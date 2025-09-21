@@ -10,9 +10,17 @@ import SwiftData
 
 struct DateHeaderView: View {
     var date: Date
-    
+
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        formatter.doesRelativeDateFormatting = true
+        return formatter
+    }
+
     var body: some View {
-        Text(DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none))
+        Text(dateFormatter.string(from: date))
             .font(.caption)
             .foregroundColor(.secondary)
     }
