@@ -22,7 +22,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 5) {
                     ForEach(sampleMessages) { message in
                         MessageBubble(message: message)
                     }
