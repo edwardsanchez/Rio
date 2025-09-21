@@ -118,40 +118,26 @@ struct ContentView: View {
         // Check if this is the last message overall
         let isLastMessage = index == messages.count - 1
 
-        print("=== Tail Check for index \(index) ===")
-        print("Message: '\(current.text.prefix(20))...' by \(current.user.name)")
-        print("Is last message: \(isLastMessage)")
-        print("Is inbound: \(current.isInbound)")
-
         if isLastMessage {
             // Last message always shows tail
-            print("Result: TRUE (last message)")
             return true
         }
 
         let next = messages[index + 1]
         let isNextSameUser = current.user.id == next.user.id
-        print("Next message by: \(next.user.name)")
-        print("Is next same user: \(isNextSameUser)")
 
         // For outbound messages (from Edward), only show tail if it's the last in a sequence
         if !current.isInbound {
             // Only show tail if the next message is from a different user (end of outbound sequence)
-            let result = !isNextSameUser
-            print("Result: \(result) (outbound logic - show tail only if next is different user)")
-            return result
+            return !isNextSameUser
         }
 
         // For inbound messages, keep the existing logic with time threshold
         let timeDifference = next.date.timeIntervalSince(current.date)
         let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
-        print("Time difference to next: \(timeDifference) seconds")
-        print("Is within threshold: \(isWithinThreshold)")
 
         // Show tail if next message is from different user OR if time gap is too large
-        let result = !isNextSameUser || !isWithinThreshold
-        print("Result: \(result) (inbound logic)")
-        return result
+        return !isNextSameUser || !isWithinThreshold
     }
 
     private func shouldShowDateHeader(at index: Int) -> Bool {
