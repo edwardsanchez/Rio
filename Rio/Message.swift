@@ -7,48 +7,43 @@
 
 import SwiftUI
 
+struct User: Identifiable {
+    let id: UUID
+    let name: String
+    let avatar: ImageResource?
+}
+
 struct Message: Identifiable {
     let id: UUID
     let text: String
-    let isInbound: Bool
-    let avatar: ImageResource?
+    let user: User
     let date: Date
-    let showTail: Bool
-    
-    var hasCartouche: Bool {
-        isInbound || avatar != nil
+    var showTail: Bool
+
+    var isInbound: Bool {
+        // We'll determine this based on the user - for now, any user that isn't "Edward" is inbound
+        user.name != "Edward"
     }
-    
-    init(id: UUID = UUID(), text: String, isInbound: Bool, avatar: ImageResource? = nil, showTail: Bool = true) {
+
+    init(id: UUID = UUID(), text: String, user: User, showTail: Bool = true, date: Date = Date.now) {
         self.id = id
         self.text = text
-        self.isInbound = isInbound
-        self.avatar = isInbound ? avatar : nil
-        self.date = Date.now
+        self.user = user
+        self.date = date
         self.showTail = showTail
     }
 }
 
 struct MessageBubble: View {
-    let text: String
-    let isInbound: Bool
-    let avatar: ImageResource?
-    let showTail: Bool
-    
-    private init(text: String, isInbound: Bool, avatar: ImageResource? = nil, showTail: Bool) {
-        self.text = text
-        self.isInbound = isInbound
-        self.avatar = isInbound ? avatar : nil
-        self.showTail = showTail
-    }
-    
+    let message: Message
+
     init(message: Message) {
-        self.init(text: message.text, isInbound: message.isInbound, avatar: message.avatar, showTail: message.showTail)
+        self.message = message
     }
-    
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            if isInbound {
+            if message.isInbound {
                 inboundAvatar
                 bubbleView(
                     textColor: .primary,
@@ -56,7 +51,7 @@ struct MessageBubble: View {
                     tailAlignment: .bottomLeading,
                     tailOffset: CGSize(width: 5, height: 5.5),
                     tailRotation: Angle(degrees: 180),
-                    showTail: showTail,
+                    showTail: message.showTail,
                     backgroundOpacity: 0.6,
                 )
                 Spacer()
@@ -68,16 +63,16 @@ struct MessageBubble: View {
                     tailAlignment: .bottomTrailing,
                     tailOffset: CGSize(width: -5, height: 5.5),
                     tailRotation: .zero,
-                    showTail: showTail,
+                    showTail: message.showTail,
                     backgroundOpacity: 1,
                 )
             }
         }
     }
-    
+
     private var inboundAvatar: some View {
         Group {
-            if let avatar {
+            if let avatar = message.user.avatar {
                 Image(avatar)
                     .resizable()
                     .frame(width: 40, height: 40)
@@ -101,7 +96,7 @@ struct MessageBubble: View {
         showTail: Bool,
         backgroundOpacity: Double
     ) -> some View {
-        Text(text)
+        Text(message.text)
             .foregroundStyle(textColor)
             .chatBubble(
                 backgroundColor: backgroundColor,
