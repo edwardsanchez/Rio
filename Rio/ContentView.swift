@@ -14,7 +14,8 @@ struct ContentView: View {
 
     @State private var message: String = ""
     private let sampleMessages: [Message] = [
-        Message(text: "Hi Rio!\nHow are you doing today?", isInbound: true),
+        Message(text: "Hi Rio!\nHow are you doing today?", isInbound: true, showTail: false),
+        Message(text: "Are you good?", isInbound: true, avatar: .usersample),
         Message(text: "Hey!\nI'm doing well, thanks for asking!", isInbound: false)
     ]
 

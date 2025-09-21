@@ -11,29 +11,43 @@ struct Message: Identifiable {
     let id: UUID
     let text: String
     let isInbound: Bool
-
-    init(id: UUID = UUID(), text: String, isInbound: Bool) {
+    let avatar: ImageResource?
+    let date: Date
+    let showTail: Bool
+    
+    var hasCartouche: Bool {
+        isInbound || avatar != nil
+    }
+    
+    init(id: UUID = UUID(), text: String, isInbound: Bool, avatar: ImageResource? = nil, showTail: Bool = true) {
         self.id = id
         self.text = text
         self.isInbound = isInbound
+        self.avatar = isInbound ? avatar : nil
+        self.date = Date.now
+        self.showTail = showTail
     }
 }
 
 struct MessageBubble: View {
     let text: String
     let isInbound: Bool
-
-    init(text: String, isInbound: Bool) {
+    let avatar: ImageResource?
+    let showTail: Bool
+    
+    private init(text: String, isInbound: Bool, avatar: ImageResource? = nil, showTail: Bool) {
         self.text = text
         self.isInbound = isInbound
+        self.avatar = isInbound ? avatar : nil
+        self.showTail = showTail
     }
-
+    
     init(message: Message) {
-        self.init(text: message.text, isInbound: message.isInbound)
+        self.init(text: message.text, isInbound: message.isInbound, avatar: message.avatar, showTail: message.showTail)
     }
-
+    
     var body: some View {
-        HStack(alignment: .bottom) {
+        HStack(alignment: .bottom, spacing: 12) {
             if isInbound {
                 inboundAvatar
                 bubbleView(
@@ -42,8 +56,8 @@ struct MessageBubble: View {
                     tailAlignment: .bottomLeading,
                     tailOffset: CGSize(width: 5, height: 5.5),
                     tailRotation: Angle(degrees: 180),
+                    showTail: showTail,
                     backgroundOpacity: 0.6,
-                    usesCompositing: true
                 )
                 Spacer()
             } else {
@@ -53,20 +67,30 @@ struct MessageBubble: View {
                     backgroundColor: .ownBubble,
                     tailAlignment: .bottomTrailing,
                     tailOffset: CGSize(width: -5, height: 5.5),
-                    tailRotation: .zero
+                    tailRotation: .zero,
+                    showTail: showTail,
+                    backgroundOpacity: 1,
                 )
             }
         }
     }
-
+    
     private var inboundAvatar: some View {
-        Image(.usersample)
-            .resizable()
-            .frame(width: 40, height: 40)
-            .clipShape(.circle)
-            .offset(y: 10)
+        Group {
+            if let avatar {
+                Image(avatar)
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .clipShape(.circle)
+                    .offset(y: 10)
+            } else {
+                Circle()
+                    .fill(Color.clear)
+                    .frame(width: 40, height: 40)
+            }
+        }
     }
-
+    
     @ViewBuilder
     private func bubbleView(
         textColor: Color,
@@ -74,8 +98,8 @@ struct MessageBubble: View {
         tailAlignment: Alignment,
         tailOffset: CGSize,
         tailRotation: Angle,
-        backgroundOpacity: Double? = nil,
-        usesCompositing: Bool = false
+        showTail: Bool,
+        backgroundOpacity: Double
     ) -> some View {
         Text(text)
             .foregroundStyle(textColor)
@@ -84,8 +108,8 @@ struct MessageBubble: View {
                 tailAlignment: tailAlignment,
                 tailOffset: tailOffset,
                 tailRotation: tailRotation,
-                backgroundOpacity: backgroundOpacity,
-                usesCompositing: usesCompositing
+                showTail: showTail,
+                backgroundOpacity: backgroundOpacity
             )
     }
 }
@@ -95,9 +119,9 @@ private struct ChatBubbleModifier: ViewModifier {
     let tailAlignment: Alignment
     let tailOffset: CGSize
     let tailRotation: Angle
-    let backgroundOpacity: Double?
-    let usesCompositing: Bool
-
+    let showTail: Bool
+    let backgroundOpacity: Double
+    
     func body(content: Content) -> some View {
         content
             .padding()
@@ -105,7 +129,7 @@ private struct ChatBubbleModifier: ViewModifier {
                 backgroundView
             }
     }
-
+    
     @ViewBuilder
     private var backgroundView: some View {
         let base = RoundedRectangle(cornerRadius: 20)
@@ -117,19 +141,12 @@ private struct ChatBubbleModifier: ViewModifier {
                     .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
                     .offset(x: tailOffset.width, y: tailOffset.height)
                     .foregroundStyle(backgroundColor)
+                    .opacity(showTail ? 1 : 0)
             }
-
-        if usesCompositing && backgroundOpacity != nil {
-            base
-                .compositingGroup()
-                .opacity(backgroundOpacity!)
-        } else if usesCompositing {
-            base.compositingGroup()
-        } else if let opacity = backgroundOpacity {
-            base.opacity(opacity)
-        } else {
-            base
-        }
+        
+        base
+            .compositingGroup()
+            .opacity(backgroundOpacity)
     }
 }
 
@@ -139,8 +156,8 @@ private extension View {
         tailAlignment: Alignment,
         tailOffset: CGSize,
         tailRotation: Angle,
-        backgroundOpacity: Double? = nil,
-        usesCompositing: Bool = false
+        showTail: Bool,
+        backgroundOpacity: Double
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -148,8 +165,8 @@ private extension View {
                 tailAlignment: tailAlignment,
                 tailOffset: tailOffset,
                 tailRotation: tailRotation,
-                backgroundOpacity: backgroundOpacity,
-                usesCompositing: usesCompositing
+                showTail: showTail,
+                backgroundOpacity: backgroundOpacity
             )
         )
     }
