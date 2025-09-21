@@ -49,10 +49,16 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 5) {
                     ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
-                        MessageBubble(
-                            message: message,
-                            showTail: shouldShowTail(at: index)
-                        )
+                        VStack(spacing: 5) {
+                            if shouldShowDateHeader(at: index) {
+                                DateHeaderView(date: message.date)
+                                    .padding(.vertical, 5)
+                            }
+                            MessageBubble(
+                                message: message,
+                                showTail: shouldShowTail(at: index)
+                            )
+                        }
                     }
                 }
             }
@@ -114,6 +120,23 @@ struct ContentView: View {
 
         // Show tail if NOT (same user AND within threshold)
         return !(isSameUser && isWithinThreshold)
+    }
+
+    private func shouldShowDateHeader(at index: Int) -> Bool {
+        guard index > 0 else {
+            // Always show date header for the first message
+            return true
+        }
+        
+        // Use 5 seconds for testing, change to 3600 (1 hour) for production
+        let dateHeaderThreshold: TimeInterval = 3600
+
+        let current = messages[index]
+        let previous = messages[index - 1]
+        let timeDifference = current.date.timeIntervalSince(previous.date)
+
+        // Show date header if messages are more than threshold apart
+        return abs(timeDifference) > dateHeaderThreshold
     }
 }
 
