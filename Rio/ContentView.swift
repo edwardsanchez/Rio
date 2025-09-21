@@ -41,14 +41,11 @@ struct ContentView: View {
     @FocusState private var isMessageFieldFocused: Bool
 
     init() {
-        // Initialize with sample messages
-        let victor = User(id: UUID(), name: "Victor", avatar: .usersample)
-        let edward = User(id: UUID(), name: "Edward", avatar: nil)
-
+        // Initialize with sample messages using the same user instances
         _messages = State(initialValue: [
-            Message(text: "Hi Rio!\nHow are you doing today?", user: victor),
-            Message(text: "Are you good?", user: victor),
-            Message(text: "Hey!\nI'm doing well, thanks for asking!", user: edward)
+            Message(text: "Hi Rio!\nHow are you doing today?", user: victorUser),
+            Message(text: "Are you good?", user: victorUser),
+            Message(text: "Hey!\nI'm doing well, thanks for asking!", user: edwardUser)
         ])
     }
 
@@ -56,14 +53,14 @@ struct ContentView: View {
         VStack {
             ScrollView {
                 VStack(spacing: 5) {
-                    ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                    ForEach(0..<messages.count, id: \.self) { index in
                         VStack(spacing: 5) {
                             if shouldShowDateHeader(at: index) {
-                                DateHeaderView(date: message.date)
+                                DateHeaderView(date: messages[index].date)
                                     .padding(.vertical, 5)
                             }
                             MessageBubble(
-                                message: message,
+                                message: messages[index],
                                 showTail: shouldShowTail(at: index)
                             )
                         }
@@ -75,7 +72,8 @@ struct ContentView: View {
                 TextField("Message", text: $message)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .glassEffect(.clear.interactive())
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(20)
                     .focused($isMessageFieldFocused)
                     .overlay(alignment: .trailing) {
                         Button {
@@ -115,19 +113,45 @@ struct ContentView: View {
 
     private func shouldShowTail(at index: Int) -> Bool {
         let tailContinuationThreshold: TimeInterval = 5
-        guard index < messages.count - 1 else {
+        let current = messages[index]
+
+        // Check if this is the last message overall
+        let isLastMessage = index == messages.count - 1
+
+        print("=== Tail Check for index \(index) ===")
+        print("Message: '\(current.text.prefix(20))...' by \(current.user.name)")
+        print("Is last message: \(isLastMessage)")
+        print("Is inbound: \(current.isInbound)")
+
+        if isLastMessage {
             // Last message always shows tail
+            print("Result: TRUE (last message)")
             return true
         }
 
-        let current = messages[index]
         let next = messages[index + 1]
-        let isSameUser = current.user.id == next.user.id
+        let isNextSameUser = current.user.id == next.user.id
+        print("Next message by: \(next.user.name)")
+        print("Is next same user: \(isNextSameUser)")
+
+        // For outbound messages (from Edward), only show tail if it's the last in a sequence
+        if !current.isInbound {
+            // Only show tail if the next message is from a different user (end of outbound sequence)
+            let result = !isNextSameUser
+            print("Result: \(result) (outbound logic - show tail only if next is different user)")
+            return result
+        }
+
+        // For inbound messages, keep the existing logic with time threshold
         let timeDifference = next.date.timeIntervalSince(current.date)
         let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
+        print("Time difference to next: \(timeDifference) seconds")
+        print("Is within threshold: \(isWithinThreshold)")
 
-        // Show tail if NOT (same user AND within threshold)
-        return !(isSameUser && isWithinThreshold)
+        // Show tail if next message is from different user OR if time gap is too large
+        let result = !isNextSameUser || !isWithinThreshold
+        print("Result: \(result) (inbound logic)")
+        return result
     }
 
     private func shouldShowDateHeader(at index: Int) -> Bool {
