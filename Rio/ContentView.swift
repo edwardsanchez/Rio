@@ -8,6 +8,16 @@
 import SwiftUI
 import SwiftData
 
+struct DateHeaderView: View {
+    var date: Date
+    
+    var body: some View {
+        Text(DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none))
+            .font(.caption)
+            .foregroundColor(.secondary)
+    }
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
