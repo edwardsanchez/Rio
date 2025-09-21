@@ -13,17 +13,18 @@ struct ContentView: View {
     @Query private var items: [Item]
 
     @State private var message: String = ""
-    private let sampleMessages: [Message] = [
+    @State private var messages: [Message] = [
         Message(text: "Hi Rio!\nHow are you doing today?", isInbound: true, showTail: false),
         Message(text: "Are you good?", isInbound: true, avatar: .usersample),
         Message(text: "Hey!\nI'm doing well, thanks for asking!", isInbound: false)
     ]
+    @FocusState private var isMessageFieldFocused: Bool
 
     var body: some View {
         VStack {
             ScrollView {
                 VStack(spacing: 5) {
-                    ForEach(sampleMessages) { message in
+                    ForEach(messages) { message in
                         MessageBubble(message: message)
                     }
                 }
@@ -34,9 +35,14 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity)
                     .padding(15)
                     .glassEffect(.clear.interactive())
+                    .focused($isMessageFieldFocused)
                     .overlay(alignment: .trailing) {
                         Button {
-
+                            let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !trimmedMessage.isEmpty else { return }
+                            messages.append(Message(text: trimmedMessage, isInbound: false))
+                            message = ""
+                            isMessageFieldFocused = true
                         } label: {
                             Image(systemName: "arrow.up")
                                 .padding(4)
@@ -44,10 +50,14 @@ struct ContentView: View {
                         }
                         .buttonBorderShape(.circle)
                         .buttonStyle(.borderedProminent)
+                        .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
 
             }
                 .padding(.horizontal, 30)
+        }
+        .onAppear {
+            isMessageFieldFocused = true
         }
         .background {
             Color.base
