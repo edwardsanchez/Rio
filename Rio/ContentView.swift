@@ -72,8 +72,7 @@ struct ContentView: View {
                 TextField("Message", text: $message)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(20)
+                    .glassEffect(.clear)
                     .focused($isMessageFieldFocused)
                     .overlay(alignment: .trailing) {
                         Button {
@@ -87,9 +86,8 @@ struct ContentView: View {
                                 .padding(4)
                                 .fontWeight(.bold)
                         }
-                        .buttonBorderShape(.roundedRectangle(radius: 15))
+                        .buttonBorderShape(.circle)
                         .buttonStyle(.borderedProminent)
-                        .offset(x: -6)
                         .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
 
