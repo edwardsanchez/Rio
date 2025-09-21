@@ -18,27 +18,27 @@ struct Message: Identifiable {
     let text: String
     let user: User
     let date: Date
-    var showTail: Bool
 
     var isInbound: Bool {
         // We'll determine this based on the user - for now, any user that isn't "Edward" is inbound
         user.name != "Edward"
     }
 
-    init(id: UUID = UUID(), text: String, user: User, showTail: Bool = true, date: Date = Date.now) {
+    init(id: UUID = UUID(), text: String, user: User, date: Date = Date.now) {
         self.id = id
         self.text = text
         self.user = user
         self.date = date
-        self.showTail = showTail
     }
 }
 
 struct MessageBubble: View {
     let message: Message
+    let showTail: Bool
 
-    init(message: Message) {
+    init(message: Message, showTail: Bool = true) {
         self.message = message
+        self.showTail = showTail
     }
 
     var body: some View {
@@ -51,7 +51,7 @@ struct MessageBubble: View {
                     tailAlignment: .bottomLeading,
                     tailOffset: CGSize(width: 5, height: 5.5),
                     tailRotation: Angle(degrees: 180),
-                    showTail: message.showTail,
+                    showTail: showTail,
                     backgroundOpacity: 0.6,
                 )
                 Spacer()
@@ -63,7 +63,7 @@ struct MessageBubble: View {
                     tailAlignment: .bottomTrailing,
                     tailOffset: CGSize(width: -5, height: 5.5),
                     tailRotation: .zero,
-                    showTail: message.showTail,
+                    showTail: showTail,
                     backgroundOpacity: 1,
                 )
             }

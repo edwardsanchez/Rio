@@ -20,8 +20,6 @@ struct ContentView: View {
 
     @State private var messages: [Message] = []
 
-    // Use 5 seconds for testing, change to 300 (5 minutes) for production
-    private let tailContinuationThreshold: TimeInterval = 5
     @FocusState private var isMessageFieldFocused: Bool
 
     init() {
@@ -30,7 +28,7 @@ struct ContentView: View {
         let edward = User(id: UUID(), name: "Edward", avatar: nil)
 
         _messages = State(initialValue: [
-            Message(text: "Hi Rio!\nHow are you doing today?", user: victor, showTail: false),
+            Message(text: "Hi Rio!\nHow are you doing today?", user: victor),
             Message(text: "Are you good?", user: victor),
             Message(text: "Hey!\nI'm doing well, thanks for asking!", user: edward)
         ])
@@ -40,8 +38,11 @@ struct ContentView: View {
         VStack {
             ScrollView {
                 VStack(spacing: 5) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
+                    ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                        MessageBubble(
+                            message: message,
+                            showTail: shouldShowTail(at: index)
+                        )
                     }
                 }
             }
@@ -57,7 +58,6 @@ struct ContentView: View {
                             let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !trimmedMessage.isEmpty else { return }
                             messages.append(Message(text: trimmedMessage, user: edwardUser))
-                            updateMessageTails()
                             message = ""
                             isMessageFieldFocused = true
                         } label: {
@@ -75,8 +75,6 @@ struct ContentView: View {
         }
         .onAppear {
             isMessageFieldFocused = true
-            // Update tails when view appears to handle initial messages
-            updateMessageTails()
         }
         .background {
             Color.base
@@ -91,26 +89,21 @@ struct ContentView: View {
         }
     }
 
-    private func updateMessageTails() {
-        guard !messages.isEmpty else { return }
-
-        var updatedMessages = messages
-        for index in updatedMessages.indices {
-            if index < updatedMessages.count - 1 {
-                let current = updatedMessages[index]
-                let next = updatedMessages[index + 1]
-                let isSameUser = current.user.id == next.user.id
-                let timeDifference = next.date.timeIntervalSince(current.date)
-                let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
-                // Hide tail only if same user AND within time threshold
-                updatedMessages[index].showTail = !(isSameUser && isWithinThreshold)
-            } else {
-                // Last message always shows tail
-                updatedMessages[index].showTail = true
-            }
+    private func shouldShowTail(at index: Int) -> Bool {
+        let tailContinuationThreshold: TimeInterval = 5
+        guard index < messages.count - 1 else {
+            // Last message always shows tail
+            return true
         }
 
-        messages = updatedMessages
+        let current = messages[index]
+        let next = messages[index + 1]
+        let isSameUser = current.user.id == next.user.id
+        let timeDifference = next.date.timeIntervalSince(current.date)
+        let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
+
+        // Show tail if NOT (same user AND within threshold)
+        return !(isSameUser && isWithinThreshold)
     }
 }
 
