@@ -87,8 +87,9 @@ struct ContentView: View {
                                 .padding(4)
                                 .fontWeight(.bold)
                         }
-                        .buttonBorderShape(.circle)
+                        .buttonBorderShape(.roundedRectangle(radius: 15))
                         .buttonStyle(.borderedProminent)
+                        .offset(x: -6)
                         .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
 
@@ -112,7 +113,7 @@ struct ContentView: View {
     }
 
     private func shouldShowTail(at index: Int) -> Bool {
-        let tailContinuationThreshold: TimeInterval = 5
+        let tailContinuationThreshold: TimeInterval = 300
         let current = messages[index]
 
         // Check if this is the last message overall
