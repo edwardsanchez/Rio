@@ -59,7 +59,7 @@ struct MessageBubble: View {
                 Spacer()
                 bubbleView(
                     textColor: .white,
-                    backgroundColor: .ownBubble,
+                    backgroundColor: .accentColor,
                     tailAlignment: .bottomTrailing,
                     tailOffset: CGSize(width: -5, height: 5.5),
                     tailRotation: .zero,
