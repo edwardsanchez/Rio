@@ -72,7 +72,7 @@ struct ContentView: View {
                 TextField("Message", text: $message)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .glassEffect(.clear)
+                    .glassEffect(.clear.interactive())
                     .focused($isMessageFieldFocused)
                     .overlay(alignment: .trailing) {
                         Button {
