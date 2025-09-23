@@ -60,9 +60,7 @@ struct MessageBubble: View {
                     width: width,
                     height: height
                 )
-                Spacer()
             } else {
-                Spacer()
                 bubbleView(
                     textColor: .white,
                     backgroundColor: .accentColor,

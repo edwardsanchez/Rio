@@ -75,6 +75,7 @@ struct ContentView: View {
                                 width: nil,
                                 height: nil,
                             )
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .offset(y: isNew ? 50 : 0)
                             .opacity(isNew ? 0 : 1)
                             .animation(.spring(response: 1.5, dampingFraction: 0.8), value: isNew)
@@ -87,23 +88,19 @@ struct ContentView: View {
                             }
                         } else {
                             // Outbound messages: animate from input field position
-                            HStack {
-                                Spacer()
-                                    .frame(width: !isNew ? 0 : nil)
-
-                                MessageBubble(
-                                    message: message,
-                                    showTail: shouldShowTail(at: index),
-                                    width: isNew ? inputFieldFrame.width : nil,
-                                    height: isNew ? inputFieldFrame.height : nil
-                                )
-                                .offset(
-                                    y: isNew ? calculateYOffset() : 0
-                                )
-                            }
+                            MessageBubble(
+                                message: message,
+                                showTail: shouldShowTail(at: index),
+                                width: isNew ? inputFieldFrame.width : nil,
+                                height: isNew ? inputFieldFrame.height : nil
+                            )
+                            .frame(maxWidth: .infinity, alignment: isNew ? .leading : .trailing)
+                            .offset(
+                                y: isNew ? calculateYOffset() : 0
+                            )
                             .onAppear {
                                 if isNew {
-                                    withAnimation(.smooth(duration: 1)) {
+                                    withAnimation(.smooth(duration: 0.5)) {
                                         newMessageId = nil
                                     }
                                 }
@@ -222,10 +219,10 @@ struct ContentView: View {
         // Calculate the vertical distance from the input field to where the message should appear
         let inputFieldBottom = inputFieldFrame.maxY
         let scrollViewBottom = scrollViewFrame.maxY
-        
+
         // The message needs to move from the input field position up to its place in the scroll view
         // This is a rough approximation - you might need to fine-tune this value
-        return max(0, inputFieldBottom - scrollViewBottom + 50)
+        return max(0, inputFieldBottom - scrollViewBottom)
     }
 }
 
