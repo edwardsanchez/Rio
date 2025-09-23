@@ -35,10 +35,14 @@ struct Message: Identifiable {
 struct MessageBubble: View {
     let message: Message
     let showTail: Bool
+    let width: CGFloat?
+    let height: CGFloat?
 
-    init(message: Message, showTail: Bool = true) {
+    init(message: Message, showTail: Bool = true, width: CGFloat?, height: CGFloat?) {
         self.message = message
         self.showTail = showTail
+        self.width = width
+        self.height = height
     }
 
     var body: some View {
@@ -53,6 +57,8 @@ struct MessageBubble: View {
                     tailRotation: Angle(degrees: 180),
                     showTail: showTail,
                     backgroundOpacity: 0.6,
+                    width: width,
+                    height: height
                 )
                 Spacer()
             } else {
@@ -65,6 +71,8 @@ struct MessageBubble: View {
                     tailRotation: .zero,
                     showTail: showTail,
                     backgroundOpacity: 1,
+                    width: width,
+                    height: height
                 )
             }
         }
@@ -94,7 +102,9 @@ struct MessageBubble: View {
         tailOffset: CGSize,
         tailRotation: Angle,
         showTail: Bool,
-        backgroundOpacity: Double
+        backgroundOpacity: Double,
+        width: CGFloat?,
+        height: CGFloat?
     ) -> some View {
         Text(message.text)
             .foregroundStyle(textColor)
@@ -104,7 +114,9 @@ struct MessageBubble: View {
                 tailOffset: tailOffset,
                 tailRotation: tailRotation,
                 showTail: showTail,
-                backgroundOpacity: backgroundOpacity
+                backgroundOpacity: backgroundOpacity,
+                width: width,
+                height: height
             )
     }
 }
@@ -116,11 +128,13 @@ private struct ChatBubbleModifier: ViewModifier {
     let tailRotation: Angle
     let showTail: Bool
     let backgroundOpacity: Double
+    let width: CGFloat?
+    let height: CGFloat?
     
     func body(content: Content) -> some View {
         content
             .padding()
-            .background {
+            .background(alignment: .leading) {
                 backgroundView
             }
     }
@@ -129,6 +143,7 @@ private struct ChatBubbleModifier: ViewModifier {
     private var backgroundView: some View {
         let base = RoundedRectangle(cornerRadius: 20)
             .fill(backgroundColor)
+            .frame(width: width, height: height)
             .overlay(alignment: tailAlignment) {
                 Image(.cartouche)
                     .resizable()
@@ -142,6 +157,7 @@ private struct ChatBubbleModifier: ViewModifier {
         base
             .compositingGroup()
             .opacity(backgroundOpacity)
+            
     }
 }
 
@@ -152,7 +168,9 @@ private extension View {
         tailOffset: CGSize,
         tailRotation: Angle,
         showTail: Bool,
-        backgroundOpacity: Double
+        backgroundOpacity: Double,
+        width: CGFloat?,
+        height: CGFloat?
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -161,7 +179,9 @@ private extension View {
                 tailOffset: tailOffset,
                 tailRotation: tailRotation,
                 showTail: showTail,
-                backgroundOpacity: backgroundOpacity
+                backgroundOpacity: backgroundOpacity,
+                width: width,
+                height: height
             )
         )
     }

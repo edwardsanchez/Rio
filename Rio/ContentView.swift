@@ -71,7 +71,9 @@ struct ContentView: View {
                             // Inbound messages: simple slide from bottom
                             MessageBubble(
                                 message: message,
-                                showTail: shouldShowTail(at: index)
+                                showTail: shouldShowTail(at: index),
+                                width: nil,
+                                height: nil,
                             )
                             .offset(y: isNew ? 50 : 0)
                             .opacity(isNew ? 0 : 1)
@@ -91,13 +93,7 @@ struct ContentView: View {
 
                                 MessageBubble(
                                     message: message,
-                                    showTail: shouldShowTail(at: index)
-                                )
-                                .frame(
-                                    width: isNew ? inputFieldFrame.width : nil,
-                                    height: isNew ? inputFieldFrame.height : nil
-                                )
-                                .frame(
+                                    showTail: shouldShowTail(at: index),
                                     width: isNew ? inputFieldFrame.width : nil,
                                     height: isNew ? inputFieldFrame.height : nil
                                 )
