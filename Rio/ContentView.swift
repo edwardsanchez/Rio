@@ -10,7 +10,7 @@ import SwiftData
 
 struct DateHeaderView: View {
     var date: Date
-    
+
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -18,13 +18,15 @@ struct DateHeaderView: View {
         formatter.doesRelativeDateFormatting = true
         return formatter
     }
-    
+
     var body: some View {
         Text(dateFormatter.string(from: date))
             .font(.caption)
             .foregroundColor(.secondary)
     }
 }
+
+
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -83,27 +85,30 @@ struct ContentView: View {
                             }
                         } else {
                             // Outbound messages: animate from input field position
-                            MessageBubble(
-                                message: message,
-                                showTail: shouldShowTail(at: index)
-                            )
-                            .frame(
-                                width: isNew ? inputFieldFrame.width : nil,
-                                height: isNew ? inputFieldFrame.height : nil,
-                                alignment: .trailing
-                            )
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                            .offset(
-                                y: isNew ? calculateYOffset() : 0
-                            )
-                            .opacity(isNew ? 0.8 : 1)
-                            .animation(.spring(response: 1.4, dampingFraction: 0.85), value: isNew)
+                            HStack {
+                                Spacer()
+                                    .frame(width: !isNew ? 0 : nil)
+
+                                MessageBubble(
+                                    message: message,
+                                    showTail: shouldShowTail(at: index)
+                                )
+                                .frame(
+                                    width: isNew ? inputFieldFrame.width : nil,
+                                    height: isNew ? inputFieldFrame.height : nil
+                                )
+                                .frame(
+                                    width: isNew ? inputFieldFrame.width : nil,
+                                    height: isNew ? inputFieldFrame.height : nil
+                                )
+                                .offset(
+                                    y: isNew ? calculateYOffset() : 0
+                                )
+                            }
                             .onAppear {
                                 if isNew {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                        withAnimation(.spring(response: 1.5, dampingFraction: 0.85)) {
-                                            newMessageId = nil
-                                        }
+                                    withAnimation(.smooth(duration: 1)) {
+                                        newMessageId = nil
                                     }
                                 }
                             }
