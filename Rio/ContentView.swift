@@ -22,7 +22,10 @@ struct ContentView: View {
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
-    
+
+    // Timer for automated inbound message
+    @State private var autoReplyTimer: Timer? = nil
+
     @FocusState private var isMessageFieldFocused: Bool
     
     init() {
@@ -73,6 +76,9 @@ struct ContentView: View {
                             messages.append(newMessage)
                             message = ""
                             isMessageFieldFocused = true
+
+                            // Reset and restart the auto-reply timer
+                            resetAutoReplyTimer()
                         } label: {
                             Image(systemName: "arrow.up")
                                 .padding(4)
@@ -99,6 +105,26 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 .opacity(0.2)
                 .blendMode(.overlay)
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            autoReplyTimer?.invalidate()
+            autoReplyTimer = nil
+        }
+    }
+
+    // MARK: - Timer Management
+
+    private func resetAutoReplyTimer() {
+        // Cancel existing timer if any
+        autoReplyTimer?.invalidate()
+
+        // Start a new 4-second timer
+        autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
+            // Send automated inbound "hi" message
+            let inboundMessage = Message(text: "hi", user: victorUser)
+            newMessageId = inboundMessage.id
+            messages.append(inboundMessage)
         }
     }
 
