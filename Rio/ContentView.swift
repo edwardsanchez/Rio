@@ -33,7 +33,8 @@ struct ContentView: View {
         _messages = State(initialValue: [
             Message(text: "Hi Rio!\nHow are you doing today?", user: victorUser),
             Message(text: "Are you good?", user: victorUser),
-            Message(text: "Hey!\nI'm doing well, thanks for asking!", user: edwardUser)
+            Message(text: "Hey!\nI'm doing well, thanks for asking!", user: edwardUser),
+            Message(text: "This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen.", user: victorUser)
         ])
     }
     
@@ -51,7 +52,8 @@ struct ContentView: View {
                 scrollViewFrame = newValue
             }
         }
-        .contentMargins(20)
+        .contentMargins(.horizontal, 20)
+        .contentMargins(.bottom, 60)
         .overlay(alignment: .bottom) {
             HStack {
                 TextField("Message", text: $message)

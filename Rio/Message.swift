@@ -4,6 +4,27 @@
 //
 //  Created by Edward Sanchez on 9/20/25.
 //
+//  Text Wrapping Approach:
+//  The chat bubble layout uses a combination of techniques to ensure long messages
+//  wrap properly instead of stretching horizontally:
+//
+//  1. Inline Spacer Constraint: A Spacer with minLength: 10 is placed opposite
+//     each bubble (after inbound, before outbound). This creates a minimum gap
+//     that prevents the bubble from expanding to the full width of the container,
+//     forcing text to wrap when it would otherwise exceed the available space.
+//
+//     Animation Consideration: For outbound messages, the spacer is conditionally
+//     applied only when NOT animating (isNew = false). This preserves the proper
+//     alignment with the input field during the send animation.
+//
+//  2. Fixed Size Modifier: The Text view uses .fixedSize(horizontal: false, vertical: true)
+//     to prevent horizontal expansion while allowing vertical growth. This ensures
+//     the text wraps within the bubble's natural width constraints.
+//
+//  3. Natural Sizing: The bubble expands naturally based on content up to the
+//     constraint imposed by the spacer, avoiding hard-coded max-width values
+//     that might not adapt well to different screen sizes.
+//
 
 import SwiftUI
 
@@ -21,7 +42,7 @@ struct MessageListView: View {
     let scrollViewFrame: CGRect
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 15) {
             ForEach(messages) { message in
                 let index = messages.firstIndex(where: { $0.id == message.id }) ?? 0
                 let isNew = message.id == newMessageId
@@ -161,7 +182,20 @@ struct MessageBubble: View {
                     width: nil,
                     height: nil
                 )
+                // Add spacer with minimum width to force text wrapping
+                // This creates a constraint that prevents the bubble from expanding
+                // beyond the available width while still allowing natural sizing
+                // For inbound messages, always show the spacer since they don't animate from input field
+                Spacer(minLength: 10)
             } else {
+                // For outbound messages, only show spacer when not animating
+                // This preserves the animation alignment with the input field
+                if !isNew {
+                    // Add spacer with minimum width to force text wrapping
+                    // This creates a constraint that prevents the bubble from expanding
+                    // beyond the available width while still allowing natural sizing
+                    Spacer(minLength: 10)
+                }
                 bubbleView(
                     textColor: .white,
                     backgroundColor: .accentColor,
@@ -258,6 +292,9 @@ struct MessageBubble: View {
     ) -> some View {
         Text(message.text)
             .foregroundStyle(textColor)
+            // Prevent horizontal expansion while allowing vertical growth
+            // This ensures text wraps properly within the bubble
+            .fixedSize(horizontal: false, vertical: true)
             .chatBubble(
                 backgroundColor: backgroundColor,
                 tailAlignment: tailAlignment,
