@@ -32,58 +32,20 @@ struct MessageListView: View {
                             .padding(.vertical, 5)
                     }
 
-                    if message.isInbound {
-                        // Inbound messages: simple slide from bottom
-                        MessageBubble(
-                            message: message,
-                            showTail: shouldShowTail(at: index),
-                            isNew: isNew,
-                            inputFieldFrame: inputFieldFrame,
-                            scrollViewFrame: scrollViewFrame
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .offset(y: isNew ? 50 : 0)
-                        .opacity(isNew ? 0 : 1)
-                        .animation(.spring(response: 1.5, dampingFraction: 0.8), value: isNew)
-                        .onAppear {
-                            if isNew {
-                                withAnimation(.spring(response: 1.5, dampingFraction: 0.8)) {
-                                    newMessageId = nil
-                                }
-                            }
-                        }
-                    } else {
-                        // Outbound messages: animate from input field position
-                        MessageBubble(
-                            message: message,
-                            showTail: shouldShowTail(at: index),
-                            isNew: isNew,
-                            inputFieldFrame: inputFieldFrame,
-                            scrollViewFrame: scrollViewFrame
-                        )
-                        .frame(maxWidth: .infinity, alignment: isNew ? .leading : .trailing)
-                        .offset(y: isNew ? calculateYOffset() : 0)
-                        .onAppear {
-                            if isNew {
-                                withAnimation(.smooth(duration: 0.5)) {
-                                    newMessageId = nil
-                                }
-                            }
-                        }
-                    }
+                    MessageBubble(
+                        message: message,
+                        showTail: shouldShowTail(at: index),
+                        isNew: isNew,
+                        inputFieldFrame: inputFieldFrame,
+                        scrollViewFrame: scrollViewFrame,
+                        newMessageId: $newMessageId
+                    )
                 }
             }
         }
     }
 
-    private func calculateYOffset() -> CGFloat {
-        // Calculate the vertical distance from the input field to where the message should appear
-        let inputFieldBottom = inputFieldFrame.maxY
-        let scrollViewBottom = scrollViewFrame.maxY
-        return max(0, inputFieldBottom - scrollViewBottom)
-    }
-
-    private func shouldShowTail(at index: Int) -> Bool {
+    private func shouldShowTail(at index: Int) -> Bool { //Move inside Message Bubble
         let tailContinuationThreshold: TimeInterval = 300
         let current = messages[index]
 
@@ -112,7 +74,7 @@ struct MessageListView: View {
         return !isNextSameUser || !isWithinThreshold
     }
 
-    private func shouldShowDateHeader(at index: Int) -> Bool {
+    private func shouldShowDateHeader(at index: Int) -> Bool { //keep here
         guard index > 0 else {
             // Always show date header for the first message
             return true
@@ -173,13 +135,15 @@ struct MessageBubble: View {
     let isNew: Bool
     let inputFieldFrame: CGRect
     let scrollViewFrame: CGRect
+    @Binding var newMessageId: UUID?
 
-    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero) {
+    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil)) {
         self.message = message
         self.showTail = showTail
         self.isNew = isNew
         self.inputFieldFrame = inputFieldFrame
         self.scrollViewFrame = scrollViewFrame
+        self._newMessageId = newMessageId
     }
 
     var body: some View {
@@ -211,6 +175,57 @@ struct MessageBubble: View {
                 )
             }
         }
+        .frame(maxWidth: .infinity, alignment: frameAlignment)
+        .offset(y: yOffset)
+        .opacity(opacity)
+        .onAppear {
+            if isNew {
+                withAnimation(animationStyle) {
+                    newMessageId = nil
+                }
+            }
+        }
+    }
+
+    // Computed properties for positioning and animation
+    private var frameAlignment: Alignment {
+        if message.isInbound {
+            return .leading
+        } else {
+            return isNew ? .leading : .trailing
+        }
+    }
+
+    private var yOffset: CGFloat {
+        guard isNew else { return 0 }
+
+        if message.isInbound {
+            return 50
+        } else {
+            return calculateYOffset()
+        }
+    }
+
+    private var opacity: Double {
+        if message.isInbound && isNew {
+            return 0
+        }
+        return 1
+    }
+
+    private var animationStyle: Animation {
+        if message.isInbound {
+            return .spring(duration: 0.5)
+        } else {
+            return .smooth(duration: 0.5)
+        }
+    }
+
+    private func calculateYOffset() -> CGFloat {
+        // Calculate the vertical distance from the input field to where the message should appear
+        let inputFieldBottom = inputFieldFrame.maxY
+        let scrollViewBottom = scrollViewFrame.maxY
+        return max(0, inputFieldBottom - scrollViewBottom)
     }
 
     private var inboundAvatar: some View {
