@@ -38,6 +38,8 @@ struct ContentView: View {
 
     @State private var messages: [Message] = []
     @State private var newMessageId: UUID? = nil
+    @State private var inputFieldFrame: CGRect = .zero
+    @State private var scrollViewFrame: CGRect = .zero
 
     @FocusState private var isMessageFieldFocused: Bool
 
@@ -63,52 +65,91 @@ struct ContentView: View {
                                 DateHeaderView(date: message.date)
                                     .padding(.vertical, 5)
                             }
-                            MessageBubble(
-                                message: message,
-                                showTail: shouldShowTail(at: index)
-                            )
-                            .offset(y: isNew ? 50 : 0)
-                            .opacity(isNew ? 0 : 1)
-                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isNew)
-                            .onAppear {
-                                if isNew {
-                                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                        newMessageId = nil
+
+                            if message.isInbound {
+                                // Inbound messages: simple slide from bottom
+                                MessageBubble(
+                                    message: message,
+                                    showTail: shouldShowTail(at: index)
+                                )
+                                .offset(y: isNew ? 50 : 0)
+                                .opacity(isNew ? 0 : 1)
+                                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isNew)
+                                .onAppear {
+                                    if isNew {
+                                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                            newMessageId = nil
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Outbound messages: animate from input field position
+                                MessageBubble(
+                                    message: message,
+                                    showTail: shouldShowTail(at: index)
+                                )
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .scaleEffect(
+                                    isNew ? CGSize(width: 0.7, height: 0.7) : CGSize(width: 1, height: 1),
+                                    anchor: .bottomTrailing
+                                )
+                                .offset(
+                                    y: isNew ? calculateYOffset() : 0
+                                )
+                                .opacity(isNew ? 0.5 : 1)
+                                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isNew)
+                                .onAppear {
+                                    if isNew {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                                newMessageId = nil
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { newValue in
+                    scrollViewFrame = newValue
+                }
             }
             .contentMargins(20)
-            HStack {
-                TextField("Message", text: $message)
-                    .frame(maxWidth: .infinity)
-                    .padding(15)
-                    .glassEffect(.clear.interactive())
-                    .focused($isMessageFieldFocused)
-                    .overlay(alignment: .trailing) {
-                        Button {
-                            let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
-                            guard !trimmedMessage.isEmpty else { return }
-                            let newMessage = Message(text: trimmedMessage, user: edwardUser)
-                            newMessageId = newMessage.id
-                            messages.append(newMessage)
-                            message = ""
-                            isMessageFieldFocused = true
-                        } label: {
-                            Image(systemName: "arrow.up")
-                                .padding(4)
-                                .fontWeight(.bold)
+                HStack {
+                    TextField("Message", text: $message)
+                        .frame(maxWidth: .infinity)
+                        .padding(15)
+                        .glassEffect(.clear.interactive())
+                        .focused($isMessageFieldFocused)
+                        .onGeometryChange(for: CGRect.self) { proxy in
+                            proxy.frame(in: .global)
+                        } action: { newValue in
+                            inputFieldFrame = newValue
                         }
-                        .buttonBorderShape(.circle)
-                        .buttonStyle(.borderedProminent)
-                        .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
+                        .overlay(alignment: .trailing) {
+                            Button {
+                                let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
+                                guard !trimmedMessage.isEmpty else { return }
+                                let newMessage = Message(text: trimmedMessage, user: edwardUser)
+                                newMessageId = newMessage.id
+                                messages.append(newMessage)
+                                message = ""
+                                isMessageFieldFocused = true
+                            } label: {
+                                Image(systemName: "arrow.up")
+                                    .padding(4)
+                                    .fontWeight(.bold)
+                            }
+                            .buttonBorderShape(.circle)
+                            .buttonStyle(.borderedProminent)
+                            .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
 
-            }
-                .padding(.horizontal, 30)
+                }
+                    .padding(.horizontal, 30)
         }
         .onAppear {
             isMessageFieldFocused = true
@@ -160,7 +201,7 @@ struct ContentView: View {
             // Always show date header for the first message
             return true
         }
-        
+
         // Use 5 seconds for testing, change to 3600 (1 hour) for production
         let dateHeaderThreshold: TimeInterval = 3600
 
@@ -170,6 +211,16 @@ struct ContentView: View {
 
         // Show date header if messages are more than threshold apart
         return abs(timeDifference) > dateHeaderThreshold
+    }
+
+    private func calculateYOffset() -> CGFloat {
+        // Calculate the vertical distance from the input field to where the message should appear
+        let inputFieldBottom = inputFieldFrame.maxY
+        let scrollViewBottom = scrollViewFrame.maxY
+
+        // The message needs to move from the input field position up to its place in the scroll view
+        // This is a rough approximation - you might need to fine-tune this value
+        return max(0, inputFieldBottom - scrollViewBottom + 50)
     }
 }
 
