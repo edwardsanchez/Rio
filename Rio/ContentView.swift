@@ -37,6 +37,7 @@ struct ContentView: View {
     private let victorUser = User(id: UUID(), name: "Victor", avatar: .usersample)
 
     @State private var messages: [Message] = []
+    @State private var newMessageId: UUID? = nil
 
     @FocusState private var isMessageFieldFocused: Bool
 
@@ -53,16 +54,29 @@ struct ContentView: View {
         VStack {
             ScrollView {
                 VStack(spacing: 5) {
-                    ForEach(0..<messages.count, id: \.self) { index in
+                    ForEach(messages) { message in
+                        let index = messages.firstIndex(where: { $0.id == message.id }) ?? 0
+                        let isNew = message.id == newMessageId
+
                         VStack(spacing: 5) {
                             if shouldShowDateHeader(at: index) {
-                                DateHeaderView(date: messages[index].date)
+                                DateHeaderView(date: message.date)
                                     .padding(.vertical, 5)
                             }
                             MessageBubble(
-                                message: messages[index],
+                                message: message,
                                 showTail: shouldShowTail(at: index)
                             )
+                            .offset(y: isNew ? 50 : 0)
+                            .opacity(isNew ? 0 : 1)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isNew)
+                            .onAppear {
+                                if isNew {
+                                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                        newMessageId = nil
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -78,7 +92,9 @@ struct ContentView: View {
                         Button {
                             let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !trimmedMessage.isEmpty else { return }
-                            messages.append(Message(text: trimmedMessage, user: edwardUser))
+                            let newMessage = Message(text: trimmedMessage, user: edwardUser)
+                            newMessageId = newMessage.id
+                            messages.append(newMessage)
                             message = ""
                             isMessageFieldFocused = true
                         } label: {
