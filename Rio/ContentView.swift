@@ -22,6 +22,7 @@ struct ContentView: View {
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
+    @State private var inputFieldHeight: CGFloat = 50 // Track input field height for dynamic spacing
     @State private var scrollPosition = ScrollPosition()
 
     // Timer for automated inbound message
