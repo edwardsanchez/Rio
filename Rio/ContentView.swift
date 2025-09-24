@@ -114,6 +114,8 @@ struct ContentView: View {
         }
     }
     
+    @State private var keyboardIsUp = false
+    
     var inputField: some View {
         HStack {
             TextField("Message", text: $message, axis: .vertical)
@@ -137,7 +139,23 @@ struct ContentView: View {
         }
         .padding(.horizontal, 30)
         .padding(.top, 15)
+        .background(alignment: .bottom) {
+            Rectangle()
+                .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
+                .ignoresSafeArea()
+                .frame(height: 170)
+                .offset(y: 120)
+        }
+        .safeAreaPadding(.bottom, keyboardIsUp ? nil : 0)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(.smooth(duration: 0.2), value: inputFieldHeight)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                withAnimation {
+                    keyboardIsUp = keyboardFrame.height > 0
+                }
+            }
+        }
     }
     
     var sendButton: some View {
