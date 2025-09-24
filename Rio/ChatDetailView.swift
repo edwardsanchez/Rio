@@ -129,6 +129,10 @@ struct ChatDetailView: View {
                 }
                 .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
                 .focused($isMessageFieldFocused)
+                .onSubmit {
+                    sendMessage()
+                }
+                .submitLabel(.send)
                 .overlay(alignment: .bottomTrailing) {
                     sendButton
                 }
@@ -152,6 +156,11 @@ struct ChatDetailView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation {
+                keyboardIsUp = false
+            }
+        }
         .background {
             Rectangle()
                 .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
@@ -163,14 +172,7 @@ struct ChatDetailView: View {
     
     var sendButton: some View {
         Button {
-            let newMessage = Message(text: message, user: chatData.edwardUser)
-            newMessageId = newMessage.id
-            messages.append(newMessage)
-            chatData.addMessage(newMessage, to: chat.id)
-            message = ""
-            isMessageFieldFocused = true
-            
-            resetAutoReplyTimer()
+            sendMessage()
         } label: {
             Image(systemName: "arrow.up")
                 .padding(4)
@@ -180,6 +182,32 @@ struct ChatDetailView: View {
         .buttonStyle(.borderedProminent)
         .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         .padding(.bottom, 5)
+    }
+
+    // MARK: - Message Sending
+
+    private func sendMessage() {
+        // Capture the message text before clearing to avoid race conditions
+        let messageText = message.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Guard against empty messages
+        guard !messageText.isEmpty else { return }
+
+        // Clear the text field immediately to provide instant feedback
+        message = ""
+
+        // Create and send the message
+        let newMessage = Message(text: messageText, user: chatData.edwardUser)
+        newMessageId = newMessage.id
+        messages.append(newMessage)
+        chatData.addMessage(newMessage, to: chat.id)
+
+        // Restore focus after a brief delay to ensure text clearing completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isMessageFieldFocused = true
+        }
+
+        resetAutoReplyTimer()
     }
 
     // MARK: - Scrolling
