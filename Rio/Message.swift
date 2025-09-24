@@ -34,6 +34,20 @@ struct User: Identifiable {
     let avatar: ImageResource?
 }
 
+struct Chat: Identifiable {
+    let id: UUID
+    let title: String
+    let participants: [User] // Always includes the current "outbound" user
+    let messages: [Message]
+
+    init(id: UUID = UUID(), title: String, participants: [User], messages: [Message] = []) {
+        self.id = id
+        self.title = title
+        self.participants = participants
+        self.messages = messages
+    }
+}
+
 // Component to handle the entire message list with date headers
 struct MessageListView: View {
     let messages: [Message]
