@@ -22,11 +22,15 @@ struct ContentView: View {
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
+    @State private var scrollPosition = ScrollPosition()
 
     // Timer for automated inbound message
     @State private var autoReplyTimer: Timer? = nil
 
     @FocusState private var isMessageFieldFocused: Bool
+
+    // Track if user is manually scrolling to avoid interrupting
+    @State private var isUserScrolling = false
     
     init() {
         // Initialize with sample messages using the same user instances
@@ -46,19 +50,36 @@ struct ContentView: View {
                 inputFieldFrame: inputFieldFrame,
                 scrollViewFrame: scrollViewFrame
             )
-            .onGeometryChange(for: CGRect.self) { proxy in
-                proxy.frame(in: .global)
+            .onGeometryChange(for: CGRect.self) { geometryProxy in
+                geometryProxy.frame(in: .global)
             } action: { newValue in
                 scrollViewFrame = newValue
             }
         }
+        .scrollPosition($scrollPosition)
         .contentMargins(.horizontal, 20)
         .contentMargins(.bottom, 120)
-        .overlay(alignment: .bottom) {
-            inputField
+        .onChange(of: messages.count) { _, _ in
+            // Auto-scroll to the latest message when a new message is added
+            scrollToLatestMessage()
+        }
+        .onChange(of: newMessageId) { _, newId in
+            if newId != nil {
+                // Slight delay to allow message to be added to view hierarchy
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    scrollToLatestMessage()
+                }
+            }
         }
         .onAppear {
+            // Scroll to the bottom when the view first appears
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                scrollToLatestMessage()
+            }
             isMessageFieldFocused = true
+        }
+        .overlay(alignment: .bottom) {
+            inputField
         }
         .background {
             Color.base
@@ -72,7 +93,6 @@ struct ContentView: View {
                 .blendMode(.overlay)
         }
         .onDisappear {
-            // Clean up timer when view disappears
             autoReplyTimer?.invalidate()
             autoReplyTimer = nil
         }
@@ -119,6 +139,16 @@ struct ContentView: View {
         .buttonStyle(.borderedProminent)
         .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         .padding(.bottom, 5)
+    }
+
+    // MARK: - Scrolling
+
+    private func scrollToLatestMessage() {
+        guard let lastMessage = messages.last else { return }
+
+        withAnimation(.smooth) {
+            scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
+        }
     }
 
     // MARK: - Timer Management

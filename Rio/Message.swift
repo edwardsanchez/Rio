@@ -61,9 +61,11 @@ struct MessageListView: View {
                         scrollViewFrame: scrollViewFrame,
                         newMessageId: $newMessageId
                     )
+                    .id(message.id) // Essential for ScrollPosition to work
                 }
             }
         }
+        .scrollTargetLayout() // Optimizes scrolling performance for iOS 18+
     }
 
     private func shouldShowTail(at index: Int) -> Bool { //Move inside Message Bubble
