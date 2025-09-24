@@ -12,10 +12,10 @@ class ChatData {
     var chats: [Chat] = []
     
     // Define users
-    let edwardUser = User(id: UUID(), name: "Edward", avatar: nil)
-    let victorUser = User(id: UUID(), name: "Victor", avatar: .usersample)
-    let aliceUser = User(id: UUID(), name: "Alice", avatar: nil)
-    let bobUser = User(id: UUID(), name: "Bob", avatar: nil)
+    let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let victorUser = User(id: UUID(), name: "Victor", avatar: .edward)
+    let aliceUser = User(id: UUID(), name: "Alice", avatar: .scarlet)
+    let bobUser = User(id: UUID(), name: "Bob", avatar: .joaquin)
     let charlieUser = User(id: UUID(), name: "Charlie", avatar: nil)
     
     init() {
