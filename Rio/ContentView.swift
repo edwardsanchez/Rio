@@ -55,44 +55,7 @@ struct ContentView: View {
         .contentMargins(.horizontal, 20)
         .contentMargins(.bottom, 60)
         .overlay(alignment: .bottom) {
-            HStack {
-                TextField("Message", text: $message)
-                    .frame(maxWidth: .infinity)
-                    .padding(15)
-                    .background {
-                        Color.clear
-                            .onGeometryChange(for: CGRect.self) { proxy in
-                                proxy.frame(in: .global)
-                            } action: { newValue in
-                                inputFieldFrame = newValue
-                            }
-                    }
-                    .glassEffect(.clear.interactive())
-                    .focused($isMessageFieldFocused)
-                    .overlay(alignment: .trailing) {
-                        Button {
-                            let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
-                            guard !trimmedMessage.isEmpty else { return }
-                            let newMessage = Message(text: trimmedMessage, user: edwardUser)
-                            newMessageId = newMessage.id
-                            messages.append(newMessage)
-                            message = ""
-                            isMessageFieldFocused = true
-
-                            // Reset and restart the auto-reply timer
-                            resetAutoReplyTimer()
-                        } label: {
-                            Image(systemName: "arrow.up")
-                                .padding(4)
-                                .fontWeight(.bold)
-                        }
-                        .buttonBorderShape(.circle)
-                        .buttonStyle(.borderedProminent)
-                        .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                
-            }
-            .padding(.horizontal, 30)
+            inputField
         }
         .onAppear {
             isMessageFieldFocused = true
@@ -113,6 +76,49 @@ struct ContentView: View {
             autoReplyTimer?.invalidate()
             autoReplyTimer = nil
         }
+    }
+    
+    var inputField: some View {
+        HStack {
+            TextField("Message", text: $message)
+                .frame(maxWidth: .infinity)
+                .padding(15)
+                .background {
+                    Color.clear
+                        .onGeometryChange(for: CGRect.self) { proxy in
+                            proxy.frame(in: .global)
+                        } action: { newValue in
+                            inputFieldFrame = newValue
+                        }
+                }
+                .glassEffect(.clear.interactive())
+                .focused($isMessageFieldFocused)
+                .overlay(alignment: .bottomTrailing) {
+                    sendButton
+                }
+        }
+        .padding(.horizontal, 30)
+    }
+    
+    var sendButton: some View {
+        Button {
+            let newMessage = Message(text: message, user: edwardUser)
+            newMessageId = newMessage.id
+            messages.append(newMessage)
+            message = ""
+            isMessageFieldFocused = true
+            
+            // Reset and restart the auto-reply timer
+            resetAutoReplyTimer()
+        } label: {
+            Image(systemName: "arrow.up")
+                .padding(4)
+                .fontWeight(.bold)
+        }
+        .buttonBorderShape(.circle)
+        .buttonStyle(.borderedProminent)
+        .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .padding(.bottom, 5)
     }
 
     // MARK: - Timer Management
