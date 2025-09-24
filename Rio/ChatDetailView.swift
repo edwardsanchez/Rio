@@ -66,7 +66,6 @@ struct ChatDetailView: View {
             .scrollClipDisabled()
             .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
-            .contentMargins(.bottom, 10)
             .onChange(of: messages.count) { _, _ in
                 // Auto-scroll to the latest message when a new message is added
                 scrollToLatestMessage()
@@ -105,7 +104,7 @@ struct ChatDetailView: View {
                 .opacity(0.2)
                 .blendMode(.overlay)
         }
-        .navigationTitle("foo")
+        .navigationTitle(chat.title)
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear {
             autoReplyTimer?.invalidate()
