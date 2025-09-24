@@ -53,7 +53,7 @@ struct ContentView: View {
             }
         }
         .contentMargins(.horizontal, 20)
-        .contentMargins(.bottom, 60)
+        .contentMargins(.bottom, 120)
         .overlay(alignment: .bottom) {
             inputField
         }
@@ -80,8 +80,8 @@ struct ContentView: View {
     
     var inputField: some View {
         HStack {
-            TextField("Message", text: $message)
-                .frame(maxWidth: .infinity)
+            TextField("Message", text: $message, axis: .vertical)
+                .lineLimit(5)
                 .padding(15)
                 .background {
                     Color.clear
@@ -91,7 +91,7 @@ struct ContentView: View {
                             inputFieldFrame = newValue
                         }
                 }
-                .glassEffect(.clear.interactive())
+                .glassEffect(.clear.interactive(), in: .containerRelative)
                 .focused($isMessageFieldFocused)
                 .overlay(alignment: .bottomTrailing) {
                     sendButton
