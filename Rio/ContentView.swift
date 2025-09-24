@@ -61,8 +61,15 @@ struct ContentView: View {
         }
             .scrollClipDisabled()
         .scrollPosition($scrollPosition)
-        .contentMargins(.horizontal, 20)
+            .contentMargins(.horizontal, 20, for: .scrollContent)
             .contentMargins(.bottom, 10)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
+                    .ignoresSafeArea()
+                    .frame(height: 170)
+                    .offset(y: 120)
+            }
         .onChange(of: messages.count) { _, _ in
             // Auto-scroll to the latest message when a new message is added
             scrollToLatestMessage()
@@ -88,18 +95,7 @@ struct ContentView: View {
             isMessageFieldFocused = true
         }
 
-//            // Subtle separator
-//            Divider()
-//                .opacity(0.3)
-
-            // Input field at the bottom
             inputField
-//                .background {
-//                    // Semi-transparent background that blends with content behind
-//                    Color.base.opacity(0.95)
-//                        .background(.ultraThinMaterial)
-//                        .ignoresSafeArea(.keyboard, edges: .bottom)
-//                }
         }
         .background {
             Color.base
@@ -133,7 +129,7 @@ struct ContentView: View {
                             inputFieldHeight = newValue.height
                         }
                 }
-                .glassEffect(.clear.interactive(), in: .containerRelative)
+                .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .containerRelative)
                 .focused($isMessageFieldFocused)
                 .overlay(alignment: .bottomTrailing) {
                     sendButton
@@ -190,8 +186,23 @@ struct ContentView: View {
 
         // Start a new 4-second timer
         autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
-            // Send automated inbound "hi" message
-            let inboundMessage = Message(text: "hi", user: victorUser)
+            // Array of random responses
+            let randomResponses = [
+                "That's a very good point!",
+                "Oh yeah!",
+                "I don't know.",
+                "I disagree tbh.",
+                "Erm, sure!",
+                "You think?",
+                "Never!",
+                "That's cool!"
+            ]
+
+            // Pick a random response
+            let randomResponse = randomResponses.randomElement() ?? "hi"
+
+            // Send automated inbound message with random response
+            let inboundMessage = Message(text: randomResponse, user: victorUser)
             newMessageId = inboundMessage.id
             messages.append(inboundMessage)
         }
