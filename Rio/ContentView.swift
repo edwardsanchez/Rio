@@ -63,13 +63,6 @@ struct ContentView: View {
         .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
             .contentMargins(.bottom, 10)
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
-                    .ignoresSafeArea()
-                    .frame(height: 170)
-                    .offset(y: 120)
-            }
         .onChange(of: messages.count) { _, _ in
             // Auto-scroll to the latest message when a new message is added
             scrollToLatestMessage()
@@ -155,6 +148,13 @@ struct ContentView: View {
                     keyboardIsUp = keyboardFrame.height > 0
                 }
             }
+        }
+        .background {
+            Rectangle()
+                .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
+                .ignoresSafeArea()
+                .frame(height: 100)
+                .offset(y: 30)
         }
     }
     
