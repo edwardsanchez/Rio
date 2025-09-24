@@ -43,6 +43,8 @@ struct ContentView: View {
     }
     
     var body: some View {
+        VStack(spacing: 0) {
+            // Main scroll view for messages
         ScrollView {
             MessageListView(
                 messages: messages,
@@ -56,9 +58,10 @@ struct ContentView: View {
                 scrollViewFrame = newValue
             }
         }
+            .scrollClipDisabled()
         .scrollPosition($scrollPosition)
         .contentMargins(.horizontal, 20)
-        .contentMargins(.bottom, 120)
+            .contentMargins(.bottom, 10)
         .onChange(of: messages.count) { _, _ in
             // Auto-scroll to the latest message when a new message is added
             scrollToLatestMessage()
@@ -71,6 +74,11 @@ struct ContentView: View {
                 }
             }
         }
+            .onChange(of: inputFieldHeight) { _, _ in
+                // Auto-scroll when input field height changes to keep latest message visible
+                // Use instant scroll to avoid competing animations
+                scrollToLatestMessageInstant()
+            }
         .onAppear {
             // Scroll to the bottom when the view first appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -78,8 +86,19 @@ struct ContentView: View {
             }
             isMessageFieldFocused = true
         }
-        .overlay(alignment: .bottom) {
+
+//            // Subtle separator
+//            Divider()
+//                .opacity(0.3)
+
+            // Input field at the bottom
             inputField
+//                .background {
+//                    // Semi-transparent background that blends with content behind
+//                    Color.base.opacity(0.95)
+//                        .background(.ultraThinMaterial)
+//                        .ignoresSafeArea(.keyboard, edges: .bottom)
+//                }
         }
         .background {
             Color.base
@@ -101,7 +120,7 @@ struct ContentView: View {
     var inputField: some View {
         HStack {
             TextField("Message", text: $message, axis: .vertical)
-                .lineLimit(5)
+                .lineLimit(1...5) // Allow 1 to 5 lines
                 .padding(15)
                 .background {
                     Color.clear
@@ -109,6 +128,8 @@ struct ContentView: View {
                             proxy.frame(in: .global)
                         } action: { newValue in
                             inputFieldFrame = newValue
+                            // Update input field height for dynamic spacing
+                            inputFieldHeight = newValue.height
                         }
                 }
                 .glassEffect(.clear.interactive(), in: .containerRelative)
@@ -118,6 +139,8 @@ struct ContentView: View {
                 }
         }
         .padding(.horizontal, 30)
+        .padding(.top, 15)
+        .animation(.smooth(duration: 0.2), value: inputFieldHeight)
     }
     
     var sendButton: some View {
@@ -146,9 +169,16 @@ struct ContentView: View {
     private func scrollToLatestMessage() {
         guard let lastMessage = messages.last else { return }
 
-        withAnimation(.smooth) {
+        withAnimation(.smooth(duration: 0.3)) {
             scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
         }
+    }
+
+    private func scrollToLatestMessageInstant() {
+        guard let lastMessage = messages.last else { return }
+
+        // Instant scroll without animation for input field height changes
+        scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
     }
 
     // MARK: - Timer Management
