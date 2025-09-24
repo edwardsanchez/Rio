@@ -60,6 +60,7 @@ struct MessageListView: View {
             ForEach(messages) { message in
                 let index = messages.firstIndex(where: { $0.id == message.id }) ?? 0
                 let isNew = message.id == newMessageId
+                var isLastMessageInChat: Bool { messages.last!.id == message.id }
 
                 VStack(spacing: 5) {
                     if shouldShowDateHeader(at: index) {
@@ -75,6 +76,7 @@ struct MessageListView: View {
                         scrollViewFrame: scrollViewFrame,
                         newMessageId: $newMessageId
                     )
+                    .padding(.bottom, isLastMessageInChat ? 20 : 0)
                     .id(message.id) // Essential for ScrollPosition to work
                 }
             }
