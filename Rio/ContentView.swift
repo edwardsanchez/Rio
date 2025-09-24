@@ -46,47 +46,47 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Main scroll view for messages
-        ScrollView {
-            MessageListView(
-                messages: messages,
-                newMessageId: $newMessageId,
-                inputFieldFrame: inputFieldFrame,
-                scrollViewFrame: scrollViewFrame
-            )
-            .onGeometryChange(for: CGRect.self) { geometryProxy in
-                geometryProxy.frame(in: .global)
-            } action: { newValue in
-                scrollViewFrame = newValue
-            }
-        }
-            .scrollClipDisabled()
-        .scrollPosition($scrollPosition)
-            .contentMargins(.horizontal, 20, for: .scrollContent)
-            .contentMargins(.bottom, 10)
-        .onChange(of: messages.count) { _, _ in
-            // Auto-scroll to the latest message when a new message is added
-            scrollToLatestMessage()
-        }
-        .onChange(of: newMessageId) { _, newId in
-            if newId != nil {
-                // Slight delay to allow message to be added to view hierarchy
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    scrollToLatestMessage()
+            ScrollView {
+                MessageListView(
+                    messages: messages,
+                    newMessageId: $newMessageId,
+                    inputFieldFrame: inputFieldFrame,
+                    scrollViewFrame: scrollViewFrame
+                )
+                .onGeometryChange(for: CGRect.self) { geometryProxy in
+                    geometryProxy.frame(in: .global)
+                } action: { newValue in
+                    scrollViewFrame = newValue
                 }
             }
-        }
+            .scrollClipDisabled()
+            .scrollPosition($scrollPosition)
+            .contentMargins(.horizontal, 20, for: .scrollContent)
+            .contentMargins(.bottom, 10)
+            .onChange(of: messages.count) { _, _ in
+                // Auto-scroll to the latest message when a new message is added
+                scrollToLatestMessage()
+            }
+            .onChange(of: newMessageId) { _, newId in
+                if newId != nil {
+                    // Slight delay to allow message to be added to view hierarchy
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        scrollToLatestMessage()
+                    }
+                }
+            }
             .onChange(of: inputFieldHeight) { _, _ in
                 // Auto-scroll when input field height changes to keep latest message visible
                 // Use instant scroll to avoid competing animations
                 scrollToLatestMessageInstant()
             }
-        .onAppear {
-            // Scroll to the bottom when the view first appears
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                scrollToLatestMessage()
+            .onAppear {
+                // Scroll to the bottom when the view first appears
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    scrollToLatestMessage()
+                }
+                isMessageFieldFocused = true
             }
-            isMessageFieldFocused = true
-        }
 
             inputField
         }
