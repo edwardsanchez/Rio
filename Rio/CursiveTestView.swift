@@ -13,7 +13,7 @@ struct CursiveTestView: View {
     @State private var helloLetters: [CGPath] = []
     @State private var drawProgress: CGFloat = 0
 
-    private let animationDuration: Double = 3.0
+    private let animationDuration: Double = 1.0
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
 
     var body: some View {
