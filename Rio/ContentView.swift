@@ -13,7 +13,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            ChatListView(chatData: chatData)
+            ChatListView(chatData: chatData) //Do not touch this
         }
     }
 }
