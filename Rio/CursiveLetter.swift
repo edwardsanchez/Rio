@@ -246,8 +246,85 @@ struct CursiveLetterShape: Shape {
 
 struct CursiveWordShape: Shape {
     let text: String
+    let fontSize: CGFloat
+
+    init(text: String, fontSize: CGFloat = 17) {
+        self.text = text
+        self.fontSize = fontSize
+    }
 
     func path(in rect: CGRect) -> Path {
+        guard let layout = Self.layout(for: text, fontSize: fontSize) else {
+            return Path()
+        }
+
+        let combined = CGMutablePath()
+        var penX: CGFloat = 0
+        for letter in layout.letters {
+            let transform = CGAffineTransform(translationX: penX, y: 0)
+            combined.addPath(letter.path, transform: transform)
+            penX += letter.advance
+        }
+
+        let fitScaleX = rect.width / max(layout.totalAdvance, 1)
+        let fitScaleY = rect.height / max(layout.verticalExtent, 1)
+        let scale = min(layout.baseScale, fitScaleX, fitScaleY)
+
+        var scaleTransform = CGAffineTransform(scaleX: scale, y: scale)
+        guard let scaled = combined.copy(using: &scaleTransform) else { return Path(combined) }
+
+        let scaledWidth = layout.totalAdvance * scale
+        let offsetX = (rect.width - scaledWidth) / 2
+
+        let baselineInRect = rect.midY
+        let offsetY = baselineInRect - layout.ascent * scale
+
+        var translate = CGAffineTransform(translationX: offsetX, y: offsetY)
+        guard let baselinePositioned = scaled.copy(using: &translate) else { return Path(scaled) }
+
+        var positioned = baselinePositioned
+        let bounds = positioned.boundingBox
+        var dy: CGFloat = 0
+        if bounds.minY < rect.minY {
+            dy += rect.minY - bounds.minY
+        }
+        if bounds.maxY > rect.maxY {
+            dy += rect.maxY - bounds.maxY
+        }
+        if dy != 0 {
+            var clamp = CGAffineTransform(translationX: 0, y: dy)
+            if let adjusted = positioned.copy(using: &clamp) {
+                positioned = adjusted
+            }
+        }
+
+        let finalBounds = positioned.boundingBox
+        let inside = rect.contains(finalBounds)
+        let overflowTop = rect.minY - finalBounds.minY
+        let overflowLeft = rect.minX - finalBounds.minX
+        let overflowBottom = finalBounds.maxY - rect.maxY
+        let overflowRight = finalBounds.maxX - rect.maxX
+        print("CursiveWordShape: rect=\(rect) bounds=\(finalBounds) inside=\(inside) baselineY=\(baselineInRect) dy=\(dy). Overflows (top,left,bottom,right)=\(overflowTop),\(overflowLeft),\(overflowBottom),\(overflowRight)")
+
+        return Path(positioned)
+    }
+
+    static func preferredSize(for text: String, fontSize: CGFloat) -> CGSize? {
+        guard let layout = layout(for: text, fontSize: fontSize) else { return nil }
+        let width = layout.totalAdvance * layout.baseScale
+        let height = layout.verticalExtent * layout.baseScale
+        return CGSize(width: width, height: height)
+    }
+
+    private struct Layout {
+        let letters: [CursiveLetter]
+        let totalAdvance: CGFloat
+        let ascent: CGFloat
+        let verticalExtent: CGFloat
+        let baseScale: CGFloat
+    }
+
+    private static func layout(for text: String, fontSize: CGFloat) -> Layout? {
         var letters: [CursiveLetter] = []
         var totalAdvance: CGFloat = 0
         for ch in text {
@@ -257,62 +334,23 @@ struct CursiveWordShape: Shape {
                 totalAdvance += letter.advance
             }
         }
-        guard let first = letters.first else { return Path() }
+        guard !letters.isEmpty else { return nil }
 
-        let verticalExtent = first.verticalExtent
-        let scaleX = rect.width / max(1, totalAdvance)
-        let scaleY = rect.height / max(1, verticalExtent)
-        let scale = min(scaleX, scaleY)
+        let ascent = letters.map(\.ascent).max() ?? 0
+        let descent = letters.map(\.descent).min() ?? 0
+        var verticalExtent = letters.map(\.verticalExtent).max() ?? 0
+        verticalExtent = max(verticalExtent, ascent - descent, 1)
 
-        let scaledWidth = totalAdvance * scale
-        let offsetX = (rect.width - scaledWidth) / 2
+        let unitsPerEm = letters.first(where: { $0.unitsPerEm > 0 })?.unitsPerEm ?? verticalExtent
+        let denominator = max(unitsPerEm, 1)
+        let baseScale = fontSize / denominator
 
-        // Align baseline to the vertical center of the rect
-        let baselineInRect = rect.midY
-        let offsetY = baselineInRect - first.ascent * scale
-
-        let combined = CGMutablePath()
-        var penX: CGFloat = 0
-        for letter in letters {
-            let t = CGAffineTransform(translationX: penX, y: 0)
-            combined.addPath(letter.path, transform: t)
-            penX += letter.advance
-        }
-
-        // 1) Scale into screen space
-        var scaleT = CGAffineTransform(scaleX: scale, y: scale)
-        guard let scaled = combined.copy(using: &scaleT) else { return Path(combined) }
-
-        // 2) Translate in screen space so baseline sits at rect.midY and centered horizontally
-        var translateT = CGAffineTransform(translationX: offsetX, y: offsetY)
-        guard let baselinePositioned = scaled.copy(using: &translateT) else { return Path(scaled) }
-
-        // Clamp vertically inside rect without changing scale
-        var positioned = baselinePositioned
-        let b = positioned.boundingBox
-        var dy: CGFloat = 0
-        if b.minY < rect.minY {
-            dy += (rect.minY - b.minY)
-        }
-        if b.maxY > rect.maxY {
-            dy += (rect.maxY - b.maxY)
-        }
-        if dy != 0 {
-            var clampT = CGAffineTransform(translationX: 0, y: dy)
-            if let adjusted = positioned.copy(using: &clampT) {
-                positioned = adjusted
-            }
-        }
-
-        // Debug: verify if final drawing lies inside the provided rect
-        let bounds = positioned.boundingBox
-        let inside = rect.contains(bounds)
-        let overflowTop = rect.minY - bounds.minY
-        let overflowLeft = rect.minX - bounds.minX
-        let overflowBottom = bounds.maxY - rect.maxY
-        let overflowRight = bounds.maxX - rect.maxX
-        print("CursiveWordShape: rect=\(rect) bounds=\(bounds) inside=\(inside) baselineY=\(baselineInRect) dy=\(dy). Overflows (top,left,bottom,right)=\(overflowTop),\(overflowLeft),\(overflowBottom),\(overflowRight)")
-
-        return Path(positioned)
+        return Layout(
+            letters: letters,
+            totalAdvance: totalAdvance,
+            ascent: ascent,
+            verticalExtent: verticalExtent,
+            baseScale: baseScale
+        )
     }
 }

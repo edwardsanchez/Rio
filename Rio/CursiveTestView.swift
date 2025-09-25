@@ -10,25 +10,43 @@ import SVGPath
 import os.log
 
 struct CursiveTestView: View {
-    @State private var helloLetters: [CGPath] = []
     @State private var drawProgress: CGFloat = 0
 
-    private let animationDuration: Double = 1.0
+    var animationDuration: Double {
+        Double(string.count) / 8
+    }
+    
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
 
+    let string: String = "Hello this is a test for the cursive font"
+    let size: Double = 13
+
+    private let wordPadding: CGFloat = 12
+    private var fontSizeValue: CGFloat { CGFloat(size) }
+    private var measuredWordSize: CGSize {
+        CursiveWordShape.preferredSize(for: string, fontSize: fontSizeValue)
+            ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
+    }
+
     var body: some View {
-        VStack {
+        let fontSize = fontSizeValue
+        let wordSize = measuredWordSize
+        return VStack {
             Text("Cursive hello")
                 .font(.title)
                 .padding()
 
+            Text(string)
+                .font(.system(size: fontSize))
+
             ZStack {
                 Rectangle().fill(Color.gray.opacity(0.08))
-                CursiveWordShape(text: "Hello")
+                CursiveWordShape(text: string, fontSize: fontSize)
                     .trim(from: 0, to: drawProgress)
-                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                    .stroke(Color.blue, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
+                    .frame(width: wordSize.width, height: wordSize.height)
             }
-            .frame(width: 400, height: 120)
+            .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
             .border(Color.red.opacity(0.4))
             .padding()
 
