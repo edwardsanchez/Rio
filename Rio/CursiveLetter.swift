@@ -274,7 +274,7 @@ struct CursiveWordShape: Shape {
         let combined = CGMutablePath()
         var penX: CGFloat = 0
         for letter in letters {
-            var t = CGAffineTransform(translationX: penX, y: 0)
+            let t = CGAffineTransform(translationX: penX, y: 0)
             combined.addPath(letter.path, transform: t)
             penX += letter.advance
         }
