@@ -1,0 +1,15 @@
+{
+  "originHash" : "c4c7a2380283fc822f4ffd8c4b7333d93253d758e63c61771d11988914397147",
+  "pins" : [
+    {
+      "identity" : "svgpath",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nicklockwood/SVGPath",
+      "state" : {
+        "revision" : "381fd6008f7d7120bdd631e3179f5a2a35e2e14f",
+        "version" : "1.2.0"
+      }
+    }
+  ],
+  "version" : 3
+}

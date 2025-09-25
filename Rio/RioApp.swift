@@ -25,7 +25,7 @@ struct RioApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CursiveTestView()
         }
         .modelContainer(sharedModelContainer)
     }
