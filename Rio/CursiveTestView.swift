@@ -27,59 +27,16 @@ struct CursiveTestView: View {
                 .multilineTextAlignment(.leading)
                 .font(.caption)
 
-            if !helloLetters.isEmpty {
-                HStack(spacing: 10) {
-                    ForEach(Array(helloLetters.enumerated()), id: \.offset) { index, path in
-                        ZStack {
-                            // Frame background to see the bounds clearly
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.1))
-                            
-                            // Simple test path to verify rendering works
-                            Path { testPath in
-                                testPath.move(to: CGPoint(x: 10, y: 10))
-                                testPath.addLine(to: CGPoint(x: 70, y: 10))
-                                testPath.addLine(to: CGPoint(x: 70, y: 90))
-                                testPath.addLine(to: CGPoint(x: 10, y: 90))
-                                testPath.closeSubpath()
-                            }
-                            .stroke(Color.green, lineWidth: 1)
-
-                            // Use the existing CursiveLetterShape which has proper coordinate handling
-                            let letterStrings = ["H", "e", "l", "l", "o"]
-                            if let letter = CursiveLetter.letter(for: letterStrings[index]) {
-                                CursiveLetterShape(letter: letter)
-                                    .fill(Color.blue.opacity(0.3))
-                                
-                                CursiveLetterShape(letter: letter)
-                                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                            } else {
-                                // Fallback to manual transform if CursiveLetter fails
-                                Path(path)
-                                    .fill(Color.blue.opacity(0.3))
-                                
-                                Path(path)
-                                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                            }
-                            
-                            // Add bounds visualization
-                            let bounds = path.boundingBox
-                            Path { boundsPath in
-                                boundsPath.addRect(bounds)
-                            }
-                            .stroke(Color.orange, style: StrokeStyle(lineWidth: 1))
-                        }
-                        .frame(width: 80, height: 100)
-                        .border(Color.red.opacity(0.5), width: 1) // Debug border to see frame
-                        .animation(.easeInOut(duration: 0.5).delay(Double(index) * 0.2), value: helloLetters.count)
-                    }
-                }
-                .padding()
-            } else {
-                Text("Loading letters...")
-                    .foregroundColor(.gray)
-                    .padding()
+            ZStack {
+                Rectangle().fill(Color.gray.opacity(0.08))
+                CursiveWordShape(text: "Hello")
+                    .fill(Color.blue.opacity(0.25))
+                CursiveWordShape(text: "Hello")
+                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             }
+            .frame(width: 400, height: 120)
+            .border(Color.red.opacity(0.4))
+            .padding()
 
             Spacer()
         }

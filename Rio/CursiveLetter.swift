@@ -11,7 +11,12 @@ import SVGPath
 struct CursiveLetter {
     let character: String
     let path: CGPath
-    
+    let advance: CGFloat
+    let ascent: CGFloat
+    let descent: CGFloat
+    let verticalExtent: CGFloat
+    let unitsPerEm: CGFloat
+
     static let allLetters: [CursiveLetter] = {
         var letters: [CursiveLetter] = []
 
@@ -81,6 +86,8 @@ struct CursiveLetter {
             return nil
         }
         
+        let metrics = parseMetrics(from: svgString)
+        
         // Extract the path data from the SVG
         guard let pathData = extractPathData(from: svgString) else {
             print("Failed to extract path data for character: \(character)")
@@ -89,12 +96,92 @@ struct CursiveLetter {
         
         // Create CGPath from SVG path data
         do {
-            let cgPath = try CGPath.from(svgPath: pathData)
-            return CursiveLetter(character: character, path: cgPath)
+            let rawPath = try CGPath.from(svgPath: pathData)
+            let rawBounds = rawPath.boundingBox
+
+            if let m = metrics {
+                // Normalize to Y-down with baseline at y=ascent if incoming path appears Y-up (minY < 0)
+                var normalized = rawPath
+                if rawBounds.minY < 0 {
+                    var flip = CGAffineTransform(scaleX: 1, y: -1)
+                    if let p1 = normalized.copy(using: &flip) { normalized = p1 }
+                    var translate = CGAffineTransform(translationX: 0, y: m.ascent)
+                    if let p2 = normalized.copy(using: &translate) { normalized = p2 }
+                }
+
+                return CursiveLetter(
+                    character: character,
+                    path: normalized,
+                    advance: m.advance,
+                    ascent: m.ascent,
+                    descent: m.descent,
+                    verticalExtent: m.verticalExtent,
+                    unitsPerEm: m.unitsPerEm
+                )
+            } else {
+                // Fallback: estimate metrics, and normalize to Y-down if needed
+                var normalized = rawPath
+                let box = rawBounds
+                let height = max(1, box.height)
+                let ascent = height * 0.8
+                let descent = ascent - height
+                if box.minY < 0 {
+                    var flip = CGAffineTransform(scaleX: 1, y: -1)
+                    if let p1 = normalized.copy(using: &flip) { normalized = p1 }
+                    var translate = CGAffineTransform(translationX: 0, y: ascent)
+                    if let p2 = normalized.copy(using: &translate) { normalized = p2 }
+                }
+
+                return CursiveLetter(
+                    character: character,
+                    path: normalized,
+                    advance: max(1, box.width),
+                    ascent: ascent,
+                    descent: descent,
+                    verticalExtent: height,
+                    unitsPerEm: height
+                )
+            }
         } catch {
             print("Failed to create CGPath for character \(character): \(error)")
             return nil
         }
+    }
+
+    private static func parseMetrics(from svgString: String) -> (advance: CGFloat, ascent: CGFloat, descent: CGFloat, verticalExtent: CGFloat, unitsPerEm: CGFloat)? {
+        func attr(_ name: String) -> CGFloat? {
+            let pattern = name + #"\=\"([^\"]+)\""#
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+            guard let match = regex.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)) else { return nil }
+            guard let range = Range(match.range(at: 1), in: svgString) else { return nil }
+            return CGFloat(Double(svgString[range]) ?? .nan)
+        }
+
+        let advance = attr("data-advance")
+        let ascent = attr("data-ascent")
+        let descent = attr("data-descent")
+        let vertical = attr("data-vertical-extent")
+        let upm = attr("data-units-per-em")
+
+        if let a = advance, let asc = ascent, let desc = descent, let v = vertical, let u = upm {
+            return (advance: a, ascent: asc, descent: desc, verticalExtent: v, unitsPerEm: u)
+        }
+
+        // Fallback: parse viewBox="0 0 width height" and width attribute as advance
+        if let viewBoxMatch = try? NSRegularExpression(pattern: #"viewBox\=\"0\s+0\s+([0-9\.\-]+)\s+([0-9\.\-]+)\""#, options: []) {
+            if let m = viewBoxMatch.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)),
+               let wRange = Range(m.range(at: 1), in: svgString),
+               let hRange = Range(m.range(at: 2), in: svgString) {
+                let width = CGFloat(Double(svgString[wRange]) ?? 0)
+                let height = CGFloat(Double(svgString[hRange]) ?? 0)
+                let adv = attr("width") ?? width
+                let asc = height * 0.8
+                let desc = asc - height
+                return (advance: adv, ascent: asc, descent: desc, verticalExtent: height, unitsPerEm: height)
+            }
+        }
+
+        return nil
     }
     
     private static func extractPathData(from svgString: String) -> String? {
@@ -134,25 +221,19 @@ struct CursiveLetterShape: Shape {
     let letter: CursiveLetter
     
     func path(in rect: CGRect) -> Path {
-        // 1) Translate so minX/minY is at the origin
+        // Translate so minX/minY is at the origin
         var t = CGAffineTransform(translationX: -letter.path.boundingBox.minX, y: -letter.path.boundingBox.minY)
         guard let originPath = letter.path.copy(using: &t) else { return Path(letter.path) }
 
-        // 2) Flip vertically in local coordinates (Y-down SVG -> Y-up CoreGraphics)
+        // Compute scale to fit
         let originBox = originPath.boundingBox
-        var flip = CGAffineTransform(scaleX: 1, y: -1)
-        guard let flippedPath = originPath.copy(using: &flip) else { return Path(originPath) }
-        var translateAfterFlip = CGAffineTransform(translationX: 0, y: originBox.height)
-        guard let yUpPath = flippedPath.copy(using: &translateAfterFlip) else { return Path(flippedPath) }
-
-        // 3) Compute scale to fit
         let scaleX = rect.width / originBox.width
         let scaleY = rect.height / originBox.height
         let scale = min(scaleX, scaleY)
         var s = CGAffineTransform(scaleX: scale, y: scale)
-        guard let scaledPath = yUpPath.copy(using: &s) else { return Path(yUpPath) }
+        guard let scaledPath = originPath.copy(using: &s) else { return Path(originPath) }
 
-        // 4) Center in rect
+        // Center in rect
         let scaledSize = CGSize(width: originBox.width * scale, height: originBox.height * scale)
         let offsetX = (rect.width - scaledSize.width) / 2
         let offsetY = (rect.height - scaledSize.height) / 2
@@ -160,5 +241,47 @@ struct CursiveLetterShape: Shape {
         guard let centeredPath = scaledPath.copy(using: &centerT) else { return Path(scaledPath) }
 
         return Path(centeredPath)
+    }
+}
+
+struct CursiveWordShape: Shape {
+    let text: String
+
+    func path(in rect: CGRect) -> Path {
+        var letters: [CursiveLetter] = []
+        var totalAdvance: CGFloat = 0
+        for ch in text {
+            let s = String(ch)
+            if let letter = CursiveLetter.letter(for: s) {
+                letters.append(letter)
+                totalAdvance += letter.advance
+            }
+        }
+        guard let first = letters.first else { return Path() }
+
+        let verticalExtent = first.verticalExtent
+        let scaleX = rect.width / max(1, totalAdvance)
+        let scaleY = rect.height / max(1, verticalExtent)
+        let scale = min(scaleX, scaleY)
+
+        let scaledWidth = totalAdvance * scale
+        let scaledHeight = verticalExtent * scale
+        let offsetX = (rect.width - scaledWidth) / 2
+        let offsetY = (rect.height - scaledHeight) / 2
+
+        let combined = CGMutablePath()
+        var penX: CGFloat = 0
+        for letter in letters {
+            var t = CGAffineTransform(translationX: penX, y: 0)
+            combined.addPath(letter.path, transform: t)
+            penX += letter.advance
+        }
+
+        var finalT = CGAffineTransform.identity
+        finalT = finalT.translatedBy(x: offsetX, y: offsetY)
+        finalT = finalT.scaledBy(x: scale, y: scale)
+
+        guard let transformed = combined.copy(using: &finalT) else { return Path(combined) }
+        return Path(transformed)
     }
 }
