@@ -287,6 +287,7 @@ struct CursiveTestView: View {
     @State private var showPipe = true  // Toggle to show/hide the red pipe
     @State private var windowMode = false  // Toggle for window effect
     @State private var maxDrawProgressFrom: CGFloat = 0  // Track maximum from parameter for monotonic movement
+    @State private var maxMaskX: CGFloat = 0  // Track maximum X position for gradient mask (forward-only)
 
     private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
 
@@ -410,10 +411,41 @@ struct CursiveTestView: View {
                     Rectangle().fill(Color.gray.opacity(0.08))
 
                     // The cursive word shape with window mode support
-                    CursiveWordShape(text: string, fontSize: fontSize)
-                        .trim(from: windowMode ? drawProgressFrom : 0, to: drawProgress)
-                        .stroke(Color.blue, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                        .frame(width: wordSize.width, height: wordSize.height)
+                    if windowMode {
+                        // Window mode: apply gradient mask to the green stroke
+                        // Green stroke layer with gradient mask
+                        CursiveWordShape(text: string, fontSize: fontSize)
+                            .trim(from: drawProgressFrom, to: drawProgress)
+                            .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
+                            .frame(width: wordSize.width, height: wordSize.height)
+                            .mask(
+                                // Create a 40-point wide mask aligned with the window's right edge
+                                LinearGradient(
+                                    gradient: Gradient(stops: [
+                                        // Left edge: fade from transparent to opaque over 10 points
+                                        .init(color: .clear, location: 0),
+                                        .init(color: .black, location: 10/40),  // 10 points / 40 points total
+                                        // Right portion: fully opaque
+                                        .init(color: .black, location: 1)
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                                .frame(width: 40, height: wordSize.height * 1.5)
+                                // Position the mask so its right edge aligns with maxMaskX
+                                .position(
+                                    x: maxMaskX - 20,  // Center of 40pt mask is 20pt from its right edge
+                                    y: wordSize.height / 2
+                                )
+                                .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                            )
+                    } else {
+                        // Normal mode: single blue stroke
+                        CursiveWordShape(text: string, fontSize: fontSize)
+                            .trim(from: 0, to: drawProgress)
+                            .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
+                            .frame(width: wordSize.width, height: wordSize.height)
+                    }
 
                     // Vertical indicators at scanner bounds
                     if isDragging {
@@ -582,6 +614,7 @@ struct CursiveTestView: View {
         drawProgressFrom = 0
         maxPipeX = 0
         maxDrawProgressFrom = 0
+        maxMaskX = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: string, fontSize: fontSizeValue)
@@ -595,7 +628,7 @@ struct CursiveTestView: View {
         animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [self] timer in
 
             let elapsed = Date().timeIntervalSince(startTime)
-            var progress = min(elapsed / self.animationDuration, 1.0)
+            let progress = min(elapsed / self.animationDuration, 1.0)
 
             if self.windowMode {
                 // Check if we've reached the end with the red pipe
@@ -608,6 +641,12 @@ struct CursiveTestView: View {
 
                     // Keep red pipe at 1.0
                     self.drawProgress = 1.0
+
+                    // During end phase, mask should stay at the final position
+                    let finalPoint = analyzer.pointAtParameter(1.0)
+                    if finalPoint.x > self.maxMaskX {
+                        self.maxMaskX = finalPoint.x
+                    }
 
                     // Animate green pipe from its current position to 1.0
                     let endElapsed = Date().timeIntervalSince(endPhaseStartTime!)
@@ -634,6 +673,11 @@ struct CursiveTestView: View {
                 // Calculate the 'from' parameter to maintain window width
                 let toPoint = analyzer.pointAtParameter(progress)
                 let toX = toPoint.x
+
+                // Update mask position (forward-only movement)
+                if toX > self.maxMaskX {
+                    self.maxMaskX = toX
+                }
 
                 // Find the parameter that's windowWidth pixels behind
                 let targetFromX = toX - self.windowWidth
