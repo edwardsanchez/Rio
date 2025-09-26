@@ -31,6 +31,7 @@ struct AnimatedCursiveTextView: View {
     let showProgressIndicator: Bool
     let forwardOnlyMode: Bool
     let windowWidth: CGFloat
+    let variableSpeed: Bool
     
     // Computed properties
     private var fontSizeValue: CGFloat { fontSize }
@@ -47,7 +48,8 @@ struct AnimatedCursiveTextView: View {
         staticWindow: Bool = true,
         showProgressIndicator: Bool = false,
         forwardOnlyMode: Bool = false,
-        windowWidth: CGFloat = 50
+        windowWidth: CGFloat = 50,
+        variableSpeed: Bool = true
     ) {
         self.text = text
         self.fontSize = fontSize
@@ -57,6 +59,7 @@ struct AnimatedCursiveTextView: View {
         self.showProgressIndicator = showProgressIndicator
         self.forwardOnlyMode = forwardOnlyMode
         self.windowWidth = windowWidth
+        self.variableSpeed = variableSpeed
     }
     
     var shape: CursiveWordShape {
@@ -118,6 +121,43 @@ struct AnimatedCursiveTextView: View {
         // Calculate moving average
         let sum = previousTextOffsets.reduce(0, +)
         smoothedTextOffset = sum / CGFloat(previousTextOffsets.count)
+    }
+
+    // Convert linear time progress to path-length-adjusted progress
+    private func adjustProgressForPathLength(_ linearProgress: CGFloat) -> CGFloat {
+        guard !variableSpeed else { return linearProgress }
+
+        // When variableSpeed is false, we want the visual progress to be linear
+        // This means we need to adjust the path parameter based on path length density
+        let targetPathLength = linearProgress * analyzer.totalPathLength
+
+        // Use binary search for efficiency (O(log n) instead of O(n))
+        let samples = analyzer.samples
+        var low = 0
+        var high = samples.count - 1
+
+        while low < high {
+            let mid = (low + high) / 2
+            if samples[mid].cumulativeLength < targetPathLength {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+
+        // Interpolate between samples for smooth results
+        if low > 0 && low < samples.count {
+            let prevSample = samples[low - 1]
+            let currentSample = samples[low]
+            let lengthDiff = currentSample.cumulativeLength - prevSample.cumulativeLength
+
+            if lengthDiff > 0 {
+                let t = (targetPathLength - prevSample.cumulativeLength) / lengthDiff
+                return prevSample.u + t * (currentSample.u - prevSample.u)
+            }
+        }
+
+        return low < samples.count ? samples[low].u : 1.0
     }
     
     var body: some View {
@@ -287,10 +327,11 @@ struct AnimatedCursiveTextView: View {
                 }
                 
                 // Normal animation (before end phase)
-                self.drawProgress = progress
+                let adjustedProgress = self.adjustProgressForPathLength(progress)
+                self.drawProgress = adjustedProgress
                 
                 // Calculate the 'from' parameter to maintain window width
-                let toPoint = analyzer.pointAtParameter(progress)
+                let toPoint = analyzer.pointAtParameter(adjustedProgress)
                 let toX = toPoint.x
                 
                 // Update mask position (forward-only movement)
@@ -305,7 +346,7 @@ struct AnimatedCursiveTextView: View {
                 let interpolatedFrom = analyzer.parameterAtXPosition(targetFromX)
 
                 // Ensure we don't go beyond current progress and apply monotonic constraint
-                let clampedFrom = min(interpolatedFrom, progress)
+                let clampedFrom = min(interpolatedFrom, adjustedProgress)
                 if clampedFrom > self.maxDrawProgressFrom {
                     self.maxDrawProgressFrom = clampedFrom
                 }
@@ -323,7 +364,8 @@ struct AnimatedCursiveTextView: View {
                 
             } else {
                 // Normal mode: no 'from' trimming
-                self.drawProgress = progress
+                let adjustedProgress = self.adjustProgressForPathLength(progress)
+                self.drawProgress = adjustedProgress
                 self.drawProgressFrom = 0
                 self.maxDrawProgressFrom = 0
 

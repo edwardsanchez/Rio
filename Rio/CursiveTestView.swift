@@ -20,13 +20,14 @@ struct CursiveTestView: View {
     @State private var showPipe = true  // Toggle to show/hide the red pipe
     @State private var windowMode = false  // Toggle for window effect
     @State private var staticWindow = false  // Toggle for static window effect (window stays in place, text scrolls)
+    @State private var variableSpeed = true  // Toggle for variable speed animation
 
     // Animation restart trigger
     @State private var animationKey = 0
 
     // Configuration constants
     private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
-    private let string: String = "hello how are you"
+    private let string: String = "hello how are you doing today? I think I'm gonna go to the theatre later this weekend, what do you think?"
     private let size: Double = 20
     private let wordPadding: CGFloat = 12
     private let scannerWidth: CGFloat = 50  // Width of the scanning rectangle - narrower for more range
@@ -36,10 +37,6 @@ struct CursiveTestView: View {
     private var measuredWordSize: CGSize {
         CursiveWordShape.preferredSize(for: string, fontSize: fontSizeValue)
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
-    }
-
-    var animationDuration: Double {
-        Double(string.count) / 3
     }
 
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
@@ -120,16 +117,17 @@ struct CursiveTestView: View {
                 .frame(width: wordSize.width)
 
                 // The animated cursive text view
-                ZStack {
+                ZStack(alignment: .trailing) {
                     AnimatedCursiveTextView(
                         text: string,
                         fontSize: fontSizeValue,
-                        animationDuration: animationDuration,
+                        animationDuration: nil,
                         windowMode: windowMode,
                         staticWindow: staticWindow,
                         showProgressIndicator: showPipe,
                         forwardOnlyMode: forwardOnlyMode,
-                        windowWidth: windowWidth
+                        windowWidth: windowWidth,
+                        variableSpeed: variableSpeed
                     )
                     .id(animationKey)  // Force recreation when key changes
 
@@ -242,6 +240,24 @@ struct CursiveTestView: View {
                                 .foregroundColor(.primary)
                         }
                         .padding(.leading, 20)
+                    }
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Animation Speed")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+
+                        Toggle("Variable Speed", isOn: $variableSpeed)
+                            .onChange(of: variableSpeed) {
+                                animationKey += 1  // Restart animation when mode changes
+                            }
+
+                        Text("When enabled, animation speed varies with path complexity. When disabled, visual progress appears linear.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 20)
                     }
                 }
             }
