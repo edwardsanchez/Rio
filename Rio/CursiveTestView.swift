@@ -291,7 +291,7 @@ struct CursiveTestView: View {
     private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
 
     var animationDuration: Double {
-        Double(string.count) / 8
+        Double(string.count) / 4
     }
 
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
