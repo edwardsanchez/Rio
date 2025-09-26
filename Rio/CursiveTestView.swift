@@ -23,7 +23,7 @@ struct PathXAnalyzer {
     let totalPathLength: CGFloat
     let bounds: CGRect
 
-    init(path: CGPath, sampleCount: Int = 400) {
+    init(path: CGPath, sampleCount: Int = 800) {  // Increased sample count for better accuracy
         var samples: [Sample] = []
         var cumulativeX: CGFloat = 0
         var cumulativeLength: CGFloat = 0
@@ -33,7 +33,7 @@ struct PathXAnalyzer {
         for i in 0...sampleCount {
             let u = CGFloat(i) / CGFloat(sampleCount)
 
-            // Get point at parameter u (we'll approximate this)
+            // Get point at parameter u
             let point = path.pointAtParameter(u) ?? .zero
 
             if let prev = previousPoint {
@@ -114,6 +114,50 @@ struct PathXAnalyzer {
         }
 
         return samples[low].u
+    }
+
+    // Get the actual point at a given path parameter
+    func pointAtParameter(_ u: CGFloat) -> CGPoint {
+        guard u >= 0 else { return samples.first?.point ?? .zero }
+        guard u <= 1 else { return samples.last?.point ?? CGPoint(x: bounds.maxX, y: bounds.midY) }
+
+        // Find the samples that bracket this parameter
+        var low = 0
+        var high = samples.count - 1
+
+        while low < high {
+            let mid = (low + high) / 2
+            if samples[mid].u < u {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+
+        // Interpolate between samples to get the point
+        if low > 0 {
+            let s1 = samples[low - 1]
+            let s2 = samples[low]
+            if s2.u > s1.u {
+                let t = (u - s1.u) / (s2.u - s1.u)
+                // Interpolate the point position
+                return CGPoint(
+                    x: s1.point.x + (s2.point.x - s1.point.x) * t,
+                    y: s1.point.y + (s2.point.y - s1.point.y) * t
+                )
+            }
+        }
+
+        return samples[low].point
+    }
+}
+
+// Extension to get the end point of a trimmed path
+extension Path {
+    func trimmedEndPoint(from startT: CGFloat, to endT: CGFloat) -> CGPoint? {
+        // Get the CGPath and find the point at the trim end
+        let cgPath = self.cgPath
+        return cgPath.pointAtParameter(endT)
     }
 }
 
@@ -196,6 +240,7 @@ struct CursiveTestView: View {
     @State private var scannerOffset: CGFloat = 50  // Actual offset in points
     @State private var isDragging = false
     @State private var dragStartOffset: CGFloat = 0  // Track initial offset when drag starts
+    @State private var animationTimer: Timer?
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -233,6 +278,9 @@ struct CursiveTestView: View {
             from: clampedOffset,
             to: clampedOffset + scannerWidth
         )
+
+        // Get the actual end point of the trimmed path
+        let trimEndPoint = analyzer.pointAtParameter(drawProgress)
 
         return VStack(spacing: 20) {
             Text("X-Parametrized Path Scanner")
@@ -317,12 +365,12 @@ struct CursiveTestView: View {
                             .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                     }
 
-                    // X-parametrized progress line
+                    // Red pipe that follows the actual trim end point
                     Rectangle()
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: wordSize.height)
                         .position(
-                            x: analyzer.parameterAtXDistance(drawProgress * analyzer.totalXDistance) * wordSize.width,
+                            x: trimEndPoint.x,
                             y: wordSize.height / 2
                         )
                         .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
@@ -377,13 +425,30 @@ struct CursiveTestView: View {
         .onAppear {
             restartAnimation()
         }
+        .onDisappear {
+            animationTimer?.invalidate()
+            animationTimer = nil
+        }
     }
 
     private func restartAnimation() {
+        // Cancel any existing timer
+        animationTimer?.invalidate()
+
+        // Reset progress
         drawProgress = 0
-        DispatchQueue.main.async {
-            withAnimation(.linear(duration: animationDuration)) {
-                drawProgress = 1
+
+        // Start animation with timer for continuous updates
+        let startTime = Date()
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { timer in
+            let elapsed = Date().timeIntervalSince(startTime)
+            let progress = min(elapsed / animationDuration, 1.0)
+
+            drawProgress = progress
+
+            if progress >= 1.0 {
+                timer.invalidate()
+                animationTimer = nil
             }
         }
     }
