@@ -286,13 +286,14 @@ struct CursiveTestView: View {
     @State private var maxPipeX: CGFloat = 0  // Track the maximum X position reached
     @State private var showPipe = true  // Toggle to show/hide the red pipe
     @State private var windowMode = false  // Toggle for window effect
+    @State private var staticWindow = false  // Toggle for static window effect (window stays in place, text scrolls)
     @State private var maxDrawProgressFrom: CGFloat = 0  // Track maximum from parameter for monotonic movement
     @State private var maxMaskX: CGFloat = 0  // Track maximum X position for gradient mask (forward-only)
 
     private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
 
     var animationDuration: Double {
-        Double(string.count) / 4
+        Double(string.count) / 3
     }
 
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
@@ -348,6 +349,17 @@ struct CursiveTestView: View {
                 // Normal mode: follow the actual trim end point
                 return trimEndPoint.x
             }
+        }()
+
+        // Calculate text offset for static window effect
+        let textOffset: CGFloat = {
+            if windowMode && staticWindow && maxDrawProgressFrom > 0 {
+                // For static window, we want the window to appear at the start of the text
+                let textStartX = analyzer.bounds.minX  // Start of the text
+                let desiredWindowX = textStartX + windowWidth  // Back to original position
+                return desiredWindowX - maxMaskX
+            }
+            return 0
         }()
 
         return VStack(spacing: 20) {
@@ -418,33 +430,46 @@ struct CursiveTestView: View {
                             .trim(from: drawProgressFrom, to: drawProgress)
                             .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
                             .frame(width: wordSize.width, height: wordSize.height)
+                            .offset(x: textOffset)  // Apply static window offset
                             .mask(
-                                // Create a 40-point wide mask aligned with the window's right edge
+                                // Create a wider mask with more left padding for static window mode
                                 LinearGradient(
                                     gradient: Gradient(stops: [
-                                        // Left edge: fade from transparent to opaque over 10 points
+                                        // Left edge: fade from transparent to opaque
                                         .init(color: .clear, location: 0),
-                                        .init(color: .black, location: 10/40),  // 10 points / 40 points total
+                                        .init(color: .black, location: staticWindow ? 20/60 : 10/40),  // Even more left padding in static mode
                                         // Right portion: fully opaque
                                         .init(color: .black, location: 1)
                                     ]),
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
-                                .frame(width: 40, height: wordSize.height * 1.5)
-                                // Position the mask so its right edge aligns with maxMaskX
+                                .frame(width: staticWindow ? 60 : 40, height: wordSize.height * 1.5)  // Even wider mask in static mode
+                                // Position the mask: static in static window mode, moving otherwise
                                 .position(
-                                    x: maxMaskX - 20,  // Center of 40pt mask is 20pt from its right edge
+                                    x: staticWindow ? (analyzer.bounds.minX + windowWidth - 30) : maxMaskX - 20,  // Center of wider mask
                                     y: wordSize.height / 2
                                 )
                                 .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                             )
+//                            .overlay {
+//                                Rectangle()
+//                                    .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round))
+//                                    .frame(width: staticWindow ? 60 : 40, height: wordSize.height * 1.5)  // Even wider mask in static mode
+//                                // Position the mask: static in static window mode, moving otherwise
+//                                    .position(
+//                                        x: staticWindow ? (analyzer.bounds.minX + windowWidth - 30) : maxMaskX - 20,  // Center of wider mask
+//                                        y: wordSize.height / 2
+//                                    )
+//                                    .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+//                            }
                     } else {
                         // Normal mode: single blue stroke
                         CursiveWordShape(text: string, fontSize: fontSize)
                             .trim(from: 0, to: drawProgress)
                             .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
                             .frame(width: wordSize.width, height: wordSize.height)
+                            .offset(x: textOffset)  // Apply static window offset (will be 0 in normal mode)
                     }
 
                     // Vertical indicators at scanner bounds
@@ -474,7 +499,7 @@ struct CursiveTestView: View {
                                 .fill(Color.green.opacity(0.7))
                                 .frame(width: 2, height: wordSize.height)
                                 .position(
-                                    x: fromPoint.x,
+                                    x: fromPoint.x + textOffset,
                                     y: wordSize.height / 2
                                 )
                                 .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
@@ -484,7 +509,7 @@ struct CursiveTestView: View {
                                 .fill(Color.red.opacity(0.7))
                                 .frame(width: 2, height: wordSize.height)
                                 .position(
-                                    x: pipeX,
+                                    x: pipeX + textOffset,
                                     y: wordSize.height / 2
                                 )
                                 .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
@@ -494,14 +519,15 @@ struct CursiveTestView: View {
                                 .fill(Color.red.opacity(0.7))
                                 .frame(width: 2, height: wordSize.height)
                                 .position(
-                                    x: pipeX,
+                                    x: pipeX + textOffset,
                                     y: wordSize.height / 2
                                 )
                                 .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                         }
                     }
                 }
-                .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
+                .frame(width: wordSize.width + wordPadding * 4, height: wordSize.height + wordPadding * 2)  // Extra width for offset text
+//                .clipped(false)  // Allow content to extend beyond frame bounds
                 .border(Color.gray.opacity(0.3))
             }
 
@@ -574,10 +600,17 @@ struct CursiveTestView: View {
 
                     Toggle("Window Mode", isOn: $windowMode)
                         .onChange(of: windowMode) {
+                            staticWindow = false  // Reset static window when window mode is toggled
                             restartAnimation()
                         }
 
                     if windowMode {
+                        Toggle("Static Window", isOn: $staticWindow)
+                            .padding(.leading, 20)
+                            .onChange(of: staticWindow) {
+                                restartAnimation()
+                            }
+
                         HStack {
                             Text("Window Width:")
                                 .font(.caption)
@@ -603,6 +636,7 @@ struct CursiveTestView: View {
             animationTimer?.invalidate()
             animationTimer = nil
         }
+        .animation(drawProgress == 0 ? nil : .linear, value: drawProgress)
     }
 
     private func restartAnimation() {
