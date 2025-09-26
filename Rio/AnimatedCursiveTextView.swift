@@ -161,7 +161,7 @@ struct AnimatedCursiveTextView: View {
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .leading) {
             Group {
                 if windowMode {
                     // Window mode: apply gradient mask to the green stroke
@@ -169,7 +169,7 @@ struct AnimatedCursiveTextView: View {
                     CursiveWordShape(text: text, fontSize: fontSize)
                         .trim(from: drawProgressFrom, to: drawProgress)
                         .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                        .frame(width: measuredWordSize.width, height: measuredWordSize.height)
+                        .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
                         .offset(x: smoothedTextOffset)  // Apply smoothed static window offset
                         .mask(
                             // Create a wider mask with more left padding for static window mode
@@ -197,15 +197,16 @@ struct AnimatedCursiveTextView: View {
                     CursiveWordShape(text: text, fontSize: fontSize)
                         .trim(from: 0, to: drawProgress)
                         .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                        .frame(width: measuredWordSize.width, height: measuredWordSize.height)
+                        .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
                         .offset(x: smoothedTextOffset)  // Apply smoothed static window offset (will be 0 in normal mode)
                 }
             }
             // The cursive word shape with window mode support
-            
+
             progressIndicatorView
         }
-        .frame(width: measuredWordSize.width, height: measuredWordSize.height)
+        .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
+        .fixedSize()  // Preserve intrinsic size so parent clipping affects the trailing edge
         .onAppear {
             restartAnimation()
         }

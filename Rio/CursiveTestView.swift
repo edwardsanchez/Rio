@@ -61,14 +61,6 @@ struct CursiveTestView: View {
         )
 
         return VStack(spacing: 20) {
-            Text("X-Parametrized Path Scanner")
-                .font(.title2)
-                .padding(.top)
-
-            Text("Drag the scanner to measure path length")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
             // Main visualization area
             VStack(spacing: 0) {
                 // Scanner and measurement display
@@ -117,7 +109,7 @@ struct CursiveTestView: View {
                 .frame(width: wordSize.width)
 
                 // The animated cursive text view
-                ZStack(alignment: .trailing) {
+                ZStack(alignment: .leading) {
                     AnimatedCursiveTextView(
                         text: string,
                         fontSize: fontSizeValue,
@@ -130,6 +122,7 @@ struct CursiveTestView: View {
                         variableSpeed: variableSpeed
                     )
                     .id(animationKey)  // Force recreation when key changes
+                    .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
 
                     // Vertical indicators at scanner bounds (overlay on top of animated text)
                     if isDragging {
@@ -148,8 +141,10 @@ struct CursiveTestView: View {
                             .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                     }
                 }
-                .frame(width: wordSize.width + wordPadding * 4, height: wordSize.height + wordPadding * 2)  // Extra width for offset text
-                .border(Color.gray.opacity(0.3))
+                .frame(width: wordSize.width + wordPadding * 4, height: wordSize.height + wordPadding * 2, alignment: .leading)
+                .frame(width: 200, alignment: .leading)
+                .clipped()
+                .border(Color.red.opacity(0.3))
             }
 
 
