@@ -16,6 +16,11 @@ struct AnimatedCursiveTextView: View {
     @State private var maxDrawProgressFrom: CGFloat = 0
     @State private var maxMaskX: CGFloat = 0
     @State private var animationTimer: Timer?
+
+    // Smoothing state for textOffset
+    @State private var smoothedTextOffset: CGFloat = 0
+    @State private var previousTextOffsets: [CGFloat] = []
+    private let smoothingWindowSize = 5
     
     // Configuration parameters
     let text: String
@@ -97,6 +102,23 @@ struct AnimatedCursiveTextView: View {
         }
         return 0
     }
+
+    // Smoothed version of textOffset for animations
+    private func updateSmoothedTextOffset() {
+        let currentOffset = textOffset
+
+        // Add current offset to the window
+        previousTextOffsets.append(currentOffset)
+
+        // Keep only the last N values for smoothing
+        if previousTextOffsets.count > smoothingWindowSize {
+            previousTextOffsets.removeFirst()
+        }
+
+        // Calculate moving average
+        let sum = previousTextOffsets.reduce(0, +)
+        smoothedTextOffset = sum / CGFloat(previousTextOffsets.count)
+    }
     
     var body: some View {
         ZStack {
@@ -108,7 +130,7 @@ struct AnimatedCursiveTextView: View {
                         .trim(from: drawProgressFrom, to: drawProgress)
                         .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height)
-                        .offset(x: textOffset)  // Apply static window offset
+                        .offset(x: smoothedTextOffset)  // Apply smoothed static window offset
                         .mask(
                             // Create a wider mask with more left padding for static window mode
                             LinearGradient(
@@ -136,7 +158,7 @@ struct AnimatedCursiveTextView: View {
                         .trim(from: 0, to: drawProgress)
                         .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height)
-                        .offset(x: textOffset)  // Apply static window offset (will be 0 in normal mode)
+                        .offset(x: smoothedTextOffset)  // Apply smoothed static window offset (will be 0 in normal mode)
                 }
             }
             // The cursive word shape with window mode support
@@ -151,7 +173,7 @@ struct AnimatedCursiveTextView: View {
             animationTimer?.invalidate()
             animationTimer = nil
         }
-        .animation(drawProgress == 0 ? nil : .linear, value: drawProgress)
+
     }
     
     var progressIndicatorView: some View {
@@ -166,7 +188,7 @@ struct AnimatedCursiveTextView: View {
                         .fill(Color.green.opacity(0.7))
                         .frame(width: 2, height: measuredWordSize.height)
                         .position(
-                            x: fromPoint.x + textOffset,
+                            x: fromPoint.x + smoothedTextOffset,
                             y: measuredWordSize.height / 2
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -176,7 +198,7 @@ struct AnimatedCursiveTextView: View {
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: measuredWordSize.height)
                         .position(
-                            x: pipeX + textOffset,
+                            x: pipeX + smoothedTextOffset,
                             y: measuredWordSize.height / 2
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -186,7 +208,7 @@ struct AnimatedCursiveTextView: View {
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: measuredWordSize.height)
                         .position(
-                            x: pipeX + textOffset,
+                            x: pipeX + smoothedTextOffset,
                             y: measuredWordSize.height / 2
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -205,6 +227,10 @@ struct AnimatedCursiveTextView: View {
         maxPipeX = 0
         maxDrawProgressFrom = 0
         maxMaskX = 0
+
+        // Reset smoothing state
+        smoothedTextOffset = 0
+        previousTextOffsets.removeAll()
         
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
@@ -253,7 +279,10 @@ struct AnimatedCursiveTextView: View {
                         self.animationTimer = nil
                         print("Animation complete")
                     }
-                    
+
+                    // Update smoothed text offset during end phase
+                    self.updateSmoothedTextOffset()
+
                     return // Skip normal processing
                 }
                 
@@ -269,43 +298,38 @@ struct AnimatedCursiveTextView: View {
                     self.maxMaskX = toX
                 }
                 
-                // Find the parameter that's windowWidth pixels behind
+                // Find the parameter that's windowWidth pixels behind using interpolation
                 let targetFromX = toX - self.windowWidth
-                
-                // Linear search through samples to find best match
-                var bestFrom: CGFloat = 0
-                var bestDist = CGFloat.infinity
-                
-                for sample in analyzer.samples {
-                    // Only consider samples before current progress and at/before target X
-                    if sample.u <= progress && sample.point.x <= targetFromX {
-                        let dist = abs(sample.point.x - targetFromX)
-                        if dist < bestDist {
-                            bestDist = dist
-                            bestFrom = sample.u
-                        }
-                    }
+
+                // Use the analyzer's built-in method for smoother results
+                let interpolatedFrom = analyzer.parameterAtXPosition(targetFromX)
+
+                // Ensure we don't go beyond current progress and apply monotonic constraint
+                let clampedFrom = min(interpolatedFrom, progress)
+                if clampedFrom > self.maxDrawProgressFrom {
+                    self.maxDrawProgressFrom = clampedFrom
                 }
-                
-                // Apply monotonic constraint
-                if bestFrom > self.maxDrawProgressFrom {
-                    self.maxDrawProgressFrom = bestFrom
-                }
-                
+
                 // Set the from parameter
                 self.drawProgressFrom = self.maxDrawProgressFrom
+
+                // Update smoothed text offset
+                self.updateSmoothedTextOffset()
                 
                 // Debug logging - less frequent
-                if Int(progress * 100) % 10 == 0 {  // Log every 10%
-                    print("Window: progress=\(String(format: "%.2f", progress)), from=\(String(format: "%.2f", self.drawProgressFrom)), toX=\(String(format: "%.1f", toX))")
-                }
+//                if Int(progress * 100) % 10 == 0 {  // Log every 10%
+//                    print("Window: progress=\(String(format: "%.2f", progress)), from=\(String(format: "%.2f", self.drawProgressFrom)), toX=\(String(format: "%.1f", toX))")
+//                }
                 
             } else {
                 // Normal mode: no 'from' trimming
                 self.drawProgress = progress
                 self.drawProgressFrom = 0
                 self.maxDrawProgressFrom = 0
-                
+
+                // Update smoothed text offset (will be 0 in normal mode)
+                self.updateSmoothedTextOffset()
+
                 if progress >= 1.0 {
                     timer.invalidate()
                     self.animationTimer = nil
