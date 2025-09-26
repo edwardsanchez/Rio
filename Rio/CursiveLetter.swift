@@ -298,13 +298,13 @@ struct CursiveWordShape: Shape {
             }
         }
 
-        let finalBounds = positioned.boundingBox
-        let inside = rect.contains(finalBounds)
-        let overflowTop = rect.minY - finalBounds.minY
-        let overflowLeft = rect.minX - finalBounds.minX
-        let overflowBottom = finalBounds.maxY - rect.maxY
-        let overflowRight = finalBounds.maxX - rect.maxX
-        print("CursiveWordShape: rect=\(rect) bounds=\(finalBounds) inside=\(inside) baselineY=\(baselineInRect) dy=\(dy). Overflows (top,left,bottom,right)=\(overflowTop),\(overflowLeft),\(overflowBottom),\(overflowRight)")
+//        let finalBounds = positioned.boundingBox
+//        let inside = rect.contains(finalBounds)
+//        let overflowTop = rect.minY - finalBounds.minY
+//        let overflowLeft = rect.minX - finalBounds.minX
+//        let overflowBottom = finalBounds.maxY - rect.maxY
+//        let overflowRight = finalBounds.maxX - rect.maxX
+//        print("CursiveWordShape: rect=\(rect) bounds=\(finalBounds) inside=\(inside) baselineY=\(baselineInRect) dy=\(dy). Overflows (top,left,bottom,right)=\(overflowTop),\(overflowLeft),\(overflowBottom),\(overflowRight)")
 
         return Path(positioned)
     }
