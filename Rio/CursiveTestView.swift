@@ -243,6 +243,7 @@ struct CursiveTestView: View {
     @State private var animationTimer: Timer?
     @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
     @State private var maxPipeX: CGFloat = 0  // Track the maximum X position reached
+    @State private var showPipe = true  // Toggle to show/hide the red pipe
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -386,15 +387,18 @@ struct CursiveTestView: View {
                             .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                     }
 
-                    // Red pipe that follows based on mode
-                    Rectangle()
-                        .fill(Color.red.opacity(0.7))
-                        .frame(width: 2, height: wordSize.height)
-                        .position(
-                            x: pipeX,
-                            y: wordSize.height / 2
-                        )
-                        .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                    // Red pipe that follows based on mode (only show if enabled)
+                    if showPipe {
+                        Rectangle()
+                            .fill(Color.red.opacity(0.7))
+                            .frame(width: 2, height: wordSize.height)
+                            .position(
+                                x: pipeX,
+                                y: wordSize.height / 2
+                            )
+//                            .animation(pipeX == 0 ? nil : .smooth, value: pipeX)
+                            .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                    }
                 }
                 .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
                 .border(Color.gray.opacity(0.3))
@@ -431,17 +435,26 @@ struct CursiveTestView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(8)
 
-            HStack(spacing: 20) {
-                Button("Restart Animation") {
-                    restartAnimation()
-                }
-
-                Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
-                    .onChange(of: forwardOnlyMode) { _ in
-                        // Reset max when toggling mode
-                        maxPipeX = 0
+            VStack(spacing: 12) {
+                HStack(spacing: 20) {
+                    Button("Restart Animation") {
                         restartAnimation()
                     }
+
+                    Toggle("Show Pipe", isOn: $showPipe)
+                }
+
+                HStack(spacing: 20) {
+                    Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
+                        .disabled(!showPipe)  // Disable if pipe is hidden
+                        .onChange(of: forwardOnlyMode) { _ in
+                            // Reset max when toggling mode
+                            maxPipeX = 0
+                            restartAnimation()
+                        }
+
+                    Spacer()
+                }
             }
             .padding(.top, 8)
 
