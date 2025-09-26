@@ -286,8 +286,9 @@ struct CursiveTestView: View {
     @State private var maxPipeX: CGFloat = 0  // Track the maximum X position reached
     @State private var showPipe = true  // Toggle to show/hide the red pipe
     @State private var windowMode = false  // Toggle for window effect
+    @State private var maxDrawProgressFrom: CGFloat = 0  // Track maximum from parameter for monotonic movement
 
-    private let windowWidth: CGFloat = 30  // Width of the visible window in pixels
+    private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -503,39 +504,63 @@ struct CursiveTestView: View {
             .background(Color.gray.opacity(0.1))
             .cornerRadius(8)
 
-            VStack(spacing: 12) {
-                HStack(spacing: 20) {
-                    Button("Restart Animation") {
-                        restartAnimation()
-                    }
+            VStack(spacing: 16) {
+                // Animation Control
+                Button("Restart Animation") {
+                    restartAnimation()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
 
-                    Toggle("Show Pipe", isOn: $showPipe)
+                Divider()
+
+                // Display Options
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Display Options")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+
+                    Toggle("Show Progress Indicator", isOn: $showPipe)
+
+                    if showPipe && !windowMode {
+                        Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
+                            .padding(.leading, 20)
+                            .onChange(of: forwardOnlyMode) {
+                                maxPipeX = 0
+                                restartAnimation()
+                            }
+                    }
+                }
+
+                Divider()
+
+                // Animation Mode
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Animation Mode")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
 
                     Toggle("Window Mode", isOn: $windowMode)
                         .onChange(of: windowMode) {
                             restartAnimation()
                         }
-                }
-
-                HStack(spacing: 20) {
-                    Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
-                        .disabled(!showPipe || windowMode)  // Disable if pipe is hidden or in window mode
-                        .onChange(of: forwardOnlyMode) {
-                            // Reset max when toggling mode
-                            maxPipeX = 0
-                            restartAnimation()
-                        }
 
                     if windowMode {
-                        Text("Window: \(Int(windowWidth))px")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        HStack {
+                            Text("Window Width:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(windowWidth))px")
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundColor(.primary)
+                        }
+                        .padding(.leading, 20)
                     }
-
-                    Spacer()
                 }
             }
-            .padding(.top, 8)
+            .padding()
+            .background(Color.gray.opacity(0.05))
+            .cornerRadius(8)
 
             Spacer()
         }
@@ -552,10 +577,11 @@ struct CursiveTestView: View {
         // Cancel any existing timer
         animationTimer?.invalidate()
 
-        // Reset progress and max pipe position
+        // Reset progress and max positions
         drawProgress = 0
         drawProgressFrom = 0
         maxPipeX = 0
+        maxDrawProgressFrom = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: string, fontSize: fontSizeValue)
@@ -564,61 +590,92 @@ struct CursiveTestView: View {
 
         // Start animation with timer for continuous updates
         let startTime = Date()
+        var endPhaseStartTime: Date? = nil
+
         animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [self] timer in
 
             let elapsed = Date().timeIntervalSince(startTime)
-            let progress = min(elapsed / self.animationDuration, 1.0)
-
-            // Update the 'to' parameter (linear progression)
-            self.drawProgress = progress
+            var progress = min(elapsed / self.animationDuration, 1.0)
 
             if self.windowMode {
+                // Check if we've reached the end with the red pipe
+                if progress >= 1.0 && self.drawProgressFrom < 1.0 {
+                    // Red pipe has reached the end, now animate green pipe to catch up
+                    if endPhaseStartTime == nil {
+                        endPhaseStartTime = Date()
+                        print("End phase started - animating green pipe to end")
+                    }
+
+                    // Keep red pipe at 1.0
+                    self.drawProgress = 1.0
+
+                    // Animate green pipe from its current position to 1.0
+                    let endElapsed = Date().timeIntervalSince(endPhaseStartTime!)
+                    let endDuration = 0.5 // Half second for green pipe to catch up
+                    let endProgress = min(endElapsed / endDuration, 1.0)
+
+                    // Interpolate from current maxDrawProgressFrom to 1.0
+                    let startFrom = self.maxDrawProgressFrom
+                    self.drawProgressFrom = startFrom + (1.0 - startFrom) * endProgress
+
+                    if self.drawProgressFrom >= 1.0 {
+                        self.drawProgressFrom = 1.0
+                        timer.invalidate()
+                        self.animationTimer = nil
+                        print("Animation complete")
+                    }
+
+                    return // Skip normal processing
+                }
+
+                // Normal animation (before end phase)
+                self.drawProgress = progress
+
                 // Calculate the 'from' parameter to maintain window width
                 let toPoint = analyzer.pointAtParameter(progress)
                 let toX = toPoint.x
 
-                // Get the starting point for reference
-                let startPoint = analyzer.pointAtParameter(0)
-                let startX = startPoint.x
+                // Find the parameter that's windowWidth pixels behind
+                let targetFromX = toX - self.windowWidth
 
-                // Calculate how far we've traveled horizontally
-                let xTraveled = toX - startX
+                // Linear search through samples to find best match
+                var bestFrom: CGFloat = 0
+                var bestDist = CGFloat.infinity
 
-                if xTraveled <= self.windowWidth {
-                    // Ramp-up phase: window is growing from nothing to windowWidth
-                    self.drawProgressFrom = 0
-                } else if progress >= 1.0 {
-                    // At the very end, both should be 1
-                    self.drawProgressFrom = 1.0
-                } else {
-                    // Middle/End phase: maintain window width or shrink at the end
-                    // Find the from parameter that's windowWidth pixels behind the current to position
-                    let targetFromX = toX - self.windowWidth
-
-                    // Search for the best matching parameter
-                    var bestFrom: CGFloat = 0
-                    var minDist = CGFloat.infinity
-
-                    for sample in analyzer.samples {
-                        if sample.u < progress {  // Must be before the 'to' parameter
-                            let dist = abs(sample.point.x - targetFromX)
-                            if dist < minDist {
-                                minDist = dist
-                                bestFrom = sample.u
-                            }
+                for sample in analyzer.samples {
+                    // Only consider samples before current progress and at/before target X
+                    if sample.u <= progress && sample.point.x <= targetFromX {
+                        let dist = abs(sample.point.x - targetFromX)
+                        if dist < bestDist {
+                            bestDist = dist
+                            bestFrom = sample.u
                         }
                     }
-
-                    self.drawProgressFrom = bestFrom
                 }
+
+                // Apply monotonic constraint
+                if bestFrom > self.maxDrawProgressFrom {
+                    self.maxDrawProgressFrom = bestFrom
+                }
+
+                // Set the from parameter
+                self.drawProgressFrom = self.maxDrawProgressFrom
+
+                // Debug logging - less frequent
+                if Int(progress * 100) % 10 == 0 {  // Log every 10%
+                    print("Window: progress=\(String(format: "%.2f", progress)), from=\(String(format: "%.2f", self.drawProgressFrom)), toX=\(String(format: "%.1f", toX))")
+                }
+
             } else {
                 // Normal mode: no 'from' trimming
+                self.drawProgress = progress
                 self.drawProgressFrom = 0
-            }
+                self.maxDrawProgressFrom = 0
 
-            if progress >= 1.0 {
-                timer.invalidate()
-                self.animationTimer = nil
+                if progress >= 1.0 {
+                    timer.invalidate()
+                    self.animationTimer = nil
+                }
             }
         }
     }
