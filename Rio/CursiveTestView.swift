@@ -9,8 +9,193 @@ import SwiftUI
 import SVGPath
 import os.log
 
+// X-parametrized path analyzer
+struct PathXAnalyzer {
+    struct Sample {
+        let u: CGFloat      // Path parameter [0,1]
+        let point: CGPoint  // Point on path
+        let cumulativeX: CGFloat  // Cumulative horizontal distance
+        let cumulativeLength: CGFloat  // Cumulative path length
+    }
+
+    let samples: [Sample]
+    let totalXDistance: CGFloat
+    let totalPathLength: CGFloat
+    let bounds: CGRect
+
+    init(path: CGPath, sampleCount: Int = 400) {
+        var samples: [Sample] = []
+        var cumulativeX: CGFloat = 0
+        var cumulativeLength: CGFloat = 0
+        var previousPoint: CGPoint?
+
+        // Sample the path at regular u intervals
+        for i in 0...sampleCount {
+            let u = CGFloat(i) / CGFloat(sampleCount)
+
+            // Get point at parameter u (we'll approximate this)
+            let point = path.pointAtParameter(u) ?? .zero
+
+            if let prev = previousPoint {
+                // Calculate horizontal and path distances
+                let dx = abs(point.x - prev.x)
+                let pathDist = hypot(point.x - prev.x, point.y - prev.y)
+
+                cumulativeX += dx
+                cumulativeLength += pathDist
+            }
+
+            samples.append(Sample(
+                u: u,
+                point: point,
+                cumulativeX: cumulativeX,
+                cumulativeLength: cumulativeLength
+            ))
+
+            previousPoint = point
+        }
+
+        self.samples = samples
+        self.totalXDistance = cumulativeX
+        self.totalPathLength = cumulativeLength
+        self.bounds = path.boundingBox
+    }
+
+    // Get path length between two x positions
+    func pathLengthBetweenX(from startX: CGFloat, to endX: CGFloat) -> CGFloat {
+        // Find samples at or near the x positions
+        let startSample = sampleAtX(startX)
+        let endSample = sampleAtX(endX)
+
+        return abs(endSample.cumulativeLength - startSample.cumulativeLength)
+    }
+
+    // Find the sample closest to a given x position
+    private func sampleAtX(_ targetX: CGFloat) -> Sample {
+        // Binary search for the closest x position
+        var bestSample = samples[0]
+        var minDist = CGFloat.infinity
+
+        for sample in samples {
+            let dist = abs(sample.point.x - targetX)
+            if dist < minDist {
+                minDist = dist
+                bestSample = sample
+            }
+        }
+
+        return bestSample
+    }
+
+    // Get parameter u for a given x-distance traveled
+    func parameterAtXDistance(_ xDist: CGFloat) -> CGFloat {
+        guard xDist >= 0 else { return 0 }
+        guard xDist < totalXDistance else { return 1 }
+
+        // Binary search through samples
+        var low = 0
+        var high = samples.count - 1
+
+        while low < high {
+            let mid = (low + high) / 2
+            if samples[mid].cumulativeX < xDist {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+
+        // Interpolate between samples
+        if low > 0 {
+            let s1 = samples[low - 1]
+            let s2 = samples[low]
+            let t = (xDist - s1.cumulativeX) / max(0.001, s2.cumulativeX - s1.cumulativeX)
+            return s1.u + t * (s2.u - s1.u)
+        }
+
+        return samples[low].u
+    }
+}
+
+// Extension to approximate point at parameter
+extension CGPath {
+    func pointAtParameter(_ t: CGFloat) -> CGPoint? {
+        // Build a list of path segments with their lengths
+        var segments: [(start: CGPoint, end: CGPoint, length: CGFloat)] = []
+        var totalLength: CGFloat = 0
+        var currentPoint = CGPoint.zero
+        var firstPoint = CGPoint.zero
+
+        self.applyWithBlock { element in
+            switch element.pointee.type {
+            case .moveToPoint:
+                currentPoint = element.pointee.points[0]
+                firstPoint = currentPoint
+
+            case .addLineToPoint:
+                let endPoint = element.pointee.points[0]
+                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y)
+                segments.append((start: currentPoint, end: endPoint, length: length))
+                totalLength += length
+                currentPoint = endPoint
+
+            case .addQuadCurveToPoint:
+                // Approximate quad curve with line segment
+                let endPoint = element.pointee.points[1]
+                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y) * 1.2
+                segments.append((start: currentPoint, end: endPoint, length: length))
+                totalLength += length
+                currentPoint = endPoint
+
+            case .addCurveToPoint:
+                // Approximate cubic curve with line segment
+                let endPoint = element.pointee.points[2]
+                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y) * 1.3
+                segments.append((start: currentPoint, end: endPoint, length: length))
+                totalLength += length
+                currentPoint = endPoint
+
+            case .closeSubpath:
+                if currentPoint != firstPoint {
+                    let length = hypot(firstPoint.x - currentPoint.x, firstPoint.y - currentPoint.y)
+                    segments.append((start: currentPoint, end: firstPoint, length: length))
+                    totalLength += length
+                    currentPoint = firstPoint
+                }
+
+            @unknown default:
+                break
+            }
+        }
+
+        guard totalLength > 0 && !segments.isEmpty else { return nil }
+
+        // Find the point at parameter t
+        let targetLength = t * totalLength
+        var accumulatedLength: CGFloat = 0
+
+        for segment in segments {
+            if accumulatedLength + segment.length >= targetLength {
+                // This segment contains our target point
+                let segmentT = (targetLength - accumulatedLength) / segment.length
+                return CGPoint(
+                    x: segment.start.x + (segment.end.x - segment.start.x) * segmentT,
+                    y: segment.start.y + (segment.end.y - segment.start.y) * segmentT
+                )
+            }
+            accumulatedLength += segment.length
+        }
+
+        // Return last point if we've gone past the end
+        return segments.last?.end ?? currentPoint
+    }
+}
+
 struct CursiveTestView: View {
     @State private var drawProgress: CGFloat = 0
+    @State private var scannerOffset: CGFloat = 50  // Actual offset in points
+    @State private var isDragging = false
+    @State private var dragStartOffset: CGFloat = 0  // Track initial offset when drag starts
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -18,8 +203,8 @@ struct CursiveTestView: View {
 
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
 
-    let string: String = "Hello this is a test for the cursive font"
-    let size: Double = 13
+    let string: String = "hello how are you"
+    let size: Double = 20
 
     private let wordPadding: CGFloat = 12
     private var fontSizeValue: CGFloat { CGFloat(size) }
@@ -28,43 +213,162 @@ struct CursiveTestView: View {
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
     }
 
+    private let scannerWidth: CGFloat = 50  // Width of the scanning rectangle - narrower for more range
+
     var body: some View {
         let fontSize = fontSizeValue
         let wordSize = measuredWordSize
 
-        return VStack {
-            Text("Cursive hello")
-                .font(.title)
-                .padding()
+        // Create path analyzer
+        let shape = CursiveWordShape(text: string, fontSize: fontSize)
+        let path = shape.path(in: CGRect(origin: .zero, size: wordSize))
+        let analyzer = PathXAnalyzer(path: path.cgPath)
 
-            Text(string)
-                .font(.system(size: fontSize))
+        // Clamp scanner position to valid range
+        let maxOffset = max(0, wordSize.width - scannerWidth)
+        let clampedOffset = min(max(0, scannerOffset), maxOffset)
 
-            ZStack {
-                Rectangle().fill(Color.gray.opacity(0.08))
+        // Calculate path length between scanner bounds
+        let pathLength = analyzer.pathLengthBetweenX(
+            from: clampedOffset,
+            to: clampedOffset + scannerWidth
+        )
 
-                // The cursive word shape
-                CursiveWordShape(text: string, fontSize: fontSize)
-                    .trim(from: 0, to: drawProgress)
-                    .stroke(Color.blue, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                    .frame(width: wordSize.width, height: wordSize.height)
+        return VStack(spacing: 20) {
+            Text("X-Parametrized Path Scanner")
+                .font(.title2)
+                .padding(.top)
 
-                // The vertical line (pipe) that travels horizontally
-                Rectangle()
-                    .fill(Color.red)
-                    .frame(width: 2, height: wordSize.height)
-                    .position(
-                        x: drawProgress * wordSize.width,
-                        y: wordSize.height / 2
+            Text("Drag the scanner to measure path length")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            // Main visualization area
+            VStack(spacing: 0) {
+                // Scanner and measurement display
+                ZStack(alignment: .topLeading) {
+                    // Invisible spacer for layout
+                    Color.clear
+                        .frame(height: 60)
+
+                    // Scanner rectangle with measurement
+                    VStack(spacing: 4) {
+                        // Path length display
+                        Text(String(format: "%.1f px", pathLength))
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.8))
+                            .cornerRadius(4)
+
+                        // Scanner rectangle
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.blue.opacity(0.2))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(Color.blue, lineWidth: 2)
+                            )
+                            .frame(width: scannerWidth, height: 30)
+                    }
+                    .offset(x: clampedOffset)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                if !isDragging {
+                                    isDragging = true
+                                    dragStartOffset = scannerOffset
+                                }
+                                let newOffset = dragStartOffset + value.translation.width
+                                let maxOffset = max(0, wordSize.width - scannerWidth)
+                                scannerOffset = min(max(0, newOffset), maxOffset)
+                            }
+                            .onEnded { _ in
+                                isDragging = false
+                            }
                     )
-                    .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
-            }
-            .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
-            .border(Color.red.opacity(0.4))
-            .padding()
+                }
+                .frame(width: wordSize.width)
 
-            Button("Restart Animation") {
-                restartAnimation()
+                // The cursive word
+                ZStack {
+                    Rectangle().fill(Color.gray.opacity(0.08))
+
+                    // The cursive word shape
+                    CursiveWordShape(text: string, fontSize: fontSize)
+                        .trim(from: 0, to: drawProgress)
+                        .stroke(Color.blue, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
+                        .frame(width: wordSize.width, height: wordSize.height)
+
+                    // Vertical indicators at scanner bounds
+                    if isDragging {
+                        // Left edge indicator
+                        Rectangle()
+                            .fill(Color.green.opacity(0.5))
+                            .frame(width: 1, height: wordSize.height)
+                            .position(x: clampedOffset, y: wordSize.height / 2)
+                            .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+
+                        // Right edge indicator
+                        Rectangle()
+                            .fill(Color.green.opacity(0.5))
+                            .frame(width: 1, height: wordSize.height)
+                            .position(x: clampedOffset + scannerWidth, y: wordSize.height / 2)
+                            .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                    }
+
+                    // X-parametrized progress line
+                    Rectangle()
+                        .fill(Color.red.opacity(0.7))
+                        .frame(width: 2, height: wordSize.height)
+                        .position(
+                            x: analyzer.parameterAtXDistance(drawProgress * analyzer.totalXDistance) * wordSize.width,
+                            y: wordSize.height / 2
+                        )
+                        .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                }
+                .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
+                .border(Color.gray.opacity(0.3))
+            }
+
+
+            // Info display
+            HStack(spacing: 30) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Total Width:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%.0f px", wordSize.width))
+                        .font(.system(.body, design: .monospaced))
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Total Path Length:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%.0f px", analyzer.totalPathLength))
+                        .font(.system(.body, design: .monospaced))
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Scanner Width:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%.0f px", scannerWidth))
+                        .font(.system(.body, design: .monospaced))
+                }
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+
+            HStack(spacing: 20) {
+                Button("Restart Animation") {
+                    restartAnimation()
+                }
+
+                Toggle("X-Parametrized", isOn: .constant(true))
+                    .disabled(true)
             }
             .padding(.top, 8)
 
