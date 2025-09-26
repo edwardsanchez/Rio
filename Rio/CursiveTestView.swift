@@ -150,6 +150,46 @@ struct PathXAnalyzer {
 
         return samples[low].point
     }
+
+    // Find the parameter that corresponds to a given X position
+    func parameterAtXPosition(_ targetX: CGFloat) -> CGFloat {
+        // Find the closest sample to the target X
+        var bestU: CGFloat = 0
+        var minDist = CGFloat.infinity
+
+        for sample in samples {
+            let dist = abs(sample.point.x - targetX)
+            if dist < minDist {
+                minDist = dist
+                bestU = sample.u
+            }
+        }
+
+        return bestU
+    }
+
+    // Find the parameter that is a certain X distance before another parameter
+    func parameterXPixelsBefore(endParameter: CGFloat, xDistance: CGFloat) -> CGFloat {
+        let endPoint = pointAtParameter(endParameter)
+        let targetX = endPoint.x - xDistance
+
+        // Find the parameter that best matches this X position
+        // But ensure it's not greater than endParameter
+        var bestU: CGFloat = 0
+        var minDist = CGFloat.infinity
+
+        for sample in samples {
+            if sample.u <= endParameter {
+                let dist = abs(sample.point.x - targetX)
+                if dist < minDist {
+                    minDist = dist
+                    bestU = sample.u
+                }
+            }
+        }
+
+        return bestU
+    }
 }
 
 // Extension to get the end point of a trimmed path
@@ -237,6 +277,7 @@ extension CGPath {
 
 struct CursiveTestView: View {
     @State private var drawProgress: CGFloat = 0
+    @State private var drawProgressFrom: CGFloat = 0  // For window mode: trim from parameter
     @State private var scannerOffset: CGFloat = 50  // Actual offset in points
     @State private var isDragging = false
     @State private var dragStartOffset: CGFloat = 0  // Track initial offset when drag starts
@@ -244,6 +285,9 @@ struct CursiveTestView: View {
     @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
     @State private var maxPipeX: CGFloat = 0  // Track the maximum X position reached
     @State private var showPipe = true  // Toggle to show/hide the red pipe
+    @State private var windowMode = false  // Toggle for window effect
+
+    private let windowWidth: CGFloat = 30  // Width of the visible window in pixels
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -364,9 +408,9 @@ struct CursiveTestView: View {
                 ZStack {
                     Rectangle().fill(Color.gray.opacity(0.08))
 
-                    // The cursive word shape
+                    // The cursive word shape with window mode support
                     CursiveWordShape(text: string, fontSize: fontSize)
-                        .trim(from: 0, to: drawProgress)
+                        .trim(from: windowMode ? drawProgressFrom : 0, to: drawProgress)
                         .stroke(Color.blue, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
                         .frame(width: wordSize.width, height: wordSize.height)
 
@@ -387,17 +431,41 @@ struct CursiveTestView: View {
                             .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                     }
 
-                    // Red pipe that follows based on mode (only show if enabled)
+                    // Red pipes that follow based on mode (only show if enabled)
                     if showPipe {
-                        Rectangle()
-                            .fill(Color.red.opacity(0.7))
-                            .frame(width: 2, height: wordSize.height)
-                            .position(
-                                x: pipeX,
-                                y: wordSize.height / 2
-                            )
-//                            .animation(pipeX == 0 ? nil : .smooth, value: pipeX)
-                            .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                        if windowMode {
+                            // Window mode: show two pipes (left and right edges)
+                            // Left pipe (trim from position)
+                            let fromPoint = analyzer.pointAtParameter(drawProgressFrom)
+                            Rectangle()
+                                .fill(Color.green.opacity(0.7))
+                                .frame(width: 2, height: wordSize.height)
+                                .position(
+                                    x: fromPoint.x,
+                                    y: wordSize.height / 2
+                                )
+                                .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+
+                            // Right pipe (trim to position)
+                            Rectangle()
+                                .fill(Color.red.opacity(0.7))
+                                .frame(width: 2, height: wordSize.height)
+                                .position(
+                                    x: pipeX,
+                                    y: wordSize.height / 2
+                                )
+                                .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                        } else {
+                            // Normal mode: single pipe
+                            Rectangle()
+                                .fill(Color.red.opacity(0.7))
+                                .frame(width: 2, height: wordSize.height)
+                                .position(
+                                    x: pipeX,
+                                    y: wordSize.height / 2
+                                )
+                                .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
+                        }
                     }
                 }
                 .frame(width: wordSize.width + wordPadding * 2, height: wordSize.height + wordPadding * 2)
@@ -442,16 +510,27 @@ struct CursiveTestView: View {
                     }
 
                     Toggle("Show Pipe", isOn: $showPipe)
+
+                    Toggle("Window Mode", isOn: $windowMode)
+                        .onChange(of: windowMode) {
+                            restartAnimation()
+                        }
                 }
 
                 HStack(spacing: 20) {
                     Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
-                        .disabled(!showPipe)  // Disable if pipe is hidden
-                        .onChange(of: forwardOnlyMode) { _ in
+                        .disabled(!showPipe || windowMode)  // Disable if pipe is hidden or in window mode
+                        .onChange(of: forwardOnlyMode) {
                             // Reset max when toggling mode
                             maxPipeX = 0
                             restartAnimation()
                         }
+
+                    if windowMode {
+                        Text("Window: \(Int(windowWidth))px")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
 
                     Spacer()
                 }
@@ -475,19 +554,71 @@ struct CursiveTestView: View {
 
         // Reset progress and max pipe position
         drawProgress = 0
+        drawProgressFrom = 0
         maxPipeX = 0
+
+        // Get path analyzer for window calculations
+        let shape = CursiveWordShape(text: string, fontSize: fontSizeValue)
+        let path = shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
+        let analyzer = PathXAnalyzer(path: path.cgPath)
 
         // Start animation with timer for continuous updates
         let startTime = Date()
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { timer in
-            let elapsed = Date().timeIntervalSince(startTime)
-            let progress = min(elapsed / animationDuration, 1.0)
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [self] timer in
 
-            drawProgress = progress
+            let elapsed = Date().timeIntervalSince(startTime)
+            let progress = min(elapsed / self.animationDuration, 1.0)
+
+            // Update the 'to' parameter (linear progression)
+            self.drawProgress = progress
+
+            if self.windowMode {
+                // Calculate the 'from' parameter to maintain window width
+                let toPoint = analyzer.pointAtParameter(progress)
+                let toX = toPoint.x
+
+                // Get the starting point for reference
+                let startPoint = analyzer.pointAtParameter(0)
+                let startX = startPoint.x
+
+                // Calculate how far we've traveled horizontally
+                let xTraveled = toX - startX
+
+                if xTraveled <= self.windowWidth {
+                    // Ramp-up phase: window is growing from nothing to windowWidth
+                    self.drawProgressFrom = 0
+                } else if progress >= 1.0 {
+                    // At the very end, both should be 1
+                    self.drawProgressFrom = 1.0
+                } else {
+                    // Middle/End phase: maintain window width or shrink at the end
+                    // Find the from parameter that's windowWidth pixels behind the current to position
+                    let targetFromX = toX - self.windowWidth
+
+                    // Search for the best matching parameter
+                    var bestFrom: CGFloat = 0
+                    var minDist = CGFloat.infinity
+
+                    for sample in analyzer.samples {
+                        if sample.u < progress {  // Must be before the 'to' parameter
+                            let dist = abs(sample.point.x - targetFromX)
+                            if dist < minDist {
+                                minDist = dist
+                                bestFrom = sample.u
+                            }
+                        }
+                    }
+
+                    self.drawProgressFrom = bestFrom
+                }
+            } else {
+                // Normal mode: no 'from' trimming
+                self.drawProgressFrom = 0
+            }
 
             if progress >= 1.0 {
                 timer.invalidate()
-                animationTimer = nil
+                self.animationTimer = nil
             }
         }
     }
