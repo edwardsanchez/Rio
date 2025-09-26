@@ -241,6 +241,8 @@ struct CursiveTestView: View {
     @State private var isDragging = false
     @State private var dragStartOffset: CGFloat = 0  // Track initial offset when drag starts
     @State private var animationTimer: Timer?
+    @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
+    @State private var maxPipeX: CGFloat = 0  // Track the maximum X position reached
 
     var animationDuration: Double {
         Double(string.count) / 8
@@ -281,6 +283,25 @@ struct CursiveTestView: View {
 
         // Get the actual end point of the trimmed path
         let trimEndPoint = analyzer.pointAtParameter(drawProgress)
+
+        // Calculate pipe X position based on mode
+        let pipeX: CGFloat = {
+            if forwardOnlyMode {
+                // Forward-only mode: only increase, never decrease
+                let currentX = trimEndPoint.x
+                if currentX > maxPipeX {
+                    // Update max if we've moved forward
+                    DispatchQueue.main.async {
+                        maxPipeX = currentX
+                    }
+                    return currentX
+                }
+                return maxPipeX
+            } else {
+                // Normal mode: follow the actual trim end point
+                return trimEndPoint.x
+            }
+        }()
 
         return VStack(spacing: 20) {
             Text("X-Parametrized Path Scanner")
@@ -365,12 +386,12 @@ struct CursiveTestView: View {
                             .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
                     }
 
-                    // Red pipe that follows the actual trim end point
+                    // Red pipe that follows based on mode
                     Rectangle()
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: wordSize.height)
                         .position(
-                            x: trimEndPoint.x,
+                            x: pipeX,
                             y: wordSize.height / 2
                         )
                         .frame(width: wordSize.width, height: wordSize.height, alignment: .leading)
@@ -415,8 +436,12 @@ struct CursiveTestView: View {
                     restartAnimation()
                 }
 
-                Toggle("X-Parametrized", isOn: .constant(true))
-                    .disabled(true)
+                Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
+                    .onChange(of: forwardOnlyMode) { _ in
+                        // Reset max when toggling mode
+                        maxPipeX = 0
+                        restartAnimation()
+                    }
             }
             .padding(.top, 8)
 
@@ -435,8 +460,9 @@ struct CursiveTestView: View {
         // Cancel any existing timer
         animationTimer?.invalidate()
 
-        // Reset progress
+        // Reset progress and max pipe position
         drawProgress = 0
+        maxPipeX = 0
 
         // Start animation with timer for continuous updates
         let startTime = Date()
