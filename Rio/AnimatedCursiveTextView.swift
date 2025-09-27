@@ -14,7 +14,6 @@ struct AnimatedCursiveTextView: View {
     @State private var drawProgressFrom: CGFloat = 0
     @State private var maxPipeX: CGFloat = 0
     @State private var maxDrawProgressFrom: CGFloat = 0
-    @State private var maxMaskX: CGFloat = 0
     @State private var animationTimer: Timer?
 
     // Smoothing state for textOffset
@@ -26,8 +25,7 @@ struct AnimatedCursiveTextView: View {
     let text: String
     let fontSize: CGFloat
     let animationDuration: Double
-    let windowMode: Bool
-    let staticWindow: Bool
+    let staticMode: Bool
     let showProgressIndicator: Bool
     let forwardOnlyMode: Bool
     let windowWidth: CGFloat
@@ -44,8 +42,7 @@ struct AnimatedCursiveTextView: View {
         text: String,
         fontSize: CGFloat = 20,
         animationDuration: Double? = nil,
-        windowMode: Bool = true,
-        staticWindow: Bool = true,
+        staticMode: Bool = true,
         showProgressIndicator: Bool = false,
         forwardOnlyMode: Bool = false,
         windowWidth: CGFloat = 50,
@@ -54,8 +51,7 @@ struct AnimatedCursiveTextView: View {
         self.text = text
         self.fontSize = fontSize
         self.animationDuration = animationDuration ?? Double(text.count) / 3
-        self.windowMode = windowMode
-        self.staticWindow = staticWindow
+        self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
         self.forwardOnlyMode = forwardOnlyMode
         self.windowWidth = windowWidth
@@ -79,7 +75,7 @@ struct AnimatedCursiveTextView: View {
     }
     
     var pipeX: CGFloat {
-        if forwardOnlyMode && !windowMode {
+        if forwardOnlyMode && !staticMode {
             // Forward-only mode: only increase, never decrease
             let currentX = trimEndPoint.x
             if currentX > maxPipeX {
@@ -97,17 +93,26 @@ struct AnimatedCursiveTextView: View {
     }
     
     var textOffset: CGFloat {
-        if windowMode && staticWindow && maxDrawProgressFrom > 0 {
-            // For static window, we want the window to appear at the start of the text
-            let textStartX = analyzer.bounds.minX  // Start of the text
-            let desiredWindowX = textStartX + windowWidth  // Back to original position
-            return desiredWindowX - maxMaskX
-        }
-        return 0
+        guard staticMode else { return 0 }
+        guard windowWidth > 0 else { return 0 }
+
+        let effectiveWidth = min(windowWidth, measuredWordSize.width)
+        let headX = trimEndPoint.x
+        let overshoot = headX - effectiveWidth
+        guard overshoot > 0 else { return 0 }
+
+        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
+        return -min(overshoot, maxShift)
     }
 
     // Smoothed version of textOffset for animations
     private func updateSmoothedTextOffset() {
+        guard staticMode else {
+            smoothedTextOffset = 0
+            previousTextOffsets.removeAll()
+            return
+        }
+
         let currentOffset = textOffset
 
         // Add current offset to the window
@@ -162,46 +167,18 @@ struct AnimatedCursiveTextView: View {
     
     var body: some View {
         ZStack(alignment: .leading) {
-            Group {
-                if windowMode {
-                    // Window mode: apply gradient mask to the green stroke
-                    // Green stroke layer with gradient mask
-                    CursiveWordShape(text: text, fontSize: fontSize)
-                        .trim(from: drawProgressFrom, to: drawProgress)
-                        .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                        .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
-                        .offset(x: smoothedTextOffset)  // Apply smoothed static window offset
-                        .mask(
-                            // Create a wider mask with more left padding for static window mode
-                            LinearGradient(
-                                gradient: Gradient(stops: [
-                                    // Left edge: fade from transparent to opaque
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .black, location: staticWindow ? 20/60 : 10/40),  // Even more left padding in static mode
-                                    // Right portion: fully opaque
-                                        .init(color: .black, location: 1)
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                            .frame(width: staticWindow ? 60 : 40, height: measuredWordSize.height * 1.5)  // Even wider mask in static mode
-                            // Position the mask: static in static window mode, moving otherwise
-                                .position(
-                                    x: staticWindow ? (analyzer.bounds.minX + windowWidth - 30) : maxMaskX - 20,  // Center of wider mask
-                                    y: measuredWordSize.height / 2
-                                )
-                                .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
-                        )
-                } else {
-                    // Normal mode: single blue stroke
-                    CursiveWordShape(text: text, fontSize: fontSize)
-                        .trim(from: 0, to: drawProgress)
-                        .stroke(Color.secondary, style: StrokeStyle(lineWidth: fontSizeValue / 15, lineCap: .round, lineJoin: .round))
-                        .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
-                        .offset(x: smoothedTextOffset)  // Apply smoothed static window offset (will be 0 in normal mode)
-                }
-            }
-            // The cursive word shape with window mode support
+            CursiveWordShape(text: text, fontSize: fontSize)
+                .trim(from: staticMode ? drawProgressFrom : 0, to: drawProgress)
+                .stroke(
+                    Color.secondary,
+                    style: StrokeStyle(
+                        lineWidth: fontSizeValue / 15,
+                        lineCap: .round,
+                        lineJoin: .round
+                    )
+                )
+                .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
+                .offset(x: staticMode ? smoothedTextOffset : 0)
 
             progressIndicatorView
         }
@@ -214,16 +191,12 @@ struct AnimatedCursiveTextView: View {
             animationTimer?.invalidate()
             animationTimer = nil
         }
-
     }
-    
+
     var progressIndicatorView: some View {
-        return Group {
-            // Red pipes that follow based on mode (only show if enabled)
+        Group {
             if showProgressIndicator {
-                if windowMode {
-                    // Window mode: show two pipes (left and right edges)
-                    // Left pipe (trim from position)
+                if staticMode {
                     let fromPoint = analyzer.pointAtParameter(drawProgressFrom)
                     Rectangle()
                         .fill(Color.green.opacity(0.7))
@@ -233,8 +206,7 @@ struct AnimatedCursiveTextView: View {
                             y: measuredWordSize.height / 2
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
-                    
-                    // Right pipe (trim to position)
+
                     Rectangle()
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: measuredWordSize.height)
@@ -244,12 +216,11 @@ struct AnimatedCursiveTextView: View {
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
                 } else {
-                    // Normal mode: single pipe
                     Rectangle()
                         .fill(Color.red.opacity(0.7))
                         .frame(width: 2, height: measuredWordSize.height)
                         .position(
-                            x: pipeX + smoothedTextOffset,
+                            x: pipeX,
                             y: measuredWordSize.height / 2
                         )
                         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -257,7 +228,7 @@ struct AnimatedCursiveTextView: View {
             }
         }
     }
-    
+
     func restartAnimation() {
         // Cancel any existing timer
         animationTimer?.invalidate()
@@ -267,7 +238,6 @@ struct AnimatedCursiveTextView: View {
         drawProgressFrom = 0
         maxPipeX = 0
         maxDrawProgressFrom = 0
-        maxMaskX = 0
 
         // Reset smoothing state
         smoothedTextOffset = 0
@@ -287,90 +257,59 @@ struct AnimatedCursiveTextView: View {
             let elapsed = Date().timeIntervalSince(startTime)
             let progress = min(elapsed / self.animationDuration, 1.0)
             
-            if self.windowMode {
+            if self.staticMode {
                 // Check if we've reached the end with the red pipe
                 if progress >= 1.0 && self.drawProgressFrom < 1.0 {
-                    // Red pipe has reached the end, now animate green pipe to catch up
                     if endPhaseStartTime == nil {
                         endPhaseStartTime = Date()
-                        print("End phase started - animating green pipe to end")
                     }
-                    
-                    // Keep red pipe at 1.0
+
                     self.drawProgress = 1.0
-                    
-                    // During end phase, mask should stay at the final position
-                    let finalPoint = analyzer.pointAtParameter(1.0)
-                    if finalPoint.x > self.maxMaskX {
-                        self.maxMaskX = finalPoint.x
-                    }
-                    
-                    // Animate green pipe from its current position to 1.0
+
                     let endElapsed = Date().timeIntervalSince(endPhaseStartTime!)
-                    let endDuration = 0.5 // Half second for green pipe to catch up
+                    let endDuration = 0.5
                     let endProgress = min(endElapsed / endDuration, 1.0)
-                    
-                    // Interpolate from current maxDrawProgressFrom to 1.0
+
                     let startFrom = self.maxDrawProgressFrom
                     self.drawProgressFrom = startFrom + (1.0 - startFrom) * endProgress
-                    
+
+                    self.updateSmoothedTextOffset()
+
                     if self.drawProgressFrom >= 1.0 {
                         self.drawProgressFrom = 1.0
                         timer.invalidate()
                         self.animationTimer = nil
-                        print("Animation complete")
                     }
 
-                    // Update smoothed text offset during end phase
-                    self.updateSmoothedTextOffset()
-
-                    return // Skip normal processing
+                    return
                 }
-                
-                // Normal animation (before end phase)
+
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
-                
-                // Calculate the 'from' parameter to maintain window width
-                let toPoint = analyzer.pointAtParameter(adjustedProgress)
-                let toX = toPoint.x
-                
-                // Update mask position (forward-only movement)
-                if toX > self.maxMaskX {
-                    self.maxMaskX = toX
-                }
-                
-                // Find the parameter that's windowWidth pixels behind using interpolation
-                let targetFromX = toX - self.windowWidth
 
-                // Use the analyzer's built-in method for smoother results
-                let interpolatedFrom = analyzer.parameterAtXPosition(targetFromX)
-
-                // Ensure we don't go beyond current progress and apply monotonic constraint
-                let clampedFrom = min(interpolatedFrom, adjustedProgress)
-                if clampedFrom > self.maxDrawProgressFrom {
-                    self.maxDrawProgressFrom = clampedFrom
+                if self.windowWidth > 0 {
+                    let effectiveWidth = min(self.windowWidth, analyzer.bounds.width)
+                    let windowStart = analyzer.parameterXPixelsBefore(
+                        endParameter: adjustedProgress,
+                        xDistance: effectiveWidth
+                    )
+                    let clampedFrom = min(windowStart, adjustedProgress)
+                    if clampedFrom > self.maxDrawProgressFrom {
+                        self.maxDrawProgressFrom = clampedFrom
+                    }
+                    self.drawProgressFrom = self.maxDrawProgressFrom
+                } else {
+                    self.drawProgressFrom = 0
+                    self.maxDrawProgressFrom = 0
                 }
 
-                // Set the from parameter
-                self.drawProgressFrom = self.maxDrawProgressFrom
-
-                // Update smoothed text offset
                 self.updateSmoothedTextOffset()
-                
-                // Debug logging - less frequent
-//                if Int(progress * 100) % 10 == 0 {  // Log every 10%
-//                    print("Window: progress=\(String(format: "%.2f", progress)), from=\(String(format: "%.2f", self.drawProgressFrom)), toX=\(String(format: "%.1f", toX))")
-//                }
-                
             } else {
-                // Normal mode: no 'from' trimming
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
                 self.drawProgressFrom = 0
                 self.maxDrawProgressFrom = 0
 
-                // Update smoothed text offset (will be 0 in normal mode)
                 self.updateSmoothedTextOffset()
 
                 if progress >= 1.0 {

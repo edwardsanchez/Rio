@@ -17,9 +17,8 @@ struct CursiveTestView: View {
 
     // UI toggle state
     @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
-    @State private var showPipe = true  // Toggle to show/hide the red pipe
-    @State private var windowMode = false  // Toggle for window effect
-    @State private var staticWindow = false  // Toggle for static window effect (window stays in place, text scrolls)
+    @State private var showPipe = false  // Toggle to show/hide the progress indicator
+    @State private var staticMode = true  // Toggle for static window effect (window stays in place, text scrolls)
     @State private var variableSpeed = true  // Toggle for variable speed animation
 
     // Animation restart trigger
@@ -114,8 +113,7 @@ struct CursiveTestView: View {
                         text: string,
                         fontSize: fontSizeValue,
                         animationDuration: nil,
-                        windowMode: windowMode,
-                        staticWindow: staticWindow,
+                        staticMode: staticMode,
                         showProgressIndicator: showPipe,
                         forwardOnlyMode: forwardOnlyMode,
                         windowWidth: windowWidth,
@@ -196,7 +194,7 @@ struct CursiveTestView: View {
 
                     Toggle("Show Progress Indicator", isOn: $showPipe)
 
-                    if showPipe && !windowMode {
+                    if showPipe && !staticMode {
                         Toggle("Forward-Only Mode", isOn: $forwardOnlyMode)
                             .padding(.leading, 20)
                             .onChange(of: forwardOnlyMode) {
@@ -213,19 +211,12 @@ struct CursiveTestView: View {
                         .font(.headline)
                         .foregroundColor(.secondary)
 
-                    Toggle("Window Mode", isOn: $windowMode)
-                        .onChange(of: windowMode) {
-                            staticWindow = false  // Reset static window when window mode is toggled
+                    Toggle("Static Window Mode", isOn: $staticMode)
+                        .onChange(of: staticMode) {
                             animationKey += 1  // Restart animation when mode changes
                         }
 
-                    if windowMode {
-                        Toggle("Static Window", isOn: $staticWindow)
-                            .padding(.leading, 20)
-                            .onChange(of: staticWindow) {
-                                animationKey += 1  // Restart animation when mode changes
-                            }
-
+                    if staticMode {
                         HStack {
                             Text("Window Width:")
                                 .font(.caption)
