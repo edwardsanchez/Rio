@@ -136,31 +136,32 @@ struct ChatDetailView: View {
             currentTypingIndicatorId = nil
         }
     }
-    //TODO: If you type a message after someone already started typing, the response should always come AFTER you message.
     var inputField: some View {
         HStack {
-            TextField("Message", text: $message, axis: .vertical)
-                .lineLimit(1...5) // Allow 1 to 5 lines
-                .padding(15)
-                .background {
-                    Color.clear
-                        .onGeometryChange(for: CGRect.self) { proxy in
-                            proxy.frame(in: .global)
-                        } action: { newValue in
-                            inputFieldFrame = newValue
-                            // Update input field height for dynamic spacing
-                            inputFieldHeight = newValue.height
-                        }
-                }
-                .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
-                .focused($isMessageFieldFocused)
-                .onSubmit {
-                    sendMessage()
-                }
-                .submitLabel(.send)
-                .overlay(alignment: .bottomTrailing) { //TODO: make the bottom alignment dynamic base don the length of the message.
-                    sendButton
-                }
+            HStack(alignment: .bottom) {
+                TextField("Message", text: $message, axis: .vertical)
+                    .lineLimit(1...5) // Allow 1 to 5 lines
+                    .padding([.vertical, .leading], 15)
+                    .background {
+                        Color.clear
+                            .onGeometryChange(for: CGRect.self) { proxy in
+                                proxy.frame(in: .global)
+                            } action: { newValue in
+                                inputFieldFrame = newValue
+                                // Update input field height for dynamic spacing
+                                inputFieldHeight = newValue.height
+                            }
+                    }
+                    .focused($isMessageFieldFocused)
+                    .onSubmit {
+                        sendMessage()
+                    }
+                    .submitLabel(.send)
+
+                sendButton
+                    .padding(.bottom, 5)
+            }
+            .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
         }
         .padding(.horizontal, 30)
         .padding(.top, 15)
@@ -212,7 +213,6 @@ struct ChatDetailView: View {
         .opacity(isEmpty ? 0 : 1)
         .scaleEffect(isEmpty ? 0.9  : 1)
         .animation(.smooth(duration: 0.2), value: isEmpty)
-        .padding(.bottom, 5)
     }
 
     // MARK: - Message Sending
