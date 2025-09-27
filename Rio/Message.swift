@@ -298,9 +298,11 @@ struct MessageBubble: View {
         }
     }
     
-    var repeatedString: String {
-        let baseString = "mmmumunumluremeermunneulmuemlemmmleemmrmu"
-        return String(repeating: baseString, count: 5)
+    var randomMNuerString: String {
+        let length = 100
+        var rng = SystemRandomNumberGenerator()
+        let alphabet = "mnluew"
+        return String((0..<length).map { _ in alphabet.randomElement(using: &rng)! })
     }
     
     @ViewBuilder
@@ -319,12 +321,11 @@ struct MessageBubble: View {
             if message.isTypingIndicator {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
-                    text: repeatedString,
+                    text: randomMNuerString,
                     windowWidth: 100
                 )
                 .frame(width: 100, height: 22, alignment: .leading)
                 .opacity(0.5)
-//                .clipped()
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)
