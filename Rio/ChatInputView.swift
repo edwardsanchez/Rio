@@ -13,47 +13,80 @@ struct ChatInputView: View {
     @Binding var inputFieldFrame: CGRect
     @Binding var inputFieldHeight: CGFloat
     @State private var keyboardIsUp = false
-    @Binding var shouldFocus: Bool
+    @Binding var shouldFocusInput: Bool
 
-    let onSendMessage: (String) -> Void
+    // Chat data
+    @Binding var messages: [Message]
+    @Binding var newMessageId: UUID?
+    let chat: Chat
+    @Environment(ChatData.self) private var chatData
+    @Binding var autoReplyEnabled: Bool
+
+    // Timer for automated inbound message
+    @State private var autoReplyTimer: Timer? = nil
+
+    // Track inbound response state to prevent multiple simultaneous responses
+    @State private var isInboundResponsePending = false
+    @State private var currentTypingIndicatorId: UUID? = nil
+
+    // Array of random responses
+    private let autoReplyMessages = [
+        "That's a very good point!",
+        "Oh yeah!",
+        "I don't know.",
+        "I disagree tbh.",
+        "Erm, sure!",
+        "You think?",
+        "Never!",
+        "That's cool!"
+    ]
     
     var body: some View {
         inputField
-            .onChange(of: shouldFocus) { _, newValue in
+            .onChange(of: shouldFocusInput) { _, newValue in
                 if newValue {
                     isMessageFieldFocused = true
-                    shouldFocus = false
+                    shouldFocusInput = false
                 }
             }
+            .onAppear {
+                shouldFocusInput = true
+            }
+            .onDisappear {
+                autoReplyTimer?.invalidate()
+                autoReplyTimer = nil
+                isInboundResponsePending = false
+                currentTypingIndicatorId = nil
+            }
     }
+
+
     
     var inputField: some View {
-        HStack {
-            HStack(alignment: .bottom) {
-                TextField("Message", text: $message, axis: .vertical)
-                    .lineLimit(1...5) // Allow 1 to 5 lines
-                    .padding([.vertical, .leading], 15)
-                    .background {
-                        Color.clear
-                            .onGeometryChange(for: CGRect.self) { proxy in
-                                proxy.frame(in: .global)
-                            } action: { newValue in
-                                inputFieldFrame = newValue
-                                // Update input field height for dynamic spacing
-                                inputFieldHeight = newValue.height
-                            }
-                    }
-                    .focused($isMessageFieldFocused)
-                    .onSubmit {
-                        sendMessage()
-                    }
-                    .submitLabel(.send)
-
-                sendButton
-                    .padding(.bottom, 5)
-            }
-            .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
+        HStack(alignment: .bottom) {
+            TextField("Message", text: $message, axis: .vertical)
+                .lineLimit(1...5) // Allow 1 to 5 lines
+                .padding([.vertical, .leading], 15)
+                .background {
+                    Color.clear
+                        .onGeometryChange(for: CGRect.self) { proxy in
+                            proxy.frame(in: .global)
+                        } action: { newValue in
+                            inputFieldFrame = newValue
+                            // Update input field height for dynamic spacing
+                            inputFieldHeight = newValue.height
+                        }
+                }
+                .focused($isMessageFieldFocused)
+                .onSubmit {
+                    sendMessage()
+                }
+                .submitLabel(.send)
+            
+            sendButton
+                .padding(.bottom, 5)
         }
+        .glassEffect(.regular.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
         .padding(.horizontal, 30)
         .padding(.top, 15)
         .background(alignment: .bottom) {
@@ -118,12 +151,168 @@ struct ChatInputView: View {
         // Clear the text field immediately to provide instant feedback
         message = ""
 
-        // Call the parent's send message handler with the text
-        onSendMessage(messageText)
+        // Check if there's an existing typing indicator that needs to be moved to the end
+        var typingIndicatorToMove: Message? = nil
+        if let typingIndicatorId = currentTypingIndicatorId,
+           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+            // Store the typing indicator and remove it temporarily
+            typingIndicatorToMove = messages[typingIndex]
+            messages.remove(at: typingIndex)
+
+            // Also remove from chatData
+            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                var updatedChat = chatData.chats[chatIndex]
+                var updatedMessages = updatedChat.messages
+                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    updatedMessages.remove(at: messageIndex)
+                    updatedChat = Chat(
+                        id: updatedChat.id,
+                        title: updatedChat.title,
+                        participants: updatedChat.participants,
+                        messages: updatedMessages
+                    )
+                    chatData.chats[chatIndex] = updatedChat
+                }
+            }
+        }
+
+        // Create and send the message
+        let newMessage = Message(text: messageText, user: chatData.edwardUser)
+        newMessageId = newMessage.id
+        messages.append(newMessage)
+        chatData.addMessage(newMessage, to: chat.id)
+
+        // Re-add the typing indicator with a new timestamp to make it the last message
+        if let typingIndicator = typingIndicatorToMove {
+            let updatedTypingIndicator = Message(
+                id: typingIndicator.id, // Keep the same ID
+                text: typingIndicator.text,
+                user: typingIndicator.user,
+                date: Date.now, // Update timestamp to current time
+                isTypingIndicator: typingIndicator.isTypingIndicator
+            )
+            messages.append(updatedTypingIndicator)
+            chatData.addMessage(updatedTypingIndicator, to: chat.id)
+        }
 
         // Restore focus after a brief delay to ensure text clearing completes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             isMessageFieldFocused = true
+        }
+
+        resetAutoReplyTimer()
+    }
+
+    // MARK: - Timer Management
+
+    private func cleanupAutoReplyState() {
+        // Cancel any existing timer
+        autoReplyTimer?.invalidate()
+        autoReplyTimer = nil
+
+        // Remove any existing typing indicator
+        if let typingIndicatorId = currentTypingIndicatorId,
+           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+            messages.remove(at: typingIndex)
+
+            // Also remove from chatData
+            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                var updatedChat = chatData.chats[chatIndex]
+                var updatedMessages = updatedChat.messages
+                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    updatedMessages.remove(at: messageIndex)
+                    updatedChat = Chat(
+                        id: updatedChat.id,
+                        title: updatedChat.title,
+                        participants: updatedChat.participants,
+                        messages: updatedMessages
+                    )
+                    chatData.chats[chatIndex] = updatedChat
+                }
+            }
+        }
+
+        // Reset state variables
+        isInboundResponsePending = false
+        currentTypingIndicatorId = nil
+    }
+
+    private func resetAutoReplyTimer() {
+        // If auto-reply is disabled, don't start any auto-reply logic
+        guard autoReplyEnabled else { return }
+
+        // If an inbound response is already pending, don't start a new one
+        guard !isInboundResponsePending else { return }
+
+        // Only start auto-reply if there are other participants
+        guard let randomUser = chatData.getRandomParticipantForReply(in: chat) else { return }
+
+        // Mark that an inbound response is now pending
+        isInboundResponsePending = true
+
+        // Cancel existing timer if any (but don't remove existing typing indicator)
+        autoReplyTimer?.invalidate()
+
+        // Stage 1: Wait 1 second before showing typing indicator
+        autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+            // Only show typing indicator if no typing indicator is currently displayed
+            let hasExistingTypingIndicator = messages.contains { $0.isTypingIndicator }
+
+            if !hasExistingTypingIndicator {
+                // Stage 2: Show typing indicator for 10 seconds
+                let typingIndicatorMessage = Message(
+                    text: "", // Text is not used for typing indicator
+                    user: randomUser,
+                    isTypingIndicator: true
+                )
+                currentTypingIndicatorId = typingIndicatorMessage.id
+                newMessageId = typingIndicatorMessage.id
+                messages.append(typingIndicatorMessage)
+                chatData.addMessage(typingIndicatorMessage, to: chat.id)
+            }
+
+            // Stage 3: After 10 seconds, replace typing indicator with final message
+            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                // Remove any existing typing indicator message
+                if let typingIndicatorId = currentTypingIndicatorId,
+                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    messages.remove(at: typingIndex)
+                    // Also remove from chatData
+                    if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                        var updatedChat = chatData.chats[chatIndex]
+                        var updatedMessages = updatedChat.messages
+                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                            updatedMessages.remove(at: messageIndex)
+                            updatedChat = Chat(
+                                id: updatedChat.id,
+                                title: updatedChat.title,
+                                participants: updatedChat.participants,
+                                messages: updatedMessages
+                            )
+                            chatData.chats[chatIndex] = updatedChat
+                        }
+                    }
+                }
+
+                // Pick a random response and add final message
+                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+                let finalMessage = Message(text: randomResponse, user: randomUser)
+                newMessageId = finalMessage.id
+                messages.append(finalMessage)
+                chatData.addMessage(finalMessage, to: chat.id)
+
+                // Clear the pending state and typing indicator ID
+                isInboundResponsePending = false
+                currentTypingIndicatorId = nil
+            }
+        }
+    }
+
+    func toggleAutoReply() {
+        autoReplyEnabled.toggle()
+        // If auto-reply is disabled, clean up any pending auto-reply state
+        if !autoReplyEnabled {
+            cleanupAutoReplyState()
         }
     }
 }
@@ -131,15 +320,23 @@ struct ChatInputView: View {
 #Preview {
     @Previewable @State var inputFieldFrame: CGRect = .zero
     @Previewable @State var inputFieldHeight: CGFloat = 50
-    @Previewable @State var shouldFocus = false
+    @Previewable @State var messages: [Message] = []
+    @Previewable @State var newMessageId: UUID? = nil
+    @Previewable @State var shouldFocusInput = false
+    @Previewable @State var autoReplyEnabled = true
+
+    let chatData = ChatData()
+    let chat = chatData.chats.first!
 
     return ChatInputView(
         inputFieldFrame: $inputFieldFrame,
         inputFieldHeight: $inputFieldHeight,
-        shouldFocus: $shouldFocus,
-        onSendMessage: { messageText in
-            print("Send message: \(messageText)")
-        }
+        shouldFocusInput: $shouldFocusInput,
+        messages: $messages,
+        newMessageId: $newMessageId,
+        chat: chat,
+        autoReplyEnabled: $autoReplyEnabled
     )
+    .environment(chatData)
     .background(Color.base)
 }

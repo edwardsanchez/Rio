@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct ChatListView: View {
-    let chatData: ChatData
-    
+    @Environment(ChatData.self) private var chatData
+
     var body: some View {
         List(chatData.chats) { chat in
-            NavigationLink(destination: ChatDetailView(chat: chat, chatData: chatData)) {
+            NavigationLink(destination: ChatDetailView(chat: chat)) {
                 ChatRowView(chat: chat)
             }
         }
@@ -63,6 +63,7 @@ struct ChatRowView: View {
 
 #Preview {
     NavigationStack {
-        ChatListView(chatData: ChatData())
+        ChatListView()
     }
+    .environment(ChatData())
 }

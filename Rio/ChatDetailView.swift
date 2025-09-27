@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ChatDetailView: View {
     let chat: Chat
-    let chatData: ChatData
-    
+    @Environment(ChatData.self) private var chatData
+
     @State private var messages: [Message] = []
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
@@ -18,37 +18,17 @@ struct ChatDetailView: View {
     @State private var inputFieldHeight: CGFloat = 50 // Track input field height for dynamic spacing
     @State private var scrollPosition = ScrollPosition()
 
-    // Timer for automated inbound message
-    @State private var autoReplyTimer: Timer? = nil
-
-    // Track inbound response state to prevent multiple simultaneous responses
-    @State private var isInboundResponsePending = false
-    @State private var currentTypingIndicatorId: UUID? = nil
-
-    // Control whether the system should auto-reply with messages
-    @State private var shouldAutoReply = true
-
     // Track if user is manually scrolling to avoid interrupting
     @State private var isUserScrolling = false
 
     // Trigger for setting focus on the input field
     @State private var shouldFocusInput = false
 
-    // Array of random responses
-    private let autoReplyMessages = [
-        "That's a very good point!",
-        "Oh yeah!",
-        "I don't know.",
-        "I disagree tbh.",
-        "Erm, sure!",
-        "You think?",
-        "Never!",
-        "That's cool!"
-    ]
-    
-    init(chat: Chat, chatData: ChatData) {
+    // Auto-reply state for toolbar
+    @State private var autoReplyEnabled = true
+
+    init(chat: Chat) {
         self.chat = chat
-        self.chatData = chatData
         _messages = State(initialValue: chat.messages)
     }
     
@@ -99,8 +79,11 @@ struct ChatDetailView: View {
             ChatInputView(
                 inputFieldFrame: $inputFieldFrame,
                 inputFieldHeight: $inputFieldHeight,
-                shouldFocus: $shouldFocusInput,
-                onSendMessage: sendMessage
+                shouldFocusInput: $shouldFocusInput,
+                messages: $messages,
+                newMessageId: $newMessageId,
+                chat: chat,
+                autoReplyEnabled: $autoReplyEnabled
             )
         }
         .background {
@@ -119,80 +102,18 @@ struct ChatDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    shouldAutoReply.toggle()
-                    // If auto-reply is disabled, clean up any pending auto-reply state
-                    if !shouldAutoReply {
-                        cleanupAutoReplyState()
-                    }
+                    autoReplyEnabled.toggle()
                 } label: {
-                    Image(systemName: shouldAutoReply ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .foregroundColor(shouldAutoReply ? .accentColor : .gray)
+                    Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
+                        .foregroundColor(autoReplyEnabled ? .accentColor : .gray)
                 }
-                .accessibilityLabel(shouldAutoReply ? "Auto-reply enabled" : "Auto-reply disabled")
+                .accessibilityLabel(autoReplyEnabled ? "Auto-reply enabled" : "Auto-reply disabled")
                 .accessibilityHint("Tap to toggle automatic message responses")
             }
         }
-        .onDisappear {
-            autoReplyTimer?.invalidate()
-            autoReplyTimer = nil
-            isInboundResponsePending = false
-            currentTypingIndicatorId = nil
-        }
     }
 
 
-    // MARK: - Message Sending
-
-    private func sendMessage(_ messageText: String) {
-        // Guard against empty messages (should already be handled by ChatInputView)
-        guard !messageText.isEmpty else { return }
-
-        // Check if there's an existing typing indicator that needs to be moved to the end
-        var typingIndicatorToMove: Message? = nil
-        if let typingIndicatorId = currentTypingIndicatorId,
-           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-            // Store the typing indicator and remove it temporarily
-            typingIndicatorToMove = messages[typingIndex]
-            messages.remove(at: typingIndex)
-
-            // Also remove from chatData
-            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                var updatedChat = chatData.chats[chatIndex]
-                var updatedMessages = updatedChat.messages
-                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    updatedMessages.remove(at: messageIndex)
-                    updatedChat = Chat(
-                        id: updatedChat.id,
-                        title: updatedChat.title,
-                        participants: updatedChat.participants,
-                        messages: updatedMessages
-                    )
-                    chatData.chats[chatIndex] = updatedChat
-                }
-            }
-        }
-
-        // Create and send the message
-        let newMessage = Message(text: messageText, user: chatData.edwardUser)
-        newMessageId = newMessage.id
-        messages.append(newMessage)
-        chatData.addMessage(newMessage, to: chat.id)
-
-        // Re-add the typing indicator with a new timestamp to make it the last message
-        if let typingIndicator = typingIndicatorToMove {
-            let updatedTypingIndicator = Message(
-                id: typingIndicator.id, // Keep the same ID
-                text: typingIndicator.text,
-                user: typingIndicator.user,
-                date: Date.now, // Update timestamp to current time
-                isTypingIndicator: typingIndicator.isTypingIndicator
-            )
-            messages.append(updatedTypingIndicator)
-            chatData.addMessage(updatedTypingIndicator, to: chat.id)
-        }
-
-        resetAutoReplyTimer()
-    }
 
     // MARK: - Scrolling
     
@@ -211,108 +132,5 @@ struct ChatDetailView: View {
         scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
     }
 
-    // MARK: - Timer Management
 
-    private func cleanupAutoReplyState() {
-        // Cancel any existing timer
-        autoReplyTimer?.invalidate()
-        autoReplyTimer = nil
-
-        // Remove any existing typing indicator
-        if let typingIndicatorId = currentTypingIndicatorId,
-           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-            messages.remove(at: typingIndex)
-
-            // Also remove from chatData
-            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                var updatedChat = chatData.chats[chatIndex]
-                var updatedMessages = updatedChat.messages
-                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    updatedMessages.remove(at: messageIndex)
-                    updatedChat = Chat(
-                        id: updatedChat.id,
-                        title: updatedChat.title,
-                        participants: updatedChat.participants,
-                        messages: updatedMessages
-                    )
-                    chatData.chats[chatIndex] = updatedChat
-                }
-            }
-        }
-
-        // Reset state variables
-        isInboundResponsePending = false
-        currentTypingIndicatorId = nil
-    }
-
-    private func resetAutoReplyTimer() {
-        // If auto-reply is disabled, don't start any auto-reply logic
-        guard shouldAutoReply else { return }
-
-        // If an inbound response is already pending, don't start a new one
-        guard !isInboundResponsePending else { return }
-
-        // Only start auto-reply if there are other participants
-        guard let randomUser = chatData.getRandomParticipantForReply(in: chat) else { return }
-
-        // Mark that an inbound response is now pending
-        isInboundResponsePending = true
-
-        // Cancel existing timer if any (but don't remove existing typing indicator)
-        autoReplyTimer?.invalidate()
-
-        // Stage 1: Wait 1 second before showing typing indicator
-        autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-            // Only show typing indicator if no typing indicator is currently displayed
-            let hasExistingTypingIndicator = messages.contains { $0.isTypingIndicator }
-
-            if !hasExistingTypingIndicator {
-                // Stage 2: Show typing indicator for 10 seconds
-                let typingIndicatorMessage = Message(
-                    text: "", // Text is not used for typing indicator
-                    user: randomUser,
-                    isTypingIndicator: true
-                )
-                currentTypingIndicatorId = typingIndicatorMessage.id
-                newMessageId = typingIndicatorMessage.id
-                messages.append(typingIndicatorMessage)
-                chatData.addMessage(typingIndicatorMessage, to: chat.id)
-            }
-
-            // Stage 3: After 10 seconds, replace typing indicator with final message
-            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                // Remove any existing typing indicator message
-                if let typingIndicatorId = currentTypingIndicatorId,
-                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    messages.remove(at: typingIndex)
-                    // Also remove from chatData
-                    if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                        var updatedChat = chatData.chats[chatIndex]
-                        var updatedMessages = updatedChat.messages
-                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                            updatedMessages.remove(at: messageIndex)
-                            updatedChat = Chat(
-                                id: updatedChat.id,
-                                title: updatedChat.title,
-                                participants: updatedChat.participants,
-                                messages: updatedMessages
-                            )
-                            chatData.chats[chatIndex] = updatedChat
-                        }
-                    }
-                }
-
-                // Pick a random response and add final message
-                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
-                let finalMessage = Message(text: randomResponse, user: randomUser)
-                newMessageId = finalMessage.id
-                messages.append(finalMessage)
-                chatData.addMessage(finalMessage, to: chat.id)
-
-                // Clear the pending state and typing indicator ID
-                isInboundResponsePending = false
-                currentTypingIndicatorId = nil
-            }
-        }
-    }
 }
