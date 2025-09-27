@@ -23,6 +23,13 @@ struct ChatDetailView: View {
     // Timer for automated inbound message
     @State private var autoReplyTimer: Timer? = nil
 
+    // Track inbound response state to prevent multiple simultaneous responses
+    @State private var isInboundResponsePending = false
+    @State private var currentTypingIndicatorId: UUID? = nil
+
+    // Control whether the system should auto-reply with messages
+    @State private var shouldAutoReply = true
+
     // Track keyboard state
     @State private var keyboardIsUp = false
 
@@ -106,9 +113,27 @@ struct ChatDetailView: View {
         }
         .navigationTitle(chat.title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    shouldAutoReply.toggle()
+                    // If auto-reply is disabled, clean up any pending auto-reply state
+                    if !shouldAutoReply {
+                        cleanupAutoReplyState()
+                    }
+                } label: {
+                    Image(systemName: shouldAutoReply ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
+                        .foregroundColor(shouldAutoReply ? .blue : .gray)
+                }
+                .accessibilityLabel(shouldAutoReply ? "Auto-reply enabled" : "Auto-reply disabled")
+                .accessibilityHint("Tap to toggle automatic message responses")
+            }
+        }
         .onDisappear {
             autoReplyTimer?.invalidate()
             autoReplyTimer = nil
+            isInboundResponsePending = false
+            currentTypingIndicatorId = nil
         }
     }
     //TODO: If you type a message after someone already started typing, the response should always come AFTER you message.
@@ -196,11 +221,49 @@ struct ChatDetailView: View {
         // Clear the text field immediately to provide instant feedback
         message = ""
 
+        // Check if there's an existing typing indicator that needs to be moved to the end
+        var typingIndicatorToMove: Message? = nil
+        if let typingIndicatorId = currentTypingIndicatorId,
+           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+            // Store the typing indicator and remove it temporarily
+            typingIndicatorToMove = messages[typingIndex]
+            messages.remove(at: typingIndex)
+
+            // Also remove from chatData
+            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                var updatedChat = chatData.chats[chatIndex]
+                var updatedMessages = updatedChat.messages
+                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    updatedMessages.remove(at: messageIndex)
+                    updatedChat = Chat(
+                        id: updatedChat.id,
+                        title: updatedChat.title,
+                        participants: updatedChat.participants,
+                        messages: updatedMessages
+                    )
+                    chatData.chats[chatIndex] = updatedChat
+                }
+            }
+        }
+
         // Create and send the message
         let newMessage = Message(text: messageText, user: chatData.edwardUser)
         newMessageId = newMessage.id
         messages.append(newMessage)
         chatData.addMessage(newMessage, to: chat.id)
+
+        // Re-add the typing indicator with a new timestamp to make it the last message
+        if let typingIndicator = typingIndicatorToMove {
+            let updatedTypingIndicator = Message(
+                id: typingIndicator.id, // Keep the same ID
+                text: typingIndicator.text,
+                user: typingIndicator.user,
+                date: Date.now, // Update timestamp to current time
+                isTypingIndicator: typingIndicator.isTypingIndicator
+            )
+            messages.append(updatedTypingIndicator)
+            chatData.addMessage(updatedTypingIndicator, to: chat.id)
+        }
 
         // Restore focus after a brief delay to ensure text clearing completes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -229,35 +292,83 @@ struct ChatDetailView: View {
 
     // MARK: - Timer Management
 
-    private func resetAutoReplyTimer() {
-        // Cancel existing timer if any
+    private func cleanupAutoReplyState() {
+        // Cancel any existing timer
         autoReplyTimer?.invalidate()
+        autoReplyTimer = nil
+
+        // Remove any existing typing indicator
+        if let typingIndicatorId = currentTypingIndicatorId,
+           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+            messages.remove(at: typingIndex)
+
+            // Also remove from chatData
+            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                var updatedChat = chatData.chats[chatIndex]
+                var updatedMessages = updatedChat.messages
+                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    updatedMessages.remove(at: messageIndex)
+                    updatedChat = Chat(
+                        id: updatedChat.id,
+                        title: updatedChat.title,
+                        participants: updatedChat.participants,
+                        messages: updatedMessages
+                    )
+                    chatData.chats[chatIndex] = updatedChat
+                }
+            }
+        }
+
+        // Reset state variables
+        isInboundResponsePending = false
+        currentTypingIndicatorId = nil
+    }
+
+    private func resetAutoReplyTimer() {
+        // If auto-reply is disabled, don't start any auto-reply logic
+        guard shouldAutoReply else { return }
+
+        // If an inbound response is already pending, don't start a new one
+        guard !isInboundResponsePending else { return }
 
         // Only start auto-reply if there are other participants
         guard let randomUser = chatData.getRandomParticipantForReply(in: chat) else { return }
 
+        // Mark that an inbound response is now pending
+        isInboundResponsePending = true
+
+        // Cancel existing timer if any (but don't remove existing typing indicator)
+        autoReplyTimer?.invalidate()
+
         // Stage 1: Wait 1 second before showing typing indicator
         autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-            // Stage 2: Show typing indicator for 10 seconds
-            let typingIndicatorMessage = Message(
-                text: "", // Text is not used for typing indicator
-                user: randomUser,
-                isTypingIndicator: true
-            )
-            newMessageId = typingIndicatorMessage.id
-            messages.append(typingIndicatorMessage)
-            chatData.addMessage(typingIndicatorMessage, to: chat.id)
+            // Only show typing indicator if no typing indicator is currently displayed
+            let hasExistingTypingIndicator = messages.contains { $0.isTypingIndicator }
+
+            if !hasExistingTypingIndicator {
+                // Stage 2: Show typing indicator for 10 seconds
+                let typingIndicatorMessage = Message(
+                    text: "", // Text is not used for typing indicator
+                    user: randomUser,
+                    isTypingIndicator: true
+                )
+                currentTypingIndicatorId = typingIndicatorMessage.id
+                newMessageId = typingIndicatorMessage.id
+                messages.append(typingIndicatorMessage)
+                chatData.addMessage(typingIndicatorMessage, to: chat.id)
+            }
 
             // Stage 3: After 10 seconds, replace typing indicator with final message
             autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
-                // Remove the typing indicator message
-                if let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorMessage.id }) {
+                // Remove any existing typing indicator message
+                if let typingIndicatorId = currentTypingIndicatorId,
+                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
                     messages.remove(at: typingIndex)
                     // Also remove from chatData
                     if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
                         var updatedChat = chatData.chats[chatIndex]
                         var updatedMessages = updatedChat.messages
-                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorMessage.id }) {
+                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
                             updatedMessages.remove(at: messageIndex)
                             updatedChat = Chat(
                                 id: updatedChat.id,
@@ -276,6 +387,10 @@ struct ChatDetailView: View {
                 newMessageId = finalMessage.id
                 messages.append(finalMessage)
                 chatData.addMessage(finalMessage, to: chat.id)
+
+                // Clear the pending state and typing indicator ID
+                isInboundResponsePending = false
+                currentTypingIndicatorId = nil
             }
         }
     }
