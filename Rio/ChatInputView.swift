@@ -61,30 +61,44 @@ struct ChatInputView: View {
     }
     
     var inputField: some View {
-        HStack(alignment: .bottom) {
-            TextField("Message", text: $message, axis: .vertical)
-                .lineLimit(1...5) // Allow 1 to 5 lines
-                .padding([.vertical, .leading], 15)
-                .background {
-                    Color.clear
-                        .onGeometryChange(for: CGRect.self) { proxy in
-                            proxy.frame(in: .global)
-                        } action: { newValue in
-                            inputFieldFrame = newValue
-                            // Update input field height for dynamic spacing
-                            inputFieldHeight = newValue.height
+        GlassEffectContainer {
+            HStack(spacing: 2) {
+                Button {
+                    
+                } label: {
+                    Image(systemName: "plus")
+                        .imageScale(.large)
+                        .padding(9)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+
+                HStack(alignment: .bottom) {
+                    TextField("Message", text: $message, axis: .vertical)
+                        .lineLimit(1...5) // Allow 1 to 5 lines
+                        .padding([.vertical, .leading], 15)
+                        .background {
+                            Color.clear
+                                .onGeometryChange(for: CGRect.self) { proxy in
+                                    proxy.frame(in: .global)
+                                } action: { newValue in
+                                    inputFieldFrame = newValue
+                                    // Update input field height for dynamic spacing
+                                    inputFieldHeight = newValue.height
+                                }
                         }
+                        .focused($isMessageFieldFocused)
+                        .onSubmit {
+                            sendMessage()
+                        }
+                        .submitLabel(.send)
+                    
+                    sendButton
+                        .padding(.bottom, 5)
                 }
-                .focused($isMessageFieldFocused)
-                .onSubmit {
-                    sendMessage()
-                }
-                .submitLabel(.send)
-            
-            sendButton
-                .padding(.bottom, 5)
+                .glassEffect(.regular.tint(.base.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
+            }
         }
-        .glassEffect(.regular.tint(.base.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
         .padding(.horizontal, 30)
         .padding(.top, 15)
         .background(alignment: .bottom) {
