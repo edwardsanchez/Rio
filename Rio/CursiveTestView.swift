@@ -19,7 +19,8 @@ struct CursiveTestView: View {
     @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
     @State private var showPipe = false  // Toggle to show/hide the progress indicator
     @State private var staticMode = true  // Toggle for static window effect (window stays in place, text scrolls)
-    @State private var variableSpeed = true  // Toggle for variable speed animation
+    @State private var variableSpeed = false  // Toggle for variable speed animation
+    @State private var trackingAccuracy: CGFloat = 0.85  // 0 = smooth drift, 1 = tight tracking
 
     // Animation restart trigger
     @State private var animationKey = 0
@@ -117,7 +118,8 @@ struct CursiveTestView: View {
                         showProgressIndicator: showPipe,
                         forwardOnlyMode: forwardOnlyMode,
                         windowWidth: windowWidth,
-                        variableSpeed: variableSpeed
+                        variableSpeed: variableSpeed,
+                        trackingAccuracy: trackingAccuracy
                     )
                     .id(animationKey)  // Force recreation when key changes
                     .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
@@ -224,6 +226,30 @@ struct CursiveTestView: View {
                             Text("\(Int(windowWidth))px")
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.primary)
+                        }
+                        .padding(.leading, 20)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text("Tracking Accuracy")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(String(format: "%.2f", trackingAccuracy))
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundColor(.primary)
+                            }
+
+                            Slider(value: $trackingAccuracy, in: 0...1, step: 0.05) {
+                                Text("Tracking Accuracy")
+                            }
+                            .onChange(of: trackingAccuracy) {
+                                animationKey += 1  // Restart to apply smoothing changes
+                            }
+
+                            Text("0 prioritizes smooth left drift, 1 stays tight to the pen.")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                         .padding(.leading, 20)
                     }
