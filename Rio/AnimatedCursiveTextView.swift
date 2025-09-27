@@ -22,12 +22,21 @@ struct AnimatedCursiveTextView: View {
     @State private var lastOffsetUpdateTime: Date?
     @State private var maxLeftShift: CGFloat = 0  // Tracks the furthest left shift we've applied
     @State private var filteredLeftTarget: CGFloat = 0  // Low-pass target that keeps sliding left smoothly
+
+    // Smoothing state for drawProgressFrom to prevent jittery trim clipping
+    @State private var smoothedDrawProgressFrom: CGFloat = 0
+    @State private var drawProgressFromVelocity: CGFloat = 0
+    @State private var targetDrawProgressFrom: CGFloat = 0
     private let nominalFrameDuration: CGFloat = 1.0 / 60.0
     private let offsetSpringStiffness: CGFloat = 180
     private let offsetSpringDamping: CGFloat = 28
     private let minCatchupSpeed: CGFloat = 80     // px per second when accuracy is 0
     private let maxCatchupSpeed: CGFloat = 2400   // px per second when accuracy is 1
     private let maxDriftSpeed: CGFloat = 80       // px per second of continual left drift when accuracy is 0
+
+    // Smoothing constants for drawProgressFrom to prevent jittery trim clipping
+    private let trimSpringStiffness: CGFloat = 120  // Slightly less stiff than offset for smoother motion
+    private let trimSpringDamping: CGFloat = 22     // Slightly less damped for smoother motion
 
     @State private var pathAnalyzer: PathXAnalyzer?
 
@@ -189,6 +198,41 @@ struct AnimatedCursiveTextView: View {
         }
     }
 
+    // Smoothed version of drawProgressFrom for trim animations using a critically damped spring
+    private func updateSmoothedDrawProgressFrom(deltaTime rawDeltaTime: CGFloat) {
+        guard staticMode else {
+            smoothedDrawProgressFrom = 0
+            drawProgressFromVelocity = 0
+            targetDrawProgressFrom = 0
+            return
+        }
+
+        let clampedDelta = max(nominalFrameDuration * 0.25, min(rawDeltaTime, nominalFrameDuration * 4))
+
+        // Use the target that was calculated in the main animation loop
+        let desiredFrom = targetDrawProgressFrom
+
+        // Critically damped spring for smooth motion
+        let displacement = desiredFrom - smoothedDrawProgressFrom
+        let acceleration = trimSpringStiffness * displacement - trimSpringDamping * drawProgressFromVelocity
+        drawProgressFromVelocity += acceleration * clampedDelta
+        smoothedDrawProgressFrom += drawProgressFromVelocity * clampedDelta
+
+        // Clamp to valid range [0, 1] and ensure we don't go backwards too much
+        smoothedDrawProgressFrom = max(0, min(1, smoothedDrawProgressFrom))
+
+        // Prevent going backwards beyond the target (forward-only constraint)
+        if smoothedDrawProgressFrom < desiredFrom {
+            smoothedDrawProgressFrom = max(smoothedDrawProgressFrom, desiredFrom - 0.05) // Allow small backward motion for smoothness
+        }
+
+        // Snap when very close to target to prevent oscillation
+        if abs(desiredFrom - smoothedDrawProgressFrom) < 0.001 && abs(drawProgressFromVelocity) < 0.01 {
+            smoothedDrawProgressFrom = desiredFrom
+            drawProgressFromVelocity = 0
+        }
+    }
+
     // Convert linear time progress to path-length-adjusted progress
     private func adjustProgressForPathLength(_ linearProgress: CGFloat) -> CGFloat {
         guard !variableSpeed else { return linearProgress }
@@ -230,7 +274,7 @@ struct AnimatedCursiveTextView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             CursiveWordShape(text: text, fontSize: fontSize)
-                .trim(from: staticMode ? drawProgressFrom : 0, to: drawProgress)
+                .trim(from: staticMode ? smoothedDrawProgressFrom : 0, to: drawProgress)
                 .stroke(
                     Color.secondary,
                     style: StrokeStyle(
@@ -260,7 +304,7 @@ struct AnimatedCursiveTextView: View {
             if showProgressIndicator {
                 if staticMode {
                     if let analyzer = pathAnalyzer {
-                        let fromPoint = analyzer.pointAtParameter(drawProgressFrom)
+                        let fromPoint = analyzer.pointAtParameter(smoothedDrawProgressFrom)
                         Rectangle()
                             .fill(Color.green.opacity(0.7))
                             .frame(width: 2, height: measuredWordSize.height)
@@ -310,6 +354,11 @@ struct AnimatedCursiveTextView: View {
         maxLeftShift = 0
         filteredLeftTarget = 0
 
+        // Reset trim smoothing state
+        smoothedDrawProgressFrom = 0
+        drawProgressFromVelocity = 0
+        targetDrawProgressFrom = 0
+
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
         let path = shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
@@ -342,11 +391,15 @@ struct AnimatedCursiveTextView: View {
                     let endProgress = min(endElapsed / endDuration, 1.0)
 
                     let startFrom = self.maxDrawProgressFrom
-                    self.drawProgressFrom = startFrom + (1.0 - startFrom) * endProgress
+                    let newTargetFrom = startFrom + (1.0 - startFrom) * endProgress
+                    self.targetDrawProgressFrom = newTargetFrom
+                    self.drawProgressFrom = newTargetFrom  // Keep for compatibility
 
                     self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
+                    self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
 
-                    if self.drawProgressFrom >= 1.0 {
+                    if self.targetDrawProgressFrom >= 1.0 {
+                        self.targetDrawProgressFrom = 1.0
                         self.drawProgressFrom = 1.0
                         timer.invalidate()
                         self.animationTimer = nil
@@ -368,20 +421,25 @@ struct AnimatedCursiveTextView: View {
                     if clampedFrom > self.maxDrawProgressFrom {
                         self.maxDrawProgressFrom = clampedFrom
                     }
-                    self.drawProgressFrom = self.maxDrawProgressFrom
+                    self.targetDrawProgressFrom = self.maxDrawProgressFrom
+                    self.drawProgressFrom = self.maxDrawProgressFrom  // Keep for compatibility
                 } else {
+                    self.targetDrawProgressFrom = 0
                     self.drawProgressFrom = 0
                     self.maxDrawProgressFrom = 0
                 }
 
                 self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
+                self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
             } else {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
+                self.targetDrawProgressFrom = 0
                 self.drawProgressFrom = 0
                 self.maxDrawProgressFrom = 0
 
                 self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
+                self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
 
                 if progress >= 1.0 {
                     timer.invalidate()
