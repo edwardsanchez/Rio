@@ -298,6 +298,11 @@ struct MessageBubble: View {
         }
     }
     
+    var repeatedString: String {
+        let baseString = "mmrmumunumluemeermunneumuemlemmmleemmrmu"
+        return String(repeating: baseString, count: 5)
+    }
+    
     @ViewBuilder
     private func bubbleView(
         textColor: Color,
@@ -314,7 +319,7 @@ struct MessageBubble: View {
             if message.isTypingIndicator {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
-                    text: "mmmumunumluemeemunneumuemlemmmleemmmu!",
+                    text: repeatedString,
                     windowWidth: 100
                 )
                 .frame(width: 100, height: 22, alignment: .leading)
