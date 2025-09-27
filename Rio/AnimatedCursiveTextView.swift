@@ -20,10 +20,10 @@ struct AnimatedCursiveTextView: View {
     @State private var smoothedTextOffset: CGFloat = 0
     @State private var textOffsetVelocity: CGFloat = 0
     @State private var lastOffsetUpdateTime: Date?
+    @State private var maxLeftShift: CGFloat = 0  // Tracks the furthest left shift we've applied
     private let nominalFrameDuration: CGFloat = 1.0 / 60.0
     private let offsetSpringStiffness: CGFloat = 180
     private let offsetSpringDamping: CGFloat = 28
-
 
     @State private var pathAnalyzer: PathXAnalyzer?
 
@@ -114,26 +114,37 @@ struct AnimatedCursiveTextView: View {
             smoothedTextOffset = 0
             textOffsetVelocity = 0
             lastOffsetUpdateTime = nil
+            maxLeftShift = 0
             return
         }
 
         let targetOffset = textOffset
+
+        let effectiveWidth = min(windowWidth, measuredWordSize.width)
+        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
+        let minOffset = -maxShift
+
+        maxLeftShift = min(maxLeftShift, targetOffset)
+        maxLeftShift = max(maxLeftShift, minOffset)
+        let desiredOffset = maxLeftShift
         let clampedDelta = max(nominalFrameDuration * 0.25, min(rawDeltaTime, nominalFrameDuration * 4))
 
         // Critically damped spring keeps motion smooth while remaining responsive
-        let displacement = targetOffset - smoothedTextOffset
+        let displacement = desiredOffset - smoothedTextOffset
         let acceleration = offsetSpringStiffness * displacement - offsetSpringDamping * textOffsetVelocity
         textOffsetVelocity += acceleration * clampedDelta
         smoothedTextOffset += textOffsetVelocity * clampedDelta
 
-        // Clamp to valid scrolling bounds and snap to target when very close
-        let effectiveWidth = min(windowWidth, measuredWordSize.width)
-        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
-        let minOffset = -maxShift
+        // Clamp to valid scrolling bounds, enforce forward-only motion, and snap when near target
         smoothedTextOffset = min(0, max(minOffset, smoothedTextOffset))
 
-        if abs(displacement) < 0.1 && abs(textOffsetVelocity) < 0.05 {
-            smoothedTextOffset = targetOffset
+        if smoothedTextOffset > maxLeftShift {
+            smoothedTextOffset = max(maxLeftShift, minOffset)
+            textOffsetVelocity = min(textOffsetVelocity, 0)
+        }
+
+        if abs(desiredOffset - smoothedTextOffset) < 0.1 && abs(textOffsetVelocity) < 0.05 {
+            smoothedTextOffset = desiredOffset
             textOffsetVelocity = 0
         }
     }
@@ -256,6 +267,7 @@ struct AnimatedCursiveTextView: View {
         smoothedTextOffset = 0
         textOffsetVelocity = 0
         lastOffsetUpdateTime = nil
+        maxLeftShift = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
