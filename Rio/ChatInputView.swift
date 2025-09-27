@@ -59,8 +59,6 @@ struct ChatInputView: View {
                 currentTypingIndicatorId = nil
             }
     }
-
-
     
     var inputField: some View {
         HStack(alignment: .bottom) {
@@ -86,7 +84,7 @@ struct ChatInputView: View {
             sendButton
                 .padding(.bottom, 5)
         }
-        .glassEffect(.regular.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
+        .glassEffect(.regular.tint(.base.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
         .padding(.horizontal, 30)
         .padding(.top, 15)
         .background(alignment: .bottom) {
@@ -138,8 +136,6 @@ struct ChatInputView: View {
         .scaleEffect(isEmpty ? 0.9  : 1)
         .animation(.smooth(duration: 0.2), value: isEmpty)
     }
-
-
 
     private func sendMessage() {
         // Capture the message text before clearing to avoid race conditions
