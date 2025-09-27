@@ -174,22 +174,44 @@ struct PathXAnalyzer {
         let endPoint = pointAtParameter(endParameter)
         let targetX = endPoint.x - xDistance
 
-        // Find the parameter that best matches this X position
-        // But ensure it's not greater than endParameter
-        var bestU: CGFloat = 0
+        var lowerSample: Sample?
+        var upperSample: Sample?
+        var closestSample: Sample? = samples.first
         var minDist = CGFloat.infinity
 
         for sample in samples {
-            if sample.u <= endParameter {
-                let dist = abs(sample.point.x - targetX)
-                if dist < minDist {
-                    minDist = dist
-                    bestU = sample.u
+            guard sample.u <= endParameter else { break }
+
+            let x = sample.point.x
+            let dist = abs(x - targetX)
+            if dist < minDist {
+                minDist = dist
+                closestSample = sample
+            }
+
+            if x <= targetX {
+                if let lower = lowerSample {
+                    if x >= lower.point.x {
+                        lowerSample = sample
+                    }
+                } else {
+                    lowerSample = sample
+                }
+            }
+
+            if x >= targetX {
+                if upperSample == nil || x <= upperSample!.point.x {
+                    upperSample = sample
                 }
             }
         }
 
-        return bestU
+        if let lower = lowerSample, let upper = upperSample, upper.point.x != lower.point.x {
+            let t = (targetX - lower.point.x) / (upper.point.x - lower.point.x)
+            return lower.u + t * (upper.u - lower.u)
+        }
+
+        return closestSample?.u ?? 0
     }
 }
 
