@@ -195,6 +195,10 @@ struct ChatDetailView: View {
         }
     }
     
+    var isEmpty: Bool {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
     var sendButton: some View { //TODO: Toby: Reduce button size
         Button {
             sendMessage()
@@ -205,7 +209,9 @@ struct ChatDetailView: View {
         }
         .buttonBorderShape(.circle)
         .buttonStyle(.borderedProminent)
-        .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .opacity(isEmpty ? 0 : 1)
+        .scaleEffect(isEmpty ? 0.9  : 1)
+        .animation(.smooth(duration: 0.2), value: isEmpty)
         .padding(.bottom, 5)
     }
 
