@@ -236,16 +236,47 @@ struct ChatDetailView: View {
         // Only start auto-reply if there are other participants
         guard let randomUser = chatData.getRandomParticipantForReply(in: chat) else { return }
 
-        // Start a new timer with random interval
-        autoReplyTimer = Timer.scheduledTimer(withTimeInterval: Double.random(in: 2...5), repeats: false) { _ in
-            // Pick a random response
-            let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+        // Stage 1: Wait 1 second before showing typing indicator
+        autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+            // Stage 2: Show typing indicator for 10 seconds
+            let typingIndicatorMessage = Message(
+                text: "", // Text is not used for typing indicator
+                user: randomUser,
+                isTypingIndicator: true
+            )
+            newMessageId = typingIndicatorMessage.id
+            messages.append(typingIndicatorMessage)
+            chatData.addMessage(typingIndicatorMessage, to: chat.id)
 
-            // Send automated inbound message with random response
-            let inboundMessage = Message(text: randomResponse, user: randomUser)
-            newMessageId = inboundMessage.id
-            messages.append(inboundMessage)
-            chatData.addMessage(inboundMessage, to: chat.id)
+            // Stage 3: After 10 seconds, replace typing indicator with final message
+            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+                // Remove the typing indicator message
+                if let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorMessage.id }) {
+                    messages.remove(at: typingIndex)
+                    // Also remove from chatData
+                    if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+                        var updatedChat = chatData.chats[chatIndex]
+                        var updatedMessages = updatedChat.messages
+                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorMessage.id }) {
+                            updatedMessages.remove(at: messageIndex)
+                            updatedChat = Chat(
+                                id: updatedChat.id,
+                                title: updatedChat.title,
+                                participants: updatedChat.participants,
+                                messages: updatedMessages
+                            )
+                            chatData.chats[chatIndex] = updatedChat
+                        }
+                    }
+                }
+
+                // Pick a random response and add final message
+                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+                let finalMessage = Message(text: randomResponse, user: randomUser)
+                newMessageId = finalMessage.id
+                messages.append(finalMessage)
+                chatData.addMessage(finalMessage, to: chat.id)
+            }
         }
     }
 }

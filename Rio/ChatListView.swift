@@ -49,7 +49,7 @@ struct ChatRowView: View {
                 
                 // Show last message preview
                 if let lastMessage = chat.messages.last {
-                    Text(lastMessage.text)
+                    Text(lastMessage.isTypingIndicator ? "typing..." : lastMessage.text)
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)

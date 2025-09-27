@@ -154,17 +154,19 @@ struct Message: Identifiable {
     let text: String
     let user: User
     let date: Date
+    let isTypingIndicator: Bool
 
     var isInbound: Bool {
         // We'll determine this based on the user - for now, any user that isn't "Edward" is inbound
         user.name != "Edward"
     }
 
-    init(id: UUID = UUID(), text: String, user: User, date: Date = Date.now) {
+    init(id: UUID = UUID(), text: String, user: User, date: Date = Date.now, isTypingIndicator: Bool = false) {
         self.id = id
         self.text = text
         self.user = user
         self.date = date
+        self.isTypingIndicator = isTypingIndicator
     }
 }
 
@@ -308,21 +310,35 @@ struct MessageBubble: View {
         width: CGFloat?,
         height: CGFloat?
     ) -> some View {
-        Text(message.text)
-            .foregroundStyle(textColor)
-            // Prevent horizontal expansion while allowing vertical growth
-            // This ensures text wraps properly within the bubble
-            .fixedSize(horizontal: false, vertical: true)
-            .chatBubble(
-                backgroundColor: backgroundColor,
-                tailAlignment: tailAlignment,
-                tailOffset: tailOffset,
-                tailRotation: tailRotation,
-                showTail: showTail,
-                backgroundOpacity: backgroundOpacity,
-                width: width,
-                height: height
-            )
+        Group {
+            if message.isTypingIndicator {
+                // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
+                AnimatedCursiveTextView(
+                    text: "the quick brown fox jumps over the lazy dog and continues writing more text to demonstrate the animation effect",
+                    windowWidth: 40
+                )
+                .frame(width: 40, height: 22, alignment: .leading)
+                .opacity(0.5)
+                .clipped()
+            } else {
+                Text(message.text)
+                    .foregroundStyle(textColor)
+                    // Prevent horizontal expansion while allowing vertical growth
+                    // This ensures text wraps properly within the bubble
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .chatBubble(
+            backgroundColor: backgroundColor,
+            tailAlignment: tailAlignment,
+            tailOffset: tailOffset,
+            tailRotation: tailRotation,
+            showTail: showTail,
+            backgroundOpacity: backgroundOpacity,
+            width: width,
+            height: height,
+            isTypingIndicator: message.isTypingIndicator
+        )
     }
 }
 
@@ -335,13 +351,15 @@ private struct ChatBubbleModifier: ViewModifier {
     let backgroundOpacity: Double
     let width: CGFloat?
     let height: CGFloat?
-    
+    let isTypingIndicator: Bool
+
     func body(content: Content) -> some View {
         content
             .padding()
             .background(alignment: .leading) {
                 backgroundView
             }
+            .clipShape(RoundedRectangle(cornerRadius: 20))
     }
     
     @ViewBuilder
@@ -375,7 +393,8 @@ private extension View {
         showTail: Bool,
         backgroundOpacity: Double,
         width: CGFloat?,
-        height: CGFloat?
+        height: CGFloat?,
+        isTypingIndicator: Bool = false
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -386,7 +405,8 @@ private extension View {
                 showTail: showTail,
                 backgroundOpacity: backgroundOpacity,
                 width: width,
-                height: height
+                height: height,
+                isTypingIndicator: isTypingIndicator
             )
         )
     }
