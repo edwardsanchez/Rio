@@ -123,7 +123,7 @@ struct ChatDetailView: View {
                     }
                 } label: {
                     Image(systemName: shouldAutoReply ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .foregroundColor(shouldAutoReply ? .blue : .gray)
+                        .foregroundColor(shouldAutoReply ? .accentColor : .gray)
                 }
                 .accessibilityLabel(shouldAutoReply ? "Auto-reply enabled" : "Auto-reply disabled")
                 .accessibilityHint("Tap to toggle automatic message responses")
