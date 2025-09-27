@@ -111,7 +111,7 @@ struct ChatDetailView: View {
             autoReplyTimer = nil
         }
     }
-    
+    //TODO: If you type a message after someone already started typing, the response should always come AFTER you message.
     var inputField: some View {
         HStack {
             TextField("Message", text: $message, axis: .vertical)
@@ -133,7 +133,7 @@ struct ChatDetailView: View {
                     sendMessage()
                 }
                 .submitLabel(.send)
-                .overlay(alignment: .bottomTrailing) {
+                .overlay(alignment: .bottomTrailing) { //TODO: make the bottom alignment dynamic base don the length of the message.
                     sendButton
                 }
         }
@@ -170,12 +170,12 @@ struct ChatDetailView: View {
         }
     }
     
-    var sendButton: some View {
+    var sendButton: some View { //TODO: Toby: Reduce button size
         Button {
             sendMessage()
         } label: {
             Image(systemName: "arrow.up")
-                .padding(4)
+                .padding(5)
                 .fontWeight(.bold)
         }
         .buttonBorderShape(.circle)

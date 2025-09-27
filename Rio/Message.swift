@@ -314,31 +314,32 @@ struct MessageBubble: View {
             if message.isTypingIndicator {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
-                    text: "the quick brown fox jumps over the lazy dog and continues writing more text to demonstrate the animation effect",
-                    windowWidth: 40
+                    text: "mmmumunumluemeemunneumuemlemmmleemmmu!",
+                    windowWidth: 100
                 )
-                .frame(width: 40, height: 22, alignment: .leading)
+                .frame(width: 100, height: 22, alignment: .leading)
                 .opacity(0.5)
-                .clipped()
+//                .clipped()
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)
                     // Prevent horizontal expansion while allowing vertical growth
                     // This ensures text wraps properly within the bubble
                     .fixedSize(horizontal: false, vertical: true)
+                    .chatBubble(
+                        backgroundColor: backgroundColor,
+                        tailAlignment: tailAlignment,
+                        tailOffset: tailOffset,
+                        tailRotation: tailRotation,
+                        showTail: showTail,
+                        backgroundOpacity: backgroundOpacity,
+                        width: width,
+                        height: height,
+                        isTypingIndicator: message.isTypingIndicator
+                    )
             }
         }
-        .chatBubble(
-            backgroundColor: backgroundColor,
-            tailAlignment: tailAlignment,
-            tailOffset: tailOffset,
-            tailRotation: tailRotation,
-            showTail: showTail,
-            backgroundOpacity: backgroundOpacity,
-            width: width,
-            height: height,
-            isTypingIndicator: message.isTypingIndicator
-        )
+
     }
 }
 
@@ -359,7 +360,6 @@ private struct ChatBubbleModifier: ViewModifier {
             .background(alignment: .leading) {
                 backgroundView
             }
-            .clipShape(RoundedRectangle(cornerRadius: 20))
     }
     
     @ViewBuilder
@@ -380,7 +380,6 @@ private struct ChatBubbleModifier: ViewModifier {
         base
             .compositingGroup()
             .opacity(backgroundOpacity)
-            
     }
 }
 
