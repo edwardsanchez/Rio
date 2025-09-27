@@ -299,7 +299,7 @@ struct MessageBubble: View {
     }
     
     var repeatedString: String {
-        let baseString = "mmrmumunumluemeermunneumuemlemmmleemmrmu"
+        let baseString = "mmmumunumluremeermunneulmuemlemmmleemmrmu"
         return String(repeating: baseString, count: 5)
     }
     
