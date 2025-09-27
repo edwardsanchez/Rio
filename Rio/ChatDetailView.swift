@@ -11,14 +11,12 @@ struct ChatDetailView: View {
     let chat: Chat
     let chatData: ChatData
     
-    @State private var message: String = ""
     @State private var messages: [Message] = []
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
     @State private var inputFieldHeight: CGFloat = 50 // Track input field height for dynamic spacing
     @State private var scrollPosition = ScrollPosition()
-    @FocusState private var isMessageFieldFocused: Bool
 
     // Timer for automated inbound message
     @State private var autoReplyTimer: Timer? = nil
@@ -30,12 +28,12 @@ struct ChatDetailView: View {
     // Control whether the system should auto-reply with messages
     @State private var shouldAutoReply = true
 
-    // Track keyboard state
-    @State private var keyboardIsUp = false
-
     // Track if user is manually scrolling to avoid interrupting
     @State private var isUserScrolling = false
-    
+
+    // Trigger for setting focus on the input field
+    @State private var shouldFocusInput = false
+
     // Array of random responses
     private let autoReplyMessages = [
         "That's a very good point!",
@@ -95,10 +93,15 @@ struct ChatDetailView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     scrollToLatestMessage()
                 }
-                isMessageFieldFocused = true
+                shouldFocusInput = true
             }
 
-            inputField
+            ChatInputView(
+                inputFieldFrame: $inputFieldFrame,
+                inputFieldHeight: $inputFieldHeight,
+                shouldFocus: $shouldFocusInput,
+                onSendMessage: sendMessage
+            )
         }
         .background {
             Color.base
@@ -136,96 +139,13 @@ struct ChatDetailView: View {
             currentTypingIndicatorId = nil
         }
     }
-    var inputField: some View {
-        HStack {
-            HStack(alignment: .bottom) {
-                TextField("Message", text: $message, axis: .vertical)
-                    .lineLimit(1...5) // Allow 1 to 5 lines
-                    .padding([.vertical, .leading], 15)
-                    .background {
-                        Color.clear
-                            .onGeometryChange(for: CGRect.self) { proxy in
-                                proxy.frame(in: .global)
-                            } action: { newValue in
-                                inputFieldFrame = newValue
-                                // Update input field height for dynamic spacing
-                                inputFieldHeight = newValue.height
-                            }
-                    }
-                    .focused($isMessageFieldFocused)
-                    .onSubmit {
-                        sendMessage()
-                    }
-                    .submitLabel(.send)
 
-                sendButton
-                    .padding(.bottom, 5)
-            }
-            .glassEffect(.clear.tint(.white.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
-        }
-        .padding(.horizontal, 30)
-        .padding(.top, 15)
-        .background(alignment: .bottom) {
-            Rectangle()
-                .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
-                .ignoresSafeArea()
-                .frame(height: 170)
-                .offset(y: 120)
-        }
-        .safeAreaPadding(.bottom, keyboardIsUp ? nil : 0)
-        .ignoresSafeArea(.keyboard, edges: .bottom)
-        .animation(.smooth(duration: 0.2), value: inputFieldHeight)
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
-            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                withAnimation {
-                    keyboardIsUp = keyboardFrame.height > 0
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation {
-                keyboardIsUp = false
-            }
-        }
-        .background {
-            Rectangle()
-                .fill(Gradient(colors: [.base.opacity(0), .base.opacity(1)]))
-                .ignoresSafeArea()
-                .frame(height: 100)
-                .offset(y: 30)
-        }
-    }
-    
-    var isEmpty: Bool {
-        message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
-    var sendButton: some View { //TODO: Toby: Reduce button size
-        Button {
-            sendMessage()
-        } label: {
-            Image(systemName: "arrow.up")
-                .padding(5)
-                .fontWeight(.bold)
-        }
-        .buttonBorderShape(.circle)
-        .buttonStyle(.borderedProminent)
-        .opacity(isEmpty ? 0 : 1)
-        .scaleEffect(isEmpty ? 0.9  : 1)
-        .animation(.smooth(duration: 0.2), value: isEmpty)
-    }
 
     // MARK: - Message Sending
 
-    private func sendMessage() {
-        // Capture the message text before clearing to avoid race conditions
-        let messageText = message.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Guard against empty messages
+    private func sendMessage(_ messageText: String) {
+        // Guard against empty messages (should already be handled by ChatInputView)
         guard !messageText.isEmpty else { return }
-
-        // Clear the text field immediately to provide instant feedback
-        message = ""
 
         // Check if there's an existing typing indicator that needs to be moved to the end
         var typingIndicatorToMove: Message? = nil
@@ -269,11 +189,6 @@ struct ChatDetailView: View {
             )
             messages.append(updatedTypingIndicator)
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
-        }
-
-        // Restore focus after a brief delay to ensure text clearing completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            isMessageFieldFocused = true
         }
 
         resetAutoReplyTimer()
