@@ -82,6 +82,7 @@ struct CursiveLetter {
         } else if let url = Bundle.main.url(forResource: svgFilename, withExtension: "svg") {
             data = try? Data(contentsOf: url)
         }
+        
         guard let svgData = data, let svgString = String(data: svgData, encoding: .utf8) else {
             Logger.cursiveLetter.fault("Failed to load SVG file for character: \(character)")
             return nil
@@ -126,6 +127,7 @@ struct CursiveLetter {
                 let height = max(1, box.height)
                 let ascent = height * 0.8
                 let descent = ascent - height
+                
                 if box.minY < 0 {
                     var flip = CGAffineTransform(scaleX: 1, y: -1)
                     if let p1 = normalized.copy(using: &flip) { normalized = p1 }
@@ -149,7 +151,13 @@ struct CursiveLetter {
         }
     }
 
-    private static func parseMetrics(from svgString: String) -> (advance: CGFloat, ascent: CGFloat, descent: CGFloat, verticalExtent: CGFloat, unitsPerEm: CGFloat)? {
+    private static func parseMetrics(from svgString: String) -> (
+        advance: CGFloat,
+        ascent: CGFloat,
+        descent: CGFloat,
+        verticalExtent: CGFloat,
+        unitsPerEm: CGFloat
+    )? {
         func attr(_ name: String) -> CGFloat? {
             let pattern = name + #"\=\"([^\"]+)\""#
             guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
@@ -217,7 +225,6 @@ struct CursiveLetter {
     }
 }
 
-// SwiftUI Shape for rendering cursive letters
 struct CursiveLetterShape: Shape {
     let letter: CursiveLetter
     
@@ -286,20 +293,21 @@ struct CursiveWordShape: Shape {
         var positioned = baselinePositioned
         let bounds = positioned.boundingBox
         var dy: CGFloat = 0
+        
         if bounds.minY < rect.minY {
             dy += rect.minY - bounds.minY
         }
+        
         if bounds.maxY > rect.maxY {
             dy += rect.maxY - bounds.maxY
         }
+        
         if dy != 0 {
             var clamp = CGAffineTransform(translationX: 0, y: dy)
             if let adjusted = positioned.copy(using: &clamp) {
                 positioned = adjusted
             }
         }
-
-
 
         return Path(positioned)
     }
