@@ -19,14 +19,12 @@ struct AnimatedCursiveTextView: View {
     // Dual tracking: visual trim position vs offset calculation position
     @State private var smoothedDrawProgressFrom: CGFloat = 0  // Forward-only for visual trim
     @State private var targetDrawProgressFrom: CGFloat = 0
-    @State private var naturalDrawProgressFrom: CGFloat = 0   // Can move backward for offset calculation
+    @State private var naturalDrawProgressFrom: CGFloat = 0   // Forward-only for offset calculation
+    @State private var maxNaturalDrawProgressFrom: CGFloat = 0 // Track maximum natural position reached
     @State private var lastUpdateTime: Date?
 
     // Fixed left edge position for static window mode
     private let fixedLeftEdgeX: CGFloat = 0
-
-    // Forward-only movement tracking
-    @State private var maxLeftwardOffset: CGFloat = 0  // Most negative offset ever reached (starts at 0, becomes negative)
 
     @State private var pathAnalyzer: PathXAnalyzer?
 
@@ -113,33 +111,29 @@ struct AnimatedCursiveTextView: View {
         let naturalWindowStartX = analyzer.pointAtParameter(naturalDrawProgressFrom).x
         let offset = fixedLeftEdgeX - naturalWindowStartX
 
-        // Apply forward-only constraint using the enforced offset
-        // This is set by the animation timer, not modified here to avoid state mutation during view update
-        let constrainedOffset = min(offset, maxLeftwardOffset)
+        // No constraint needed - naturalDrawProgressFrom is now forward-only
 
         // Debug output to verify the left edge remains fixed
         #if DEBUG
-        let actualLeftEdge = naturalWindowStartX + constrainedOffset
+        let actualLeftEdge = naturalWindowStartX + offset
         if abs(actualLeftEdge - fixedLeftEdgeX) > 0.01 {
             print("⚠️ Left edge drift detected! Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
-            print("   NaturalWindowStartX: \(naturalWindowStartX), Offset: \(constrainedOffset)")
+            print("   NaturalWindowStartX: \(naturalWindowStartX), Offset: \(offset)")
             print("   naturalDrawProgressFrom: \(naturalDrawProgressFrom), visualFrom: \(smoothedDrawProgressFrom)")
         }
 
-        if constrainedOffset > offset {
-            print("� Forward-only constraint applied: \(offset) → \(constrainedOffset)")
-        }
         #endif
 
-        return constrainedOffset
+        return offset
     }
 
-    // Dual smoothing: visual (forward-only) and natural (can move backward)
+    // Dual smoothing: both visual and natural are now forward-only
     private func updateSmoothedDrawProgressFrom() {
         guard staticMode else {
             smoothedDrawProgressFrom = 0
             naturalDrawProgressFrom = 0
             targetDrawProgressFrom = 0
+            maxNaturalDrawProgressFrom = 0
             return
         }
 
@@ -147,11 +141,17 @@ struct AnimatedCursiveTextView: View {
         let previousNaturalFrom = naturalDrawProgressFrom
         let previousVisualFrom = smoothedDrawProgressFrom
 
-        // 1. Update naturalDrawProgressFrom - this can move backward and is used for offset calculation
-        // This ensures the left edge stays mathematically fixed at 0
-        naturalDrawProgressFrom += (targetDrawProgressFrom - naturalDrawProgressFrom) * smoothingFactor
-        if abs(targetDrawProgressFrom - naturalDrawProgressFrom) < 0.0001 {
-            naturalDrawProgressFrom = targetDrawProgressFrom
+        // 1. Update naturalDrawProgressFrom - now ALSO forward-only for consistent offset calculation
+        // This prevents the left edge drift by ensuring naturalDrawProgressFrom never decreases
+        if targetDrawProgressFrom > maxNaturalDrawProgressFrom {
+            maxNaturalDrawProgressFrom = targetDrawProgressFrom
+        }
+
+        if maxNaturalDrawProgressFrom > naturalDrawProgressFrom {
+            naturalDrawProgressFrom += (maxNaturalDrawProgressFrom - naturalDrawProgressFrom) * smoothingFactor
+            if abs(maxNaturalDrawProgressFrom - naturalDrawProgressFrom) < 0.0001 {
+                naturalDrawProgressFrom = maxNaturalDrawProgressFrom
+            }
         }
         naturalDrawProgressFrom = max(0, min(1, naturalDrawProgressFrom))
 
@@ -324,7 +324,7 @@ struct AnimatedCursiveTextView: View {
         lastUpdateTime = nil
 
         // Reset forward-only tracking
-        maxLeftwardOffset = 0  // Start at 0, will become negative as text moves left
+        maxNaturalDrawProgressFrom = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
@@ -405,20 +405,6 @@ struct AnimatedCursiveTextView: View {
                 }
 
                 self.updateSmoothedDrawProgressFrom()
-
-                // Update forward-only constraint in animation timer (safe to modify state here)
-                if let analyzer = self.pathAnalyzer {
-                    let naturalWindowStartX = analyzer.pointAtParameter(self.naturalDrawProgressFrom).x
-                    let currentOffset = self.fixedLeftEdgeX - naturalWindowStartX
-
-                    // Update maxLeftwardOffset to track the furthest left position
-                    if currentOffset < self.maxLeftwardOffset {
-                        self.maxLeftwardOffset = currentOffset
-                        #if DEBUG
-                        print("📍 New leftmost position: \(currentOffset)")
-                        #endif
-                    }
-                }
             } else {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
