@@ -56,11 +56,12 @@ struct MessageListView: View {
     let scrollViewFrame: CGRect
 
     var body: some View {
-        VStack(spacing: 15) {
+        VStack(spacing: 0) {
             ForEach(messages) { message in
                 let index = messages.firstIndex(where: { $0.id == message.id }) ?? 0
                 let isNew = message.id == newMessageId
                 var isLastMessageInChat: Bool { messages.last!.id == message.id }
+                let showTail = shouldShowTail(at: index)
 
                 VStack(spacing: 5) {
                     if shouldShowDateHeader(at: index) {
@@ -70,13 +71,13 @@ struct MessageListView: View {
 
                     MessageBubble(
                         message: message,
-                        showTail: shouldShowTail(at: index),
+                        showTail: showTail,
                         isNew: isNew,
                         inputFieldFrame: inputFieldFrame,
                         scrollViewFrame: scrollViewFrame,
                         newMessageId: $newMessageId
                     )
-                    .padding(.bottom, isLastMessageInChat ? 20 : 0)
+                    .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
                 }
             }
@@ -324,8 +325,9 @@ struct MessageBubble: View {
                     text: randomMNuerString,
                     windowWidth: 100
                 )
-                .frame(width: 100, height: 22, alignment: .leading)
+                .frame(width: 50, height: 22, alignment: .leading)
                 .opacity(0.5)
+                .offset(x: 10)
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)
