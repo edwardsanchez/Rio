@@ -23,6 +23,9 @@ struct AnimatedCursiveTextView: View {
     @State private var maxNaturalDrawProgressFrom: CGFloat = 0 // Track maximum natural position reached
     @State private var lastUpdateTime: Date?
 
+    // Ratchet mechanism for textOffset - only moves leftward
+    @State private var minTextOffset: CGFloat = 0  // Most negative offset reached
+
     // Fixed left edge position for static window mode
     private let fixedLeftEdgeX: CGFloat = 0
 
@@ -126,30 +129,31 @@ struct AnimatedCursiveTextView: View {
     var textOffset: CGFloat {
         guard staticMode else { return 0 }
         guard windowWidth > 0 else { return 0 }
-        guard let analyzer = pathAnalyzer else { return 0 }
 
-        // CRITICAL: Use naturalDrawProgressFrom for offset calculation to maintain fixed left edge
-        // This allows the left edge to stay at 0 even when visual trim is prevented from moving backward
-        // leftEdgeX = naturalWindowStartX + offset = fixedLeftEdgeX
-        // Therefore: offset = fixedLeftEdgeX - naturalWindowStartX
+        // Calculate the ideal offset to align trim start with fixed left edge
+        // offset = fixedLeftEdgeX - trimStartVisualX
+        let idealOffset = fixedLeftEdgeX - trimStartVisualX
 
-        let naturalWindowStartX = analyzer.pointAtParameter(naturalDrawProgressFrom).x
-        let offset = fixedLeftEdgeX - naturalWindowStartX
+        // Ratchet mechanism: only allow leftward (negative) movement
+        // This prevents rightward drift when the path curves back on itself
+        let ratchetedOffset = min(idealOffset, minTextOffset)
 
-        // No constraint needed - naturalDrawProgressFrom is now forward-only
-
-        // Debug output to verify the left edge remains fixed
-        #if DEBUG
-        let actualLeftEdge = naturalWindowStartX + offset
-        if abs(actualLeftEdge - fixedLeftEdgeX) > 0.01 {
-            print("⚠️ Left edge drift detected! Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
-            print("   NaturalWindowStartX: \(naturalWindowStartX), Offset: \(offset)")
-            print("   naturalDrawProgressFrom: \(naturalDrawProgressFrom), visualFrom: \(smoothedDrawProgressFrom)")
+        // Update the minimum offset if we've moved further left
+        DispatchQueue.main.async {
+            if idealOffset < minTextOffset {
+                minTextOffset = idealOffset
+            }
         }
 
+        #if DEBUG
+        let actualLeftEdge = trimStartVisualX + ratchetedOffset
+        if abs(actualLeftEdge - fixedLeftEdgeX) > 0.01 {
+            print("⚠️ Left edge alignment: Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
+            print("   TrimStartVisualX: \(trimStartVisualX), Ideal: \(idealOffset), Ratcheted: \(ratchetedOffset)")
+        }
         #endif
 
-        return offset
+        return ratchetedOffset
     }
 
     // Dual smoothing: both visual and natural are now forward-only
@@ -348,6 +352,9 @@ struct AnimatedCursiveTextView: View {
 
         // Reset forward-only tracking
         maxNaturalDrawProgressFrom = 0
+
+        // Reset ratchet mechanism
+        minTextOffset = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
