@@ -436,12 +436,26 @@ struct PathXAnalyzer {
         return bestSample
     }
 
-    // Get parameter u for a given x-distance traveled
+    /**
+     * Converts a cumulative X-distance to the corresponding path parameter.
+     *
+     * This method is crucial for animations that need to maintain consistent horizontal
+     * movement speed. It allows conversion from "how far horizontally" to "where on the path",
+     * enabling uniform horizontal progression regardless of path complexity.
+     *
+     * **Algorithm**:
+     * 1. **Binary Search**: Efficiently locate the sample bracket containing the target X-distance
+     * 2. **Interpolation**: Linear interpolation between samples for sub-sample precision
+     * 3. **Boundary Handling**: Proper clamping for out-of-range inputs
+     *
+     * - Parameter xDist: Cumulative horizontal distance from path start
+     * - Returns: Path parameter (0.0 to 1.0) corresponding to that X-distance
+     */
     func parameterAtXDistance(_ xDist: CGFloat) -> CGFloat {
         guard xDist >= 0 else { return 0 }
         guard xDist < totalXDistance else { return 1 }
 
-        // Binary search through samples
+        // Binary search through samples based on cumulative X-distance
         var low = 0
         var high = samples.count - 1
 
@@ -454,7 +468,7 @@ struct PathXAnalyzer {
             }
         }
 
-        // Interpolate between samples
+        // Interpolate between samples for smooth results
         if low > 0 {
             let s1 = samples[low - 1]
             let s2 = samples[low]
@@ -465,7 +479,21 @@ struct PathXAnalyzer {
         return samples[low].u
     }
 
-    // Get the actual point at a given path parameter
+    /**
+     * Converts a path parameter to the actual point coordinates on the path.
+     *
+     * This is one of the most frequently used methods, providing the fundamental
+     * parameter-to-coordinate transformation needed for animation rendering.
+     * The method uses binary search and interpolation for accurate results.
+     *
+     * **Algorithm**:
+     * 1. **Boundary Checking**: Handle out-of-range parameters gracefully
+     * 2. **Binary Search**: Locate the sample bracket containing the target parameter
+     * 3. **Linear Interpolation**: Calculate precise coordinates between samples
+     *
+     * - Parameter u: Path parameter from 0.0 to 1.0
+     * - Returns: Point coordinates at that parameter position
+     */
     func pointAtParameter(_ u: CGFloat) -> CGPoint {
         guard u >= 0 else { return samples.first?.point ?? .zero }
         guard u <= 1 else { return samples.last?.point ?? CGPoint(x: bounds.maxX, y: bounds.midY) }
@@ -483,13 +511,13 @@ struct PathXAnalyzer {
             }
         }
 
-        // Interpolate between samples to get the point
+        // Interpolate between samples to get the precise point
         if low > 0 {
             let s1 = samples[low - 1]
             let s2 = samples[low]
             if s2.u > s1.u {
                 let t = (u - s1.u) / (s2.u - s1.u)
-                // Interpolate the point position
+                // Linear interpolation of point coordinates
                 return CGPoint(
                     x: s1.point.x + (s2.point.x - s1.point.x) * t,
                     y: s1.point.y + (s2.point.y - s1.point.y) * t
@@ -500,9 +528,18 @@ struct PathXAnalyzer {
         return samples[low].point
     }
 
-    // Find the parameter that corresponds to a given X position
+    /**
+     * Finds the path parameter corresponding to a specific X coordinate.
+     *
+     * This method performs a linear search to find the sample with the closest
+     * X coordinate to the target. While not as efficient as binary search,
+     * it's simpler and adequate for the typical usage patterns.
+     *
+     * - Parameter targetX: The target X coordinate
+     * - Returns: Path parameter (0.0 to 1.0) at the closest X position
+     */
     func parameterAtXPosition(_ targetX: CGFloat) -> CGFloat {
-        // Find the closest sample to the target X
+        // Linear search for the closest X position
         var bestU: CGFloat = 0
         var minDist = CGFloat.infinity
 
@@ -517,12 +554,33 @@ struct PathXAnalyzer {
         return bestU
     }
 
-    // Find the parameter that is a certain X distance before another parameter
+    /**
+     * Finds the path parameter that is a specified horizontal distance before another parameter.
+     *
+     * This is the key method for implementing sliding window animations in static mode.
+     * It calculates where the window should start to maintain a specific width ending
+     * at the given parameter.
+     *
+     * **Algorithm**:
+     * 1. **Target Calculation**: Determine the target X position (endX - distance)
+     * 2. **Sample Bracketing**: Find samples that bracket the target X position
+     * 3. **Interpolation**: Calculate precise parameter between bracketing samples
+     * 4. **Constraint Enforcement**: Ensure result doesn't exceed the end parameter
+     *
+     * This method is crucial for maintaining consistent window width in the animated
+     * cursive text system, enabling the fixed left edge behavior.
+     *
+     * - Parameters:
+     *   - endParameter: The end parameter of the window (0.0 to 1.0)
+     *   - xDistance: Horizontal distance to look backward (in points)
+     * - Returns: Path parameter for the window start position
+     */
     func parameterXPixelsBefore(endParameter: CGFloat, xDistance: CGFloat) -> CGFloat {
         let endPoint = pointAtParameter(endParameter)
         let targetX = endPoint.x - xDistance
 
         // Find the samples that bracket the target X position
+        // We need both lower and upper bounds for accurate interpolation
         var lowerSample: Sample?
         var upperSample: Sample?
 
@@ -546,13 +604,13 @@ struct PathXAnalyzer {
             }
         }
 
-        // If we have both lower and upper samples, interpolate
+        // If we have both lower and upper samples, interpolate for precision
         if let lower = lowerSample, let upper = upperSample, upper.point.x != lower.point.x {
             let t = (targetX - lower.point.x) / (upper.point.x - lower.point.x)
             return lower.u + t * (upper.u - lower.u)
         }
 
-        // If we only have one sample, use it
+        // If we only have one sample, use it as the best approximation
         if let lower = lowerSample {
             return lower.u
         }
@@ -560,7 +618,7 @@ struct PathXAnalyzer {
             return upper.u
         }
 
-        // Fallback to the beginning
+        // Fallback to the beginning if no suitable samples found
         return 0
     }
 }
