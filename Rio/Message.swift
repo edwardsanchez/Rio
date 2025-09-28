@@ -327,7 +327,7 @@ struct MessageBubble: View {
                 )
                 .frame(width: 50, height: 22, alignment: .leading)
                 .opacity(0.5)
-                .offset(x: 10)
+                .offset(x: 20)
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)

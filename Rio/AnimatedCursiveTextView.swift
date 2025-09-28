@@ -60,18 +60,18 @@ struct AnimatedCursiveTextView: View {
 
     init(
         text: String,
-        fontSize: CGFloat = 20,
+        fontSize: CGFloat = 30,
         animationDuration: Double? = nil,
         staticMode: Bool = true,
         showProgressIndicator: Bool = false,
-        forwardOnlyMode: Bool = false,
-        windowWidth: CGFloat = 50,
+        forwardOnlyMode: Bool = true,
+        windowWidth: CGFloat = 40,
         variableSpeed: Bool = false,
         trackingAccuracy: CGFloat = 0.85
     ) {
         self.text = text
         self.fontSize = fontSize
-        self.animationDuration = animationDuration ?? Double(text.count) / 3
+        self.animationDuration = animationDuration ?? Double(text.count) / 2
         self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
         self.forwardOnlyMode = forwardOnlyMode
@@ -87,7 +87,6 @@ struct AnimatedCursiveTextView: View {
     var path: Path {
         shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
     }
-
 
     var trimEndPoint: CGPoint {
         pathAnalyzer?.pointAtParameter(drawProgress) ?? .zero
@@ -278,7 +277,7 @@ struct AnimatedCursiveTextView: View {
                 .stroke(
                     Color.secondary,
                     style: StrokeStyle(
-                        lineWidth: fontSizeValue / 15,
+                        lineWidth: fontSizeValue / 20,
                         lineCap: .round,
                         lineJoin: .round
                     )
