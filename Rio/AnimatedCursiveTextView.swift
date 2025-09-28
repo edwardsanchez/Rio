@@ -80,8 +80,33 @@ struct AnimatedCursiveTextView: View {
         pathAnalyzer?.pointAtParameter(drawProgress) ?? .zero
     }
 
+    private var trimStartVisualX: CGFloat {
+        guard staticMode else { return 0 }
+        let fallback = pathAnalyzer?.pointAtParameter(smoothedDrawProgressFrom).x ?? fixedLeftEdgeX
+        let trimmed = path.trimmedPath(from: 0, to: smoothedDrawProgressFrom)
+        let rect = trimmed.boundingRect
+        if rect.isNull || rect.isInfinite {
+            return fallback
+        }
+        return rect.maxX
+    }
+
+    private var trimEndVisualX: CGFloat {
+        let fallback = pathAnalyzer?.pointAtParameter(drawProgress).x ?? fixedLeftEdgeX
+        let trimmed = path.trimmedPath(from: 0, to: drawProgress)
+        let rect = trimmed.boundingRect
+        if rect.isNull || rect.isInfinite {
+            return fallback
+        }
+        return rect.maxX
+    }
+
     var pipeX: CGFloat {
-        if forwardOnlyMode && !staticMode {
+        if staticMode {
+            return trimEndVisualX
+        }
+
+        if forwardOnlyMode {
             // Forward-only mode: only increase, never decrease
             let currentX = trimEndPoint.x
             if currentX > maxPipeX {
@@ -92,10 +117,10 @@ struct AnimatedCursiveTextView: View {
                 return currentX
             }
             return maxPipeX
-        } else {
-            // Normal mode: follow the actual trim end point
-            return trimEndPoint.x
         }
+
+        // Normal mode: follow the actual trim end point
+        return trimEndPoint.x
     }
 
     var textOffset: CGFloat {
@@ -260,9 +285,7 @@ struct AnimatedCursiveTextView: View {
         Group {
             if showProgressIndicator {
                 if staticMode {
-                    if let analyzer = pathAnalyzer {
-                        let fromPoint = analyzer.pointAtParameter(smoothedDrawProgressFrom)
-
+                    if pathAnalyzer != nil {
                         // Fixed left edge indicator (blue line) - should never move
                         Rectangle()
                             .fill(Color.blue.opacity(0.5))
@@ -278,7 +301,7 @@ struct AnimatedCursiveTextView: View {
                             .fill(Color.green.opacity(0.7))
                             .frame(width: 2, height: measuredWordSize.height)
                             .position(
-                                x: fromPoint.x + textOffset,  // Direct use of computed textOffset
+                                x: trimStartVisualX + textOffset,
                                 y: measuredWordSize.height / 2
                             )
                             .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -288,7 +311,7 @@ struct AnimatedCursiveTextView: View {
                             .fill(Color.red.opacity(0.7))
                             .frame(width: 2, height: measuredWordSize.height)
                             .position(
-                                x: pipeX + textOffset,  // Direct use of computed textOffset
+                                x: trimEndVisualX + textOffset,
                                 y: measuredWordSize.height / 2
                             )
                             .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)

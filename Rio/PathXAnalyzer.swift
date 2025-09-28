@@ -24,43 +24,209 @@ struct PathXAnalyzer {
     let totalPathLength: CGFloat
     let bounds: CGRect
 
-    init(path: CGPath, sampleCount: Int = 800) {  // Increased sample count for better accuracy
-        var samples: [Sample] = []
-        var cumulativeX: CGFloat = 0
-        var cumulativeLength: CGFloat = 0
-        var previousPoint: CGPoint?
+    init(path: CGPath, sampleCount: Int = 800) {
+        let result = PathXAnalyzer.prepareSamples(
+            for: path,
+            sampleCount: max(sampleCount, 1)
+        )
 
-        // Sample the path at regular u intervals
-        for i in 0...sampleCount {
-            let u = CGFloat(i) / CGFloat(sampleCount)
-
-            // Get point at parameter u
-            let point = path.pointAtParameter(u) ?? .zero
-
-            if let prev = previousPoint {
-                // Calculate horizontal and path distances
-                let dx = abs(point.x - prev.x)
-                let pathDist = hypot(point.x - prev.x, point.y - prev.y)
-
-                cumulativeX += dx
-                cumulativeLength += pathDist
-            }
-
-            samples.append(Sample(
-                u: u,
-                point: point,
-                cumulativeX: cumulativeX,
-                cumulativeLength: cumulativeLength
-            ))
-
-            previousPoint = point
-        }
-
-        self.samples = samples
-        self.totalXDistance = cumulativeX
-        self.totalPathLength = cumulativeLength
+        self.samples = result.samples
+        self.totalXDistance = result.totalXDistance
+        self.totalPathLength = result.totalPathLength
         self.bounds = path.boundingBox
     }
+    private struct PolylineData {
+        let points: [CGPoint]
+        let cumulativeLengths: [CGFloat]
+        let cumulativeX: [CGFloat]
+        let totalLength: CGFloat
+        let totalX: CGFloat
+    }
+
+    private static func prepareSamples(for path: CGPath, sampleCount: Int) -> (samples: [Sample], totalXDistance: CGFloat, totalPathLength: CGFloat) {
+        let divisions = max(sampleCount, 1)
+        let stepsPerCurve = min(200, max(24, sampleCount / 4))
+        let polyline = polylineData(for: path, stepsPerCurve: stepsPerCurve)
+
+        guard polyline.totalLength > 0, polyline.points.count > 1 else {
+            let origin = polyline.points.first ?? .zero
+            let defaultSample = Sample(u: 0, point: origin, cumulativeX: 0, cumulativeLength: 0)
+            return ([defaultSample], 0, 0)
+        }
+
+        var samples: [Sample] = []
+        samples.reserveCapacity(divisions + 1)
+
+        for index in 0...divisions {
+            let fraction = CGFloat(index) / CGFloat(divisions)
+            let targetLength = fraction * polyline.totalLength
+            let (point, cumulativeX) = point(on: polyline, atLength: targetLength)
+
+            samples.append(Sample(
+                u: fraction,
+                point: point,
+                cumulativeX: cumulativeX,
+                cumulativeLength: targetLength
+            ))
+        }
+
+        return (samples, polyline.totalX, polyline.totalLength)
+    }
+
+    private static func polylineData(for path: CGPath, stepsPerCurve: Int) -> PolylineData {
+        var points: [CGPoint] = []
+        points.reserveCapacity(max(stepsPerCurve * 8, 16))
+
+        var currentPoint: CGPoint = .zero
+        var subpathStart: CGPoint = .zero
+
+        func appendPoint(_ point: CGPoint) {
+            if let last = points.last, last == point {
+                return
+            }
+            points.append(point)
+        }
+
+        path.applyWithBlock { element in
+            switch element.pointee.type {
+            case .moveToPoint:
+                currentPoint = element.pointee.points[0]
+                subpathStart = currentPoint
+                appendPoint(currentPoint)
+            case .addLineToPoint:
+                let end = element.pointee.points[0]
+                appendPoint(end)
+                currentPoint = end
+            case .addQuadCurveToPoint:
+                let control = element.pointee.points[0]
+                let end = element.pointee.points[1]
+                let steps = max(2, stepsPerCurve)
+                for step in 1...steps {
+                    let t = CGFloat(step) / CGFloat(steps)
+                    appendPoint(quadPoint(p0: currentPoint, p1: control, p2: end, t: t))
+                }
+                currentPoint = end
+            case .addCurveToPoint:
+                let control1 = element.pointee.points[0]
+                let control2 = element.pointee.points[1]
+                let end = element.pointee.points[2]
+                let steps = max(3, stepsPerCurve * 2)
+                for step in 1...steps {
+                    let t = CGFloat(step) / CGFloat(steps)
+                    appendPoint(cubicPoint(p0: currentPoint, p1: control1, p2: control2, p3: end, t: t))
+                }
+                currentPoint = end
+            case .closeSubpath:
+                appendPoint(subpathStart)
+                currentPoint = subpathStart
+            @unknown default:
+                break
+            }
+        }
+
+        if points.isEmpty {
+            points.append(.zero)
+        }
+
+        var cumulativeLengths: [CGFloat] = [0]
+        var cumulativeX: [CGFloat] = [0]
+        cumulativeLengths.reserveCapacity(points.count)
+        cumulativeX.reserveCapacity(points.count)
+
+        var totalLength: CGFloat = 0
+        var totalX: CGFloat = 0
+
+        for index in 1..<points.count {
+            let start = points[index - 1]
+            let end = points[index]
+            let segmentLength = hypot(end.x - start.x, end.y - start.y)
+            let segmentX = abs(end.x - start.x)
+
+            totalLength += segmentLength
+            totalX += segmentX
+
+            cumulativeLengths.append(totalLength)
+            cumulativeX.append(totalX)
+        }
+
+        return PolylineData(
+            points: points,
+            cumulativeLengths: cumulativeLengths,
+            cumulativeX: cumulativeX,
+            totalLength: totalLength,
+            totalX: totalX
+        )
+    }
+
+    private static func point(on polyline: PolylineData, atLength targetLength: CGFloat) -> (CGPoint, CGFloat) {
+        guard let totalLength = polyline.cumulativeLengths.last, totalLength > 0 else {
+            let point = polyline.points.first ?? .zero
+            return (point, 0)
+        }
+
+        let clamped = min(max(targetLength, 0), totalLength)
+
+        var low = 0
+        var high = polyline.cumulativeLengths.count - 1
+
+        while low < high {
+            let mid = (low + high) / 2
+            if polyline.cumulativeLengths[mid] < clamped {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+
+        if low == 0 || polyline.cumulativeLengths[low] == clamped {
+            let xValue = polyline.cumulativeX[min(low, polyline.cumulativeX.count - 1)]
+            return (polyline.points[min(low, polyline.points.count - 1)], xValue)
+        }
+
+        let prevIndex = low - 1
+        let prevLength = polyline.cumulativeLengths[prevIndex]
+        let nextLength = polyline.cumulativeLengths[low]
+        let denom = nextLength - prevLength
+
+        let t = denom > 0 ? (clamped - prevLength) / denom : 0
+
+        let startPoint = polyline.points[prevIndex]
+        let endPoint = polyline.points[low]
+        let startX = polyline.cumulativeX[prevIndex]
+        let endX = polyline.cumulativeX[low]
+
+        let interpolatedPoint = CGPoint(
+            x: startPoint.x + (endPoint.x - startPoint.x) * t,
+            y: startPoint.y + (endPoint.y - startPoint.y) * t
+        )
+        let interpolatedX = startX + (endX - startX) * t
+
+        return (interpolatedPoint, interpolatedX)
+    }
+
+    private static func quadPoint(p0: CGPoint, p1: CGPoint, p2: CGPoint, t: CGFloat) -> CGPoint {
+        let oneMinusT = 1 - t
+        let x = oneMinusT * oneMinusT * p0.x + 2 * oneMinusT * t * p1.x + t * t * p2.x
+        let y = oneMinusT * oneMinusT * p0.y + 2 * oneMinusT * t * p1.y + t * t * p2.y
+        return CGPoint(x: x, y: y)
+    }
+
+    private static func cubicPoint(p0: CGPoint, p1: CGPoint, p2: CGPoint, p3: CGPoint, t: CGFloat) -> CGPoint {
+        let oneMinusT = 1 - t
+        let oneMinusTSquared = oneMinusT * oneMinusT
+        let tSquared = t * t
+
+        let a = oneMinusTSquared * oneMinusT
+        let b = 3 * oneMinusTSquared * t
+        let c = 3 * oneMinusT * tSquared
+        let d = tSquared * t
+
+        let x = a * p0.x + b * p1.x + c * p2.x + d * p3.x
+        let y = a * p0.y + b * p1.y + c * p2.y + d * p3.y
+
+        return CGPoint(x: x, y: y)
+    }
+
 
     // Get path length between two x positions
     func pathLengthBetweenX(from startX: CGFloat, to endX: CGFloat) -> CGFloat {
@@ -217,85 +383,3 @@ struct PathXAnalyzer {
     }
 }
 
-// Extension to get the end point of a trimmed path
-extension Path {
-    func trimmedEndPoint(from startT: CGFloat, to endT: CGFloat) -> CGPoint? {
-        // Get the CGPath and find the point at the trim end
-        let cgPath = self.cgPath
-        return cgPath.pointAtParameter(endT)
-    }
-}
-
-// Extension to approximate point at parameter
-extension CGPath {
-    func pointAtParameter(_ t: CGFloat) -> CGPoint? {
-        // Build a list of path segments with their lengths
-        var segments: [(start: CGPoint, end: CGPoint, length: CGFloat)] = []
-        var totalLength: CGFloat = 0
-        var currentPoint = CGPoint.zero
-        var firstPoint = CGPoint.zero
-
-        self.applyWithBlock { element in
-            switch element.pointee.type {
-            case .moveToPoint:
-                currentPoint = element.pointee.points[0]
-                firstPoint = currentPoint
-
-            case .addLineToPoint:
-                let endPoint = element.pointee.points[0]
-                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y)
-                segments.append((start: currentPoint, end: endPoint, length: length))
-                totalLength += length
-                currentPoint = endPoint
-
-            case .addQuadCurveToPoint:
-                // Approximate quad curve with line segment
-                let endPoint = element.pointee.points[1]
-                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y) * 1.2
-                segments.append((start: currentPoint, end: endPoint, length: length))
-                totalLength += length
-                currentPoint = endPoint
-
-            case .addCurveToPoint:
-                // Approximate cubic curve with line segment
-                let endPoint = element.pointee.points[2]
-                let length = hypot(endPoint.x - currentPoint.x, endPoint.y - currentPoint.y) * 1.3
-                segments.append((start: currentPoint, end: endPoint, length: length))
-                totalLength += length
-                currentPoint = endPoint
-
-            case .closeSubpath:
-                if currentPoint != firstPoint {
-                    let length = hypot(firstPoint.x - currentPoint.x, firstPoint.y - currentPoint.y)
-                    segments.append((start: currentPoint, end: firstPoint, length: length))
-                    totalLength += length
-                    currentPoint = firstPoint
-                }
-
-            @unknown default:
-                break
-            }
-        }
-
-        guard totalLength > 0 && !segments.isEmpty else { return nil }
-
-        // Find the point at parameter t
-        let targetLength = t * totalLength
-        var accumulatedLength: CGFloat = 0
-
-        for segment in segments {
-            if accumulatedLength + segment.length >= targetLength {
-                // This segment contains our target point
-                let segmentT = (targetLength - accumulatedLength) / segment.length
-                return CGPoint(
-                    x: segment.start.x + (segment.end.x - segment.start.x) * segmentT,
-                    y: segment.start.y + (segment.end.y - segment.start.y) * segmentT
-                )
-            }
-            accumulatedLength += segment.length
-        }
-
-        // Return last point if we've gone past the end
-        return segments.last?.end ?? currentPoint
-    }
-}
