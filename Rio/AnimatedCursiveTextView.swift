@@ -288,8 +288,8 @@ struct AnimatedCursiveTextView: View {
                     if pathAnalyzer != nil {
                         // Fixed left edge indicator (blue line) - should never move
                         Rectangle()
-                            .fill(Color.blue.opacity(0.5))
-                            .frame(width: 2, height: measuredWordSize.height)
+                            .fill(Color.purple)
+                            .frame(width: 3, height: measuredWordSize.height)
                             .position(
                                 x: fixedLeftEdgeX,  // This should always be at x=0
                                 y: measuredWordSize.height / 2
@@ -298,8 +298,8 @@ struct AnimatedCursiveTextView: View {
 
                         // Trim start indicator (green line)
                         Rectangle()
-                            .fill(Color.green.opacity(0.7))
-                            .frame(width: 2, height: measuredWordSize.height)
+                            .fill(Color.green)
+                            .frame(width: 3, height: measuredWordSize.height)
                             .position(
                                 x: trimStartVisualX + textOffset,
                                 y: measuredWordSize.height / 2
@@ -308,8 +308,8 @@ struct AnimatedCursiveTextView: View {
 
                         // Trim end indicator (red line)
                         Rectangle()
-                            .fill(Color.red.opacity(0.7))
-                            .frame(width: 2, height: measuredWordSize.height)
+                            .fill(Color.red)
+                            .frame(width: 3, height: measuredWordSize.height)
                             .position(
                                 x: trimEndVisualX + textOffset,
                                 y: measuredWordSize.height / 2
