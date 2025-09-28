@@ -16,22 +16,16 @@ struct AnimatedCursiveTextView: View {
     @State private var maxDrawProgressFrom: CGFloat = 0
     @State private var animationTimer: Timer?
 
-    // Smoothing state for textOffset
-    @State private var smoothedTextOffset: CGFloat = 0
-    @State private var textOffsetVelocity: CGFloat = 0
-    @State private var lastOffsetUpdateTime: Date?
-
-    // Smoothing state for drawProgressFrom to prevent jittery trim clipping
+    // Single smoothing system for trim position only
     @State private var smoothedDrawProgressFrom: CGFloat = 0
-    @State private var drawProgressFromVelocity: CGFloat = 0
     @State private var targetDrawProgressFrom: CGFloat = 0
-    private let nominalFrameDuration: CGFloat = 1.0 / 60.0
-    private let offsetSpringStiffness: CGFloat = 180
-    private let offsetSpringDamping: CGFloat = 28
+    @State private var lastUpdateTime: Date?
 
-    // Smoothing constants for drawProgressFrom to prevent jittery trim clipping
-    private let trimSpringStiffness: CGFloat = 120  // Slightly less stiff than offset for smoother motion
-    private let trimSpringDamping: CGFloat = 22     // Slightly less damped for smoother motion
+    // Track the maximum leftward offset to ensure we never move back right
+    @State private var maxLeftwardOffset: CGFloat = 0
+
+    // Fixed left edge position for static window mode
+    private let fixedLeftEdgeX: CGFloat = 0
 
     @State private var pathAnalyzer: PathXAnalyzer?
 
@@ -110,83 +104,69 @@ struct AnimatedCursiveTextView: View {
         guard windowWidth > 0 else { return 0 }
         guard let analyzer = pathAnalyzer else { return 0 }
 
-        let effectiveWidth = min(windowWidth, measuredWordSize.width)
-
-        // Simple approach: offset the text so that the window start appears at x=0
-        // This keeps the visible portion stationary as the window moves
+        // CRITICAL: Direct calculation from smoothed trim position
+        // No separate smoothing for text offset - this ensures perfect synchronization
         let windowStartX = analyzer.pointAtParameter(smoothedDrawProgressFrom).x
-        let offset = -windowStartX
 
-        // Clamp the offset to valid bounds
-        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
-        return max(-maxShift, min(0, offset))
-    }
+        // Mathematical guarantee: leftEdgeX = windowStartX + offset = fixedLeftEdgeX
+        // Therefore: offset = fixedLeftEdgeX - windowStartX
+        var offset = fixedLeftEdgeX - windowStartX
 
-    // Simplified and more accurate text offset calculation for static mode
-    private func updateSmoothedTextOffset(deltaTime rawDeltaTime: CGFloat) {
-        guard staticMode else {
-            smoothedTextOffset = 0
-            textOffsetVelocity = 0
-            lastOffsetUpdateTime = nil
-            return
+        // ENFORCE FORWARD-ONLY: Text can only move LEFT (more negative) or stay still
+        // Track the most leftward position and never allow moving back right
+        if offset < maxLeftwardOffset {
+            // Moving further left is allowed
+            DispatchQueue.main.async {
+                self.maxLeftwardOffset = offset
+            }
+        } else {
+            // Trying to move right - prevent it!
+            offset = maxLeftwardOffset
         }
 
-        let targetOffset = textOffset
-        let clampedDelta = max(nominalFrameDuration * 0.25, min(rawDeltaTime, nominalFrameDuration * 4))
-
-        // Use a simple critically damped spring without complex drift logic
-        // This prevents accumulative errors that cause leftward drift
-        let displacement = targetOffset - smoothedTextOffset
-        let acceleration = offsetSpringStiffness * displacement - offsetSpringDamping * textOffsetVelocity
-        textOffsetVelocity += acceleration * clampedDelta
-        smoothedTextOffset += textOffsetVelocity * clampedDelta
-
-        // Clamp to valid bounds
-        let effectiveWidth = min(windowWidth, measuredWordSize.width)
-        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
-        let minOffset = -maxShift
-        smoothedTextOffset = min(0, max(minOffset, smoothedTextOffset))
-
-        // Snap when very close to target to prevent oscillation
-        if abs(targetOffset - smoothedTextOffset) < 0.1 && abs(textOffsetVelocity) < 0.05 {
-            smoothedTextOffset = targetOffset
-            textOffsetVelocity = 0
+        // Debug output to verify the left edge remains fixed and no rightward movement
+        #if DEBUG
+        let leftEdgePosition = windowStartX + offset
+        if abs(leftEdgePosition - fixedLeftEdgeX) > 0.01 {
+            print("⚠️ Left edge drift detected! Expected: \(fixedLeftEdgeX), Actual: \(leftEdgePosition)")
         }
+        if offset > maxLeftwardOffset + 0.01 {
+            print("⚠️ Rightward movement prevented! Tried: \(offset), Kept: \(maxLeftwardOffset)")
+        }
+        #endif
+
+        return offset
     }
 
-    // Smoothed version of drawProgressFrom for trim animations using a critically damped spring
-    private func updateSmoothedDrawProgressFrom(deltaTime rawDeltaTime: CGFloat) {
+    // Single smoothing function for trim position only
+    private func updateSmoothedDrawProgressFrom() {
         guard staticMode else {
             smoothedDrawProgressFrom = 0
-            drawProgressFromVelocity = 0
             targetDrawProgressFrom = 0
             return
         }
 
-        let clampedDelta = max(nominalFrameDuration * 0.25, min(rawDeltaTime, nominalFrameDuration * 4))
+        // Simple exponential smoothing for forward-only movement
+        // This prevents oscillation and ensures smooth, predictable motion
+        let smoothingFactor: CGFloat = 0.15  // Adjust for smoothness (0.1 = smoother, 0.3 = more responsive)
 
-        // Use the target that was calculated in the main animation loop
-        let desiredFrom = targetDrawProgressFrom
+        // CRITICAL: Only allow forward movement of the trim start (increasing parameter)
+        // This means the text can only move LEFT (more negative offset) or stay still
+        // Never allow backwards movement (which would move text RIGHT)
+        if targetDrawProgressFrom > smoothedDrawProgressFrom {
+            // Smooth forward movement (trim start advances, text moves left)
+            smoothedDrawProgressFrom += (targetDrawProgressFrom - smoothedDrawProgressFrom) * smoothingFactor
 
-        // Critically damped spring for smooth motion
-        let displacement = desiredFrom - smoothedDrawProgressFrom
-        let acceleration = trimSpringStiffness * displacement - trimSpringDamping * drawProgressFromVelocity
-        drawProgressFromVelocity += acceleration * clampedDelta
-        smoothedDrawProgressFrom += drawProgressFromVelocity * clampedDelta
+            // Snap when very close to prevent infinite approach
+            if abs(targetDrawProgressFrom - smoothedDrawProgressFrom) < 0.0001 {
+                smoothedDrawProgressFrom = targetDrawProgressFrom
+            }
+        }
+        // If target is same or behind, do nothing - keep current position
+        // This ensures text NEVER moves back to the right
 
-        // Clamp to valid range [0, 1] and ensure we don't go backwards too much
+        // Ensure we stay within valid bounds
         smoothedDrawProgressFrom = max(0, min(1, smoothedDrawProgressFrom))
-
-        // Prevent going backwards beyond the target (forward-only constraint)
-        if smoothedDrawProgressFrom < desiredFrom {
-            smoothedDrawProgressFrom = max(smoothedDrawProgressFrom, desiredFrom - 0.05) // Allow small backward motion for smoothness
-        }
-
-        // Snap when very close to target to prevent oscillation
-        if abs(desiredFrom - smoothedDrawProgressFrom) < 0.001 && abs(drawProgressFromVelocity) < 0.01 {
-            smoothedDrawProgressFrom = desiredFrom
-            drawProgressFromVelocity = 0
-        }
     }
 
     // Convert linear time progress to path-length-adjusted progress
@@ -244,7 +224,7 @@ struct AnimatedCursiveTextView: View {
                     )
                 )
                 .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
-                .offset(x: staticMode ? smoothedTextOffset : 0)
+                .offset(x: staticMode ? textOffset : 0)  // Direct use of computed textOffset
 
             progressIndicatorView
         }
@@ -265,20 +245,33 @@ struct AnimatedCursiveTextView: View {
                 if staticMode {
                     if let analyzer = pathAnalyzer {
                         let fromPoint = analyzer.pointAtParameter(smoothedDrawProgressFrom)
+
+                        // Fixed left edge indicator (blue line) - should never move
                         Rectangle()
-                            .fill(Color.green.opacity(0.7))
+                            .fill(Color.blue.opacity(0.5))
                             .frame(width: 2, height: measuredWordSize.height)
                             .position(
-                                x: fromPoint.x + smoothedTextOffset,
+                                x: fixedLeftEdgeX,  // This should always be at x=0
                                 y: measuredWordSize.height / 2
                             )
                             .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
 
+                        // Trim start indicator (green line)
+                        Rectangle()
+                            .fill(Color.green.opacity(0.7))
+                            .frame(width: 2, height: measuredWordSize.height)
+                            .position(
+                                x: fromPoint.x + textOffset,  // Direct use of computed textOffset
+                                y: measuredWordSize.height / 2
+                            )
+                            .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
+
+                        // Trim end indicator (red line)
                         Rectangle()
                             .fill(Color.red.opacity(0.7))
                             .frame(width: 2, height: measuredWordSize.height)
                             .position(
-                                x: pipeX + smoothedTextOffset,
+                                x: pipeX + textOffset,  // Direct use of computed textOffset
                                 y: measuredWordSize.height / 2
                             )
                             .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
@@ -307,15 +300,13 @@ struct AnimatedCursiveTextView: View {
         maxPipeX = 0
         maxDrawProgressFrom = 0
 
-        // Reset smoothing state completely to prevent drift
-        smoothedTextOffset = 0
-        textOffsetVelocity = 0
-        lastOffsetUpdateTime = nil
-
-        // Reset trim smoothing state
+        // Reset smoothing state
         smoothedDrawProgressFrom = 0
-        drawProgressFromVelocity = 0
         targetDrawProgressFrom = 0
+        lastUpdateTime = nil
+
+        // Reset forward-only tracking
+        maxLeftwardOffset = 0
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
@@ -332,8 +323,7 @@ struct AnimatedCursiveTextView: View {
             let elapsed = now.timeIntervalSince(startTime)
             let progress = min(elapsed / self.animationDuration, 1.0)
 
-            let rawDeltaTime = self.lastOffsetUpdateTime.map { CGFloat(now.timeIntervalSince($0)) } ?? nominalFrameDuration //Value of type 'AnimatedCursiveTextView' has no member 'lastOffsetUpdateTime'
-            self.lastOffsetUpdateTime = now
+            self.lastUpdateTime = now
 
             if self.staticMode {
                 // Check if we've reached the end with the red pipe
@@ -353,8 +343,7 @@ struct AnimatedCursiveTextView: View {
                     self.targetDrawProgressFrom = newTargetFrom
                     self.drawProgressFrom = newTargetFrom  // Keep for compatibility
 
-                    self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
-                    self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
+                    self.updateSmoothedDrawProgressFrom()
 
                     if self.targetDrawProgressFrom >= 1.0 {
                         self.targetDrawProgressFrom = 1.0
@@ -390,17 +379,14 @@ struct AnimatedCursiveTextView: View {
                     self.maxDrawProgressFrom = 0
                 }
 
-                self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
-                self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
+                self.updateSmoothedDrawProgressFrom()
             } else {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
                 self.targetDrawProgressFrom = 0
                 self.drawProgressFrom = 0
                 self.maxDrawProgressFrom = 0
-
-                self.updateSmoothedTextOffset(deltaTime: rawDeltaTime)
-                self.updateSmoothedDrawProgressFrom(deltaTime: rawDeltaTime)
+                self.smoothedDrawProgressFrom = 0  // Reset for non-static mode
 
                 if progress >= 1.0 {
                     timer.invalidate()
