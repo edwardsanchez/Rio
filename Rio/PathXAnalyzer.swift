@@ -174,44 +174,46 @@ struct PathXAnalyzer {
         let endPoint = pointAtParameter(endParameter)
         let targetX = endPoint.x - xDistance
 
+        // Find the samples that bracket the target X position
         var lowerSample: Sample?
         var upperSample: Sample?
-        var closestSample: Sample? = samples.first
-        var minDist = CGFloat.infinity
 
         for sample in samples {
             guard sample.u <= endParameter else { break }
 
             let x = sample.point.x
-            let dist = abs(x - targetX)
-            if dist < minDist {
-                minDist = dist
-                closestSample = sample
-            }
 
+            // Find the sample just before or at the target X
             if x <= targetX {
-                if let lower = lowerSample {
-                    if x >= lower.point.x {
-                        lowerSample = sample
-                    }
-                } else {
+                if lowerSample == nil || x > lowerSample!.point.x {
                     lowerSample = sample
                 }
             }
 
+            // Find the sample just after the target X
             if x >= targetX {
-                if upperSample == nil || x <= upperSample!.point.x {
+                if upperSample == nil || x < upperSample!.point.x {
                     upperSample = sample
                 }
             }
         }
 
+        // If we have both lower and upper samples, interpolate
         if let lower = lowerSample, let upper = upperSample, upper.point.x != lower.point.x {
             let t = (targetX - lower.point.x) / (upper.point.x - lower.point.x)
             return lower.u + t * (upper.u - lower.u)
         }
 
-        return closestSample?.u ?? 0
+        // If we only have one sample, use it
+        if let lower = lowerSample {
+            return lower.u
+        }
+        if let upper = upperSample {
+            return upper.u
+        }
+
+        // Fallback to the beginning
+        return 0
     }
 }
 

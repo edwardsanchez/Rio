@@ -20,8 +20,6 @@ struct AnimatedCursiveTextView: View {
     @State private var smoothedTextOffset: CGFloat = 0
     @State private var textOffsetVelocity: CGFloat = 0
     @State private var lastOffsetUpdateTime: Date?
-    @State private var maxLeftShift: CGFloat = 0  // Tracks the furthest left shift we've applied
-    @State private var filteredLeftTarget: CGFloat = 0  // Low-pass target that keeps sliding left smoothly
 
     // Smoothing state for drawProgressFrom to prevent jittery trim clipping
     @State private var smoothedDrawProgressFrom: CGFloat = 0
@@ -30,9 +28,6 @@ struct AnimatedCursiveTextView: View {
     private let nominalFrameDuration: CGFloat = 1.0 / 60.0
     private let offsetSpringStiffness: CGFloat = 180
     private let offsetSpringDamping: CGFloat = 28
-    private let minCatchupSpeed: CGFloat = 80     // px per second when accuracy is 0
-    private let maxCatchupSpeed: CGFloat = 2400   // px per second when accuracy is 1
-    private let maxDriftSpeed: CGFloat = 80       // px per second of continual left drift when accuracy is 0
 
     // Smoothing constants for drawProgressFrom to prevent jittery trim clipping
     private let trimSpringStiffness: CGFloat = 120  // Slightly less stiff than offset for smoother motion
@@ -113,86 +108,48 @@ struct AnimatedCursiveTextView: View {
     var textOffset: CGFloat {
         guard staticMode else { return 0 }
         guard windowWidth > 0 else { return 0 }
+        guard let analyzer = pathAnalyzer else { return 0 }
 
         let effectiveWidth = min(windowWidth, measuredWordSize.width)
-        let headX = trimEndPoint.x
-        let overshoot = headX - effectiveWidth
-        guard overshoot > 0 else { return 0 }
 
+        // Simple approach: offset the text so that the window start appears at x=0
+        // This keeps the visible portion stationary as the window moves
+        let windowStartX = analyzer.pointAtParameter(smoothedDrawProgressFrom).x
+        let offset = -windowStartX
+
+        // Clamp the offset to valid bounds
         let maxShift = max(0, measuredWordSize.width - effectiveWidth)
-        return -min(overshoot, maxShift)
+        return max(-maxShift, min(0, offset))
     }
 
-    // Smoothed version of textOffset for animations using a critically damped spring
+    // Simplified and more accurate text offset calculation for static mode
     private func updateSmoothedTextOffset(deltaTime rawDeltaTime: CGFloat) {
         guard staticMode else {
             smoothedTextOffset = 0
             textOffsetVelocity = 0
             lastOffsetUpdateTime = nil
-            maxLeftShift = 0
-            filteredLeftTarget = 0
             return
         }
 
         let targetOffset = textOffset
-
-        let effectiveWidth = min(windowWidth, measuredWordSize.width)
-        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
-        let minOffset = -maxShift
-
-        maxLeftShift = min(maxLeftShift, targetOffset)
-        maxLeftShift = max(maxLeftShift, minOffset)
-
         let clampedDelta = max(nominalFrameDuration * 0.25, min(rawDeltaTime, nominalFrameDuration * 4))
-        let clampedAccuracy = min(max(trackingAccuracy, 0), 1)
 
-        let lerp: (CGFloat, CGFloat, CGFloat) -> CGFloat = { start, end, t in
-            start + (end - start) * t
-        }
-
-        let catchupSpeed = lerp(minCatchupSpeed, maxCatchupSpeed, clampedAccuracy)
-        let driftSpeed = lerp(maxDriftSpeed, 0, clampedAccuracy)
-        let overshootAllowance = lerp(80, 8, clampedAccuracy)
-
-        var nextFiltered = filteredLeftTarget
-        let deltaToTarget = maxLeftShift - nextFiltered
-
-        if deltaToTarget < 0 {
-            let maxStep = -catchupSpeed * clampedDelta
-            nextFiltered += max(deltaToTarget, maxStep)
-        } else if maxLeftShift < 0 && driftSpeed > 0 {
-            let driftLimit = max(maxLeftShift - overshootAllowance, minOffset)
-            if nextFiltered > driftLimit {
-                let driftStep = -driftSpeed * clampedDelta
-                nextFiltered = max(nextFiltered + driftStep, driftLimit)
-            }
-        }
-
-        if nextFiltered > filteredLeftTarget {
-            nextFiltered = filteredLeftTarget
-        }
-
-        nextFiltered = max(nextFiltered, minOffset)
-        filteredLeftTarget = nextFiltered
-
-        let desiredOffset = filteredLeftTarget
-
-        // Critically damped spring keeps motion smooth while remaining responsive
-        let displacement = desiredOffset - smoothedTextOffset
+        // Use a simple critically damped spring without complex drift logic
+        // This prevents accumulative errors that cause leftward drift
+        let displacement = targetOffset - smoothedTextOffset
         let acceleration = offsetSpringStiffness * displacement - offsetSpringDamping * textOffsetVelocity
         textOffsetVelocity += acceleration * clampedDelta
         smoothedTextOffset += textOffsetVelocity * clampedDelta
 
-        // Clamp to valid scrolling bounds, enforce forward-only motion, and snap when near target
+        // Clamp to valid bounds
+        let effectiveWidth = min(windowWidth, measuredWordSize.width)
+        let maxShift = max(0, measuredWordSize.width - effectiveWidth)
+        let minOffset = -maxShift
         smoothedTextOffset = min(0, max(minOffset, smoothedTextOffset))
 
-        if smoothedTextOffset > desiredOffset {
-            smoothedTextOffset = desiredOffset
-            textOffsetVelocity = min(textOffsetVelocity, 0)
-        }
-
-        if abs(desiredOffset - smoothedTextOffset) < 0.1 && abs(textOffsetVelocity) < 0.05 {
-            smoothedTextOffset = desiredOffset
+        // Snap when very close to target to prevent oscillation
+        if abs(targetOffset - smoothedTextOffset) < 0.1 && abs(textOffsetVelocity) < 0.05 {
+            smoothedTextOffset = targetOffset
             textOffsetVelocity = 0
         }
     }
@@ -234,40 +191,44 @@ struct AnimatedCursiveTextView: View {
 
     // Convert linear time progress to path-length-adjusted progress
     private func adjustProgressForPathLength(_ linearProgress: CGFloat) -> CGFloat {
-        guard !variableSpeed else { return linearProgress }
         guard let analyzer = pathAnalyzer else { return linearProgress }
 
-        // When variableSpeed is false, we want the visual progress to be linear
-        // This means we need to adjust the path parameter based on path length density
-        let targetPathLength = linearProgress * analyzer.totalPathLength
+        if variableSpeed {
+            // Variable speed mode: use linear progress directly
+            return linearProgress
+        } else {
+            // Fixed speed mode: adjust for path length to achieve linear visual movement
+            // This ensures the trim head moves at constant visual speed
+            let targetPathLength = linearProgress * analyzer.totalPathLength
 
-        // Use binary search for efficiency (O(log n) instead of O(n))
-        let samples = analyzer.samples
-        var low = 0
-        var high = samples.count - 1
+            // Use binary search for efficiency (O(log n) instead of O(n))
+            let samples = analyzer.samples
+            var low = 0
+            var high = samples.count - 1
 
-        while low < high {
-            let mid = (low + high) / 2
-            if samples[mid].cumulativeLength < targetPathLength {
-                low = mid + 1
-            } else {
-                high = mid
+            while low < high {
+                let mid = (low + high) / 2
+                if samples[mid].cumulativeLength < targetPathLength {
+                    low = mid + 1
+                } else {
+                    high = mid
+                }
             }
-        }
 
-        // Interpolate between samples for smooth results
-        if low > 0 && low < samples.count {
-            let prevSample = samples[low - 1]
-            let currentSample = samples[low]
-            let lengthDiff = currentSample.cumulativeLength - prevSample.cumulativeLength
+            // Interpolate between samples for smooth results
+            if low > 0 && low < samples.count {
+                let prevSample = samples[low - 1]
+                let currentSample = samples[low]
+                let lengthDiff = currentSample.cumulativeLength - prevSample.cumulativeLength
 
-            if lengthDiff > 0 {
-                let t = (targetPathLength - prevSample.cumulativeLength) / lengthDiff
-                return prevSample.u + t * (currentSample.u - prevSample.u)
+                if lengthDiff > 0 {
+                    let t = (targetPathLength - prevSample.cumulativeLength) / lengthDiff
+                    return prevSample.u + t * (currentSample.u - prevSample.u)
+                }
             }
-        }
 
-        return low < samples.count ? samples[low].u : 1.0
+            return low < samples.count ? samples[low].u : 1.0
+        }
     }
 
     var body: some View {
@@ -346,12 +307,10 @@ struct AnimatedCursiveTextView: View {
         maxPipeX = 0
         maxDrawProgressFrom = 0
 
-        // Reset smoothing state
+        // Reset smoothing state completely to prevent drift
         smoothedTextOffset = 0
         textOffsetVelocity = 0
         lastOffsetUpdateTime = nil
-        maxLeftShift = 0
-        filteredLeftTarget = 0
 
         // Reset trim smoothing state
         smoothedDrawProgressFrom = 0
@@ -373,7 +332,7 @@ struct AnimatedCursiveTextView: View {
             let elapsed = now.timeIntervalSince(startTime)
             let progress = min(elapsed / self.animationDuration, 1.0)
 
-            let rawDeltaTime = self.lastOffsetUpdateTime.map { CGFloat(now.timeIntervalSince($0)) } ?? nominalFrameDuration
+            let rawDeltaTime = self.lastOffsetUpdateTime.map { CGFloat(now.timeIntervalSince($0)) } ?? nominalFrameDuration //Value of type 'AnimatedCursiveTextView' has no member 'lastOffsetUpdateTime'
             self.lastOffsetUpdateTime = now
 
             if self.staticMode {
@@ -411,12 +370,15 @@ struct AnimatedCursiveTextView: View {
                 self.drawProgress = adjustedProgress
 
                 if self.windowWidth > 0 {
-                    let effectiveWidth = min(self.windowWidth, analyzer.bounds.width)
+                    // Use measuredWordSize.width instead of analyzer.bounds.width for consistency
+                    let effectiveWidth = min(self.windowWidth, self.measuredWordSize.width)
                     let windowStart = analyzer.parameterXPixelsBefore(
                         endParameter: adjustedProgress,
                         xDistance: effectiveWidth
                     )
                     let clampedFrom = min(windowStart, adjustedProgress)
+
+                    // Ensure forward-only progression to prevent drift
                     if clampedFrom > self.maxDrawProgressFrom {
                         self.maxDrawProgressFrom = clampedFrom
                     }
