@@ -7,7 +7,7 @@
 
 import SwiftUI
 import SVGPath
-import os.log
+import OSLog
 
 struct AnimatedCursiveTextView: View {
     @State private var drawProgress: CGFloat = 0
@@ -148,8 +148,8 @@ struct AnimatedCursiveTextView: View {
         #if DEBUG
         let actualLeftEdge = trimStartVisualX + ratchetedOffset
         if abs(actualLeftEdge - fixedLeftEdgeX) > 0.01 {
-            print("⚠️ Left edge alignment: Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
-            print("   TrimStartVisualX: \(trimStartVisualX), Ideal: \(idealOffset), Ratcheted: \(ratchetedOffset)")
+            Logger.animatedCursiveText.debug("⚠️ Left edge alignment: Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
+            Logger.animatedCursiveText.debug("   TrimStartVisualX: \(trimStartVisualX), Ideal: \(idealOffset), Ratcheted: \(ratchetedOffset)")
         }
         #endif
 
@@ -196,7 +196,7 @@ struct AnimatedCursiveTextView: View {
             // Visual position blocked from moving backward
             #if DEBUG
             if targetDrawProgressFrom < previousVisualFrom - 0.0001 {
-                print("🛡️ Visual trim movement blocked: target \(targetDrawProgressFrom) < current \(previousVisualFrom)")
+                Logger.animatedCursiveText.debug("🛡️ Visual trim movement blocked: target \(targetDrawProgressFrom) < current \(previousVisualFrom)")
             }
             #endif
         }
@@ -207,10 +207,10 @@ struct AnimatedCursiveTextView: View {
         #if DEBUG
         if abs(naturalDrawProgressFrom - previousNaturalFrom) > 0.0001 {
             let direction = naturalDrawProgressFrom > previousNaturalFrom ? "FORWARD" : "BACKWARD"
-            print("📍 Natural position: \(previousNaturalFrom) → \(naturalDrawProgressFrom) (\(direction))")
+            Logger.animatedCursiveText.debug("📍 Natural position: \(previousNaturalFrom) → \(naturalDrawProgressFrom) (\(direction))")
         }
         if abs(smoothedDrawProgressFrom - previousVisualFrom) > 0.0001 {
-            print("👁️ Visual position: \(previousVisualFrom) → \(smoothedDrawProgressFrom) (FORWARD ONLY)")
+            Logger.animatedCursiveText.debug("👁️ Visual position: \(previousVisualFrom) → \(smoothedDrawProgressFrom) (FORWARD ONLY)")
         }
         #endif
     }

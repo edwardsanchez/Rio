@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SVGPath
+import OSLog
 
 struct CursiveLetter {
     let character: String
@@ -26,9 +27,9 @@ struct CursiveLetter {
                 let char = String(scalar)
                 if let letter = loadLetter(character: char, filename: "Capital-\(char)") {
                     letters.append(letter)
-                    print("Successfully loaded letter: \(char)")
+                    Logger.cursiveLetter.debug("Successfully loaded letter: \(char)")
                 } else {
-                    print("Failed to load letter: \(char)")
+                    Logger.cursiveLetter.warning("Failed to load letter: \(char)")
                 }
             }
         }
@@ -39,9 +40,9 @@ struct CursiveLetter {
                 let char = String(scalar)
                 if let letter = loadLetter(character: char) {
                     letters.append(letter)
-                    print("Successfully loaded letter: \(char)")
+                    Logger.cursiveLetter.debug("Successfully loaded letter: \(char)")
                 } else {
-                    print("Failed to load letter: \(char)")
+                    Logger.cursiveLetter.fault("Failed to load letter: \(char)")
                 }
             }
         }
@@ -52,9 +53,9 @@ struct CursiveLetter {
                 let char = String(character)
                 if let letter = loadLetter(character: char) {
                     letters.append(letter)
-                    print("Successfully loaded number: \(char)")
+                    Logger.cursiveLetter.debug("Successfully loaded number: \(char)")
                 } else {
-                    print("Failed to load number: \(char)")
+                    Logger.cursiveLetter.fault("Failed to load number: \(char)")
                 }
             }
         }
@@ -62,12 +63,12 @@ struct CursiveLetter {
         // Load space
         if let spaceLetter = loadLetter(character: " ", filename: "space") {
             letters.append(spaceLetter)
-            print("Successfully loaded space")
+            Logger.cursiveLetter.debug("Successfully loaded space")
         } else {
-            print("Failed to load space")
+            Logger.cursiveLetter.fault("Failed to load space")
         }
 
-        print("Total letters loaded: \(letters.count)")
+        Logger.cursiveLetter.info("Total letters loaded: \(letters.count)")
         return letters
     }()
     
@@ -82,15 +83,15 @@ struct CursiveLetter {
             data = try? Data(contentsOf: url)
         }
         guard let svgData = data, let svgString = String(data: svgData, encoding: .utf8) else {
-            print("Failed to load SVG file for character: \(character)")
+            Logger.cursiveLetter.fault("Failed to load SVG file for character: \(character)")
             return nil
         }
-        
+
         let metrics = parseMetrics(from: svgString)
-        
+
         // Extract the path data from the SVG
         guard let pathData = extractPathData(from: svgString) else {
-            print("Failed to extract path data for character: \(character)")
+            Logger.cursiveLetter.fault("Failed to extract path data for character: \(character)")
             return nil
         }
         
@@ -143,7 +144,7 @@ struct CursiveLetter {
                 )
             }
         } catch {
-            print("Failed to create CGPath for character \(character): \(error)")
+            Logger.cursiveLetter.fault("Failed to create CGPath for character \(character): \(error)")
             return nil
         }
     }
@@ -197,12 +198,12 @@ struct CursiveLetter {
                let match = regex.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)),
                let range = Range(match.range(at: 1), in: svgString) {
                 let pathData = String(svgString[range])
-                print("Extracted path data: \(pathData.prefix(50))...")
+                Logger.cursiveLetter.debug("Extracted path data: \(pathData.prefix(50))...")
                 return pathData
             }
         }
 
-        print("Failed to extract path data from SVG")
+        Logger.cursiveLetter.fault("Failed to extract path data from SVG")
         return nil
     }
     
