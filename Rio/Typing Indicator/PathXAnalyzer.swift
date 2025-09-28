@@ -8,7 +8,6 @@
 
 import SwiftUI
 import SVGPath
-import os.log
 
 // X-parametrized path analyzer
 struct PathXAnalyzer {

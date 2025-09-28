@@ -21,7 +21,6 @@ struct AnimatedCursiveTextView: View {
     @State private var targetDrawProgressFrom: CGFloat = 0
     @State private var naturalDrawProgressFrom: CGFloat = 0   // Forward-only for offset calculation
     @State private var maxNaturalDrawProgressFrom: CGFloat = 0 // Track maximum natural position reached
-    @State private var lastUpdateTime: Date?
 
     // Ratchet mechanism for textOffset - only moves leftward
     @State private var minTextOffset: CGFloat = 0  // Most negative offset reached
@@ -348,7 +347,6 @@ struct AnimatedCursiveTextView: View {
         smoothedDrawProgressFrom = 0
         naturalDrawProgressFrom = 0
         targetDrawProgressFrom = 0
-        lastUpdateTime = nil
 
         // Reset forward-only tracking
         maxNaturalDrawProgressFrom = 0
@@ -370,8 +368,6 @@ struct AnimatedCursiveTextView: View {
             let now = Date()
             let elapsed = now.timeIntervalSince(startTime)
             let progress = min(elapsed / self.animationDuration, 1.0)
-
-            self.lastUpdateTime = now
 
             if self.staticMode {
                 // Check if we've reached the end with the red pipe
