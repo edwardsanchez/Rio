@@ -16,16 +16,17 @@ struct AnimatedCursiveTextView: View {
     @State private var maxDrawProgressFrom: CGFloat = 0
     @State private var animationTimer: Timer?
 
-    // Single smoothing system for trim position only
-    @State private var smoothedDrawProgressFrom: CGFloat = 0
+    // Dual tracking: visual trim position vs offset calculation position
+    @State private var smoothedDrawProgressFrom: CGFloat = 0  // Forward-only for visual trim
     @State private var targetDrawProgressFrom: CGFloat = 0
+    @State private var naturalDrawProgressFrom: CGFloat = 0   // Can move backward for offset calculation
     @State private var lastUpdateTime: Date?
-
-    // Track the maximum leftward offset to ensure we never move back right
-    @State private var maxLeftwardOffset: CGFloat = 0
 
     // Fixed left edge position for static window mode
     private let fixedLeftEdgeX: CGFloat = 0
+
+    // Forward-only movement tracking
+    @State private var maxLeftwardOffset: CGFloat = 0  // Most negative offset ever reached (starts at 0, becomes negative)
 
     @State private var pathAnalyzer: PathXAnalyzer?
 
@@ -104,69 +105,85 @@ struct AnimatedCursiveTextView: View {
         guard windowWidth > 0 else { return 0 }
         guard let analyzer = pathAnalyzer else { return 0 }
 
-        // CRITICAL: Direct calculation from smoothed trim position
-        // No separate smoothing for text offset - this ensures perfect synchronization
-        let windowStartX = analyzer.pointAtParameter(smoothedDrawProgressFrom).x
+        // CRITICAL: Use naturalDrawProgressFrom for offset calculation to maintain fixed left edge
+        // This allows the left edge to stay at 0 even when visual trim is prevented from moving backward
+        // leftEdgeX = naturalWindowStartX + offset = fixedLeftEdgeX
+        // Therefore: offset = fixedLeftEdgeX - naturalWindowStartX
 
-        // Mathematical guarantee: leftEdgeX = windowStartX + offset = fixedLeftEdgeX
-        // Therefore: offset = fixedLeftEdgeX - windowStartX
-        var offset = fixedLeftEdgeX - windowStartX
+        let naturalWindowStartX = analyzer.pointAtParameter(naturalDrawProgressFrom).x
+        let offset = fixedLeftEdgeX - naturalWindowStartX
 
-        // ENFORCE FORWARD-ONLY: Text can only move LEFT (more negative) or stay still
-        // Track the most leftward position and never allow moving back right
-        if offset < maxLeftwardOffset {
-            // Moving further left is allowed
-            DispatchQueue.main.async {
-                self.maxLeftwardOffset = offset
-            }
-        } else {
-            // Trying to move right - prevent it!
-            offset = maxLeftwardOffset
-        }
+        // Apply forward-only constraint using the enforced offset
+        // This is set by the animation timer, not modified here to avoid state mutation during view update
+        let constrainedOffset = min(offset, maxLeftwardOffset)
 
-        // Debug output to verify the left edge remains fixed and no rightward movement
+        // Debug output to verify the left edge remains fixed
         #if DEBUG
-        let leftEdgePosition = windowStartX + offset
-        if abs(leftEdgePosition - fixedLeftEdgeX) > 0.01 {
-            print("⚠️ Left edge drift detected! Expected: \(fixedLeftEdgeX), Actual: \(leftEdgePosition)")
+        let actualLeftEdge = naturalWindowStartX + constrainedOffset
+        if abs(actualLeftEdge - fixedLeftEdgeX) > 0.01 {
+            print("⚠️ Left edge drift detected! Expected: \(fixedLeftEdgeX), Actual: \(actualLeftEdge)")
+            print("   NaturalWindowStartX: \(naturalWindowStartX), Offset: \(constrainedOffset)")
+            print("   naturalDrawProgressFrom: \(naturalDrawProgressFrom), visualFrom: \(smoothedDrawProgressFrom)")
         }
-        if offset > maxLeftwardOffset + 0.01 {
-            print("⚠️ Rightward movement prevented! Tried: \(offset), Kept: \(maxLeftwardOffset)")
+
+        if constrainedOffset > offset {
+            print("� Forward-only constraint applied: \(offset) → \(constrainedOffset)")
         }
         #endif
 
-        return offset
+        return constrainedOffset
     }
 
-    // Single smoothing function for trim position only
+    // Dual smoothing: visual (forward-only) and natural (can move backward)
     private func updateSmoothedDrawProgressFrom() {
         guard staticMode else {
             smoothedDrawProgressFrom = 0
+            naturalDrawProgressFrom = 0
             targetDrawProgressFrom = 0
             return
         }
 
-        // Simple exponential smoothing for forward-only movement
-        // This prevents oscillation and ensures smooth, predictable motion
-        let smoothingFactor: CGFloat = 0.15  // Adjust for smoothness (0.1 = smoother, 0.3 = more responsive)
+        let smoothingFactor: CGFloat = 0.15
+        let previousNaturalFrom = naturalDrawProgressFrom
+        let previousVisualFrom = smoothedDrawProgressFrom
 
-        // CRITICAL: Only allow forward movement of the trim start (increasing parameter)
-        // This means the text can only move LEFT (more negative offset) or stay still
-        // Never allow backwards movement (which would move text RIGHT)
+        // 1. Update naturalDrawProgressFrom - this can move backward and is used for offset calculation
+        // This ensures the left edge stays mathematically fixed at 0
+        naturalDrawProgressFrom += (targetDrawProgressFrom - naturalDrawProgressFrom) * smoothingFactor
+        if abs(targetDrawProgressFrom - naturalDrawProgressFrom) < 0.0001 {
+            naturalDrawProgressFrom = targetDrawProgressFrom
+        }
+        naturalDrawProgressFrom = max(0, min(1, naturalDrawProgressFrom))
+
+        // 2. Update smoothedDrawProgressFrom - this is forward-only and used for visual trim
+        // This ensures the trim window only moves forward visually
         if targetDrawProgressFrom > smoothedDrawProgressFrom {
-            // Smooth forward movement (trim start advances, text moves left)
+            // Allow forward movement
             smoothedDrawProgressFrom += (targetDrawProgressFrom - smoothedDrawProgressFrom) * smoothingFactor
-
-            // Snap when very close to prevent infinite approach
             if abs(targetDrawProgressFrom - smoothedDrawProgressFrom) < 0.0001 {
                 smoothedDrawProgressFrom = targetDrawProgressFrom
             }
+        } else {
+            // Visual position blocked from moving backward
+            #if DEBUG
+            if targetDrawProgressFrom < previousVisualFrom - 0.0001 {
+                print("🛡️ Visual trim movement blocked: target \(targetDrawProgressFrom) < current \(previousVisualFrom)")
+            }
+            #endif
         }
-        // If target is same or behind, do nothing - keep current position
-        // This ensures text NEVER moves back to the right
 
-        // Ensure we stay within valid bounds
         smoothedDrawProgressFrom = max(0, min(1, smoothedDrawProgressFrom))
+
+        // Debug logging for position changes
+        #if DEBUG
+        if abs(naturalDrawProgressFrom - previousNaturalFrom) > 0.0001 {
+            let direction = naturalDrawProgressFrom > previousNaturalFrom ? "FORWARD" : "BACKWARD"
+            print("📍 Natural position: \(previousNaturalFrom) → \(naturalDrawProgressFrom) (\(direction))")
+        }
+        if abs(smoothedDrawProgressFrom - previousVisualFrom) > 0.0001 {
+            print("👁️ Visual position: \(previousVisualFrom) → \(smoothedDrawProgressFrom) (FORWARD ONLY)")
+        }
+        #endif
     }
 
     // Convert linear time progress to path-length-adjusted progress
@@ -302,11 +319,12 @@ struct AnimatedCursiveTextView: View {
 
         // Reset smoothing state
         smoothedDrawProgressFrom = 0
+        naturalDrawProgressFrom = 0
         targetDrawProgressFrom = 0
         lastUpdateTime = nil
 
         // Reset forward-only tracking
-        maxLeftwardOffset = 0
+        maxLeftwardOffset = 0  // Start at 0, will become negative as text moves left
 
         // Get path analyzer for window calculations
         let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
@@ -340,8 +358,12 @@ struct AnimatedCursiveTextView: View {
 
                     let startFrom = self.maxDrawProgressFrom
                     let newTargetFrom = startFrom + (1.0 - startFrom) * endProgress
-                    self.targetDrawProgressFrom = newTargetFrom
-                    self.drawProgressFrom = newTargetFrom  // Keep for compatibility
+
+                    // CRITICAL: Only allow forward movement
+                    if newTargetFrom > self.targetDrawProgressFrom {
+                        self.targetDrawProgressFrom = newTargetFrom
+                        self.drawProgressFrom = newTargetFrom  // Keep for compatibility
+                    }
 
                     self.updateSmoothedDrawProgressFrom()
 
@@ -367,12 +389,15 @@ struct AnimatedCursiveTextView: View {
                     )
                     let clampedFrom = min(windowStart, adjustedProgress)
 
-                    // Ensure forward-only progression to prevent drift
+                    // CRITICAL: Ensure forward-only progression
+                    // This is the KEY to preventing left edge drift
                     if clampedFrom > self.maxDrawProgressFrom {
                         self.maxDrawProgressFrom = clampedFrom
+                        self.targetDrawProgressFrom = clampedFrom
+                        self.drawProgressFrom = clampedFrom  // Keep for compatibility
                     }
-                    self.targetDrawProgressFrom = self.maxDrawProgressFrom
-                    self.drawProgressFrom = self.maxDrawProgressFrom  // Keep for compatibility
+                    // If clampedFrom would move backward, keep the current position
+                    // This ensures smoothedDrawProgressFrom never decreases
                 } else {
                     self.targetDrawProgressFrom = 0
                     self.drawProgressFrom = 0
@@ -380,6 +405,20 @@ struct AnimatedCursiveTextView: View {
                 }
 
                 self.updateSmoothedDrawProgressFrom()
+
+                // Update forward-only constraint in animation timer (safe to modify state here)
+                if let analyzer = self.pathAnalyzer {
+                    let naturalWindowStartX = analyzer.pointAtParameter(self.naturalDrawProgressFrom).x
+                    let currentOffset = self.fixedLeftEdgeX - naturalWindowStartX
+
+                    // Update maxLeftwardOffset to track the furthest left position
+                    if currentOffset < self.maxLeftwardOffset {
+                        self.maxLeftwardOffset = currentOffset
+                        #if DEBUG
+                        print("📍 New leftmost position: \(currentOffset)")
+                        #endif
+                    }
+                }
             } else {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
