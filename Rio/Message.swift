@@ -69,7 +69,7 @@ struct MessageListView: View {
                             .padding(.vertical, 5)
                     }
 
-                    MessageBubble(
+                    MessageBubbleView(
                         message: message,
                         showTail: showTail,
                         isNew: isNew,
@@ -171,7 +171,7 @@ struct Message: Identifiable {
     }
 }
 
-struct MessageBubble: View {
+struct MessageBubbleView: View {
     let message: Message
     let showTail: Bool
     let isNew: Bool
