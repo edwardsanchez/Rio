@@ -76,16 +76,6 @@ struct ChatInputView: View {
                     TextField("Message", text: $message, axis: .vertical)
                         .lineLimit(1...5) // Allow 1 to 5 lines
                         .padding([.vertical, .leading], 15)
-                        .background {
-                            Color.clear
-                                .onGeometryChange(for: CGRect.self) { proxy in
-                                    // Capture the TextField frame in the main container coordinate space
-                                    // Same coordinate space as the scroll view
-                                    proxy.frame(in: .named("field"))
-                                } action: { newValue in
-                                    inputFieldFrame = newValue
-                                }
-                        }
                         .focused($isMessageFieldFocused)
                         .onSubmit {
                             sendMessage()
@@ -96,6 +86,13 @@ struct ChatInputView: View {
                         .padding(.bottom, 5)
                 }
                 .glassEffect(.regular.tint(.base.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    // Capture the text input field frame (excluding the plus button)
+                    // This is after the glass effect and padding are applied
+                    proxy.frame(in: .global)
+                } action: { newValue in
+                    inputFieldFrame = newValue
+                }
             }
         }
         .padding(.horizontal, 30)
