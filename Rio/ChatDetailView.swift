@@ -59,6 +59,13 @@ struct ChatDetailView: View {
                 geometry.contentOffset.y
             } action: { oldValue, newValue in
                 let currentY = newValue
+
+                // Initialize previousScrollY on first call to prevent bad initial positioning
+                if previousScrollY == 0 {
+                    previousScrollY = currentY
+                    return
+                }
+
                 let velocity = currentY - previousScrollY
 
                 // Apply smoothing to prevent jittery movement
@@ -94,6 +101,10 @@ struct ChatDetailView: View {
                 scrollToLatestMessageInstant()
             }
             .onAppear {
+                // Initialize scroll tracking state
+                scrollVelocity = 0
+                previousScrollY = 0
+
                 // Scroll to the bottom when the view first appears
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     scrollToLatestMessage()
