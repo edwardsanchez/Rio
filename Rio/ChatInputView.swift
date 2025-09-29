@@ -92,6 +92,7 @@ struct ChatInputView: View {
                     proxy.frame(in: .global)
                 } action: { newValue in
                     inputFieldFrame = newValue
+                    inputFieldFrame.origin.x -= 15
                 }
             }
         }

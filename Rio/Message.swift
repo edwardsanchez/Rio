@@ -236,7 +236,7 @@ struct MessageBubbleView: View {
         .opacity(opacity)
         .onAppear {
             if isNew {
-                withAnimation(animationStyle) {
+                withAnimation(.smooth(duration: 0.5)) {
                     newMessageId = nil
                 }
             }
@@ -283,14 +283,6 @@ struct MessageBubbleView: View {
             return 0
         }
         return 1
-    }
-
-    private var animationStyle: Animation {
-        if message.isInbound {
-            return .spring(duration: 0.5)
-        } else {
-            return .smooth(duration: 0.5)
-        }
     }
 
     private func calculateYOffset() -> CGFloat {
