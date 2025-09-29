@@ -26,6 +26,10 @@ struct ChatDetailView: View {
     // Auto-reply state for toolbar
     @State private var autoReplyEnabled = true
 
+    // Physics-based parallax effect state
+    @State private var scrollVelocity: CGFloat = 0
+    @State private var previousScrollY: CGFloat = 0
+
     init(chat: Chat) {
         self.chat = chat
         _messages = State(initialValue: chat.messages)
@@ -39,7 +43,8 @@ struct ChatDetailView: View {
                     messages: messages,
                     newMessageId: $newMessageId,
                     inputFieldFrame: inputFieldFrame,
-                    scrollViewFrame: scrollViewFrame
+                    scrollViewFrame: scrollViewFrame,
+                    scrollVelocity: scrollVelocity
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -50,6 +55,27 @@ struct ChatDetailView: View {
             .scrollClipDisabled()
             .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentOffset.y
+            } action: { oldValue, newValue in
+                let currentY = newValue
+                let velocity = currentY - previousScrollY
+
+                // Apply smoothing to prevent jittery movement
+                withAnimation(.smooth(duration: 0.1)) {
+                    scrollVelocity = velocity
+                }
+
+                previousScrollY = currentY
+            }
+            .onScrollPhaseChange { oldPhase, newPhase in
+                // When scrolling stops, smoothly return to neutral position
+                if newPhase == .idle {
+                    withAnimation(.smooth(duration: 0.8)) {
+                        scrollVelocity = 0
+                    }
+                }
+            }
             .onChange(of: messages.count) { _, _ in
                 // Auto-scroll to the latest message when a new message is added
                 scrollToLatestMessage()

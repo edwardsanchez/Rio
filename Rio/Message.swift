@@ -55,6 +55,7 @@ struct MessageListView: View {
     @Binding var newMessageId: UUID?
     let inputFieldFrame: CGRect
     let scrollViewFrame: CGRect
+    let scrollVelocity: CGFloat
 
     var body: some View {
         VStack(spacing: 0) {
@@ -76,7 +77,8 @@ struct MessageListView: View {
                         isNew: isNew,
                         inputFieldFrame: inputFieldFrame,
                         scrollViewFrame: scrollViewFrame,
-                        newMessageId: $newMessageId
+                        newMessageId: $newMessageId,
+                        scrollVelocity: scrollVelocity
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
@@ -179,14 +181,16 @@ struct MessageBubbleView: View {
     let inputFieldFrame: CGRect
     let scrollViewFrame: CGRect
     @Binding var newMessageId: UUID?
+    let scrollVelocity: CGFloat
 
-    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil)) {
+    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil), scrollVelocity: CGFloat = 0) {
         self.message = message
         self.showTail = showTail
         self.isNew = isNew
         self.inputFieldFrame = inputFieldFrame
         self.scrollViewFrame = scrollViewFrame
         self._newMessageId = newMessageId
+        self.scrollVelocity = scrollVelocity
     }
 
     var body: some View {
@@ -232,7 +236,8 @@ struct MessageBubbleView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
-        .offset(x: xOffset, y: yOffset)
+        .offset(x: xOffset, y: yOffset + parallaxOffset)
+        .animation(.interactiveSpring(response: 0.8, dampingFraction: 0.3), value: parallaxOffset)
         .opacity(opacity)
         .onAppear {
             if isNew {
@@ -283,6 +288,23 @@ struct MessageBubbleView: View {
             return 0
         }
         return 1
+    }
+
+    // Physics-based parallax offset for jelly effect
+    private var parallaxOffset: CGFloat {
+        // Don't apply parallax during new message animations
+        guard !isNew else { return 0 }
+
+        // Create different multipliers for variety (like in the sample code)
+        let baseMultiplier: CGFloat = message.isInbound ? 0.8 : 1.2
+
+        // Add some variation based on message position in the list
+        let hashValue = abs(message.id.hashValue)
+        let variation = CGFloat((hashValue % 100)) / 100.0 // 0.0 to 1.0
+        let multiplier = baseMultiplier + (variation * 0.8) // Add up to 0.8 variation
+
+        // Apply the physics-based offset with spring animation
+        return -scrollVelocity * multiplier
     }
 
     private func calculateYOffset() -> CGFloat {
