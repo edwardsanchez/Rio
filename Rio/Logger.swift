@@ -16,5 +16,7 @@ extension Logger {
     
     /// Logger for AnimatedCursiveText component - handles text animation, trim calculations, and offset tracking
     static let animatedCursiveText = Logger(subsystem: subsystem, category: "Animated Cursive Text")
+    
+    static let message = Logger(subsystem: subsystem, category: "Message")
 }
 

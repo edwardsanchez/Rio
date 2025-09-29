@@ -15,7 +15,6 @@ struct ChatDetailView: View {
     @State private var newMessageId: UUID? = nil
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
-    @State private var inputFieldHeight: CGFloat = 50 // Track input field height for dynamic spacing
     @State private var scrollPosition = ScrollPosition()
 
     // Track if user is manually scrolling to avoid interrupting
@@ -63,7 +62,7 @@ struct ChatDetailView: View {
                     }
                 }
             }
-            .onChange(of: inputFieldHeight) { _, _ in
+            .onChange(of: inputFieldFrame.height) { _, _ in
                 // Auto-scroll when input field height changes to keep latest message visible
                 // Use instant scroll to avoid competing animations
                 scrollToLatestMessageInstant()
@@ -78,7 +77,6 @@ struct ChatDetailView: View {
 
             ChatInputView(
                 inputFieldFrame: $inputFieldFrame,
-                inputFieldHeight: $inputFieldHeight,
                 shouldFocusInput: $shouldFocusInput,
                 messages: $messages,
                 newMessageId: $newMessageId,
@@ -109,6 +107,7 @@ struct ChatDetailView: View {
                 }
             }
         }
+        .coordinateSpace(name: "field")
     }
 
 

@@ -11,7 +11,6 @@ struct ChatInputView: View {
     @State private var message: String = ""
     @FocusState private var isMessageFieldFocused: Bool
     @Binding var inputFieldFrame: CGRect
-    @Binding var inputFieldHeight: CGFloat
     @State private var keyboardIsUp = false
     @Binding var shouldFocusInput: Bool
 
@@ -80,11 +79,11 @@ struct ChatInputView: View {
                         .background {
                             Color.clear
                                 .onGeometryChange(for: CGRect.self) { proxy in
-                                    proxy.frame(in: .global)
+                                    // Capture the TextField frame in the main container coordinate space
+                                    // Same coordinate space as the scroll view
+                                    proxy.frame(in: .named("field"))
                                 } action: { newValue in
                                     inputFieldFrame = newValue
-                                    // Update input field height for dynamic spacing
-                                    inputFieldHeight = newValue.height
                                 }
                         }
                         .focused($isMessageFieldFocused)
@@ -92,7 +91,7 @@ struct ChatInputView: View {
                             sendMessage()
                         }
                         .submitLabel(.send)
-                    
+
                     sendButton
                         .padding(.bottom, 5)
                 }
@@ -110,7 +109,7 @@ struct ChatInputView: View {
         }
         .safeAreaPadding(.bottom, keyboardIsUp ? nil : 0)
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .animation(.smooth(duration: 0.2), value: inputFieldHeight)
+        .animation(.smooth(duration: 0.2), value: inputFieldFrame.height)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
             if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 withAnimation {
@@ -340,7 +339,6 @@ struct ChatInputView: View {
 
     return ChatInputView(
         inputFieldFrame: $inputFieldFrame,
-        inputFieldHeight: $inputFieldHeight,
         shouldFocusInput: $shouldFocusInput,
         messages: $messages,
         newMessageId: $newMessageId,

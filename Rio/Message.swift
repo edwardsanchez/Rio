@@ -27,6 +27,7 @@
 //
 
 import SwiftUI
+import OSLog
 
 struct User: Identifiable {
     let id: UUID
@@ -231,7 +232,7 @@ struct MessageBubbleView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
-        .offset(y: yOffset)
+        .offset(x: xOffset, y: yOffset)
         .opacity(opacity)
         .onAppear {
             if isNew {
@@ -261,6 +262,22 @@ struct MessageBubbleView: View {
         }
     }
 
+    private var xOffset: CGFloat {
+        guard isNew && !message.isInbound else { return 0 }
+
+        let logger = Logger(subsystem: "Rio", category: "Animation")
+
+        // Both frames are now captured in the same coordinate space (MainContainer)
+        logger.debug("🎯 TextField frame in MainContainer: \(String(describing: inputFieldFrame))")
+        logger.debug("🎯 Scroll view frame in MainContainer: \(String(describing: scrollViewFrame))")
+
+        let textFieldRelativeToContent = inputFieldFrame.minX
+
+        logger.debug("🎯 TextField relative to content: \(textFieldRelativeToContent)")
+
+        return textFieldRelativeToContent
+    }
+
     private var opacity: Double {
         if message.isInbound && isNew {
             return 0
@@ -277,10 +294,23 @@ struct MessageBubbleView: View {
     }
 
     private func calculateYOffset() -> CGFloat {
-        // Calculate the vertical distance from the input field to where the message should appear
+        // Both frames are in global coordinates
+        // Calculate the vertical distance from the input field to the scroll view
+        // The message bubble needs to appear at the input field's vertical position
+
+        // Calculate where the input field is relative to the scroll view's bottom
         let inputFieldBottom = inputFieldFrame.maxY
         let scrollViewBottom = scrollViewFrame.maxY
-        return max(0, inputFieldBottom - scrollViewBottom)
+
+        // The offset moves the bubble UP from its normal position to align with input field
+        let offset = inputFieldBottom - scrollViewBottom
+
+        let logger = Logger(subsystem: "Rio", category: "Animation")
+        logger.debug("🎯 Input field bottom: \(inputFieldBottom)")
+        logger.debug("🎯 Scroll view bottom: \(scrollViewBottom)")
+        logger.debug("🎯 Y Offset: \(offset)")
+
+        return offset
     }
 
     private var inboundAvatar: some View {
@@ -327,7 +357,6 @@ struct MessageBubbleView: View {
                 )
                 .frame(width: 50, height: 22, alignment: .leading)
                 .opacity(0.5)
-                .offset(x: 20)
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)
