@@ -237,7 +237,7 @@ struct MessageBubbleView: View {
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
         .offset(x: xOffset, y: yOffset + parallaxOffset)
-        .animation(.interactiveSpring(response: 0.8, dampingFraction: 0.3), value: parallaxOffset)
+        .animation(.interpolatingSpring(.smooth), value: parallaxOffset)
         .opacity(opacity)
         .onAppear {
             if isNew {
@@ -294,6 +294,9 @@ struct MessageBubbleView: View {
     private var parallaxOffset: CGFloat {
         // Don't apply parallax during new message animations
         guard !isNew else { return 0 }
+
+        // Ensure we have a valid scroll velocity (fixes initial positioning)
+        guard scrollVelocity != 0 else { return 0 }
 
         // Create different multipliers for variety (like in the sample code)
         let baseMultiplier: CGFloat = message.isInbound ? 0.8 : 1.2
