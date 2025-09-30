@@ -69,7 +69,7 @@ struct ChatDetailView: View {
                 let velocity = currentY - previousScrollY
 
                 // Apply smoothing to prevent jittery movement
-                withAnimation(.smooth(duration: 0.1)) {
+                withAnimation(.smooth(duration: 1.1)) {
                     scrollVelocity = velocity
                 }
 

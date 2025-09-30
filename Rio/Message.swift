@@ -299,7 +299,7 @@ struct MessageBubbleView: View {
         guard scrollVelocity != 0 else { return 0 }
 
         // Create different multipliers for variety (like in the sample code)
-        let baseMultiplier: CGFloat = message.isInbound ? 0.8 : 1.2
+        let baseMultiplier: CGFloat = 0.2
 
         // Add some variation based on message position in the list
         let hashValue = abs(message.id.hashValue)
