@@ -56,11 +56,11 @@ struct MessageListView: View {
     let inputFieldFrame: CGRect
     let scrollViewFrame: CGRect
     let scrollVelocity: CGFloat
+    let scrollPhase: ScrollPhase
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(messages) { message in
-                let index = messages.firstIndex(where: { $0.id == message.id }) ?? 0
+            ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
                 let isNew = message.id == newMessageId
                 var isLastMessageInChat: Bool { messages.last!.id == message.id }
                 let showTail = shouldShowTail(at: index)
@@ -78,7 +78,9 @@ struct MessageListView: View {
                         inputFieldFrame: inputFieldFrame,
                         scrollViewFrame: scrollViewFrame,
                         newMessageId: $newMessageId,
-                        scrollVelocity: scrollVelocity
+                        scrollVelocity: scrollVelocity,
+                        scrollPhase: scrollPhase,
+                        visibleMessageIndex: index
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
@@ -182,8 +184,10 @@ struct MessageBubbleView: View {
     let scrollViewFrame: CGRect
     @Binding var newMessageId: UUID?
     let scrollVelocity: CGFloat
+    let scrollPhase: ScrollPhase
+    let visibleMessageIndex: Int
 
-    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil), scrollVelocity: CGFloat = 0) {
+    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil), scrollVelocity: CGFloat = 0, scrollPhase: ScrollPhase = .idle, visibleMessageIndex: Int = 0) {
         self.message = message
         self.showTail = showTail
         self.isNew = isNew
@@ -191,6 +195,8 @@ struct MessageBubbleView: View {
         self.scrollViewFrame = scrollViewFrame
         self._newMessageId = newMessageId
         self.scrollVelocity = scrollVelocity
+        self.scrollPhase = scrollPhase
+        self.visibleMessageIndex = visibleMessageIndex
     }
 
     var body: some View {
@@ -290,7 +296,7 @@ struct MessageBubbleView: View {
         return 1
     }
 
-    // Physics-based parallax offset for jelly effect
+    // Physics-based parallax offset for cascading jelly effect
     private var parallaxOffset: CGFloat {
         // Don't apply parallax during new message animations
         guard !isNew else { return 0 }
@@ -298,16 +304,26 @@ struct MessageBubbleView: View {
         // Ensure we have a valid scroll velocity (fixes initial positioning)
         guard scrollVelocity != 0 else { return 0 }
 
-        // Create different multipliers for variety (like in the sample code)
-        let baseMultiplier: CGFloat = 0.2
+        // Only apply cascading effect during active scrolling phases
+        let shouldApplyCascade = scrollPhase == .tracking || scrollPhase == .decelerating
 
-        // Add some variation based on message position in the list
-        let hashValue = abs(message.id.hashValue)
-        let variation = CGFloat((hashValue % 100)) / 100.0 // 0.0 to 1.0
-        let multiplier = baseMultiplier + (variation * 0.8) // Add up to 0.8 variation
+        if shouldApplyCascade {
+            // Create cascading effect based on visible message position
+            // Messages lower in the visible area get higher multipliers
+            let baseMultiplier: CGFloat = 0.8
+            let cascadeIncrement: CGFloat = 0.3
+            let maxCascadeMessages = 8 // Limit cascade to prevent excessive multipliers
 
-        // Apply the physics-based offset with spring animation
-        return -scrollVelocity * multiplier
+            // Calculate position-based multiplier (clamped to prevent extreme values)
+            let cascadePosition = min(visibleMessageIndex, maxCascadeMessages)
+            let multiplier = baseMultiplier + (CGFloat(cascadePosition) * cascadeIncrement)
+
+            return -scrollVelocity * multiplier
+        } else {
+            // Use consistent multiplier when not actively scrolling
+            let multiplier: CGFloat = 0.4
+            return -scrollVelocity * multiplier
+        }
     }
 
     private func calculateYOffset() -> CGFloat {

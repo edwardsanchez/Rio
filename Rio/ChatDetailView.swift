@@ -29,6 +29,7 @@ struct ChatDetailView: View {
     // Physics-based parallax effect state
     @State private var scrollVelocity: CGFloat = 0
     @State private var previousScrollY: CGFloat = 0
+    @State private var scrollPhase: ScrollPhase = .idle
 
     init(chat: Chat) {
         self.chat = chat
@@ -44,7 +45,8 @@ struct ChatDetailView: View {
                     newMessageId: $newMessageId,
                     inputFieldFrame: inputFieldFrame,
                     scrollViewFrame: scrollViewFrame,
-                    scrollVelocity: scrollVelocity
+                    scrollVelocity: scrollVelocity,
+                    scrollPhase: scrollPhase
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -76,6 +78,9 @@ struct ChatDetailView: View {
                 previousScrollY = currentY
             }
             .onScrollPhaseChange { oldPhase, newPhase in
+                // Track scroll phase for cascading jelly effect
+                scrollPhase = newPhase
+
                 // When scrolling stops, smoothly return to neutral position
                 if newPhase == .idle {
                     withAnimation(.smooth(duration: 0.8)) {
