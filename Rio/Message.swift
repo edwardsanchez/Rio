@@ -243,7 +243,7 @@ struct MessageBubbleView: View {
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
         .offset(x: xOffset, y: yOffset + parallaxOffset)
-        .animation(.interpolatingSpring(.smooth), value: parallaxOffset)
+        .animation(.interactiveSpring, value: parallaxOffset)
         .opacity(opacity)
         .onAppear {
             if isNew {
@@ -311,7 +311,7 @@ struct MessageBubbleView: View {
             // Create cascading effect based on visible message position
             // Messages lower in the visible area get higher multipliers
             let baseMultiplier: CGFloat = 0.8
-            let cascadeIncrement: CGFloat = 0.3
+            let cascadeIncrement: CGFloat = 0.2
             let maxCascadeMessages = 8 // Limit cascade to prevent excessive multipliers
 
             // Calculate position-based multiplier (clamped to prevent extreme values)
@@ -321,7 +321,7 @@ struct MessageBubbleView: View {
             return -scrollVelocity * multiplier
         } else {
             // Use consistent multiplier when not actively scrolling
-            let multiplier: CGFloat = 0.4
+            let multiplier: CGFloat = 0.2
             return -scrollVelocity * multiplier
         }
     }

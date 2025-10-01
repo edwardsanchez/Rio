@@ -71,7 +71,7 @@ struct ChatDetailView: View {
                 let velocity = currentY - previousScrollY
 
                 // Apply smoothing to prevent jittery movement
-                withAnimation(.smooth(duration: 1.1)) {
+                withAnimation(.smooth(duration: 0.4)) {
                     scrollVelocity = velocity
                 }
 
@@ -83,7 +83,7 @@ struct ChatDetailView: View {
 
                 // When scrolling stops, smoothly return to neutral position
                 if newPhase == .idle {
-                    withAnimation(.smooth(duration: 0.8)) {
+                    withAnimation(.smooth(duration: 0.2)) {
                         scrollVelocity = 0
                     }
                 }
