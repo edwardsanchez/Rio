@@ -29,6 +29,41 @@
 import SwiftUI
 import OSLog
 
+// MARK: - Shared Parallax Effect Logic
+
+/// Calculates the cascading jelly parallax offset for scroll-based animations
+struct ParallaxCalculator {
+    let scrollVelocity: CGFloat
+    let scrollPhase: ScrollPhase
+    let visibleMessageIndex: Int
+
+    var offset: CGFloat {
+        // Ensure we have a valid scroll velocity
+        guard scrollVelocity != 0 else { return 0 }
+
+        // Only apply cascading effect during active scrolling phases
+        let shouldApplyCascade = scrollPhase == .tracking || scrollPhase == .decelerating
+
+        if shouldApplyCascade {
+            // Create cascading effect based on visible message position
+            // Messages lower in the visible area get higher multipliers
+            let baseMultiplier: CGFloat = 0.8
+            let cascadeIncrement: CGFloat = 0.2
+            let maxCascadeMessages = 20 // Limit cascade to prevent excessive multipliers
+
+            // Calculate position-based multiplier (clamped to prevent extreme values)
+            let cascadePosition = min(visibleMessageIndex, maxCascadeMessages)
+            let multiplier = baseMultiplier + (CGFloat(cascadePosition) * cascadeIncrement)
+
+            return -scrollVelocity * multiplier
+        } else {
+            // Use consistent multiplier when not actively scrolling
+            let multiplier: CGFloat = 0.2
+            return -scrollVelocity * multiplier
+        }
+    }
+}
+
 struct User: Identifiable {
     let id: UUID
     let name: String
@@ -60,15 +95,20 @@ struct MessageListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+            ForEach(Array(zip(messages.indices, messages)), id: \.1.id) { index, message in
                 let isNew = message.id == newMessageId
                 var isLastMessageInChat: Bool { messages.last!.id == message.id }
                 let showTail = shouldShowTail(at: index)
 
                 VStack(spacing: 5) {
                     if shouldShowDateHeader(at: index) {
-                        DateHeaderView(date: message.date)
-                            .padding(.vertical, 5)
+                        DateHeaderView(
+                            date: message.date,
+                            scrollVelocity: scrollVelocity,
+                            scrollPhase: scrollPhase,
+                            visibleMessageIndex: index
+                        )
+                        .padding(.vertical, 5)
                     }
 
                     MessageBubbleView(
@@ -139,6 +179,16 @@ struct MessageListView: View {
 
 struct DateHeaderView: View {
     var date: Date
+    let scrollVelocity: CGFloat
+    let scrollPhase: ScrollPhase
+    let visibleMessageIndex: Int
+
+    init(date: Date, scrollVelocity: CGFloat = 0, scrollPhase: ScrollPhase = .idle, visibleMessageIndex: Int = 0) {
+        self.date = date
+        self.scrollVelocity = scrollVelocity
+        self.scrollPhase = scrollPhase
+        self.visibleMessageIndex = visibleMessageIndex
+    }
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -148,10 +198,20 @@ struct DateHeaderView: View {
         return formatter
     }
 
+    private var parallaxCalculator: ParallaxCalculator {
+        ParallaxCalculator(
+            scrollVelocity: scrollVelocity,
+            scrollPhase: scrollPhase,
+            visibleMessageIndex: visibleMessageIndex
+        )
+    }
+
     var body: some View {
         Text(dateFormatter.string(from: date))
             .font(.caption)
             .foregroundColor(.secondary)
+            .offset(y: parallaxCalculator.offset)
+            .animation(.interactiveSpring, value: parallaxCalculator.offset)
     }
 }
 
@@ -301,29 +361,13 @@ struct MessageBubbleView: View {
         // Don't apply parallax during new message animations
         guard !isNew else { return 0 }
 
-        // Ensure we have a valid scroll velocity (fixes initial positioning)
-        guard scrollVelocity != 0 else { return 0 }
-
-        // Only apply cascading effect during active scrolling phases
-        let shouldApplyCascade = scrollPhase == .tracking || scrollPhase == .decelerating
-
-        if shouldApplyCascade {
-            // Create cascading effect based on visible message position
-            // Messages lower in the visible area get higher multipliers
-            let baseMultiplier: CGFloat = 0.8
-            let cascadeIncrement: CGFloat = 0.2
-            let maxCascadeMessages = 8 // Limit cascade to prevent excessive multipliers
-
-            // Calculate position-based multiplier (clamped to prevent extreme values)
-            let cascadePosition = min(visibleMessageIndex, maxCascadeMessages)
-            let multiplier = baseMultiplier + (CGFloat(cascadePosition) * cascadeIncrement)
-
-            return -scrollVelocity * multiplier
-        } else {
-            // Use consistent multiplier when not actively scrolling
-            let multiplier: CGFloat = 0.2
-            return -scrollVelocity * multiplier
-        }
+        // Use shared parallax calculator
+        let calculator = ParallaxCalculator(
+            scrollVelocity: scrollVelocity,
+            scrollPhase: scrollPhase,
+            visibleMessageIndex: visibleMessageIndex
+        )
+        return calculator.offset
     }
 
     private func calculateYOffset() -> CGFloat {
