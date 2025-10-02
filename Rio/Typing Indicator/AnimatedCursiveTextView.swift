@@ -83,7 +83,7 @@ struct AnimatedCursiveTextView: View {
 
     // MARK: - Configuration Parameters
 
-    let text: String                    /// Text to animate
+    let texts: [String]                 /// Array of texts to animate sequentially (or single text)
     let fontSize: CGFloat               /// Font size in points
     let animationSpeed: Double       /// Total animation duration in seconds
     let staticMode: Bool                /// Enable static window mode with fixed left edge
@@ -96,15 +96,25 @@ struct AnimatedCursiveTextView: View {
     let trackingAccuracy: CGFloat       /// Accuracy factor for path tracking (0.0 to 1.0)
     let cleanup: Bool                   /// Enable cleanup phase that trims away text after animation completes
 
+    // MARK: - Sequential Animation State
+
+    @State private var currentTextIndex: Int = 0  /// Index of the currently animating text in the array
+
     // MARK: - Computed Properties
 
     /// Font size accessor for consistency across the view
     private var fontSizeValue: CGFloat { fontSize }
 
+    /// Current text being animated (based on currentTextIndex)
+    private var currentText: String {
+        guard currentTextIndex < texts.count else { return texts.last ?? "" }
+        return texts[currentTextIndex]
+    }
+
     /// Calculated size needed to render the complete text at the specified font size
     /// Falls back to estimated dimensions if CursiveWordShape calculation fails
     private var measuredWordSize: CGSize {
-        CursiveWordShape.preferredSize(for: text, fontSize: fontSizeValue)
+        CursiveWordShape.preferredSize(for: currentText, fontSize: fontSizeValue)
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
     }
 
@@ -176,7 +186,8 @@ struct AnimatedCursiveTextView: View {
      * Initializes an animated cursive text view with comprehensive configuration options.
      *
      * - Parameters:
-     *   - text: The text to animate in cursive handwriting
+     *   - text: The text to animate in cursive handwriting (convenience for single text)
+     *   - texts: Array of texts to animate sequentially (for multiple messages)
      *   - fontSize: Font size in points (default: 30)
      *   - animationSpeed: Total animation time, auto-calculated if nil (default: text.count / 5 seconds)
      *   - staticMode: Enable fixed left edge with sliding window (default: true)
@@ -190,7 +201,8 @@ struct AnimatedCursiveTextView: View {
      *   - cleanup: Enable cleanup phase that trims away text after animation completes (default: false)
      */
     init(
-        text: String,
+        text: String? = nil,
+        texts: [String]? = nil,
         fontSize: CGFloat = 25,
         animationSpeed: Double? = nil,
         staticMode: Bool = true,
@@ -203,10 +215,19 @@ struct AnimatedCursiveTextView: View {
         trackingAccuracy: CGFloat = 0.85,
         cleanup: Bool = true
     ) {
-        self.text = text
+        // Support both single text and array of texts
+        if let texts = texts, !texts.isEmpty {
+            self.texts = texts
+        } else if let text = text {
+            self.texts = [text]
+        } else {
+            self.texts = [""]
+        }
+
         self.fontSize = fontSize
         // Auto-calculate duration based on text length if not specified
-        self.animationSpeed = Double(text.count) / (animationSpeed ?? 7)
+        let firstText = self.texts.first ?? ""
+        self.animationSpeed = Double(firstText.count) / (animationSpeed ?? 7)
         self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
         self.containerWidthOverride = containerWidthOverride
@@ -223,7 +244,7 @@ struct AnimatedCursiveTextView: View {
 
     /// Creates the cursive word shape for the current text and font size
     var shape: CursiveWordShape {
-        CursiveWordShape(text: text, fontSize: fontSize)
+        CursiveWordShape(text: currentText, fontSize: fontSize)
     }
 
     /// Generates the complete path for the text within the measured bounds
@@ -528,7 +549,7 @@ struct AnimatedCursiveTextView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             // Main cursive text shape with trim animation
-            CursiveWordShape(text: text, fontSize: fontSize)
+            CursiveWordShape(text: currentText, fontSize: fontSize)
                 .trim(
                     from: staticMode ? smoothedDrawProgressFrom : 0,  // Static mode uses sliding window
                     to: drawProgress                                   // End position advances normally
@@ -555,12 +576,16 @@ struct AnimatedCursiveTextView: View {
             updateContainerWidth(newWidth)
         }
         .onAppear {
+            // Reset to first text when view appears
+            currentTextIndex = 0
             restartAnimation()
         }
         .onDisappear {
             // Clean up timer to prevent memory leaks
             animationTimer?.invalidate()
             animationTimer = nil
+            // Reset index for next appearance
+            currentTextIndex = 0
         }
     }
 
@@ -737,7 +762,7 @@ struct AnimatedCursiveTextView: View {
 
         // Initialize path analyzer for mathematical calculations
         // This provides the foundation for all position and window calculations
-        let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
+        let shape = CursiveWordShape(text: currentText, fontSize: fontSizeValue)
         let path = shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
         let analyzer = PathXAnalyzer(path: path.cgPath)
         self.pathAnalyzer = analyzer
@@ -794,8 +819,22 @@ struct AnimatedCursiveTextView: View {
                     if self.smoothedDrawProgressFrom >= 0.999 {
                         self.targetDrawProgressFrom = 1.0
                         self.drawProgressFrom = 1.0
-                        timer.invalidate()
-                        self.animationTimer = nil
+
+                        // Check if there are more texts to animate
+                        if self.currentTextIndex < self.texts.count - 1 {
+                            // Move to next text in the sequence
+                            self.currentTextIndex += 1
+
+                            // Restart animation for the next text
+                            // Don't invalidate the timer - just restart the animation state
+                            timer.invalidate()
+                            self.animationTimer = nil
+                            self.restartAnimation()
+                        } else {
+                            // All texts completed - stop the animation
+                            timer.invalidate()
+                            self.animationTimer = nil
+                        }
                     }
 
                     return

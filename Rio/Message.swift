@@ -406,12 +406,12 @@ struct MessageBubbleView: View {
         }
     }
 
-    var randomMNuerString: String {
-//        let length = 100
-//        var rng = SystemRandomNumberGenerator()
-//        let alphabet = "mnluew"
-//        return String((0..<length).map { _ in alphabet.randomElement(using: &rng)! })
-        return "Searching for best vegan restaults in Paris"
+    var typingIndicatorMessages: [String] {
+        return [
+            "Searching for best vegan restaurants in Paris",
+            "Looking up reviews",
+            "Checking which restaurants are open on Sundays"
+        ]
     }
 
     private var typingIndicatorContainerWidth: CGFloat? {
@@ -447,7 +447,7 @@ struct MessageBubbleView: View {
             if message.isTypingIndicator {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
-                    text: randomMNuerString,
+                    texts: typingIndicatorMessages,
                     containerWidthOverride: typingIndicatorWidth,
                     cleanup: true
                 )
