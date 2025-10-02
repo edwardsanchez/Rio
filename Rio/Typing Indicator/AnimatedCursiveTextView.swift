@@ -182,64 +182,141 @@ struct AnimatedCursiveTextView: View {
         }
     }
 
+    // MARK: - Initializers
+
     /**
-     * Initializes an animated cursive text view with comprehensive configuration options.
+     * Creates an animated cursive text view with static window mode (typing indicator style).
+     *
+     * This is the primary initializer for typing indicators where text appears to be written
+     * continuously with a fixed left edge and sliding window. Supports sequential text animation
+     * for multiple messages.
      *
      * - Parameters:
-     *   - text: The text to animate in cursive handwriting (convenience for single text)
-     *   - texts: Array of texts to animate sequentially (for multiple messages)
-     *   - fontSize: Font size in points (default: 30)
-     *   - animationSpeed: Total animation time, auto-calculated if nil (default: text.count / 5 seconds)
-     *   - staticMode: Enable fixed left edge with sliding window (default: true)
-     *   - showProgressIndicator: Enable debug indicators and console logging for trim positions (default: false)
+     *   - texts: Array of texts to animate sequentially
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationSpeed: Characters per second, auto-calculated if nil (default: 7 chars/sec)
+     *   - containerWidthOverride: Container width for calculating window size (default: nil, auto-detect)
+     *   - windowWidth: Override for sliding window width (default: nil, calculated from container)
+     *   - autoWindowMargin: Right margin when calculating window width (default: 10)
      *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
-     *   - windowWidth: Optional override for the sliding window width. Provide `nil` to derive from the container size.
-     *   - autoWindowMargin: Right-edge margin maintained when window width is computed automatically (default: 10 points)
-     *   - containerWidthOverride: Explicit container width to use when deriving the sliding window (default: nil)
-     *   - variableSpeed: Allow speed variation based on path complexity (default: false)
-     *   - trackingAccuracy: Path tracking precision from 0.0 to 1.0 (default: 0.85)
-     *   - cleanup: Enable cleanup phase that trims away text after animation completes (default: false)
+     *   - variableSpeed: Vary speed based on path complexity (default: false)
+     *   - trackingAccuracy: Path tracking precision 0.0-1.0 (default: 0.85)
+     *   - cleanup: Enable cleanup phase after animation (default: true)
+     *   - showProgressIndicator: Show debug indicators (default: false)
      */
     init(
-        text: String? = nil,
-        texts: [String]? = nil,
+        texts: [String],
         fontSize: CGFloat = 25,
         animationSpeed: Double? = nil,
-        staticMode: Bool = true,
-        showProgressIndicator: Bool = false,
-        forwardOnlyMode: Bool = true,
+        containerWidthOverride: CGFloat? = nil,
         windowWidth: CGFloat? = nil,
         autoWindowMargin: CGFloat = 10,
-        containerWidthOverride: CGFloat? = nil,
+        forwardOnlyMode: Bool = true,
         variableSpeed: Bool = false,
         trackingAccuracy: CGFloat = 0.85,
-        cleanup: Bool = true
+        cleanup: Bool = true,
+        showProgressIndicator: Bool = false
     ) {
-        // Support both single text and array of texts
-        if let texts = texts, !texts.isEmpty {
-            self.texts = texts
-        } else if let text = text {
-            self.texts = [text]
-        } else {
-            self.texts = [""]
-        }
-
+        self.texts = texts.isEmpty ? [""] : texts
         self.fontSize = fontSize
-        // Auto-calculate duration based on text length if not specified
-        let firstText = self.texts.first ?? ""
-        self.animationSpeed = Double(firstText.count) / (animationSpeed ?? 7)
-        self.staticMode = staticMode
-        self.showProgressIndicator = showProgressIndicator
-        self.containerWidthOverride = containerWidthOverride
 
+        let firstText = texts.first ?? ""
+        self.animationSpeed = Double(firstText.count) / (animationSpeed ?? 7)
+
+        // Static mode configuration
+        self.staticMode = true
         self.forwardOnlyMode = forwardOnlyMode
         self.windowWidth = windowWidth
         self.autoWindowMargin = autoWindowMargin
-
+        self.containerWidthOverride = containerWidthOverride
         self.variableSpeed = variableSpeed
-        // Clamp tracking accuracy to valid range
         self.trackingAccuracy = min(max(trackingAccuracy, 0), 1)
         self.cleanup = cleanup
+
+        // Debug
+        self.showProgressIndicator = showProgressIndicator
+    }
+
+    /**
+     * Creates an animated cursive text view with static window mode for a single text.
+     *
+     * Convenience initializer for typing indicators with a single message.
+     *
+     * - Parameters:
+     *   - text: The text to animate
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationSpeed: Characters per second, auto-calculated if nil (default: 7 chars/sec)
+     *   - containerWidthOverride: Container width for calculating window size (default: nil)
+     *   - windowWidth: Override for sliding window width (default: nil)
+     *   - autoWindowMargin: Right margin when calculating window width (default: 10)
+     *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
+     *   - variableSpeed: Vary speed based on path complexity (default: false)
+     *   - trackingAccuracy: Path tracking precision 0.0-1.0 (default: 0.85)
+     *   - cleanup: Enable cleanup phase after animation (default: true)
+     *   - showProgressIndicator: Show debug indicators (default: false)
+     */
+    init(
+        text: String,
+        fontSize: CGFloat = 25,
+        animationSpeed: Double? = nil,
+        containerWidthOverride: CGFloat? = nil,
+        windowWidth: CGFloat? = nil,
+        autoWindowMargin: CGFloat = 10,
+        forwardOnlyMode: Bool = true,
+        variableSpeed: Bool = false,
+        trackingAccuracy: CGFloat = 0.85,
+        cleanup: Bool = true,
+        showProgressIndicator: Bool = false
+    ) {
+        self.init(
+            texts: [text],
+            fontSize: fontSize,
+            animationSpeed: animationSpeed,
+            containerWidthOverride: containerWidthOverride,
+            windowWidth: windowWidth,
+            autoWindowMargin: autoWindowMargin,
+            forwardOnlyMode: forwardOnlyMode,
+            variableSpeed: variableSpeed,
+            trackingAccuracy: trackingAccuracy,
+            cleanup: cleanup,
+            showProgressIndicator: showProgressIndicator
+        )
+    }
+
+    /**
+     * Creates an animated cursive text view with progressive mode (traditional left-to-right).
+     *
+     * This mode animates text appearing progressively from left to right without a sliding window.
+     * Simpler than static mode - most parameters don't apply here.
+     *
+     * - Parameters:
+     *   - text: The text to animate
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationDuration: Total animation time in seconds, auto-calculated if nil
+     *   - showProgressIndicator: Show debug indicators (default: false)
+     */
+    init(
+        progressiveText text: String,
+        fontSize: CGFloat = 25,
+        animationDuration: Double? = nil,
+        showProgressIndicator: Bool = false
+    ) {
+        self.texts = [text]
+        self.fontSize = fontSize
+        self.animationSpeed = animationDuration ?? (Double(text.count) / 7)
+
+        // Progressive mode configuration - most parameters don't apply
+        self.staticMode = false
+        self.forwardOnlyMode = false
+        self.windowWidth = nil
+        self.autoWindowMargin = 0
+        self.containerWidthOverride = nil
+        self.variableSpeed = false
+        self.trackingAccuracy = 0.85
+        self.cleanup = false
+
+        // Debug
+        self.showProgressIndicator = showProgressIndicator
     }
 
     /// Creates the cursive word shape for the current text and font size
