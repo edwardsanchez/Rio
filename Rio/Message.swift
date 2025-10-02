@@ -448,8 +448,11 @@ struct MessageBubbleView: View {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
                     text: randomMNuerString,
-                    containerWidthOverride: typingIndicatorWidth
+                    containerWidthOverride: typingIndicatorWidth,
+                    cleanup: true
                 )
+                .id(message.id)  // Force recreation for each new typing indicator message
+                .offset(x: 10)
                 .frame(width: typingIndicatorWidth, height: 22, alignment: .leading)
                 .opacity(0.5)
             } else {
