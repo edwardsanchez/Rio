@@ -405,7 +405,7 @@ struct MessageBubbleView: View {
             }
         }
     }
-    
+
     var randomMNuerString: String {
 //        let length = 100
 //        var rng = SystemRandomNumberGenerator()
@@ -413,11 +413,27 @@ struct MessageBubbleView: View {
 //        return String((0..<length).map { _ in alphabet.randomElement(using: &rng)! })
         return "Searching for best vegan restaults in Paris"
     }
-    
+
+    private var typingIndicatorContainerWidth: CGFloat? {
+        guard message.isTypingIndicator else { return nil }
+        let scrollWidth = scrollViewFrame.width
+        guard scrollWidth > 0 else { return nil }
+
+        let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
+        let avatarWidth: CGFloat = message.isInbound ? 40 : 0
+        let bubbleSpacing: CGFloat = message.isInbound ? 12 : 0
+        let trailingSpacer: CGFloat = message.isInbound ? 10 : 0
+
+        let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
+        return width > 0 ? width : nil
+    }
+
+
     @ViewBuilder
     private func bubbleView(
         textColor: Color,
         backgroundColor: Color,
+
         tailAlignment: Alignment,
         tailOffset: CGSize,
         tailRotation: Angle,
@@ -426,14 +442,16 @@ struct MessageBubbleView: View {
         width: CGFloat?,
         height: CGFloat?
     ) -> some View {
+        let typingIndicatorWidth = typingIndicatorContainerWidth
         Group {
             if message.isTypingIndicator {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
                     text: randomMNuerString,
-                    windowWidth: 100
+                    showProgressIndicator: true,
+                    containerWidthOverride: typingIndicatorWidth
                 )
-                .frame(width: 50, height: 22, alignment: .leading)
+                .frame(width: typingIndicatorWidth, height: 22, alignment: .leading)
                 .opacity(0.5)
             } else {
                 Text(message.text)
@@ -476,7 +494,7 @@ private struct ChatBubbleModifier: ViewModifier {
                 backgroundView
             }
     }
-    
+
     @ViewBuilder
     private var backgroundView: some View {
         let base = RoundedRectangle(cornerRadius: 20)
@@ -491,7 +509,7 @@ private struct ChatBubbleModifier: ViewModifier {
                     .foregroundStyle(backgroundColor)
                     .opacity(showTail ? 1 : 0)
             }
-        
+
         base
             .compositingGroup()
             .opacity(backgroundOpacity)

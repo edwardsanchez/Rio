@@ -70,15 +70,22 @@ struct AnimatedCursiveTextView: View {
     /// Analyzer for path measurements, coordinate transformations, and window calculations
     @State private var pathAnalyzer: PathXAnalyzer?
 
+    @State private var containerWidth: CGFloat?
+    @State private var lastLoggedShouldActivate: Bool?
+    @State private var lastLoggedWindowActive: Bool?
+    @State private var lastLoggedEffectiveContainerWidth: CGFloat?
+
     // MARK: - Configuration Parameters
 
     let text: String                    /// Text to animate
     let fontSize: CGFloat               /// Font size in points
     let animationDuration: Double       /// Total animation duration in seconds
     let staticMode: Bool                /// Enable static window mode with fixed left edge
-    let showProgressIndicator: Bool     /// Show debug indicators for trim positions
+    let showProgressIndicator: Bool     /// Enable debug indicators and logging for trim positions
     let forwardOnlyMode: Bool           /// Prevent backward movement of drawing cursor
-    let windowWidth: CGFloat            /// Width of the visible text window in static mode
+    let windowWidth: CGFloat?           /// Optional override for sliding window width
+    let autoWindowMargin: CGFloat       /// Right-edge margin used when computing dynamic window width
+    let containerWidthOverride: CGFloat?/// Optional externally-supplied container width used when computing the sliding window
     let variableSpeed: Bool             /// Allow animation speed to vary with path complexity
     let trackingAccuracy: CGFloat       /// Accuracy factor for path tracking (0.0 to 1.0)
 
@@ -94,17 +101,83 @@ struct AnimatedCursiveTextView: View {
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
     }
 
+    /// Resolves the sliding window width, falling back to geometry-derived measurements when no explicit override is supplied.
+    private var resolvedWindowWidth: CGFloat? {
+        if let specified = windowWidth {
+            return specified > 0 ? specified : nil
+        }
+        guard let width = effectiveContainerWidth else { return nil }
+        return resolvedWindowWidth(from: width)
+    }
+
+    private var loggingEnabled: Bool { showProgressIndicator }
+
+    private var effectiveContainerWidth: CGFloat? {
+        containerWidthOverride ?? containerWidth
+    }
+
+    private func resolvedWindowWidth(from width: CGFloat) -> CGFloat? {
+        let candidateWidth = width - autoWindowMargin
+        return candidateWidth > 0 ? candidateWidth : nil
+    }
+
+    /// Indicates whether the sliding window should be active based on the current geometry readings.
+    private var staticActivationThresholdReached: Bool {
+        guard staticMode, let windowWidth = resolvedWindowWidth else { return false }
+        return trimEndVisualX >= windowWidth
+    }
+
+    /// Indicates whether the sliding window logic is currently trimming the leading edge.
+    private var staticWindowCurrentlyActive: Bool {
+        staticMode && resolvedWindowWidth != nil && smoothedDrawProgressFrom > 0.0001
+    }
+
+    /// Formats optional width values for the debug HUD.
+    private func formatWidth(_ value: CGFloat?) -> String {
+        guard let value else { return "nil" }
+        return String(format: "%.1f", value)
+    }
+
+    /// Formats progress values (0...1 range) for the debug HUD.
+    private func formatProgress(_ value: CGFloat) -> String {
+        String(format: "%.3f", value)
+    }
+
+
+
+    /// Updates the cached container width while preventing unnecessary state churn.
+    private func updateContainerWidth(_ width: CGFloat) {
+        let clampedWidth = max(0, width)
+        DispatchQueue.main.async {
+            let previousValue = self.containerWidth
+            let widthChanged: Bool
+
+            if let previousValue {
+                widthChanged = abs(previousValue - clampedWidth) >= 0.5
+            } else {
+                widthChanged = true
+            }
+
+            if widthChanged {
+                self.containerWidth = clampedWidth
+                self.emitGeometryLogIfNeeded(reason: "container width update", force: true)
+            }
+        }
+    }
+
     /**
      * Initializes an animated cursive text view with comprehensive configuration options.
      *
      * - Parameters:
      *   - text: The text to animate in cursive handwriting
      *   - fontSize: Font size in points (default: 30)
-     *   - animationDuration: Total animation time, auto-calculated if nil (default: text.count / 2 seconds)
+     *   - animationDuration: Total animation time, auto-calculated if nil (default: text.count / 5 seconds)
      *   - staticMode: Enable fixed left edge with sliding window (default: true)
-     *   - showProgressIndicator: Show debug indicators for trim positions (default: false)
+     *   - showProgressIndicator: Enable debug indicators and console logging for trim positions (default: false)
      *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
-     *   - windowWidth: Width of visible text window in static mode (default: 40 points)
+     *   - windowWidth: Optional override for the sliding window width. Provide `nil` to derive from the container size.
+     *   - autoWindowMargin: Right-edge margin maintained when window width is computed automatically (default: 10 points)
+     *   - containerWidthOverride: Explicit container width to use when deriving the sliding window (default: nil)
      *   - variableSpeed: Allow speed variation based on path complexity (default: false)
      *   - trackingAccuracy: Path tracking precision from 0.0 to 1.0 (default: 0.85)
      */
@@ -112,10 +185,12 @@ struct AnimatedCursiveTextView: View {
         text: String,
         fontSize: CGFloat = 25,
         animationDuration: Double? = nil,
-        staticMode: Bool = false,
+        staticMode: Bool = true,
         showProgressIndicator: Bool = false,
         forwardOnlyMode: Bool = true,
-        windowWidth: CGFloat = 0, //0 means no window
+        windowWidth: CGFloat? = nil,
+        autoWindowMargin: CGFloat = 10,
+        containerWidthOverride: CGFloat? = nil,
         variableSpeed: Bool = false,
         trackingAccuracy: CGFloat = 0.85
     ) {
@@ -125,8 +200,12 @@ struct AnimatedCursiveTextView: View {
         self.animationDuration = animationDuration ?? Double(text.count) / 5
         self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
+        self.containerWidthOverride = containerWidthOverride
+
         self.forwardOnlyMode = forwardOnlyMode
         self.windowWidth = windowWidth
+        self.autoWindowMargin = autoWindowMargin
+
         self.variableSpeed = variableSpeed
         // Clamp tracking accuracy to valid range
         self.trackingAccuracy = min(max(trackingAccuracy, 0), 1)
@@ -242,7 +321,7 @@ struct AnimatedCursiveTextView: View {
      */
     var textOffset: CGFloat {
         guard staticMode else { return 0 }
-        guard windowWidth > 0 else { return 0 }
+        guard resolvedWindowWidth != nil else { return 0 }
 
         // Calculate the ideal offset to align trim start with fixed left edge
         // This is the mathematical relationship: offset = target_position - current_position
@@ -455,6 +534,11 @@ struct AnimatedCursiveTextView: View {
         }
         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
         .fixedSize()  // Preserve intrinsic size so parent clipping affects the trailing edge
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { newWidth in
+            updateContainerWidth(newWidth)
+        }
         .onAppear {
             restartAnimation()
         }
@@ -463,6 +547,62 @@ struct AnimatedCursiveTextView: View {
             animationTimer?.invalidate()
             animationTimer = nil
         }
+    }
+
+
+    private func emitGeometryLogIfNeeded(reason: String, force: Bool = false) {
+        guard loggingEnabled else { return }
+
+        let shouldActivate = staticActivationThresholdReached
+        let isActive = staticWindowCurrentlyActive
+        let effectiveSnapshot = effectiveContainerWidth
+
+        let widthChanged: Bool
+        switch (lastLoggedEffectiveContainerWidth, effectiveSnapshot) {
+        case let (previous?, current?):
+            widthChanged = abs(previous - current) >= 0.5
+        case (nil, nil):
+            widthChanged = false
+        default:
+            widthChanged = true
+        }
+
+        if force || widthChanged || shouldActivate != lastLoggedShouldActivate || isActive != lastLoggedWindowActive {
+            logGeometrySnapshot(reason: reason, shouldActivate: shouldActivate, isActive: isActive)
+            lastLoggedShouldActivate = shouldActivate
+            lastLoggedWindowActive = isActive
+            lastLoggedEffectiveContainerWidth = effectiveSnapshot
+        }
+    }
+
+    private func logGeometrySnapshot(reason: String, shouldActivate: Bool, isActive: Bool) {
+        guard loggingEnabled else { return }
+
+        let marginText = String(format: "%.1f", autoWindowMargin)
+        let intrinsicText = String(format: "%.1f", measuredWordSize.width)
+        let trimStartText = String(format: "%.1f", trimStartVisualX)
+        let trimEndText = String(format: "%.1f", trimEndVisualX)
+        let offsetText = String(format: "%.1f", textOffset)
+        let drawText = formatProgress(drawProgress)
+        let drawFromText = formatProgress(smoothedDrawProgressFrom)
+        let overrideText = formatWidth(containerWidthOverride)
+        let measuredText = formatWidth(containerWidth)
+        let effectiveText = formatWidth(effectiveContainerWidth)
+        let resolvedText = formatWidth(resolvedWindowWidth)
+
+        Logger.animatedCursiveText.debug("""
+        🧭 geometry (\(reason)):
+          overrideWidth=\(overrideText) measuredWidth=\(measuredText) effectiveWidth=\(effectiveText) resolvedWidth=\(resolvedText) margin=\(marginText)
+          intrinsicWidth=\(intrinsicText) trimStartX=\(trimStartText) trimEndX=\(trimEndText) offset=\(offsetText)
+          drawProgress=\(drawText) drawProgressFrom=\(drawFromText)
+          shouldActivate=\(shouldActivate ? "yes" : "no") active=\(isActive ? "yes" : "no")
+        """)
+    }
+
+    private func resetGeometryLoggerState() {
+        lastLoggedShouldActivate = nil
+        lastLoggedWindowActive = nil
+        lastLoggedEffectiveContainerWidth = nil
     }
 
     /**
@@ -499,7 +639,7 @@ struct AnimatedCursiveTextView: View {
                         // Trim start indicator (green line) - shows where visible text begins
                         // This should align with the purple line when the system is working correctly
                         Rectangle()
-                            .fill(Color.green)
+                            .fill((staticWindowCurrentlyActive ? Color.green : Color.orange).opacity(0.9))
                             .frame(width: 3, height: measuredWordSize.height)
                             .position(
                                 x: trimStartVisualX + textOffset,
@@ -575,6 +715,8 @@ struct AnimatedCursiveTextView: View {
 
         // Reset the ratchet mechanism for left edge alignment
         minTextOffset = 0
+        resetGeometryLoggerState()
+
 
         // Initialize path analyzer for mathematical calculations
         // This provides the foundation for all position and window calculations
@@ -587,7 +729,9 @@ struct AnimatedCursiveTextView: View {
         let startTime = Date()
         var endPhaseStartTime: Date? = nil
 
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [self] timer in
+        emitGeometryLogIfNeeded(reason: "restart", force: true)
+
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [self] timer in
             let now = Date()
             let elapsed = now.timeIntervalSince(startTime)
             let progress = min(elapsed / self.animationDuration, 1.0)
@@ -638,10 +782,10 @@ struct AnimatedCursiveTextView: View {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
 
-                if self.windowWidth > 0 {
+                if let windowWidth = self.resolvedWindowWidth {
                     // Calculate the sliding window start position
                     // Use measuredWordSize.width for consistency with view layout
-                    let effectiveWidth = min(self.windowWidth, self.measuredWordSize.width)
+                    let effectiveWidth = min(windowWidth, self.measuredWordSize.width)
 
                     // Find where the window should start to maintain the specified width
                     let windowStart = analyzer.parameterXPixelsBefore(
@@ -686,6 +830,9 @@ struct AnimatedCursiveTextView: View {
                     self.animationTimer = nil
                 }
             }
+
+            self.emitGeometryLogIfNeeded(reason: "animation tick")
+
         }
     }
 }
