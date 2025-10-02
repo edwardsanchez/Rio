@@ -407,10 +407,11 @@ struct MessageBubbleView: View {
     }
     
     var randomMNuerString: String {
-        let length = 100
-        var rng = SystemRandomNumberGenerator()
-        let alphabet = "mnluew"
-        return String((0..<length).map { _ in alphabet.randomElement(using: &rng)! })
+//        let length = 100
+//        var rng = SystemRandomNumberGenerator()
+//        let alphabet = "mnluew"
+//        return String((0..<length).map { _ in alphabet.randomElement(using: &rng)! })
+        return "Searching for best vegan restaults in Paris"
     }
     
     @ViewBuilder

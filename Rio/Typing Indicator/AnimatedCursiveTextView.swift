@@ -110,19 +110,19 @@ struct AnimatedCursiveTextView: View {
      */
     init(
         text: String,
-        fontSize: CGFloat = 30,
+        fontSize: CGFloat = 25,
         animationDuration: Double? = nil,
-        staticMode: Bool = true,
+        staticMode: Bool = false,
         showProgressIndicator: Bool = false,
         forwardOnlyMode: Bool = true,
-        windowWidth: CGFloat = 40,
+        windowWidth: CGFloat = 0, //0 means no window
         variableSpeed: Bool = false,
         trackingAccuracy: CGFloat = 0.85
     ) {
         self.text = text
         self.fontSize = fontSize
         // Auto-calculate duration based on text length if not specified
-        self.animationDuration = animationDuration ?? Double(text.count) / 2
+        self.animationDuration = animationDuration ?? Double(text.count) / 5
         self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
         self.forwardOnlyMode = forwardOnlyMode
