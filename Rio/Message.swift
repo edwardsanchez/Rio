@@ -448,7 +448,6 @@ struct MessageBubbleView: View {
                 // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
                 AnimatedCursiveTextView(
                     text: randomMNuerString,
-                    showProgressIndicator: true,
                     containerWidthOverride: typingIndicatorWidth
                 )
                 .frame(width: typingIndicatorWidth, height: 22, alignment: .leading)

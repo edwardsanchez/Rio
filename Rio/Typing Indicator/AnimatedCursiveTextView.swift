@@ -60,6 +60,12 @@ struct AnimatedCursiveTextView: View {
     /// Most negative (leftward) offset reached - acts as a ratchet preventing rightward drift
     @State private var minTextOffset: CGFloat = 0
 
+    /// Frozen offset value used during cleanup phase to keep text stationary
+    @State private var frozenCleanupOffset: CGFloat = 0
+
+    /// Flag indicating whether we're currently in the cleanup phase
+    @State private var isInCleanupPhase: Bool = false
+
     // MARK: - Fixed Reference Point
 
     /// Fixed left edge position for static window mode (always at x=0)
@@ -79,7 +85,7 @@ struct AnimatedCursiveTextView: View {
 
     let text: String                    /// Text to animate
     let fontSize: CGFloat               /// Font size in points
-    let animationDuration: Double       /// Total animation duration in seconds
+    let animationSpeed: Double       /// Total animation duration in seconds
     let staticMode: Bool                /// Enable static window mode with fixed left edge
     let showProgressIndicator: Bool     /// Enable debug indicators and logging for trim positions
     let forwardOnlyMode: Bool           /// Prevent backward movement of drawing cursor
@@ -88,6 +94,7 @@ struct AnimatedCursiveTextView: View {
     let containerWidthOverride: CGFloat?/// Optional externally-supplied container width used when computing the sliding window
     let variableSpeed: Bool             /// Allow animation speed to vary with path complexity
     let trackingAccuracy: CGFloat       /// Accuracy factor for path tracking (0.0 to 1.0)
+    let cleanup: Bool                   /// Enable cleanup phase that trims away text after animation completes
 
     // MARK: - Computed Properties
 
@@ -171,7 +178,7 @@ struct AnimatedCursiveTextView: View {
      * - Parameters:
      *   - text: The text to animate in cursive handwriting
      *   - fontSize: Font size in points (default: 30)
-     *   - animationDuration: Total animation time, auto-calculated if nil (default: text.count / 5 seconds)
+     *   - animationSpeed: Total animation time, auto-calculated if nil (default: text.count / 5 seconds)
      *   - staticMode: Enable fixed left edge with sliding window (default: true)
      *   - showProgressIndicator: Enable debug indicators and console logging for trim positions (default: false)
      *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
@@ -180,11 +187,12 @@ struct AnimatedCursiveTextView: View {
      *   - containerWidthOverride: Explicit container width to use when deriving the sliding window (default: nil)
      *   - variableSpeed: Allow speed variation based on path complexity (default: false)
      *   - trackingAccuracy: Path tracking precision from 0.0 to 1.0 (default: 0.85)
+     *   - cleanup: Enable cleanup phase that trims away text after animation completes (default: false)
      */
     init(
         text: String,
         fontSize: CGFloat = 25,
-        animationDuration: Double? = nil,
+        animationSpeed: Double? = nil,
         staticMode: Bool = true,
         showProgressIndicator: Bool = false,
         forwardOnlyMode: Bool = true,
@@ -192,12 +200,13 @@ struct AnimatedCursiveTextView: View {
         autoWindowMargin: CGFloat = 10,
         containerWidthOverride: CGFloat? = nil,
         variableSpeed: Bool = false,
-        trackingAccuracy: CGFloat = 0.85
+        trackingAccuracy: CGFloat = 0.85,
+        cleanup: Bool = true
     ) {
         self.text = text
         self.fontSize = fontSize
         // Auto-calculate duration based on text length if not specified
-        self.animationDuration = animationDuration ?? Double(text.count) / 5
+        self.animationSpeed = Double(text.count) / (animationSpeed ?? 7)
         self.staticMode = staticMode
         self.showProgressIndicator = showProgressIndicator
         self.containerWidthOverride = containerWidthOverride
@@ -209,6 +218,7 @@ struct AnimatedCursiveTextView: View {
         self.variableSpeed = variableSpeed
         // Clamp tracking accuracy to valid range
         self.trackingAccuracy = min(max(trackingAccuracy, 0), 1)
+        self.cleanup = cleanup
     }
 
     /// Creates the cursive word shape for the current text and font size
@@ -322,6 +332,11 @@ struct AnimatedCursiveTextView: View {
     var textOffset: CGFloat {
         guard staticMode else { return 0 }
         guard resolvedWindowWidth != nil else { return 0 }
+
+        // During cleanup phase, use the frozen offset to keep text stationary
+        if isInCleanupPhase {
+            return frozenCleanupOffset
+        }
 
         // Calculate the ideal offset to align trim start with fixed left edge
         // This is the mathematical relationship: offset = target_position - current_position
@@ -715,6 +730,8 @@ struct AnimatedCursiveTextView: View {
 
         // Reset the ratchet mechanism for left edge alignment
         minTextOffset = 0
+        frozenCleanupOffset = 0
+        isInCleanupPhase = false
         resetGeometryLoggerState()
 
 
@@ -727,17 +744,64 @@ struct AnimatedCursiveTextView: View {
 
         // Start the main animation timer running at 60fps for smooth updates
         let startTime = Date()
+        var cleanupPhaseStartTime: Date? = nil
 
         emitGeometryLogIfNeeded(reason: "restart", force: true)
 
         animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [self] timer in
             let now = Date()
             let elapsed = now.timeIntervalSince(startTime)
-            let progress = min(elapsed / self.animationDuration, 1.0)
+            let progress = min(elapsed / self.animationSpeed, 1.0)
 
             if self.staticMode {
                 // **Static Mode Animation Logic**
-                // Maintain the sliding window throughout the write and leave the final offset in place when complete.
+
+                // Check if we've entered the cleanup phase
+                if self.cleanup && progress >= 1.0 && self.resolvedWindowWidth != nil {
+                    // **Cleanup Phase**: Trim away remaining text from left to right
+                    if cleanupPhaseStartTime == nil {
+                        cleanupPhaseStartTime = Date()
+                        // Freeze the offset at its current value when entering cleanup
+                        self.frozenCleanupOffset = self.textOffset
+                        self.isInCleanupPhase = true
+                    }
+
+                    // Keep the end position at 100% during cleanup
+                    self.drawProgress = 1.0
+
+                    // Calculate cleanup progress with 1.0 second duration
+                    let cleanupElapsed = now.timeIntervalSince(cleanupPhaseStartTime!)
+                    let cleanupDuration = 0.5
+                    let linearCleanupProgress = min(cleanupElapsed / cleanupDuration, 1.0)
+
+                    // Apply ease-in curve (t^2) for slow start, faster finish
+                    let easedCleanupProgress = linearCleanupProgress * linearCleanupProgress
+
+                    // Calculate target trim start position
+                    let startFrom = self.maxDrawProgressFrom
+                    let newTargetFrom = startFrom + (1.0 - startFrom) * easedCleanupProgress
+
+                    // CRITICAL: Only allow forward movement to maintain system integrity
+                    if newTargetFrom > self.targetDrawProgressFrom {
+                        self.targetDrawProgressFrom = newTargetFrom
+                        self.drawProgressFrom = newTargetFrom  // Keep for compatibility
+                    }
+
+                    // Apply the dual smoothing system
+                    self.updateSmoothedDrawProgressFrom()
+
+                    // Check if cleanup is complete
+                    if self.smoothedDrawProgressFrom >= 0.999 {
+                        self.targetDrawProgressFrom = 1.0
+                        self.drawProgressFrom = 1.0
+                        timer.invalidate()
+                        self.animationTimer = nil
+                    }
+
+                    return
+                }
+
+                // **Main Animation Phase**: Normal drawing progression
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
 
@@ -772,7 +836,8 @@ struct AnimatedCursiveTextView: View {
                 // Apply the sophisticated dual smoothing system
                 self.updateSmoothedDrawProgressFrom()
 
-                if progress >= 1.0 {
+                // Only stop if cleanup is disabled or no window width is available
+                if progress >= 1.0 && (!self.cleanup || self.resolvedWindowWidth == nil) {
                     timer.invalidate()
                     self.animationTimer = nil
                 }
