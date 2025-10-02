@@ -727,7 +727,6 @@ struct AnimatedCursiveTextView: View {
 
         // Start the main animation timer running at 60fps for smooth updates
         let startTime = Date()
-        var endPhaseStartTime: Date? = nil
 
         emitGeometryLogIfNeeded(reason: "restart", force: true)
 
@@ -738,47 +737,7 @@ struct AnimatedCursiveTextView: View {
 
             if self.staticMode {
                 // **Static Mode Animation Logic**
-                // This mode has two phases: main animation and end phase cleanup
-
-                // Check if we've reached the end phase (text fully drawn, now clean up the window)
-                if progress >= 1.0 && self.drawProgressFrom < 1.0 {
-                    if endPhaseStartTime == nil {
-                        endPhaseStartTime = Date()
-                    }
-
-                    // Keep the end position at 100% while advancing the start position
-                    self.drawProgress = 1.0
-
-                    // Calculate end phase progress (0.5 second duration for cleanup)
-                    let endElapsed = now.timeIntervalSince(endPhaseStartTime!)
-                    let endDuration = 0.5
-                    let endProgress = min(endElapsed / endDuration, 1.0)
-
-                    // Interpolate from current start position to 100% (full cleanup)
-                    let startFrom = self.maxDrawProgressFrom
-                    let newTargetFrom = startFrom + (1.0 - startFrom) * endProgress
-
-                    // CRITICAL: Only allow forward movement to maintain system integrity
-                    if newTargetFrom > self.targetDrawProgressFrom {
-                        self.targetDrawProgressFrom = newTargetFrom
-                        self.drawProgressFrom = newTargetFrom  // Keep for compatibility
-                    }
-
-                    // Apply the dual smoothing system
-                    self.updateSmoothedDrawProgressFrom()
-
-                    // Check if end phase is complete
-                    if self.targetDrawProgressFrom >= 1.0 {
-                        self.targetDrawProgressFrom = 1.0
-                        self.drawProgressFrom = 1.0
-                        timer.invalidate()
-                        self.animationTimer = nil
-                    }
-
-                    return
-                }
-
-                // **Main Animation Phase**: Normal drawing progression
+                // Maintain the sliding window throughout the write and leave the final offset in place when complete.
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
 
@@ -812,6 +771,11 @@ struct AnimatedCursiveTextView: View {
 
                 // Apply the sophisticated dual smoothing system
                 self.updateSmoothedDrawProgressFrom()
+
+                if progress >= 1.0 {
+                    timer.invalidate()
+                    self.animationTimer = nil
+                }
             } else {
                 // **Progressive Mode Animation Logic**
                 // Simpler logic for traditional left-to-right animation
