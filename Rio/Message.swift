@@ -215,6 +215,32 @@ struct DateHeaderView: View {
     }
 }
 
+// MARK: - Typing Indicator View
+
+struct TypingIndicatorView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(Color.primary.opacity(0.4))
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(isAnimating ? 1.0 : 0.5)
+                    .animation(
+                        .smooth(duration: 0.8)
+                            .repeatForever(autoreverses: true)
+                            .delay(Double(index) * 0.25),
+                        value: isAnimating
+                    )
+            }
+        }
+        .onAppear {
+            isAnimating = true
+        }
+    }
+}
+
 struct Message: Identifiable {
     let id: UUID
     let text: String
@@ -442,19 +468,21 @@ struct MessageBubbleView: View {
         width: CGFloat?,
         height: CGFloat?
     ) -> some View {
-        let typingIndicatorWidth = typingIndicatorContainerWidth
+
         Group {
             if message.isTypingIndicator {
-                // Use AnimatedCursiveTextView for typing indicator with fixed height and clipping
-                AnimatedCursiveTextView(
-                    texts: typingIndicatorMessages,
-                    containerWidthOverride: typingIndicatorWidth,
-                    cleanup: true
-                )
-                .id(message.id)  // Force recreation for each new typing indicator message
-                .offset(x: 10)
-                .frame(width: typingIndicatorWidth, height: 22, alignment: .leading)
-                .opacity(0.5)
+                TypingIndicatorView()
+                    .chatBubble(
+                        backgroundColor: backgroundColor,
+                        tailAlignment: tailAlignment,
+                        tailOffset: tailOffset,
+                        tailRotation: tailRotation,
+                        showTail: showTail,
+                        backgroundOpacity: backgroundOpacity,
+                        width: width,
+                        height: height,
+                        isTypingIndicator: message.isTypingIndicator
+                    )
             } else {
                 Text(message.text)
                     .foregroundStyle(textColor)
