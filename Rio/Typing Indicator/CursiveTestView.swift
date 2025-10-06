@@ -110,19 +110,7 @@ struct CursiveTestView: View {
 
                 // The animated cursive text view
                 ZStack(alignment: .leading) {
-                    AnimatedCursiveTextView(
-                        text: string,
-                        fontSize: fontSizeValue,
-                        animationSpeed: nil,
-                        staticMode: staticMode,
-                        showProgressIndicator: showPipe,
-                        forwardOnlyMode: forwardOnlyMode,
-                        windowWidth: windowWidth,
-                        variableSpeed: variableSpeed,
-                        trackingAccuracy: trackingAccuracy
-                    )
-                    .id(animationKey)  // Force recreation when key changes
-                    .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
+                    typingIndicatorView
 
                     // Vertical indicators at scanner bounds (overlay on top of animated text)
                     if isDragging {
@@ -278,6 +266,37 @@ struct CursiveTestView: View {
             .cornerRadius(8)
 
             Spacer()
+        }
+    }
+    
+    var typingIndicatorView: some View {
+        Group {
+            if staticMode {
+                // Static mode: use the default initializer (which is always static mode)
+                AnimatedCursiveTextView(
+                    text: string,
+                    fontSize: fontSizeValue,
+                    animationSpeed: nil,
+                    windowWidth: windowWidth,
+                    forwardOnlyMode: forwardOnlyMode,
+                    variableSpeed: variableSpeed,
+                    trackingAccuracy: trackingAccuracy,
+                    cleanup: false,  // Disable cleanup for test view
+                    showProgressIndicator: showPipe
+                )
+                .id(animationKey)  // Force recreation when key changes
+                .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
+            } else {
+                // Progressive mode: use the progressiveText initializer
+                AnimatedCursiveTextView(
+                    progressiveText: string,
+                    fontSize: fontSizeValue,
+                    animationDuration: nil,
+                    showProgressIndicator: showPipe
+                )
+                .id(animationKey)  // Force recreation when key changes
+                .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
+            }
         }
     }
 }
