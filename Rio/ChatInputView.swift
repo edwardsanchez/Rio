@@ -279,7 +279,7 @@ struct ChatInputView: View {
             }
 
             // Stage 3: After 10 seconds, replace typing indicator with final message
-            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { _ in
+            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { _ in
                 // Remove any existing typing indicator message
                 if let typingIndicatorId = currentTypingIndicatorId,
                    let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {

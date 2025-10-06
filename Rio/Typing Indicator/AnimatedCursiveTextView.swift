@@ -60,6 +60,12 @@ struct AnimatedCursiveTextView: View {
     /// Most negative (leftward) offset reached - acts as a ratchet preventing rightward drift
     @State private var minTextOffset: CGFloat = 0
 
+    /// Frozen offset value used during cleanup phase to keep text stationary
+    @State private var frozenCleanupOffset: CGFloat = 0
+
+    /// Flag indicating whether we're currently in the cleanup phase
+    @State private var isInCleanupPhase: Bool = false
+
     // MARK: - Fixed Reference Point
 
     /// Fixed left edge position for static window mode (always at x=0)
@@ -70,71 +76,252 @@ struct AnimatedCursiveTextView: View {
     /// Analyzer for path measurements, coordinate transformations, and window calculations
     @State private var pathAnalyzer: PathXAnalyzer?
 
+    @State private var containerWidth: CGFloat?
+    @State private var lastLoggedShouldActivate: Bool?
+    @State private var lastLoggedWindowActive: Bool?
+    @State private var lastLoggedEffectiveContainerWidth: CGFloat?
+
     // MARK: - Configuration Parameters
 
-    let text: String                    /// Text to animate
+    let texts: [String]                 /// Array of texts to animate sequentially (or single text)
     let fontSize: CGFloat               /// Font size in points
-    let animationDuration: Double       /// Total animation duration in seconds
+    let animationSpeed: Double       /// Total animation duration in seconds
     let staticMode: Bool                /// Enable static window mode with fixed left edge
-    let showProgressIndicator: Bool     /// Show debug indicators for trim positions
+    let showProgressIndicator: Bool     /// Enable debug indicators and logging for trim positions
     let forwardOnlyMode: Bool           /// Prevent backward movement of drawing cursor
-    let windowWidth: CGFloat            /// Width of the visible text window in static mode
+    let windowWidth: CGFloat?           /// Optional override for sliding window width
+    let autoWindowMargin: CGFloat       /// Right-edge margin used when computing dynamic window width
+    let containerWidthOverride: CGFloat?/// Optional externally-supplied container width used when computing the sliding window
     let variableSpeed: Bool             /// Allow animation speed to vary with path complexity
     let trackingAccuracy: CGFloat       /// Accuracy factor for path tracking (0.0 to 1.0)
+    let cleanup: Bool                   /// Enable cleanup phase that trims away text after animation completes
+
+    // MARK: - Sequential Animation State
+
+    @State private var currentTextIndex: Int = 0  /// Index of the currently animating text in the array
 
     // MARK: - Computed Properties
 
     /// Font size accessor for consistency across the view
     private var fontSizeValue: CGFloat { fontSize }
 
+    /// Current text being animated (based on currentTextIndex)
+    private var currentText: String {
+        guard currentTextIndex < texts.count else { return texts.last ?? "" }
+        return texts[currentTextIndex]
+    }
+
     /// Calculated size needed to render the complete text at the specified font size
     /// Falls back to estimated dimensions if CursiveWordShape calculation fails
     private var measuredWordSize: CGSize {
-        CursiveWordShape.preferredSize(for: text, fontSize: fontSizeValue)
+        CursiveWordShape.preferredSize(for: currentText, fontSize: fontSizeValue)
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
     }
 
+    /// Resolves the sliding window width, falling back to geometry-derived measurements when no explicit override is supplied.
+    private var resolvedWindowWidth: CGFloat? {
+        if let specified = windowWidth {
+            return specified > 0 ? specified : nil
+        }
+        guard let width = effectiveContainerWidth else { return nil }
+        return resolvedWindowWidth(from: width)
+    }
+
+    private var loggingEnabled: Bool { showProgressIndicator }
+
+    private var effectiveContainerWidth: CGFloat? {
+        containerWidthOverride ?? containerWidth
+    }
+
+    private func resolvedWindowWidth(from width: CGFloat) -> CGFloat? {
+        let candidateWidth = width - autoWindowMargin
+        return candidateWidth > 0 ? candidateWidth : nil
+    }
+
+    /// Indicates whether the sliding window should be active based on the current geometry readings.
+    private var staticActivationThresholdReached: Bool {
+        guard staticMode, let windowWidth = resolvedWindowWidth else { return false }
+        return trimEndVisualX >= windowWidth
+    }
+
+    /// Indicates whether the sliding window logic is currently trimming the leading edge.
+    private var staticWindowCurrentlyActive: Bool {
+        staticMode && resolvedWindowWidth != nil && smoothedDrawProgressFrom > 0.0001
+    }
+
+    /// Formats optional width values for the debug HUD.
+    private func formatWidth(_ value: CGFloat?) -> String {
+        guard let value else { return "nil" }
+        return String(format: "%.1f", value)
+    }
+
+    /// Formats progress values (0...1 range) for the debug HUD.
+    private func formatProgress(_ value: CGFloat) -> String {
+        String(format: "%.3f", value)
+    }
+
+
+
+    /// Updates the cached container width while preventing unnecessary state churn.
+    private func updateContainerWidth(_ width: CGFloat) {
+        let clampedWidth = max(0, width)
+        DispatchQueue.main.async {
+            let previousValue = self.containerWidth
+            let widthChanged: Bool
+
+            if let previousValue {
+                widthChanged = abs(previousValue - clampedWidth) >= 0.5
+            } else {
+                widthChanged = true
+            }
+
+            if widthChanged {
+                self.containerWidth = clampedWidth
+                self.emitGeometryLogIfNeeded(reason: "container width update", force: true)
+            }
+        }
+    }
+
+    // MARK: - Initializers
+
     /**
-     * Initializes an animated cursive text view with comprehensive configuration options.
+     * Creates an animated cursive text view with static window mode (typing indicator style).
+     *
+     * This is the primary initializer for typing indicators where text appears to be written
+     * continuously with a fixed left edge and sliding window. Supports sequential text animation
+     * for multiple messages.
      *
      * - Parameters:
-     *   - text: The text to animate in cursive handwriting
-     *   - fontSize: Font size in points (default: 30)
-     *   - animationDuration: Total animation time, auto-calculated if nil (default: text.count / 2 seconds)
-     *   - staticMode: Enable fixed left edge with sliding window (default: true)
-     *   - showProgressIndicator: Show debug indicators for trim positions (default: false)
+     *   - texts: Array of texts to animate sequentially
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationSpeed: Characters per second, auto-calculated if nil (default: 7 chars/sec)
+     *   - containerWidthOverride: Container width for calculating window size (default: nil, auto-detect)
+     *   - windowWidth: Override for sliding window width (default: nil, calculated from container)
+     *   - autoWindowMargin: Right margin when calculating window width (default: 10)
      *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
-     *   - windowWidth: Width of visible text window in static mode (default: 40 points)
-     *   - variableSpeed: Allow speed variation based on path complexity (default: false)
-     *   - trackingAccuracy: Path tracking precision from 0.0 to 1.0 (default: 0.85)
+     *   - variableSpeed: Vary speed based on path complexity (default: false)
+     *   - trackingAccuracy: Path tracking precision 0.0-1.0 (default: 0.85)
+     *   - cleanup: Enable cleanup phase after animation (default: true)
+     *   - showProgressIndicator: Show debug indicators (default: false)
+     */
+    init(
+        texts: [String],
+        fontSize: CGFloat = 25,
+        animationSpeed: Double? = nil,
+        containerWidthOverride: CGFloat? = nil,
+        windowWidth: CGFloat? = nil,
+        autoWindowMargin: CGFloat = 10,
+        forwardOnlyMode: Bool = true,
+        variableSpeed: Bool = false,
+        trackingAccuracy: CGFloat = 0.85,
+        cleanup: Bool = true,
+        showProgressIndicator: Bool = false
+    ) {
+        self.texts = texts.isEmpty ? [""] : texts
+        self.fontSize = fontSize
+
+        let firstText = texts.first ?? ""
+        self.animationSpeed = Double(firstText.count) / (animationSpeed ?? 7)
+
+        // Static mode configuration
+        self.staticMode = true
+        self.forwardOnlyMode = forwardOnlyMode
+        self.windowWidth = windowWidth
+        self.autoWindowMargin = autoWindowMargin
+        self.containerWidthOverride = containerWidthOverride
+        self.variableSpeed = variableSpeed
+        self.trackingAccuracy = min(max(trackingAccuracy, 0), 1)
+        self.cleanup = cleanup
+
+        // Debug
+        self.showProgressIndicator = showProgressIndicator
+    }
+
+    /**
+     * Creates an animated cursive text view with static window mode for a single text.
+     *
+     * Convenience initializer for typing indicators with a single message.
+     *
+     * - Parameters:
+     *   - text: The text to animate
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationSpeed: Characters per second, auto-calculated if nil (default: 7 chars/sec)
+     *   - containerWidthOverride: Container width for calculating window size (default: nil)
+     *   - windowWidth: Override for sliding window width (default: nil)
+     *   - autoWindowMargin: Right margin when calculating window width (default: 10)
+     *   - forwardOnlyMode: Prevent backward cursor movement (default: true)
+     *   - variableSpeed: Vary speed based on path complexity (default: false)
+     *   - trackingAccuracy: Path tracking precision 0.0-1.0 (default: 0.85)
+     *   - cleanup: Enable cleanup phase after animation (default: true)
+     *   - showProgressIndicator: Show debug indicators (default: false)
      */
     init(
         text: String,
-        fontSize: CGFloat = 30,
-        animationDuration: Double? = nil,
-        staticMode: Bool = true,
-        showProgressIndicator: Bool = false,
+        fontSize: CGFloat = 25,
+        animationSpeed: Double? = nil,
+        containerWidthOverride: CGFloat? = nil,
+        windowWidth: CGFloat? = nil,
+        autoWindowMargin: CGFloat = 10,
         forwardOnlyMode: Bool = true,
-        windowWidth: CGFloat = 40,
         variableSpeed: Bool = false,
-        trackingAccuracy: CGFloat = 0.85
+        trackingAccuracy: CGFloat = 0.85,
+        cleanup: Bool = true,
+        showProgressIndicator: Bool = false
     ) {
-        self.text = text
+        self.init(
+            texts: [text],
+            fontSize: fontSize,
+            animationSpeed: animationSpeed,
+            containerWidthOverride: containerWidthOverride,
+            windowWidth: windowWidth,
+            autoWindowMargin: autoWindowMargin,
+            forwardOnlyMode: forwardOnlyMode,
+            variableSpeed: variableSpeed,
+            trackingAccuracy: trackingAccuracy,
+            cleanup: cleanup,
+            showProgressIndicator: showProgressIndicator
+        )
+    }
+
+    /**
+     * Creates an animated cursive text view with progressive mode (traditional left-to-right).
+     *
+     * This mode animates text appearing progressively from left to right without a sliding window.
+     * Simpler than static mode - most parameters don't apply here.
+     *
+     * - Parameters:
+     *   - text: The text to animate
+     *   - fontSize: Font size in points (default: 25)
+     *   - animationDuration: Total animation time in seconds, auto-calculated if nil
+     *   - showProgressIndicator: Show debug indicators (default: false)
+     */
+    init(
+        progressiveText text: String,
+        fontSize: CGFloat = 25,
+        animationDuration: Double? = nil,
+        showProgressIndicator: Bool = false
+    ) {
+        self.texts = [text]
         self.fontSize = fontSize
-        // Auto-calculate duration based on text length if not specified
-        self.animationDuration = animationDuration ?? Double(text.count) / 2
-        self.staticMode = staticMode
+        self.animationSpeed = animationDuration ?? (Double(text.count) / 7)
+
+        // Progressive mode configuration - most parameters don't apply
+        self.staticMode = false
+        self.forwardOnlyMode = false
+        self.windowWidth = nil
+        self.autoWindowMargin = 0
+        self.containerWidthOverride = nil
+        self.variableSpeed = false
+        self.trackingAccuracy = 0.85
+        self.cleanup = false
+
+        // Debug
         self.showProgressIndicator = showProgressIndicator
-        self.forwardOnlyMode = forwardOnlyMode
-        self.windowWidth = windowWidth
-        self.variableSpeed = variableSpeed
-        // Clamp tracking accuracy to valid range
-        self.trackingAccuracy = min(max(trackingAccuracy, 0), 1)
     }
 
     /// Creates the cursive word shape for the current text and font size
     var shape: CursiveWordShape {
-        CursiveWordShape(text: text, fontSize: fontSize)
+        CursiveWordShape(text: currentText, fontSize: fontSize)
     }
 
     /// Generates the complete path for the text within the measured bounds
@@ -242,7 +429,12 @@ struct AnimatedCursiveTextView: View {
      */
     var textOffset: CGFloat {
         guard staticMode else { return 0 }
-        guard windowWidth > 0 else { return 0 }
+        guard resolvedWindowWidth != nil else { return 0 }
+
+        // During cleanup phase, use the frozen offset to keep text stationary
+        if isInCleanupPhase {
+            return frozenCleanupOffset
+        }
 
         // Calculate the ideal offset to align trim start with fixed left edge
         // This is the mathematical relationship: offset = target_position - current_position
@@ -434,7 +626,7 @@ struct AnimatedCursiveTextView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             // Main cursive text shape with trim animation
-            CursiveWordShape(text: text, fontSize: fontSize)
+            CursiveWordShape(text: currentText, fontSize: fontSize)
                 .trim(
                     from: staticMode ? smoothedDrawProgressFrom : 0,  // Static mode uses sliding window
                     to: drawProgress                                   // End position advances normally
@@ -455,14 +647,79 @@ struct AnimatedCursiveTextView: View {
         }
         .frame(width: measuredWordSize.width, height: measuredWordSize.height, alignment: .leading)
         .fixedSize()  // Preserve intrinsic size so parent clipping affects the trailing edge
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { newWidth in
+            updateContainerWidth(newWidth)
+        }
         .onAppear {
+            // Reset to first text when view appears
+            currentTextIndex = 0
             restartAnimation()
         }
         .onDisappear {
             // Clean up timer to prevent memory leaks
             animationTimer?.invalidate()
             animationTimer = nil
+            // Reset index for next appearance
+            currentTextIndex = 0
         }
+    }
+
+
+    private func emitGeometryLogIfNeeded(reason: String, force: Bool = false) {
+        guard loggingEnabled else { return }
+
+        let shouldActivate = staticActivationThresholdReached
+        let isActive = staticWindowCurrentlyActive
+        let effectiveSnapshot = effectiveContainerWidth
+
+        let widthChanged: Bool
+        switch (lastLoggedEffectiveContainerWidth, effectiveSnapshot) {
+        case let (previous?, current?):
+            widthChanged = abs(previous - current) >= 0.5
+        case (nil, nil):
+            widthChanged = false
+        default:
+            widthChanged = true
+        }
+
+        if force || widthChanged || shouldActivate != lastLoggedShouldActivate || isActive != lastLoggedWindowActive {
+            logGeometrySnapshot(reason: reason, shouldActivate: shouldActivate, isActive: isActive)
+            lastLoggedShouldActivate = shouldActivate
+            lastLoggedWindowActive = isActive
+            lastLoggedEffectiveContainerWidth = effectiveSnapshot
+        }
+    }
+
+    private func logGeometrySnapshot(reason: String, shouldActivate: Bool, isActive: Bool) {
+        guard loggingEnabled else { return }
+
+        let marginText = String(format: "%.1f", autoWindowMargin)
+        let intrinsicText = String(format: "%.1f", measuredWordSize.width)
+        let trimStartText = String(format: "%.1f", trimStartVisualX)
+        let trimEndText = String(format: "%.1f", trimEndVisualX)
+        let offsetText = String(format: "%.1f", textOffset)
+        let drawText = formatProgress(drawProgress)
+        let drawFromText = formatProgress(smoothedDrawProgressFrom)
+        let overrideText = formatWidth(containerWidthOverride)
+        let measuredText = formatWidth(containerWidth)
+        let effectiveText = formatWidth(effectiveContainerWidth)
+        let resolvedText = formatWidth(resolvedWindowWidth)
+
+        Logger.animatedCursiveText.debug("""
+        🧭 geometry (\(reason)):
+          overrideWidth=\(overrideText) measuredWidth=\(measuredText) effectiveWidth=\(effectiveText) resolvedWidth=\(resolvedText) margin=\(marginText)
+          intrinsicWidth=\(intrinsicText) trimStartX=\(trimStartText) trimEndX=\(trimEndText) offset=\(offsetText)
+          drawProgress=\(drawText) drawProgressFrom=\(drawFromText)
+          shouldActivate=\(shouldActivate ? "yes" : "no") active=\(isActive ? "yes" : "no")
+        """)
+    }
+
+    private func resetGeometryLoggerState() {
+        lastLoggedShouldActivate = nil
+        lastLoggedWindowActive = nil
+        lastLoggedEffectiveContainerWidth = nil
     }
 
     /**
@@ -499,7 +756,7 @@ struct AnimatedCursiveTextView: View {
                         // Trim start indicator (green line) - shows where visible text begins
                         // This should align with the purple line when the system is working correctly
                         Rectangle()
-                            .fill(Color.green)
+                            .fill((staticWindowCurrentlyActive ? Color.green : Color.orange).opacity(0.9))
                             .frame(width: 3, height: measuredWordSize.height)
                             .position(
                                 x: trimStartVisualX + textOffset,
@@ -575,44 +832,56 @@ struct AnimatedCursiveTextView: View {
 
         // Reset the ratchet mechanism for left edge alignment
         minTextOffset = 0
+        frozenCleanupOffset = 0
+        isInCleanupPhase = false
+        resetGeometryLoggerState()
+
 
         // Initialize path analyzer for mathematical calculations
         // This provides the foundation for all position and window calculations
-        let shape = CursiveWordShape(text: text, fontSize: fontSizeValue)
+        let shape = CursiveWordShape(text: currentText, fontSize: fontSizeValue)
         let path = shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
         let analyzer = PathXAnalyzer(path: path.cgPath)
         self.pathAnalyzer = analyzer
 
         // Start the main animation timer running at 60fps for smooth updates
         let startTime = Date()
-        var endPhaseStartTime: Date? = nil
+        var cleanupPhaseStartTime: Date? = nil
 
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [self] timer in
+        emitGeometryLogIfNeeded(reason: "restart", force: true)
+
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [self] timer in
             let now = Date()
             let elapsed = now.timeIntervalSince(startTime)
-            let progress = min(elapsed / self.animationDuration, 1.0)
+            let progress = min(elapsed / self.animationSpeed, 1.0)
 
             if self.staticMode {
                 // **Static Mode Animation Logic**
-                // This mode has two phases: main animation and end phase cleanup
 
-                // Check if we've reached the end phase (text fully drawn, now clean up the window)
-                if progress >= 1.0 && self.drawProgressFrom < 1.0 {
-                    if endPhaseStartTime == nil {
-                        endPhaseStartTime = Date()
+                // Check if we've entered the cleanup phase
+                if self.cleanup && progress >= 1.0 && self.resolvedWindowWidth != nil {
+                    // **Cleanup Phase**: Trim away remaining text from left to right
+                    if cleanupPhaseStartTime == nil {
+                        cleanupPhaseStartTime = Date()
+                        // Freeze the offset at its current value when entering cleanup
+                        self.frozenCleanupOffset = self.textOffset
+                        self.isInCleanupPhase = true
                     }
 
-                    // Keep the end position at 100% while advancing the start position
+                    // Keep the end position at 100% during cleanup
                     self.drawProgress = 1.0
 
-                    // Calculate end phase progress (0.5 second duration for cleanup)
-                    let endElapsed = now.timeIntervalSince(endPhaseStartTime!)
-                    let endDuration = 0.5
-                    let endProgress = min(endElapsed / endDuration, 1.0)
+                    // Calculate cleanup progress with 1.0 second duration
+                    let cleanupElapsed = now.timeIntervalSince(cleanupPhaseStartTime!)
+                    let cleanupDuration = 0.5
+                    let linearCleanupProgress = min(cleanupElapsed / cleanupDuration, 1.0)
 
-                    // Interpolate from current start position to 100% (full cleanup)
+                    // Apply ease-in curve (t^2) for slow start, faster finish
+                    let easedCleanupProgress = linearCleanupProgress * linearCleanupProgress
+
+                    // Calculate target trim start position
                     let startFrom = self.maxDrawProgressFrom
-                    let newTargetFrom = startFrom + (1.0 - startFrom) * endProgress
+                    let newTargetFrom = startFrom + (1.0 - startFrom) * easedCleanupProgress
 
                     // CRITICAL: Only allow forward movement to maintain system integrity
                     if newTargetFrom > self.targetDrawProgressFrom {
@@ -623,12 +892,26 @@ struct AnimatedCursiveTextView: View {
                     // Apply the dual smoothing system
                     self.updateSmoothedDrawProgressFrom()
 
-                    // Check if end phase is complete
-                    if self.targetDrawProgressFrom >= 1.0 {
+                    // Check if cleanup is complete
+                    if self.smoothedDrawProgressFrom >= 0.999 {
                         self.targetDrawProgressFrom = 1.0
                         self.drawProgressFrom = 1.0
-                        timer.invalidate()
-                        self.animationTimer = nil
+
+                        // Check if there are more texts to animate
+                        if self.currentTextIndex < self.texts.count - 1 {
+                            // Move to next text in the sequence
+                            self.currentTextIndex += 1
+
+                            // Restart animation for the next text
+                            // Don't invalidate the timer - just restart the animation state
+                            timer.invalidate()
+                            self.animationTimer = nil
+                            self.restartAnimation()
+                        } else {
+                            // All texts completed - stop the animation
+                            timer.invalidate()
+                            self.animationTimer = nil
+                        }
                     }
 
                     return
@@ -638,10 +921,10 @@ struct AnimatedCursiveTextView: View {
                 let adjustedProgress = self.adjustProgressForPathLength(progress)
                 self.drawProgress = adjustedProgress
 
-                if self.windowWidth > 0 {
+                if let windowWidth = self.resolvedWindowWidth {
                     // Calculate the sliding window start position
                     // Use measuredWordSize.width for consistency with view layout
-                    let effectiveWidth = min(self.windowWidth, self.measuredWordSize.width)
+                    let effectiveWidth = min(windowWidth, self.measuredWordSize.width)
 
                     // Find where the window should start to maintain the specified width
                     let windowStart = analyzer.parameterXPixelsBefore(
@@ -668,6 +951,12 @@ struct AnimatedCursiveTextView: View {
 
                 // Apply the sophisticated dual smoothing system
                 self.updateSmoothedDrawProgressFrom()
+
+                // Only stop if cleanup is disabled or no window width is available
+                if progress >= 1.0 && (!self.cleanup || self.resolvedWindowWidth == nil) {
+                    timer.invalidate()
+                    self.animationTimer = nil
+                }
             } else {
                 // **Progressive Mode Animation Logic**
                 // Simpler logic for traditional left-to-right animation
@@ -686,6 +975,9 @@ struct AnimatedCursiveTextView: View {
                     self.animationTimer = nil
                 }
             }
+
+            self.emitGeometryLogIfNeeded(reason: "animation tick")
+
         }
     }
 }

@@ -113,7 +113,7 @@ struct CursiveTestView: View {
                     AnimatedCursiveTextView(
                         text: string,
                         fontSize: fontSizeValue,
-                        animationDuration: nil,
+                        animationSpeed: nil,
                         staticMode: staticMode,
                         showProgressIndicator: showPipe,
                         forwardOnlyMode: forwardOnlyMode,
