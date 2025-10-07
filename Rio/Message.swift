@@ -609,7 +609,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     cornerRadius: 20,
                     minDiameter: minDiameter,
                     maxDiameter: maxDiameter,
-                    blurRadius: blurRadius
+                    blurRadius: blurRadius,
+                    color: backgroundColor
                 )
                 // Apply negative padding to compensate for canvas padding
                 .padding(-canvasPadding)

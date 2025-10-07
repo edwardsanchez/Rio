@@ -17,6 +17,7 @@ struct ThoughtBubbleView: View {
     let randomSeed: UInt64
     let hasInvalidInput: Bool
     let blurRadius: CGFloat
+    let color: Color
 
     let startTime = Date()
 
@@ -39,7 +40,15 @@ struct ThoughtBubbleView: View {
         calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
     }
 
-    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat? = nil, minDiameter: CGFloat, maxDiameter: CGFloat, blurRadius: CGFloat = 4) {
+    init(
+        width: CGFloat,
+        height: CGFloat,
+        cornerRadius: CGFloat? = nil,
+        minDiameter: CGFloat,
+        maxDiameter: CGFloat,
+        blurRadius: CGFloat = 4,
+        color: Color
+    ) {
         let cornerRadius = cornerRadius ?? min(height, width) / 2
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
         precondition(cornerRadius >= 0, "Corner radius must be non-negative.")
@@ -49,6 +58,7 @@ struct ThoughtBubbleView: View {
         self.maxDiameter = maxDiameter
         self.blurRadius = blurRadius
         self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
+        self.color = color
 
         // Calculate perimeter based on the inner rectangle dimensions
         let perimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: self.cornerRadius)
@@ -94,13 +104,13 @@ struct ThoughtBubbleView: View {
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
-                context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5)))
+                context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? color : Color.red.opacity(0.5)))
                 context.addFilter(.blur(radius: blurRadius))
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: cornerRadius)
                         .path(in: CGRect(x: padding, y: padding, width: width, height: height))
-                    ctx.fill(rectPath, with: .color(.primary))
+                    ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
                     for (index, _) in animatedDiameters.enumerated() {
@@ -464,7 +474,8 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
                 height: 40,
                 cornerRadius: 20,
                 minDiameter: 10,
-                maxDiameter: 22
+                maxDiameter: 22,
+                color: .blue
             )
 //                .border(.gray)
 
