@@ -235,16 +235,18 @@ struct TypingIndicatorView: View {
     @State private var isAnimating = false
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 5) {
             ForEach(0..<3) { index in
                 Circle()
                     .fill(Color.primary.opacity(0.4))
-                    .frame(width: 8, height: 8)
+                    .frame(width: 10, height: 10)
                     .scaleEffect(isAnimating ? 1.0 : 0.5)
+                    .opacity(isAnimating ? 1 : 0.5)
+//                    .blur(radius: isAnimating ? 0 : 2)
                     .animation(
-                        .smooth(duration: 0.8)
+                        .easeInOut(duration: 0.8)
                             .repeatForever(autoreverses: true)
-                            .delay(Double(index) * 0.25),
+                            .delay(Double(index) * 0.3),
                         value: isAnimating
                     )
             }
@@ -690,7 +692,7 @@ private extension View {
 #Preview("Thinking Bubble") {
     VStack(spacing: 60) {
         // Thinking bubble (inbound style)
-        Text("Message")
+        TypingIndicatorView()
             .foregroundStyle(.primary)
             .chatBubble(
                 messageType: .inbound,
@@ -698,6 +700,7 @@ private extension View {
                 showTail: true,
                 tailType: .thinking
             )
+            .scaleEffect(2)
 
         // Talking bubble for comparison (inbound style)
         Text("Message")
@@ -708,6 +711,7 @@ private extension View {
                 showTail: true,
                 tailType: .talking
             )
+            .hidden()
 
         // Outbound talking bubble
         Text("Message")
@@ -718,6 +722,7 @@ private extension View {
                 showTail: true,
                 tailType: .talking
             )
+            .hidden()
     }
     .padding()
 }
