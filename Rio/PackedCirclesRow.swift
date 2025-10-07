@@ -9,8 +9,8 @@
 import SwiftUI
 
 struct PackedCirclesRow: View {
-    let width: CGFloat
-    let height: CGFloat
+    let width: CGFloat  // Inner rectangle width
+    let height: CGFloat  // Inner rectangle height
     let cornerRadius: CGFloat
     let minDiameter: CGFloat
     let maxDiameter: CGFloat
@@ -19,7 +19,24 @@ struct PackedCirclesRow: View {
 
     let startTime = Date()
 
-    // Computed perimeter of the rounded rectangle
+    // Blur radius used in the metaball effect
+    let blurRadius: CGFloat = 4
+
+    // Padding around the inner rectangle to accommodate circles + blur
+    var padding: CGFloat {
+        maxDiameter / 2 + blurRadius
+    }
+
+    // Canvas dimensions (larger than inner rectangle to fit circles + blur)
+    var canvasWidth: CGFloat {
+        width + maxDiameter + 2 * blurRadius
+    }
+
+    var canvasHeight: CGFloat {
+        height + maxDiameter + 2 * blurRadius
+    }
+
+    // Computed perimeter of the inner rounded rectangle
     var perimeter: CGFloat {
         calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
     }
@@ -31,19 +48,19 @@ struct PackedCirclesRow: View {
 
         self.width = width
         self.height = height
+        self.maxDiameter = maxDiameter
         self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
 
+        // Calculate perimeter based on the inner rectangle dimensions
         let perimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: self.cornerRadius)
         precondition(minDiameter <= perimeter && maxDiameter <= perimeter, "minDiameter and maxDiameter must be <= perimeter.")
 
         // If min > max, swap them and mark as invalid
         if minDiameter > maxDiameter {
             self.minDiameter = maxDiameter
-            self.maxDiameter = maxDiameter
             self.hasInvalidInput = true
         } else {
             self.minDiameter = minDiameter
-            self.maxDiameter = maxDiameter
             self.hasInvalidInput = false
         }
 
@@ -76,13 +93,12 @@ struct PackedCirclesRow: View {
             let positions = calculatePositions(diameters: animatedDiameters, movementProgress: movementProgress)
 
             // Canvas with metaball effect
-            // Expand canvas to accommodate circles extending beyond the path
-            let padding = maxDiameter / 2
+            // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
                 context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5)))
-                context.addFilter(.blur(radius: 4))
+                context.addFilter(.blur(radius: blurRadius))
                 context.drawLayer { ctx in
-                    // Draw filled rounded rectangle in the center
+                    // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: cornerRadius)
                         .path(in: CGRect(x: padding, y: padding, width: width, height: height))
                     ctx.fill(rectPath, with: .color(.primary))
@@ -90,7 +106,7 @@ struct PackedCirclesRow: View {
                     // Draw circles around the path
                     for (index, _) in animatedDiameters.enumerated() {
                         if let circleSymbol = ctx.resolveSymbol(id: index) {
-                            // Offset position to account for padding
+                            // Offset position by padding to account for canvas border
                             let position = CGPoint(
                                 x: positions[index].x + padding,
                                 y: positions[index].y + padding
@@ -106,7 +122,7 @@ struct PackedCirclesRow: View {
                         .tag(index)
                 }
             }
-            .frame(width: width + maxDiameter, height: height + maxDiameter)
+            .frame(width: canvasWidth, height: canvasHeight)
         }
     }
 
@@ -443,25 +459,31 @@ private func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, corn
 struct PackedCirclesRow_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Small rounded rectangle")
-            PackedCirclesRow(width: 200, height: 100, cornerRadius: 20, minDiameter: 10, maxDiameter: 30)
-                .border(.gray)
-
-            Text("Square with rounded corners")
-            PackedCirclesRow(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
-                .border(.gray)
-
-            Text("Wide rectangle")
-            PackedCirclesRow(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+//            Text("Small rounded rectangle")
+            PackedCirclesRow(
+                width: 68,
+                height: 40,
+                cornerRadius: 20,
+                minDiameter: 10,
+                maxDiameter: 22
+            )
 //                .border(.gray)
 
-            Text("Tall rectangle")
-            PackedCirclesRow(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
-                .border(.gray)
-
-            Text("Sharp corners (radius = 0)")
-            PackedCirclesRow(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
-                .border(.gray)
+//            Text("Square with rounded corners")
+//            PackedCirclesRow(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
+//                .border(.gray)
+//
+//            Text("Wide rectangle")
+//            PackedCirclesRow(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+////                .border(.gray)
+//
+//            Text("Tall rectangle")
+//            PackedCirclesRow(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
+//                .border(.gray)
+//
+//            Text("Sharp corners (radius = 0)")
+//            PackedCirclesRow(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
+//                .border(.gray)
         }
         .padding()
         .previewLayout(.sizeThatFits)

@@ -566,8 +566,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     width: bubbleWidth,
                     height: bubbleHeight,
                     cornerRadius: 20,
-                    minDiameter: 15,
-                    maxDiameter: 25
+                    minDiameter: 10,
+                    maxDiameter: 22
                 )
                 .overlay(alignment: tailAlignment) {
                     tailView
