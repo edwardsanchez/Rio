@@ -56,18 +56,23 @@ struct PackedCirclesRow: View {
 
         TimelineView(.animation) { timeline in
             let elapsed = timeline.date.timeIntervalSince(startTime)
-            let progress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
+
+            // Size oscillation progress (3 second cycle)
+            let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
 
             let animatedDiameters = calculateAnimatedDiameters(
                 animationData: animationData,
-                progress: progress,
+                progress: sizeProgress,
                 totalLength: perimeter,
                 min: minDiameter,
                 max: maxDiameter
             )
 
+            // Movement progress - circles complete one full loop every 5 seconds
+            let movementProgress = CGFloat(elapsed / 10.0).truncatingRemainder(dividingBy: 1.0)
+
             // Calculate positions for each circle along the rounded rectangle path
-            let positions = calculatePositions(diameters: animatedDiameters)
+            let positions = calculatePositions(diameters: animatedDiameters, movementProgress: movementProgress)
 
             // Canvas with metaball effect
             // Expand canvas to accommodate circles extending beyond the path
@@ -105,20 +110,32 @@ struct PackedCirclesRow: View {
     }
 
     // Calculate center positions for each circle along the rounded rectangle path
-    private func calculatePositions(diameters: [CGFloat]) -> [CGPoint] {
+    // movementProgress: 0.0 to 1.0 representing one complete loop around the path
+    private func calculatePositions(diameters: [CGFloat], movementProgress: CGFloat) -> [CGPoint] {
         var positions: [CGPoint] = []
-        var currentDistance: CGFloat = 0
 
+        // Calculate initial spacing positions (where circles would be if stationary)
+        var initialDistances: [CGFloat] = []
+        var currentDistance: CGFloat = 0
         for diameter in diameters {
             let centerDistance = currentDistance + diameter / 2
+            initialDistances.append(centerDistance)
+            currentDistance += diameter
+        }
+
+        // Apply movement offset - move all circles by the same distance
+        let movementOffset = movementProgress * perimeter
+
+        for initialDistance in initialDistances {
+            // Add movement offset and wrap around using modulo
+            let animatedDistance = (initialDistance + movementOffset).truncatingRemainder(dividingBy: perimeter)
             let position = pointOnRoundedRectPath(
-                distance: centerDistance,
+                distance: animatedDistance,
                 width: width,
                 height: height,
                 cornerRadius: cornerRadius
             )
             positions.append(position)
-            currentDistance += diameter
         }
 
         return positions
@@ -434,7 +451,7 @@ struct PackedCirclesRow_Previews: PreviewProvider {
                 .border(.gray)
 
             Text("Wide rectangle")
-            PackedCirclesRow(width: 300, height: 100, cornerRadius: 25, minDiameter: 20, maxDiameter: 50)
+            PackedCirclesRow(width: 300, height: 100, cornerRadius: 25, minDiameter: 50, maxDiameter: 80)
                 .border(.gray)
 
             Text("Tall rectangle")
