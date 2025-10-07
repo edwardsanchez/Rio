@@ -1,5 +1,5 @@
 //
-//  PackedCirclesRow.swift
+//  ThoughtBubbleView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/6/25.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct PackedCirclesRow: View {
+struct ThoughtBubbleView: View {
     let width: CGFloat  // Inner rectangle width
     let height: CGFloat  // Inner rectangle height
     let cornerRadius: CGFloat
@@ -455,11 +455,11 @@ private func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, corn
 }
 
 // MARK: - Preview
-struct PackedCirclesRow_Previews: PreviewProvider {
+struct ThoughtBubbleView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading, spacing: 16) {
 //            Text("Small rounded rectangle")
-            PackedCirclesRow(
+            ThoughtBubbleView(
                 width: 68,
                 height: 40,
                 cornerRadius: 20,
@@ -469,19 +469,19 @@ struct PackedCirclesRow_Previews: PreviewProvider {
 //                .border(.gray)
 
 //            Text("Square with rounded corners")
-//            PackedCirclesRow(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
+//            ThoughtBubbleView(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
 //                .border(.gray)
 //
 //            Text("Wide rectangle")
-//            PackedCirclesRow(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+//            ThoughtBubbleView(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
 ////                .border(.gray)
 //
 //            Text("Tall rectangle")
-//            PackedCirclesRow(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
+//            ThoughtBubbleView(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
 //                .border(.gray)
 //
 //            Text("Sharp corners (radius = 0)")
-//            PackedCirclesRow(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
+//            ThoughtBubbleView(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
 //                .border(.gray)
         }
         .padding()

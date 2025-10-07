@@ -557,18 +557,18 @@ private struct ChatBubbleModifier: ViewModifier {
                 .opacity(backgroundOpacity)
 
         case .thinking:
-            // Use PackedCirclesRow for thinking bubbles
+            // Use ThoughtBubbleView for thinking bubbles
             let bubbleWidth = contentSize.width
             let bubbleHeight = contentSize.height
 
-            // Parameters for PackedCirclesRow
+            // Parameters for ThoughtBubbleView
             let maxDiameter: CGFloat = 23
             let minDiameter: CGFloat = 13
             let blurRadius: CGFloat = 4
 
             // Optical size compensation algorithm:
             //
-            // Problem: PackedCirclesRow draws circles centered on the perimeter of the inner
+            // Problem: ThoughtBubbleView draws circles centered on the perimeter of the inner
             // rectangle. These circles extend maxDiameter/2 both inward and outward, adding
             // visual weight that makes the bubble appear larger than a talking bubble with
             // the same content.
@@ -603,7 +603,7 @@ private struct ChatBubbleModifier: ViewModifier {
             let canvasPadding = maxDiameter / 2 + blurRadius
 
             if bubbleWidth > 0 && bubbleHeight > 0 {
-                PackedCirclesRow(
+                ThoughtBubbleView(
                     width: adjustedWidth,
                     height: adjustedHeight,
                     cornerRadius: 20,
