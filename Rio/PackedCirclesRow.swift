@@ -15,6 +15,8 @@ struct PackedCirclesRow: View {
     let randomSeed: UInt64
     let hasInvalidInput: Bool
 
+    let startTime = Date()
+
     init(length: CGFloat, minDiameter: CGFloat, maxDiameter: CGFloat) {
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
         precondition(minDiameter <= length && maxDiameter <= length, "minDiameter and maxDiameter must be <= length.")
@@ -38,18 +40,41 @@ struct PackedCirclesRow: View {
     var body: some View {
         let result = computeDiameters(length: length, min: minDiameter, max: maxDiameter, seed: randomSeed)
         let isValid = result.isValid && !hasInvalidInput
-        // Visuals: circles packed with no gaps, centers aligned by using a fixed row height = maxDiameter
-        HStack(spacing: 0) {
-            ForEach(Array(result.diameters.enumerated()), id: \.offset) { _, d in
-                Circle()
-                    .fill(isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5))
-                    .frame(width: d, height: d)
-                    .frame(height: maxDiameter, alignment: .center)
+        let animationData = computeAnimationData(baseDiameters: result.diameters, min: minDiameter, max: maxDiameter, seed: randomSeed)
+
+        TimelineView(.animation) { timeline in
+            let elapsed = timeline.date.timeIntervalSince(startTime)
+            let progress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
+
+            let animatedDiameters = calculateAnimatedDiameters(
+                animationData: animationData,
+                progress: progress,
+                totalLength: length,
+                min: minDiameter,
+                max: maxDiameter
+            )
+
+            // Visuals: circles packed with no gaps, centers aligned by using a fixed row height = maxDiameter
+            HStack(spacing: 0) {
+                ForEach(Array(animatedDiameters.enumerated()), id: \.offset) { index, diameter in
+                    Circle()
+                        .fill(isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5))
+                        .frame(width: diameter, height: diameter)
+                        .frame(height: maxDiameter, alignment: .center)
+                }
             }
+            .frame(width: length, height: maxDiameter, alignment: .leading)
+            .clipped()
         }
-        .frame(width: length, height: maxDiameter, alignment: .leading)
-        .clipped()
     }
+}
+
+// MARK: - Animation data structures
+private struct CircleAnimationData {
+    let baseDiameter: CGFloat
+    let amplitude: CGFloat  // How much this circle oscillates (+/-)
+    let phase: CGFloat
+    let direction: CGFloat  // +1 or -1, determines if it grows or shrinks first
 }
 
 // MARK: - Packing logic
@@ -124,6 +149,116 @@ private func computeDiameters(length L: CGFloat, min a: CGFloat, max b: CGFloat,
     return PackingResult(diameters: sizes, isValid: isValid)
 }
 
+// MARK: - Animation logic
+private func computeAnimationData(baseDiameters: [CGFloat], min: CGFloat, max: CGFloat, seed: UInt64) -> [CircleAnimationData] {
+    var rng = SeededRandomGenerator(seed: seed)
+    var animationData: [CircleAnimationData] = []
+
+    // For each circle, calculate the maximum amplitude it can oscillate
+    // while staying within [min, max] bounds
+    var amplitudes: [CGFloat] = []
+    for baseDiameter in baseDiameters {
+        let maxGrowth = max - baseDiameter
+        let maxShrink = baseDiameter - min
+
+        // Maximum oscillation amplitude (how far from base in either direction)
+        let amplitude = Swift.min(maxGrowth, maxShrink)
+        amplitudes.append(amplitude)
+    }
+
+    // Normalize amplitudes so they can be used in a zero-sum system
+    // We'll pair circles and give them opposite directions
+    for i in 0..<baseDiameters.count {
+        let baseDiameter = baseDiameters[i]
+        let amplitude = amplitudes[i]
+
+        // Random phase offset for visual variety
+        let phase = CGFloat(rng.next() % 1000) / 1000.0
+
+        // Alternate direction: even indices grow first (+1), odd indices shrink first (-1)
+        let direction: CGFloat = (i % 2 == 0) ? 1.0 : -1.0
+
+        animationData.append(CircleAnimationData(
+            baseDiameter: baseDiameter,
+            amplitude: amplitude,
+            phase: phase,
+            direction: direction
+        ))
+    }
+
+    return animationData
+}
+
+private func calculateAnimatedDiameters(animationData: [CircleAnimationData], progress: CGFloat, totalLength: CGFloat, min: CGFloat, max: CGFloat) -> [CGFloat] {
+    var diameters: [CGFloat] = []
+    var totalDeviation: CGFloat = 0
+
+    // First pass: calculate desired diameters with oscillations
+    for data in animationData {
+        // Apply phase offset
+        let phasedProgress = (progress + data.phase).truncatingRemainder(dividingBy: 1.0)
+
+        // Create sine-like oscillation: -1 → +1 → -1 over the cycle
+        let angle = phasedProgress * 2.0 * .pi
+        let oscillation = sin(angle)
+
+        // Apply direction and amplitude
+        let deviation = data.direction * data.amplitude * oscillation
+
+        // Calculate desired diameter
+        let desiredDiameter = data.baseDiameter + deviation
+
+        diameters.append(desiredDiameter)
+        totalDeviation += deviation
+    }
+
+    // Second pass: correct to maintain exact sum
+    // Distribute the error proportionally based on how much room each circle has
+    let currentSum = diameters.reduce(0, +)
+    let error = currentSum - totalLength
+
+    if abs(error) > 0.001 {
+        // Calculate correction weights based on available space
+        var weights: [CGFloat] = []
+        var totalWeight: CGFloat = 0
+
+        for (i, diameter) in diameters.enumerated() {
+            // Weight based on how much this circle can adjust
+            let canGrow = max - diameter
+            let canShrink = diameter - min
+            let weight = error > 0 ? canShrink : canGrow
+            weights.append(weight)
+            totalWeight += weight
+        }
+
+        // Apply corrections
+        if totalWeight > 0 {
+            for i in 0..<diameters.count {
+                let correction = (weights[i] / totalWeight) * error
+                diameters[i] -= correction
+
+                // Clamp to bounds
+                diameters[i] = Swift.max(min, Swift.min(max, diameters[i]))
+            }
+        }
+    }
+
+    // Final verification and adjustment to ensure exact sum
+    let finalSum = diameters.reduce(0, +)
+    let finalError = finalSum - totalLength
+
+    if abs(finalError) > 0.001 {
+        // Distribute remaining error evenly across all circles that have room
+        let errorPerCircle = finalError / CGFloat(diameters.count)
+        for i in 0..<diameters.count {
+            diameters[i] -= errorPerCircle
+            diameters[i] = Swift.max(min, Swift.min(max, diameters[i]))
+        }
+    }
+
+    return diameters
+}
+
 // Simple deterministic RNG for optional variety
 private struct SeededRandomGenerator: RandomNumberGenerator {
     private var state: UInt64
@@ -154,11 +289,11 @@ struct PackedCirclesRow_Previews: PreviewProvider {
                 .border(.gray)
 
 //            Text("Impossible constraints - should be red")
-            PackedCirclesRow(length: 220, minDiameter: 47, maxDiameter: 48)
+            PackedCirclesRow(length: 220, minDiameter: 40, maxDiameter: 48)
                 .border(.gray)
 
 //            Text("Invalid: min > max - should be red")
-            PackedCirclesRow(length: 220, minDiameter: 20, maxDiameter: 30)
+            PackedCirclesRow(length: 200, minDiameter: 10, maxDiameter: 30)
                 .border(.gray)
         }
         .padding()
