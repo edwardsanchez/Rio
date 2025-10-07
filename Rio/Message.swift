@@ -534,16 +534,47 @@ private struct ChatBubbleModifier: ViewModifier {
 
     @ViewBuilder
     private var backgroundView: some View {
-        let base = RoundedRectangle(cornerRadius: 20)
-            .fill(backgroundColor)
-            .frame(width: width, height: height)
-            .overlay(alignment: tailAlignment) {
-                tailView
-            }
+        switch tailType {
+        case .talking:
+            // Standard rounded rectangle background
+            let base = RoundedRectangle(cornerRadius: 20)
+                .fill(backgroundColor)
+                .overlay(alignment: tailAlignment) {
+                    tailView
+                }
 
-        base
-            .compositingGroup()
-            .opacity(backgroundOpacity)
+            base
+                .compositingGroup()
+                .opacity(backgroundOpacity)
+
+        case .thinking:
+            // Use PackedCirclesRow for thinking bubbles
+            if let width, let height {
+                PackedCirclesRow(
+                    width: width,
+                    height: height,
+                    cornerRadius: 20,
+                    minDiameter: 10,
+                    maxDiameter: 30
+                )
+                .overlay(alignment: tailAlignment) {
+                    tailView
+                }
+                .compositingGroup()
+                .opacity(backgroundOpacity)
+            } else {
+                // Fallback to rounded rectangle if dimensions aren't provided
+                let base = RoundedRectangle(cornerRadius: 20)
+                    .fill(.red)
+                    .overlay(alignment: tailAlignment) {
+                        tailView
+                    }
+
+                base
+                    .compositingGroup()
+                    .opacity(backgroundOpacity)
+            }
+        }
     }
 
     @ViewBuilder
