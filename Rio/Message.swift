@@ -146,7 +146,7 @@ struct MessageListView: View {
         let isNextSameUser = current.user.id == next.user.id
 
         // For outbound messages (from Edward), only show tail if it's the last in a sequence
-        if !current.isInbound {
+        if current.messageType == .outbound {
             // Only show tail if the next message is from a different user (end of outbound sequence)
             return !isNextSameUser
         }
@@ -215,6 +215,13 @@ struct DateHeaderView: View {
     }
 }
 
+// MARK: - Message Type
+
+enum MessageType {
+    case inbound
+    case outbound
+}
+
 // MARK: - Bubble Tail Type
 
 enum BubbleTailType {
@@ -255,9 +262,9 @@ struct Message: Identifiable {
     let date: Date
     let isTypingIndicator: Bool
 
-    var isInbound: Bool {
-        // We'll determine this based on the user - for now, any user that isn't "Edward" is inbound
-        user.name != "Edward"
+    var messageType: MessageType {
+        // We'll determine this based on the user - for now, any user that isn't "Edward" is outbound
+        user.name == "Edward" ? .outbound : .inbound
     }
 
     init(id: UUID = UUID(), text: String, user: User, date: Date = Date.now, isTypingIndicator: Bool = false) {
@@ -294,18 +301,11 @@ struct MessageBubbleView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            if message.isInbound {
+            if message.messageType == .inbound {
                 inboundAvatar
                 bubbleView(
                     textColor: .primary,
-                    backgroundColor: .userBubble,
-                    tailAlignment: .bottomLeading,
-                    tailOffset: CGSize(width: 5, height: 5.5),
-                    tailRotation: Angle(degrees: 180),
-                    showTail: showTail,
-                    backgroundOpacity: 0.6,
-                    width: nil,
-                    height: nil
+                    backgroundColor: .userBubble
                 )
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
@@ -323,14 +323,7 @@ struct MessageBubbleView: View {
                 }
                 bubbleView(
                     textColor: .white,
-                    backgroundColor: .accentColor,
-                    tailAlignment: .bottomTrailing,
-                    tailOffset: CGSize(width: -5, height: 5.5),
-                    tailRotation: .zero,
-                    showTail: showTail,
-                    backgroundOpacity: 1,
-                    width: isNew ? inputFieldFrame.width : nil,
-                    height: isNew ? inputFieldFrame.height : nil
+                    backgroundColor: .accentColor
                 )
             }
         }
@@ -349,7 +342,7 @@ struct MessageBubbleView: View {
 
     // Computed properties for positioning and animation
     private var frameAlignment: Alignment {
-        if message.isInbound {
+        if message.messageType == .inbound {
             return .leading
         } else {
             return isNew ? .leading : .trailing
@@ -359,7 +352,7 @@ struct MessageBubbleView: View {
     private var yOffset: CGFloat {
         guard isNew else { return 0 }
 
-        if message.isInbound {
+        if message.messageType == .inbound {
             return 50
         } else {
             return calculateYOffset()
@@ -367,7 +360,7 @@ struct MessageBubbleView: View {
     }
 
     private var xOffset: CGFloat {
-        guard isNew && !message.isInbound else { return 0 }
+        guard isNew && message.messageType == .outbound else { return 0 }
 
         let logger = Logger(subsystem: "Rio", category: "Animation")
 
@@ -383,7 +376,7 @@ struct MessageBubbleView: View {
     }
 
     private var opacity: Double {
-        if message.isInbound && isNew {
+        if message.messageType == .inbound && isNew {
             return 0
         }
         return 1
@@ -453,9 +446,9 @@ struct MessageBubbleView: View {
         guard scrollWidth > 0 else { return nil }
 
         let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
-        let avatarWidth: CGFloat = message.isInbound ? 40 : 0
-        let bubbleSpacing: CGFloat = message.isInbound ? 12 : 0
-        let trailingSpacer: CGFloat = message.isInbound ? 10 : 0
+        let avatarWidth: CGFloat = message.messageType == .inbound ? 40 : 0
+        let bubbleSpacing: CGFloat = message.messageType == .inbound ? 12 : 0
+        let trailingSpacer: CGFloat = message.messageType == .inbound ? 10 : 0
 
         let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
         return width > 0 ? width : nil
@@ -465,30 +458,19 @@ struct MessageBubbleView: View {
     @ViewBuilder
     private func bubbleView(
         textColor: Color,
-        backgroundColor: Color,
-
-        tailAlignment: Alignment,
-        tailOffset: CGSize,
-        tailRotation: Angle,
-        showTail: Bool,
-        backgroundOpacity: Double,
-        width: CGFloat?,
-        height: CGFloat?
+        backgroundColor: Color
     ) -> some View {
 
         Group {
             if message.isTypingIndicator {
                 TypingIndicatorView()
                     .chatBubble(
+                        messageType: message.messageType,
                         backgroundColor: backgroundColor,
-                        tailAlignment: tailAlignment,
-                        tailOffset: tailOffset,
-                        tailRotation: tailRotation,
                         showTail: showTail,
-                        backgroundOpacity: backgroundOpacity,
-                        width: width,
-                        height: height,
-                        tailType: .thinking
+                        tailType: .thinking,
+                        animationWidth: isNew ? inputFieldFrame.width : nil,
+                        animationHeight: isNew ? inputFieldFrame.height : nil
                     )
             } else {
                 Text(message.text)
@@ -497,15 +479,12 @@ struct MessageBubbleView: View {
                     // This ensures text wraps properly within the bubble
                     .fixedSize(horizontal: false, vertical: true)
                     .chatBubble(
+                        messageType: message.messageType,
                         backgroundColor: backgroundColor,
-                        tailAlignment: tailAlignment,
-                        tailOffset: tailOffset,
-                        tailRotation: tailRotation,
                         showTail: showTail,
-                        backgroundOpacity: backgroundOpacity,
-                        width: width,
-                        height: height,
-                        tailType: .talking
+                        tailType: .talking,
+                        animationWidth: isNew ? inputFieldFrame.width : nil,
+                        animationHeight: isNew ? inputFieldFrame.height : nil
                     )
             }
         }
@@ -514,17 +493,31 @@ struct MessageBubbleView: View {
 }
 
 private struct ChatBubbleModifier: ViewModifier {
+    let messageType: MessageType
     let backgroundColor: Color
-    let tailAlignment: Alignment
-    let tailOffset: CGSize
-    let tailRotation: Angle
     let showTail: Bool
-    let backgroundOpacity: Double
-    let width: CGFloat?
-    let height: CGFloat?
     let tailType: BubbleTailType
+    let animationWidth: CGFloat?
+    let animationHeight: CGFloat?
 
     @State private var contentSize: CGSize = .zero
+
+    // Computed properties derived from messageType
+    private var tailAlignment: Alignment {
+        messageType == .inbound ? .bottomLeading : .bottomTrailing
+    }
+
+    private var tailOffset: CGSize {
+        messageType == .inbound ? CGSize(width: 5, height: 5.5) : CGSize(width: -5, height: 5.5)
+    }
+
+    private var tailRotation: Angle {
+        messageType == .inbound ? Angle(degrees: 180) : .zero
+    }
+
+    private var backgroundOpacity: Double {
+        messageType == .inbound ? 0.6 : 1.0
+    }
 
     func body(content: Content) -> some View {
         content
@@ -624,7 +617,7 @@ private struct ChatBubbleModifier: ViewModifier {
                 // Temporary placeholder while size is being measured
                 RoundedRectangle(cornerRadius: 20)
                     .fill(backgroundColor)
-                    .frame(width: width, height: height)
+                    .frame(width: animationWidth, height: animationHeight)
                     .overlay(alignment: tailAlignment) {
                         tailView
                     }
@@ -674,27 +667,21 @@ private struct ChatBubbleModifier: ViewModifier {
 
 private extension View {
     func chatBubble(
+        messageType: MessageType,
         backgroundColor: Color,
-        tailAlignment: Alignment,
-        tailOffset: CGSize,
-        tailRotation: Angle,
         showTail: Bool,
-        backgroundOpacity: Double,
-        width: CGFloat?,
-        height: CGFloat?,
-        tailType: BubbleTailType = .talking
+        tailType: BubbleTailType = .talking,
+        animationWidth: CGFloat? = nil,
+        animationHeight: CGFloat? = nil
     ) -> some View {
         modifier(
             ChatBubbleModifier(
+                messageType: messageType,
                 backgroundColor: backgroundColor,
-                tailAlignment: tailAlignment,
-                tailOffset: tailOffset,
-                tailRotation: tailRotation,
                 showTail: showTail,
-                backgroundOpacity: backgroundOpacity,
-                width: width,
-                height: height,
-                tailType: tailType
+                tailType: tailType,
+                animationWidth: animationWidth,
+                animationHeight: animationHeight
             )
         )
     }
@@ -706,14 +693,9 @@ private extension View {
         Text("Message")
             .foregroundStyle(.primary)
             .chatBubble(
+                messageType: .inbound,
                 backgroundColor: .userBubble,
-                tailAlignment: .bottomLeading,
-                tailOffset: CGSize(width: 5, height: 5.5),
-                tailRotation: Angle(degrees: 180),
                 showTail: true,
-                backgroundOpacity: 0.6,
-                width: nil,
-                height: nil,
                 tailType: .thinking
             )
 
@@ -721,14 +703,19 @@ private extension View {
         Text("Message")
             .foregroundStyle(.primary)
             .chatBubble(
+                messageType: .inbound,
                 backgroundColor: .userBubble,
-                tailAlignment: .bottomLeading,
-                tailOffset: CGSize(width: 5, height: 5.5),
-                tailRotation: Angle(degrees: 180),
                 showTail: true,
-                backgroundOpacity: 0.6,
-                width: nil,
-                height: nil,
+                tailType: .talking
+            )
+
+        // Outbound talking bubble
+        Text("Message")
+            .foregroundStyle(.white)
+            .chatBubble(
+                messageType: .outbound,
+                backgroundColor: .accentColor,
+                showTail: true,
                 tailType: .talking
             )
     }
