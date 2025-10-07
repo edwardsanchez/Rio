@@ -561,21 +561,59 @@ private struct ChatBubbleModifier: ViewModifier {
             let bubbleWidth = contentSize.width
             let bubbleHeight = contentSize.height
 
-            // PackedCirclesRow adds padding: maxDiameter/2 + blurRadius
-            // For maxDiameter=22, blurRadius=4: padding = 11 + 4 = 15
-            let canvasPadding: CGFloat = 15
+            // Parameters for PackedCirclesRow
+            let maxDiameter: CGFloat = 23
+            let minDiameter: CGFloat = 13
+            let blurRadius: CGFloat = 4
+
+            // Optical size compensation algorithm:
+            //
+            // Problem: PackedCirclesRow draws circles centered on the perimeter of the inner
+            // rectangle. These circles extend maxDiameter/2 both inward and outward, adding
+            // visual weight that makes the bubble appear larger than a talking bubble with
+            // the same content.
+            //
+            // Solution Strategy:
+            // We want the overall visual bounds to match contentSize, but the circles add
+            // visual weight. We have two approaches:
+            //
+            // Approach A: Reduce inner rectangle, keep content size
+            // - Problem: Background becomes smaller than content (content overflows)
+            //
+            // Approach B: Keep inner rectangle at content size, apply extra negative padding
+            // - Problem: Negative padding clips the canvas, but circles still extend
+            //
+            // Hybrid Approach (current):
+            // 1. Slightly reduce inner rectangle to reduce overall footprint
+            // 2. The content will naturally center within the available space
+            // 3. Apply negative padding to remove canvas borders
+            //
+            // The reduction factor is empirically tuned for optimal visual balance.
+            // Factor of 1.0 would reduce by full maxDiameter (maxDiameter/2 on each side).
+            // Factor of 0.5 would reduce by maxDiameter/2 total.
+            // We use 0.8 to significantly reduce visual weight while maintaining bubble integrity.
+            let opticalReductionFactor: CGFloat = 0.8
+            let sizeReduction = maxDiameter * opticalReductionFactor
+
+            // Reduce inner rectangle dimensions to compensate for circle extension
+            let adjustedWidth = max(bubbleWidth - sizeReduction, 20)  // Ensure minimum size
+            let adjustedHeight = max(bubbleHeight - sizeReduction, 20)
+
+            // Canvas padding to remove (brings canvas edges closer to inner rectangle)
+            let canvasPadding = maxDiameter / 2 + blurRadius
 
             if bubbleWidth > 0 && bubbleHeight > 0 {
                 PackedCirclesRow(
-                    width: bubbleWidth,
-                    height: bubbleHeight,
+                    width: adjustedWidth,
+                    height: adjustedHeight,
                     cornerRadius: 20,
-                    minDiameter: 10,
-                    maxDiameter: 22
+                    minDiameter: minDiameter,
+                    maxDiameter: maxDiameter,
+                    blurRadius: blurRadius
                 )
                 // Apply negative padding to compensate for canvas padding
-                // This makes the visual size match the content size
                 .padding(-canvasPadding)
+                .padding(.leading, 10)
                 .overlay(alignment: tailAlignment) {
                     tailView
                 }
@@ -615,8 +653,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 14, height: 14)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? 5 : -5,
-                        y: 5.5
+                        x: tailAlignment == .bottomLeading ? 12 : -12,
+                        y: 15
                     )
 
                 // Smaller circle (further from bubble)
@@ -624,8 +662,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 8, height: 8)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? -1 : 1,
-                        y: 14.5
+                        x: tailAlignment == .bottomLeading ? 8 : -8,
+                        y: 25
                     )
             }
             .opacity(showTail ? 1 : 0)

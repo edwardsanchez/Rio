@@ -16,11 +16,9 @@ struct PackedCirclesRow: View {
     let maxDiameter: CGFloat
     let randomSeed: UInt64
     let hasInvalidInput: Bool
+    let blurRadius: CGFloat
 
     let startTime = Date()
-
-    // Blur radius used in the metaball effect
-    let blurRadius: CGFloat = 4
 
     // Padding around the inner rectangle to accommodate circles + blur
     var padding: CGFloat {
@@ -41,7 +39,7 @@ struct PackedCirclesRow: View {
         calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
     }
 
-    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat? = nil, minDiameter: CGFloat, maxDiameter: CGFloat) {
+    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat? = nil, minDiameter: CGFloat, maxDiameter: CGFloat, blurRadius: CGFloat = 4) {
         let cornerRadius = cornerRadius ?? min(height, width) / 2
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
         precondition(cornerRadius >= 0, "Corner radius must be non-negative.")
@@ -49,6 +47,7 @@ struct PackedCirclesRow: View {
         self.width = width
         self.height = height
         self.maxDiameter = maxDiameter
+        self.blurRadius = blurRadius
         self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
 
         // Calculate perimeter based on the inner rectangle dimensions
