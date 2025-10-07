@@ -24,7 +24,8 @@ struct PackedCirclesRow: View {
         calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
     }
 
-    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat, minDiameter: CGFloat, maxDiameter: CGFloat) {
+    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat? = nil, minDiameter: CGFloat, maxDiameter: CGFloat) {
+        let cornerRadius = cornerRadius ?? min(height, width) / 2
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
         precondition(cornerRadius >= 0, "Corner radius must be non-negative.")
 
@@ -451,8 +452,8 @@ struct PackedCirclesRow_Previews: PreviewProvider {
                 .border(.gray)
 
             Text("Wide rectangle")
-            PackedCirclesRow(width: 300, height: 100, cornerRadius: 25, minDiameter: 50, maxDiameter: 80)
-                .border(.gray)
+            PackedCirclesRow(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+//                .border(.gray)
 
             Text("Tall rectangle")
             PackedCirclesRow(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
