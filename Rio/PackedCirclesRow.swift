@@ -54,18 +54,46 @@ struct PackedCirclesRow: View {
                 max: maxDiameter
             )
 
-            // Visuals: circles packed with no gaps, centers aligned by using a fixed row height = maxDiameter
-            HStack(spacing: 0) {
+            // Calculate positions for each circle
+            let positions = calculatePositions(diameters: animatedDiameters)
+
+            // Canvas with metaball effect
+            Canvas { context, size in
+                context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5)))
+                context.addFilter(.blur(radius: 4))
+                context.drawLayer { ctx in
+                    for (index, _) in animatedDiameters.enumerated() {
+                        if let circleSymbol = ctx.resolveSymbol(id: index) {
+                            let position = positions[index]
+                            ctx.draw(circleSymbol, at: position)
+                        }
+                    }
+                }
+            } symbols: {
                 ForEach(Array(animatedDiameters.enumerated()), id: \.offset) { index, diameter in
                     Circle()
-                        .fill(isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5))
                         .frame(width: diameter, height: diameter)
-                        .frame(height: maxDiameter, alignment: .center)
+                        .tag(index)
                 }
             }
             .frame(width: length, height: maxDiameter, alignment: .leading)
             .clipped()
         }
+    }
+
+    // Calculate center positions for each circle
+    private func calculatePositions(diameters: [CGFloat]) -> [CGPoint] {
+        var positions: [CGPoint] = []
+        var currentX: CGFloat = 0
+
+        for diameter in diameters {
+            let centerX = currentX + diameter / 2
+            let centerY = maxDiameter / 2
+            positions.append(CGPoint(x: centerX, y: centerY))
+            currentX += diameter
+        }
+
+        return positions
     }
 }
 
