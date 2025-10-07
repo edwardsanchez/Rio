@@ -9,7 +9,9 @@
 import SwiftUI
 
 struct PackedCirclesRow: View {
-    let length: CGFloat
+    let width: CGFloat
+    let height: CGFloat
+    let cornerRadius: CGFloat
     let minDiameter: CGFloat
     let maxDiameter: CGFloat
     let randomSeed: UInt64
@@ -17,11 +19,21 @@ struct PackedCirclesRow: View {
 
     let startTime = Date()
 
-    init(length: CGFloat, minDiameter: CGFloat, maxDiameter: CGFloat) {
-        precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
-        precondition(minDiameter <= length && maxDiameter <= length, "minDiameter and maxDiameter must be <= length.")
+    // Computed perimeter of the rounded rectangle
+    var perimeter: CGFloat {
+        calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
+    }
 
-        self.length = length
+    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat, minDiameter: CGFloat, maxDiameter: CGFloat) {
+        precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
+        precondition(cornerRadius >= 0, "Corner radius must be non-negative.")
+
+        self.width = width
+        self.height = height
+        self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
+
+        let perimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: self.cornerRadius)
+        precondition(minDiameter <= perimeter && maxDiameter <= perimeter, "minDiameter and maxDiameter must be <= perimeter.")
 
         // If min > max, swap them and mark as invalid
         if minDiameter > maxDiameter {
@@ -38,7 +50,7 @@ struct PackedCirclesRow: View {
     }
 
     var body: some View {
-        let result = computeDiameters(length: length, min: minDiameter, max: maxDiameter, seed: randomSeed)
+        let result = computeDiameters(length: perimeter, min: minDiameter, max: maxDiameter, seed: randomSeed)
         let isValid = result.isValid && !hasInvalidInput
         let animationData = computeAnimationData(baseDiameters: result.diameters, min: minDiameter, max: maxDiameter, seed: randomSeed)
 
@@ -49,22 +61,34 @@ struct PackedCirclesRow: View {
             let animatedDiameters = calculateAnimatedDiameters(
                 animationData: animationData,
                 progress: progress,
-                totalLength: length,
+                totalLength: perimeter,
                 min: minDiameter,
                 max: maxDiameter
             )
 
-            // Calculate positions for each circle
+            // Calculate positions for each circle along the rounded rectangle path
             let positions = calculatePositions(diameters: animatedDiameters)
 
             // Canvas with metaball effect
+            // Expand canvas to accommodate circles extending beyond the path
+            let padding = maxDiameter / 2
             Canvas { context, size in
                 context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? .primary.opacity(0.12) : Color.red.opacity(0.5)))
                 context.addFilter(.blur(radius: 4))
                 context.drawLayer { ctx in
+                    // Draw filled rounded rectangle in the center
+                    let rectPath = RoundedRectangle(cornerRadius: cornerRadius)
+                        .path(in: CGRect(x: padding, y: padding, width: width, height: height))
+                    ctx.fill(rectPath, with: .color(.primary))
+
+                    // Draw circles around the path
                     for (index, _) in animatedDiameters.enumerated() {
                         if let circleSymbol = ctx.resolveSymbol(id: index) {
-                            let position = positions[index]
+                            // Offset position to account for padding
+                            let position = CGPoint(
+                                x: positions[index].x + padding,
+                                y: positions[index].y + padding
+                            )
                             ctx.draw(circleSymbol, at: position)
                         }
                     }
@@ -76,24 +100,112 @@ struct PackedCirclesRow: View {
                         .tag(index)
                 }
             }
-            .frame(width: length, height: maxDiameter, alignment: .leading)
-            .clipped()
+            .frame(width: width + maxDiameter, height: height + maxDiameter)
         }
     }
 
-    // Calculate center positions for each circle
+    // Calculate center positions for each circle along the rounded rectangle path
     private func calculatePositions(diameters: [CGFloat]) -> [CGPoint] {
         var positions: [CGPoint] = []
-        var currentX: CGFloat = 0
+        var currentDistance: CGFloat = 0
 
         for diameter in diameters {
-            let centerX = currentX + diameter / 2
-            let centerY = maxDiameter / 2
-            positions.append(CGPoint(x: centerX, y: centerY))
-            currentX += diameter
+            let centerDistance = currentDistance + diameter / 2
+            let position = pointOnRoundedRectPath(
+                distance: centerDistance,
+                width: width,
+                height: height,
+                cornerRadius: cornerRadius
+            )
+            positions.append(position)
+            currentDistance += diameter
         }
 
         return positions
+    }
+
+    // Get a point on the rounded rectangle path at a given distance from the start
+    // Start point is top-left corner, moving clockwise
+    private func pointOnRoundedRectPath(distance: CGFloat, width: CGFloat, height: CGFloat, cornerRadius: CGFloat) -> CGPoint {
+        let d = distance.truncatingRemainder(dividingBy: perimeter)
+
+        let straightWidth = width - 2 * cornerRadius
+        let straightHeight = height - 2 * cornerRadius
+        let quarterArc = (.pi * cornerRadius) / 2
+
+        // Define segments:
+        // 1. Top edge (left to right): from (cornerRadius, 0) to (width - cornerRadius, 0)
+        let topEdgeEnd = straightWidth
+
+        // 2. Top-right arc: quarter circle
+        let topRightArcEnd = topEdgeEnd + quarterArc
+
+        // 3. Right edge (top to bottom): from (width, cornerRadius) to (width, height - cornerRadius)
+        let rightEdgeEnd = topRightArcEnd + straightHeight
+
+        // 4. Bottom-right arc: quarter circle
+        let bottomRightArcEnd = rightEdgeEnd + quarterArc
+
+        // 5. Bottom edge (right to left): from (width - cornerRadius, height) to (cornerRadius, height)
+        let bottomEdgeEnd = bottomRightArcEnd + straightWidth
+
+        // 6. Bottom-left arc: quarter circle
+        let bottomLeftArcEnd = bottomEdgeEnd + quarterArc
+
+        // 7. Left edge (bottom to top): from (0, height - cornerRadius) to (0, cornerRadius)
+        let leftEdgeEnd = bottomLeftArcEnd + straightHeight
+
+        // 8. Top-left arc: quarter circle
+        // let topLeftArcEnd = leftEdgeEnd + quarterArc (this equals perimeter)
+
+        if d < topEdgeEnd {
+            // Top edge
+            return CGPoint(x: cornerRadius + d, y: 0)
+        } else if d < topRightArcEnd {
+            // Top-right arc
+            let arcProgress = (d - topEdgeEnd) / quarterArc
+            let angle = .pi * 1.5 + arcProgress * .pi / 2 // Start at -90°, go to 0°
+            return CGPoint(
+                x: width - cornerRadius + cornerRadius * cos(angle),
+                y: cornerRadius + cornerRadius * sin(angle)
+            )
+        } else if d < rightEdgeEnd {
+            // Right edge
+            let edgeProgress = d - topRightArcEnd
+            return CGPoint(x: width, y: cornerRadius + edgeProgress)
+        } else if d < bottomRightArcEnd {
+            // Bottom-right arc
+            let arcProgress = (d - rightEdgeEnd) / quarterArc
+            let angle = arcProgress * .pi / 2 // Start at 0°, go to 90°
+            return CGPoint(
+                x: width - cornerRadius + cornerRadius * cos(angle),
+                y: height - cornerRadius + cornerRadius * sin(angle)
+            )
+        } else if d < bottomEdgeEnd {
+            // Bottom edge (moving left)
+            let edgeProgress = d - bottomRightArcEnd
+            return CGPoint(x: width - cornerRadius - edgeProgress, y: height)
+        } else if d < bottomLeftArcEnd {
+            // Bottom-left arc
+            let arcProgress = (d - bottomEdgeEnd) / quarterArc
+            let angle = .pi / 2 + arcProgress * .pi / 2 // Start at 90°, go to 180°
+            return CGPoint(
+                x: cornerRadius + cornerRadius * cos(angle),
+                y: height - cornerRadius + cornerRadius * sin(angle)
+            )
+        } else if d < leftEdgeEnd {
+            // Left edge (moving up)
+            let edgeProgress = d - bottomLeftArcEnd
+            return CGPoint(x: 0, y: height - cornerRadius - edgeProgress)
+        } else {
+            // Top-left arc
+            let arcProgress = (d - leftEdgeEnd) / quarterArc
+            let angle = .pi + arcProgress * .pi / 2 // Start at 180°, go to 270°
+            return CGPoint(
+                x: cornerRadius + cornerRadius * cos(angle),
+                y: cornerRadius + cornerRadius * sin(angle)
+            )
+        }
     }
 }
 
@@ -250,7 +362,7 @@ private func calculateAnimatedDiameters(animationData: [CircleAnimationData], pr
         var weights: [CGFloat] = []
         var totalWeight: CGFloat = 0
 
-        for (i, diameter) in diameters.enumerated() {
+        for (_, diameter) in diameters.enumerated() {
             // Weight based on how much this circle can adjust
             let canGrow = max - diameter
             let canShrink = diameter - min
@@ -300,28 +412,37 @@ private struct SeededRandomGenerator: RandomNumberGenerator {
     }
 }
 
+// MARK: - Helper function for perimeter calculation (standalone)
+private func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, cornerRadius: CGFloat) -> CGFloat {
+    let straightWidth = width - 2 * cornerRadius
+    let straightHeight = height - 2 * cornerRadius
+    let arcLength = 2 * .pi * cornerRadius // Full circle circumference
+
+    return 2 * straightWidth + 2 * straightHeight + arcLength
+}
+
 // MARK: - Preview
 struct PackedCirclesRow_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading, spacing: 16) {
-
-            PackedCirclesRow(length: 100, minDiameter: 20, maxDiameter: 50)
+            Text("Small rounded rectangle")
+            PackedCirclesRow(width: 200, height: 100, cornerRadius: 20, minDiameter: 10, maxDiameter: 30)
                 .border(.gray)
 
-//            Text("Tighter range")
-            PackedCirclesRow(length: 227, minDiameter: 10, maxDiameter: 48)
+            Text("Square with rounded corners")
+            PackedCirclesRow(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
                 .border(.gray)
 
-//            Text("Wide range with variety")
-            PackedCirclesRow(length: 320, minDiameter: 30, maxDiameter: 80)
+            Text("Wide rectangle")
+            PackedCirclesRow(width: 300, height: 100, cornerRadius: 25, minDiameter: 20, maxDiameter: 50)
                 .border(.gray)
 
-//            Text("Impossible constraints - should be red")
-            PackedCirclesRow(length: 220, minDiameter: 40, maxDiameter: 48)
+            Text("Tall rectangle")
+            PackedCirclesRow(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
                 .border(.gray)
 
-//            Text("Invalid: min > max - should be red")
-            PackedCirclesRow(length: 200, minDiameter: 10, maxDiameter: 30)
+            Text("Sharp corners (radius = 0)")
+            PackedCirclesRow(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
                 .border(.gray)
         }
         .padding()
