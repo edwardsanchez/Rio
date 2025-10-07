@@ -215,6 +215,13 @@ struct DateHeaderView: View {
     }
 }
 
+// MARK: - Bubble Tail Type
+
+enum BubbleTailType {
+    case talking
+    case thinking
+}
+
 // MARK: - Typing Indicator View
 
 struct TypingIndicatorView: View {
@@ -481,7 +488,7 @@ struct MessageBubbleView: View {
                         backgroundOpacity: backgroundOpacity,
                         width: width,
                         height: height,
-                        isTypingIndicator: message.isTypingIndicator
+                        tailType: .thinking
                     )
             } else {
                 Text(message.text)
@@ -498,7 +505,7 @@ struct MessageBubbleView: View {
                         backgroundOpacity: backgroundOpacity,
                         width: width,
                         height: height,
-                        isTypingIndicator: message.isTypingIndicator
+                        tailType: .talking
                     )
             }
         }
@@ -515,7 +522,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let backgroundOpacity: Double
     let width: CGFloat?
     let height: CGFloat?
-    let isTypingIndicator: Bool
+    let tailType: BubbleTailType
 
     func body(content: Content) -> some View {
         content
@@ -531,18 +538,49 @@ private struct ChatBubbleModifier: ViewModifier {
             .fill(backgroundColor)
             .frame(width: width, height: height)
             .overlay(alignment: tailAlignment) {
-                Image(.cartouche)
-                    .resizable()
-                    .frame(width: 15, height: 15)
-                    .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
-                    .offset(x: tailOffset.width, y: tailOffset.height)
-                    .foregroundStyle(backgroundColor)
-                    .opacity(showTail ? 1 : 0)
+                tailView
             }
 
         base
             .compositingGroup()
             .opacity(backgroundOpacity)
+    }
+
+    @ViewBuilder
+    private var tailView: some View {
+        switch tailType {
+        case .talking:
+            Image(.cartouche)
+                .resizable()
+                .frame(width: 15, height: 15)
+                .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
+                .offset(x: tailOffset.width, y: tailOffset.height)
+                .foregroundStyle(backgroundColor)
+                .opacity(showTail ? 1 : 0)
+
+        case .thinking:
+            // Thinking bubble tail with two circles
+            ZStack(alignment: tailAlignment == .bottomLeading ? .bottomLeading : .bottomTrailing) {
+                // Larger circle (closer to bubble)
+                Circle()
+                    .fill(backgroundColor)
+                    .frame(width: 14, height: 14)
+                    .offset(
+                        x: tailAlignment == .bottomLeading ? 0 : -8,
+                        y: 0
+                    )
+
+                // Smaller circle (further from bubble)
+                Circle()
+                    .fill(backgroundColor)
+                    .frame(width: 8, height: 8)
+                    .offset(
+                        x: tailAlignment == .bottomLeading ? -6 : 6,
+                        y: 9
+                    )
+            }
+            .opacity(showTail ? 1 : 0)
+        }
     }
 }
 
@@ -556,7 +594,7 @@ private extension View {
         backgroundOpacity: Double,
         width: CGFloat?,
         height: CGFloat?,
-        isTypingIndicator: Bool = false
+        tailType: BubbleTailType = .talking
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -568,8 +606,43 @@ private extension View {
                 backgroundOpacity: backgroundOpacity,
                 width: width,
                 height: height,
-                isTypingIndicator: isTypingIndicator
+                tailType: tailType
             )
         )
     }
+}
+
+#Preview("Thinking Bubble") {
+    VStack(spacing: 20) {
+        // Thinking bubble (inbound style)
+        Text("Thinking about your question...")
+            .foregroundStyle(.primary)
+            .chatBubble(
+                backgroundColor: .userBubble,
+                tailAlignment: .bottomLeading,
+                tailOffset: CGSize(width: 5, height: 5.5),
+                tailRotation: Angle(degrees: 180),
+                showTail: true,
+                backgroundOpacity: 0.6,
+                width: nil,
+                height: nil,
+                tailType: .thinking
+            )
+
+        // Talking bubble for comparison (inbound style)
+        Text("Regular message")
+            .foregroundStyle(.primary)
+            .chatBubble(
+                backgroundColor: .userBubble,
+                tailAlignment: .bottomLeading,
+                tailOffset: CGSize(width: 5, height: 5.5),
+                tailRotation: Angle(degrees: 180),
+                showTail: true,
+                backgroundOpacity: 0.6,
+                width: nil,
+                height: nil,
+                tailType: .talking
+            )
+    }
+    .padding()
 }
