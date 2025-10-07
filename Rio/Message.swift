@@ -524,11 +524,19 @@ private struct ChatBubbleModifier: ViewModifier {
     let height: CGFloat?
     let tailType: BubbleTailType
 
+    @State private var contentSize: CGSize = .zero
+
     func body(content: Content) -> some View {
         content
             .padding()
             .background(alignment: .leading) {
                 backgroundView
+            }
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                contentSize = newSize
+                print(newSize)
             }
     }
 
@@ -539,6 +547,7 @@ private struct ChatBubbleModifier: ViewModifier {
             // Standard rounded rectangle background
             let base = RoundedRectangle(cornerRadius: 20)
                 .fill(backgroundColor)
+//                .frame(width: width, height: height)
                 .overlay(alignment: tailAlignment) {
                     tailView
                 }
@@ -549,13 +558,16 @@ private struct ChatBubbleModifier: ViewModifier {
 
         case .thinking:
             // Use PackedCirclesRow for thinking bubbles
-            if let width, let height {
+            let bubbleWidth = contentSize.width
+            let bubbleHeight = contentSize.height
+
+            if bubbleWidth > 0 && bubbleHeight > 0 {
                 PackedCirclesRow(
-                    width: width,
-                    height: height,
+                    width: bubbleWidth,
+                    height: bubbleHeight,
                     cornerRadius: 20,
-                    minDiameter: 10,
-                    maxDiameter: 30
+                    minDiameter: 15,
+                    maxDiameter: 25
                 )
                 .overlay(alignment: tailAlignment) {
                     tailView
@@ -563,14 +575,13 @@ private struct ChatBubbleModifier: ViewModifier {
                 .compositingGroup()
                 .opacity(backgroundOpacity)
             } else {
-                // Fallback to rounded rectangle if dimensions aren't provided
-                let base = RoundedRectangle(cornerRadius: 20)
-                    .fill(.red)
+                // Temporary placeholder while size is being measured
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(backgroundColor)
+                    .frame(width: width, height: height)
                     .overlay(alignment: tailAlignment) {
                         tailView
                     }
-
-                base
                     .compositingGroup()
                     .opacity(backgroundOpacity)
             }
