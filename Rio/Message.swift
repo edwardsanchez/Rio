@@ -561,6 +561,10 @@ private struct ChatBubbleModifier: ViewModifier {
             let bubbleWidth = contentSize.width
             let bubbleHeight = contentSize.height
 
+            // PackedCirclesRow adds padding: maxDiameter/2 + blurRadius
+            // For maxDiameter=22, blurRadius=4: padding = 11 + 4 = 15
+            let canvasPadding: CGFloat = 15
+
             if bubbleWidth > 0 && bubbleHeight > 0 {
                 PackedCirclesRow(
                     width: bubbleWidth,
@@ -569,6 +573,9 @@ private struct ChatBubbleModifier: ViewModifier {
                     minDiameter: 10,
                     maxDiameter: 22
                 )
+                // Apply negative padding to compensate for canvas padding
+                // This makes the visual size match the content size
+                .padding(-canvasPadding)
                 .overlay(alignment: tailAlignment) {
                     tailView
                 }
@@ -608,8 +615,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 14, height: 14)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? 0 : -8,
-                        y: 0
+                        x: tailAlignment == .bottomLeading ? 5 : -5,
+                        y: 5.5
                     )
 
                 // Smaller circle (further from bubble)
@@ -617,8 +624,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 8, height: 8)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? -6 : 6,
-                        y: 9
+                        x: tailAlignment == .bottomLeading ? -1 : 1,
+                        y: 14.5
                     )
             }
             .opacity(showTail ? 1 : 0)
@@ -655,9 +662,9 @@ private extension View {
 }
 
 #Preview("Thinking Bubble") {
-    VStack(spacing: 20) {
+    VStack(spacing: 60) {
         // Thinking bubble (inbound style)
-        Text("Thinking about your question...")
+        Text("Message")
             .foregroundStyle(.primary)
             .chatBubble(
                 backgroundColor: .userBubble,
@@ -672,7 +679,7 @@ private extension View {
             )
 
         // Talking bubble for comparison (inbound style)
-        Text("Regular message")
+        Text("Message")
             .foregroundStyle(.primary)
             .chatBubble(
                 backgroundColor: .userBubble,
