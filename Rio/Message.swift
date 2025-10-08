@@ -229,6 +229,14 @@ enum BubbleTailType {
     case thinking
 }
 
+struct Theme {
+    let backgroundColor: Color
+    var inboundTextColor: Color = .primary
+    let inboundBackgroundColor: Color
+    var outboundTextColor: Color = .white
+    let outboundBackgroundColor: Color
+}
+
 struct Message: Identifiable {
     let id: UUID
     let text: String
@@ -279,7 +287,7 @@ struct MessageBubbleView: View {
                 inboundAvatar
                 bubbleView(
                     textColor: .primary,
-                    backgroundColor: .userBubble
+                    backgroundColor: .Default.inboundBubble
                 )
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
@@ -297,7 +305,7 @@ struct MessageBubbleView: View {
                 }
                 bubbleView(
                     textColor: .white,
-                    backgroundColor: .accentColor
+                    backgroundColor: .Default.outboundBubble
                 )
             }
         }

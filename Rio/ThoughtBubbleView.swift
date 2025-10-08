@@ -508,7 +508,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
             .foregroundStyle(.primary)
             .chatBubble(
                 messageType: .inbound,
-                backgroundColor: .userBubble,
+                backgroundColor: .Default.inboundBubble,
                 showTail: true,
                 tailType: .thinking
             )
@@ -519,7 +519,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
             .foregroundStyle(.primary)
             .chatBubble(
                 messageType: .inbound,
-                backgroundColor: .userBubble,
+                backgroundColor: .Default.inboundBubble,
                 showTail: true,
                 tailType: .talking
             )
@@ -530,7 +530,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
             .foregroundStyle(.white)
             .chatBubble(
                 messageType: .outbound,
-                backgroundColor: .accentColor,
+                backgroundColor: .Default.outboundBubble,
                 showTail: true,
                 tailType: .talking
             )
