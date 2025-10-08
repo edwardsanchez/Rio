@@ -14,12 +14,18 @@ struct ThoughtBubbleView: View {
     let cornerRadius: CGFloat
     let minDiameter: CGFloat
     let maxDiameter: CGFloat
-    let randomSeed: UInt64
     let hasInvalidInput: Bool
     let blurRadius: CGFloat
     let color: Color
 
-    let startTime = Date()
+    private let transitionDuration: TimeInterval = 0.3
+
+    @State private var animationSeed: UInt64
+    @State private var circleTransitions: [CircleTransition]
+    @State private var nextCircleID: Int
+    @State private var animatedWidth: CGFloat
+    @State private var animatedHeight: CGFloat
+    @State private var startTime: Date
 
     // Padding around the inner rectangle to accommodate circles + blur
     var padding: CGFloat {
@@ -28,16 +34,11 @@ struct ThoughtBubbleView: View {
 
     // Canvas dimensions (larger than inner rectangle to fit circles + blur)
     var canvasWidth: CGFloat {
-        width + maxDiameter + 2 * blurRadius
+        animatedWidth + maxDiameter + 2 * blurRadius
     }
 
     var canvasHeight: CGFloat {
-        height + maxDiameter + 2 * blurRadius
-    }
-
-    // Computed perimeter of the inner rounded rectangle
-    var perimeter: CGFloat {
-        calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
+        animatedHeight + maxDiameter + 2 * blurRadius
     }
 
     init(
@@ -73,33 +74,170 @@ struct ThoughtBubbleView: View {
             self.hasInvalidInput = false
         }
 
-        self.randomSeed = UInt64.random(in: 0...UInt64.max)
+        _animationSeed = State(initialValue: UInt64.random(in: 0...UInt64.max))
+        _circleTransitions = State(initialValue: [])
+        _nextCircleID = State(initialValue: 0)
+        _animatedWidth = State(initialValue: width)
+        _animatedHeight = State(initialValue: height)
+        _startTime = State(initialValue: Date())
+    }
+
+    private struct CircleTransition: Identifiable {
+        let id: Int
+        var index: Int
+        var startValue: CGFloat
+        var endValue: CGFloat
+        var startTime: Date
+        var isDisappearing: Bool
+
+        func value(at date: Date, duration: TimeInterval) -> CGFloat {
+            guard duration > 0 else { return endValue }
+            let elapsed = date.timeIntervalSince(startTime)
+            let clamped = max(0, min(1, elapsed / duration))
+            let progress = CGFloat(clamped)
+            let eased = CGFloat(0.5 - 0.5 * cos(Double(progress) * .pi))
+            return startValue + (endValue - startValue) * eased
+        }
+    }
+
+    private func configureInitialTransitions(targetDiameters: [CGFloat]) {
+        let now = Date()
+        circleTransitions = targetDiameters.enumerated().map { index, value in
+            CircleTransition(
+                id: index,
+                index: index,
+                startValue: value,
+                endValue: value,
+                startTime: now,
+                isDisappearing: false
+            )
+        }
+        nextCircleID = targetDiameters.count
+    }
+
+    private func updateCircleTransitions(targetDiameters: [CGFloat]) {
+        let now = Date()
+        var updated: [CircleTransition] = []
+        let existing = circleTransitions.sorted { $0.index < $1.index }
+
+        let sharedCount = min(existing.count, targetDiameters.count)
+
+        for i in 0..<sharedCount {
+            var transition = existing[i]
+            let currentValue = transition.value(at: now, duration: transitionDuration)
+            transition.startValue = currentValue
+            transition.endValue = targetDiameters[i]
+            transition.startTime = now
+            transition.index = i
+            transition.isDisappearing = false
+            updated.append(transition)
+        }
+
+        if existing.count > targetDiameters.count {
+            for i in targetDiameters.count..<existing.count {
+                var transition = existing[i]
+                let currentValue = transition.value(at: now, duration: transitionDuration)
+                transition.startValue = currentValue
+                transition.endValue = 0
+                transition.startTime = now
+                transition.index = i
+                transition.isDisappearing = true
+                updated.append(transition)
+                scheduleRemoval(of: transition.id)
+            }
+        }
+
+        if targetDiameters.count > existing.count {
+            for i in existing.count..<targetDiameters.count {
+                let newID = nextCircleID
+                nextCircleID += 1
+                let transition = CircleTransition(
+                    id: newID,
+                    index: i,
+                    startValue: 0,
+                    endValue: targetDiameters[i],
+                    startTime: now,
+                    isDisappearing: false
+                )
+                updated.append(transition)
+            }
+        }
+
+        updated.sort { $0.index < $1.index }
+        circleTransitions = updated
+    }
+
+    private func scheduleRemoval(of id: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + transitionDuration) {
+            circleTransitions.removeAll { $0.id == id && $0.isDisappearing }
+        }
+    }
+
+    private func currentBaseDiameters(at date: Date) -> [CGFloat] {
+        circleTransitions
+            .sorted { $0.index < $1.index }
+            .compactMap { transition in
+                let value = transition.value(at: date, duration: transitionDuration)
+                if transition.isDisappearing && value <= 0.01 {
+                    return nil
+                }
+                return max(0, value)
+            }
+    }
+
+    private func animateRectangleSize(to size: CGSize) {
+        withAnimation(.easeInOut(duration: transitionDuration)) {
+            animatedWidth = size.width
+            animatedHeight = size.height
+        }
     }
 
     var body: some View {
-        let result = computeDiameters(length: perimeter, min: minDiameter, max: maxDiameter, seed: randomSeed)
-        let isValid = result.isValid && !hasInvalidInput
-        let animationData = computeAnimationData(baseDiameters: result.diameters, min: minDiameter, max: maxDiameter, seed: randomSeed)
+        let targetPerimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: cornerRadius)
+        let packingResult = computeDiameters(length: targetPerimeter, min: minDiameter, max: maxDiameter, seed: animationSeed)
+        let targetDiameters = packingResult.diameters
+        let isValid = packingResult.isValid && !hasInvalidInput
 
         TimelineView(.animation) { timeline in
-            let elapsed = timeline.date.timeIntervalSince(startTime)
+            let now = timeline.date
+            let elapsed = now.timeIntervalSince(startTime)
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
 
+            let baseDiameters = currentBaseDiameters(at: now)
+            let currentPerimeter = calculateRoundedRectPerimeter(
+                width: animatedWidth,
+                height: animatedHeight,
+                cornerRadius: cornerRadius
+            )
+
+            let animationData = computeAnimationData(
+                baseDiameters: baseDiameters,
+                min: minDiameter,
+                max: maxDiameter,
+                seed: animationSeed
+            )
+
             let animatedDiameters = calculateAnimatedDiameters(
                 animationData: animationData,
                 progress: sizeProgress,
-                totalLength: perimeter,
+                totalLength: currentPerimeter,
                 min: minDiameter,
                 max: maxDiameter
             )
 
-            // Movement progress - circles complete one full loop every 5 seconds
+            // Movement progress - circles complete one full loop every 10 seconds
             let movementProgress = CGFloat(elapsed / 10.0).truncatingRemainder(dividingBy: 1.0)
 
             // Calculate positions for each circle along the rounded rectangle path
-            let positions = calculatePositions(diameters: animatedDiameters, movementProgress: movementProgress)
+            let positions = calculatePositions(
+                diameters: animatedDiameters,
+                movementProgress: movementProgress,
+                perimeter: currentPerimeter,
+                width: animatedWidth,
+                height: animatedHeight
+            )
 
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
@@ -109,7 +247,7 @@ struct ThoughtBubbleView: View {
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: cornerRadius)
-                        .path(in: CGRect(x: padding, y: padding, width: width, height: height))
+                        .path(in: CGRect(x: padding, y: padding, width: animatedWidth, height: animatedHeight))
                     ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
@@ -133,11 +271,34 @@ struct ThoughtBubbleView: View {
             }
             .frame(width: canvasWidth, height: canvasHeight)
         }
+        .onAppear {
+            animatedWidth = width
+            animatedHeight = height
+            startTime = Date()
+            if circleTransitions.isEmpty {
+                configureInitialTransitions(targetDiameters: targetDiameters)
+            } else {
+                updateCircleTransitions(targetDiameters: targetDiameters)
+            }
+        }
+        .onChange(of: CGSize(width: width, height: height)) { _, newSize in
+            animateRectangleSize(to: newSize)
+        }
+        .onChange(of: targetDiameters) { _, newDiameters in
+            updateCircleTransitions(targetDiameters: newDiameters)
+        }
+        .frame(width: canvasWidth, height: canvasHeight)
     }
 
     // Calculate center positions for each circle along the rounded rectangle path
     // movementProgress: 0.0 to 1.0 representing one complete loop around the path
-    private func calculatePositions(diameters: [CGFloat], movementProgress: CGFloat) -> [CGPoint] {
+    private func calculatePositions(
+        diameters: [CGFloat],
+        movementProgress: CGFloat,
+        perimeter: CGFloat,
+        width: CGFloat,
+        height: CGFloat
+    ) -> [CGPoint] {
         var positions: [CGPoint] = []
 
         // Calculate initial spacing positions (where circles would be if stationary)
@@ -159,7 +320,8 @@ struct ThoughtBubbleView: View {
                 distance: animatedDistance,
                 width: width,
                 height: height,
-                cornerRadius: cornerRadius
+                cornerRadius: cornerRadius,
+                perimeter: perimeter
             )
             positions.append(position)
         }
@@ -169,7 +331,13 @@ struct ThoughtBubbleView: View {
 
     // Get a point on the rounded rectangle path at a given distance from the start
     // Start point is top-left corner, moving clockwise
-    private func pointOnRoundedRectPath(distance: CGFloat, width: CGFloat, height: CGFloat, cornerRadius: CGFloat) -> CGPoint {
+    private func pointOnRoundedRectPath(
+        distance: CGFloat,
+        width: CGFloat,
+        height: CGFloat,
+        cornerRadius: CGFloat,
+        perimeter: CGFloat
+    ) -> CGPoint {
         let d = distance.truncatingRemainder(dividingBy: perimeter)
 
         let straightWidth = width - 2 * cornerRadius
@@ -341,8 +509,8 @@ private func computeAnimationData(baseDiameters: [CGFloat], min: CGFloat, max: C
     // while staying within [min, max] bounds
     var amplitudes: [CGFloat] = []
     for baseDiameter in baseDiameters {
-        let maxGrowth = max - baseDiameter
-        let maxShrink = baseDiameter - min
+        let maxGrowth = Swift.max(max - baseDiameter, 0)
+        let maxShrink = Swift.max(baseDiameter - min, 0)
 
         // Maximum oscillation amplitude (how far from base in either direction)
         let amplitude = Swift.min(maxGrowth, maxShrink)
@@ -373,6 +541,10 @@ private func computeAnimationData(baseDiameters: [CGFloat], min: CGFloat, max: C
 }
 
 private func calculateAnimatedDiameters(animationData: [CircleAnimationData], progress: CGFloat, totalLength: CGFloat, min: CGFloat, max: CGFloat) -> [CGFloat] {
+    if animationData.isEmpty || totalLength <= 0 {
+        return []
+    }
+
     var diameters: [CGFloat] = []
     var totalDeviation: CGFloat = 0
 
@@ -405,10 +577,13 @@ private func calculateAnimatedDiameters(animationData: [CircleAnimationData], pr
         var weights: [CGFloat] = []
         var totalWeight: CGFloat = 0
 
-        for (_, diameter) in diameters.enumerated() {
+        for (index, diameter) in diameters.enumerated() {
             // Weight based on how much this circle can adjust
-            let canGrow = max - diameter
-            let canShrink = diameter - min
+            let data = animationData[index]
+            let lowerBound = Swift.min(min, data.baseDiameter)
+            let upperBound = Swift.max(max, data.baseDiameter)
+            let canGrow = Swift.max(upperBound - diameter, 0)
+            let canShrink = Swift.max(diameter - lowerBound, 0)
             let weight = error > 0 ? canShrink : canGrow
             weights.append(weight)
             totalWeight += weight
@@ -421,7 +596,10 @@ private func calculateAnimatedDiameters(animationData: [CircleAnimationData], pr
                 diameters[i] -= correction
 
                 // Clamp to bounds
-                diameters[i] = Swift.max(min, Swift.min(max, diameters[i]))
+                let data = animationData[i]
+                let lowerBound = Swift.min(min, data.baseDiameter)
+                let upperBound = Swift.max(max, data.baseDiameter)
+                diameters[i] = Swift.max(lowerBound, Swift.min(upperBound, diameters[i]))
             }
         }
     }
@@ -430,12 +608,15 @@ private func calculateAnimatedDiameters(animationData: [CircleAnimationData], pr
     let finalSum = diameters.reduce(0, +)
     let finalError = finalSum - totalLength
 
-    if abs(finalError) > 0.001 {
+    if abs(finalError) > 0.001 && !diameters.isEmpty {
         // Distribute remaining error evenly across all circles that have room
         let errorPerCircle = finalError / CGFloat(diameters.count)
         for i in 0..<diameters.count {
             diameters[i] -= errorPerCircle
-            diameters[i] = Swift.max(min, Swift.min(max, diameters[i]))
+            let data = animationData[i]
+            let lowerBound = Swift.min(min, data.baseDiameter)
+            let upperBound = Swift.max(max, data.baseDiameter)
+            diameters[i] = Swift.max(lowerBound, Swift.min(upperBound, diameters[i]))
         }
     }
 
