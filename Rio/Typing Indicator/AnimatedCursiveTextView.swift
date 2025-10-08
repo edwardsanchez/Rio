@@ -303,7 +303,7 @@ struct AnimatedCursiveTextView: View {
     ) {
         self.texts = [text]
         self.fontSize = fontSize
-        self.animationSpeed = animationDuration ?? (Double(text.count) / 7)
+        self.animationSpeed = animationDuration ?? (Double(text.count) / 3)
 
         // Progressive mode configuration - most parameters don't apply
         self.staticMode = false

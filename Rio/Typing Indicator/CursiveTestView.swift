@@ -24,7 +24,7 @@ struct CursiveTestView: View {
     @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
     @State private var showPipe = false  // Toggle to show/hide the progress indicator
     @State private var staticMode = false  // Toggle for static window effect (window stays in place, text scrolls)
-    @State private var variableSpeed = false  // Toggle for variable speed animation
+    @State private var variableSpeed = true  // Toggle for variable speed animation
     @State private var trackingAccuracy: CGFloat = 0.85  // 0 = smooth drift, 1 = tight tracking
 
     // Animation restart trigger
@@ -60,7 +60,7 @@ struct CursiveTestView: View {
         let clampedOffset = min(max(0, scannerOffset), maxOffset)
 
         // Calculate path length between scanner bounds
-        let pathLength = analyzer.pathLengthBetweenX(
+        _ = analyzer.pathLengthBetweenX(
             from: clampedOffset,
             to: clampedOffset + scannerWidth
         )
@@ -71,23 +71,27 @@ struct CursiveTestView: View {
                 HStack(spacing: 12) {
                     TextField("Text", text: $inputText)
                         .textFieldStyle(.roundedBorder)
+                        .textInputAutocapitalization(.never)
                         .focused($isInputFocused)
                         .onSubmit {
                             submitText()
                         }
 
-                    Button("Animate") {
-                        submitText()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(inputText.isEmpty)
-                    .hidden()
+//                    Button("Animate") {
+//                        submitText()
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    .disabled(inputText.isEmpty)
+//                    .hidden()
                 }
             }
             .padding()
 //            .background(Color.blue.opacity(0.05))
             .cornerRadius(8)
             typingIndicatorView
+        }
+        .onAppear {
+            isInputFocused = true
         }
     }
     
@@ -113,7 +117,7 @@ struct CursiveTestView: View {
                 AnimatedCursiveTextView(
                     progressiveText: displayText,
                     fontSize: fontSizeValue,
-                    animationDuration: 3,
+                    animationDuration: nil,
                     showProgressIndicator: showPipe
                 )
                 .id(animationKey)  // Force recreation when key changes
@@ -129,19 +133,19 @@ struct CursiveTestView: View {
         guard !inputText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
 
         // Convert to lowercase for cursive rendering
-        displayText = inputText.lowercased()
-
+        displayText = inputText
+        
         // Clear input field
         inputText = ""
-
-        // Dismiss keyboard
-        isInputFocused = false
 
         // Reset scanner position
         scannerOffset = 50
 
         // Trigger animation restart
         animationKey += 1
+
+        // Keep focus on the text field
+        isInputFocused = true
     }
 }
 
