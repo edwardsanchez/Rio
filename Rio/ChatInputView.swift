@@ -176,7 +176,8 @@ struct ChatInputView: View {
                         id: updatedChat.id,
                         title: updatedChat.title,
                         participants: updatedChat.participants,
-                        messages: updatedMessages
+                        messages: updatedMessages,
+                        theme: updatedChat.theme
                     )
                     chatData.chats[chatIndex] = updatedChat
                 }
@@ -232,7 +233,8 @@ struct ChatInputView: View {
                         id: updatedChat.id,
                         title: updatedChat.title,
                         participants: updatedChat.participants,
-                        messages: updatedMessages
+                        messages: updatedMessages,
+                        theme: updatedChat.theme
                     )
                     chatData.chats[chatIndex] = updatedChat
                 }
@@ -294,7 +296,8 @@ struct ChatInputView: View {
                                 id: updatedChat.id,
                                 title: updatedChat.title,
                                 participants: updatedChat.participants,
-                                messages: updatedMessages
+                                messages: updatedMessages,
+                                theme: updatedChat.theme
                             )
                             chatData.chats[chatIndex] = updatedChat
                         }

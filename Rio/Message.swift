@@ -75,12 +75,20 @@ struct Chat: Identifiable {
     let title: String
     let participants: [User] // Always includes the current "outbound" user
     let messages: [Message]
+    let theme: ChatTheme
 
-    init(id: UUID = UUID(), title: String, participants: [User], messages: [Message] = []) {
+    init(
+        id: UUID = UUID(),
+        title: String,
+        participants: [User],
+        messages: [Message] = [],
+        theme: ChatTheme
+    ) {
         self.id = id
         self.title = title
         self.participants = participants
         self.messages = messages
+        self.theme = theme
     }
 }
 
@@ -92,6 +100,7 @@ struct MessageListView: View {
     let scrollViewFrame: CGRect
     let scrollVelocity: CGFloat
     let scrollPhase: ScrollPhase
+    let theme: ChatTheme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -120,7 +129,8 @@ struct MessageListView: View {
                         newMessageId: $newMessageId,
                         scrollVelocity: scrollVelocity,
                         scrollPhase: scrollPhase,
-                        visibleMessageIndex: index
+                        visibleMessageIndex: index,
+                        theme: theme
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
@@ -229,12 +239,37 @@ enum BubbleTailType {
     case thinking
 }
 
-struct Theme {
+struct ChatTheme {
     let backgroundColor: Color
-    var inboundTextColor: Color = .primary
+    let inboundTextColor: Color
     let inboundBackgroundColor: Color
-    var outboundTextColor: Color = .white
+    let outboundTextColor: Color
     let outboundBackgroundColor: Color
+
+    // Predefined themes matching asset catalog
+    static let defaultTheme = ChatTheme(
+        backgroundColor: .base,
+        inboundTextColor: .primary,
+        inboundBackgroundColor: .Default.inboundBubble,
+        outboundTextColor: .white,
+        outboundBackgroundColor: .Default.outboundBubble
+    )
+
+    static let theme1 = ChatTheme(
+        backgroundColor: .base,
+        inboundTextColor: .primary,
+        inboundBackgroundColor: .Theme1.inboundBubble,
+        outboundTextColor: .white,
+        outboundBackgroundColor: .Theme1.outboundBubble
+    )
+
+    static let theme2 = ChatTheme(
+        backgroundColor: .base,
+        inboundTextColor: .primary,
+        inboundBackgroundColor: .Theme2.inboundBubble,
+        outboundTextColor: .white,
+        outboundBackgroundColor: .Theme2.outboundBubble
+    )
 }
 
 struct Message: Identifiable {
@@ -268,8 +303,20 @@ struct MessageBubbleView: View {
     let scrollVelocity: CGFloat
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
+    let theme: ChatTheme
 
-    init(message: Message, showTail: Bool = true, isNew: Bool = false, inputFieldFrame: CGRect = .zero, scrollViewFrame: CGRect = .zero, newMessageId: Binding<UUID?> = .constant(nil), scrollVelocity: CGFloat = 0, scrollPhase: ScrollPhase = .idle, visibleMessageIndex: Int = 0) {
+    init(
+        message: Message,
+        showTail: Bool = true,
+        isNew: Bool = false,
+        inputFieldFrame: CGRect = .zero,
+        scrollViewFrame: CGRect = .zero,
+        newMessageId: Binding<UUID?> = .constant(nil),
+        scrollVelocity: CGFloat = 0,
+        scrollPhase: ScrollPhase = .idle,
+        visibleMessageIndex: Int = 0,
+        theme: ChatTheme = .defaultTheme
+    ) {
         self.message = message
         self.showTail = showTail
         self.isNew = isNew
@@ -279,6 +326,7 @@ struct MessageBubbleView: View {
         self.scrollVelocity = scrollVelocity
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
+        self.theme = theme
     }
 
     var body: some View {
@@ -286,8 +334,8 @@ struct MessageBubbleView: View {
             if message.messageType == .inbound {
                 inboundAvatar
                 bubbleView(
-                    textColor: .primary,
-                    backgroundColor: .Default.inboundBubble
+                    textColor: theme.inboundTextColor,
+                    backgroundColor: theme.inboundBackgroundColor
                 )
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
@@ -304,8 +352,8 @@ struct MessageBubbleView: View {
                     Spacer(minLength: 10)
                 }
                 bubbleView(
-                    textColor: .white,
-                    backgroundColor: .Default.outboundBubble
+                    textColor: theme.outboundTextColor,
+                    backgroundColor: theme.outboundBackgroundColor
                 )
             }
         }

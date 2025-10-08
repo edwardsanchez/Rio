@@ -46,7 +46,8 @@ struct ChatDetailView: View {
                     inputFieldFrame: inputFieldFrame,
                     scrollViewFrame: scrollViewFrame,
                     scrollVelocity: scrollVelocity,
-                    scrollPhase: scrollPhase
+                    scrollPhase: scrollPhase,
+                    theme: chat.theme
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)

@@ -34,9 +34,10 @@ class ChatData {
         let chat1 = Chat(
             title: "Maya & Edward",
             participants: [edwardUser, mayaUser],
-            messages: chat1Messages
+            messages: chat1Messages,
+            theme: .defaultTheme
         )
-        
+
         // Chat 2: Edward, Sophia, and Liam (3 participants)
         let chat2Messages = [
             Message(text: "Hey everyone! Ready for the project meeting?", user: sophiaUser, date: Date().addingTimeInterval(-7200)),
@@ -49,9 +50,10 @@ class ChatData {
         let chat2 = Chat(
             title: "Design Squad",
             participants: [edwardUser, sophiaUser, liamUser],
-            messages: chat2Messages
+            messages: chat2Messages,
+            theme: .theme1
         )
-        
+
         // Chat 3: Edward, Sophia, Liam, and Zoe (4 participants)
         let chat3Messages = [
             Message(text: "Welcome to the group chat!", user: zoeUser, date: Date().addingTimeInterval(-10800)),
@@ -65,7 +67,8 @@ class ChatData {
         let chat3 = Chat(
             title: "Adventure Crew",
             participants: [edwardUser, sophiaUser, liamUser, zoeUser],
-            messages: chat3Messages
+            messages: chat3Messages,
+            theme: .theme2
         )
         
         chats = [chat1, chat2, chat3]
@@ -87,7 +90,8 @@ class ChatData {
                 id: updatedChat.id,
                 title: updatedChat.title,
                 participants: updatedChat.participants,
-                messages: updatedMessages
+                messages: updatedMessages,
+                theme: updatedChat.theme
             )
             
             chats[chatIndex] = updatedChat
