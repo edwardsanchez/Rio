@@ -162,7 +162,7 @@ private struct ChatBubbleModifier: ViewModifier {
                     .frame(width: 14, height: 14)
                     .offset(
                         x: tailAlignment == .bottomLeading ? 12 : -12,
-                        y: 15
+                        y: 17
                     )
 
                 // Smaller circle (further from bubble)
@@ -171,7 +171,7 @@ private struct ChatBubbleModifier: ViewModifier {
                     .frame(width: 8, height: 8)
                     .offset(
                         x: tailAlignment == .bottomLeading ? 8 : -8,
-                        y: 25
+                        y: 26
                     )
             }
             .opacity(showTail ? 1 : 0)
