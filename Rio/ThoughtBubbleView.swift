@@ -499,3 +499,42 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+
+
+#Preview("Thinking Bubble") {
+    VStack(spacing: 60) {
+        // Thinking bubble (inbound style)
+        TypingIndicatorView()
+            .foregroundStyle(.primary)
+            .chatBubble(
+                messageType: .inbound,
+                backgroundColor: .userBubble,
+                showTail: true,
+                tailType: .thinking
+            )
+            .scaleEffect(2)
+        
+        // Talking bubble for comparison (inbound style)
+        Text("Message")
+            .foregroundStyle(.primary)
+            .chatBubble(
+                messageType: .inbound,
+                backgroundColor: .userBubble,
+                showTail: true,
+                tailType: .talking
+            )
+            .hidden()
+        
+        // Outbound talking bubble
+        Text("Message")
+            .foregroundStyle(.white)
+            .chatBubble(
+                messageType: .outbound,
+                backgroundColor: .accentColor,
+                showTail: true,
+                tailType: .talking
+            )
+            .hidden()
+    }
+    .padding()
+}
