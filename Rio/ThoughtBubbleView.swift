@@ -502,8 +502,27 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
 
 
 #Preview("Thinking Bubble") {
-    VStack(spacing: 60) {
+    @Previewable @State var bubbleText = "hello how are yyou"
+
+    VStack(alignment: .leading, spacing: 50) {
+        // Input field to change the text
+        TextField("Enter text", text: $bubbleText)
+            .textFieldStyle(.roundedBorder)
+            .onSubmit {
+                // Text is already bound, so it updates automatically
+            }
+
         // Thinking bubble (inbound style)
+        Text(bubbleText)
+            .foregroundStyle(.primary)
+            .chatBubble(
+                messageType: .inbound,
+                backgroundColor: .Default.inboundBubble,
+                showTail: true,
+                tailType: .thinking
+            )
+//            .scaleEffect(2)
+
         TypingIndicatorView()
             .foregroundStyle(.primary)
             .chatBubble(
@@ -512,8 +531,8 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
                 showTail: true,
                 tailType: .thinking
             )
-            .scaleEffect(2)
-        
+//            .scaleEffect(2)
+
         // Talking bubble for comparison (inbound style)
         Text("Message")
             .foregroundStyle(.primary)
@@ -524,7 +543,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
                 tailType: .talking
             )
             .hidden()
-        
+
         // Outbound talking bubble
         Text("Message")
             .foregroundStyle(.white)
@@ -536,5 +555,6 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
             )
             .hidden()
     }
+    .frame(maxWidth: .infinity, alignment: .leading)
     .padding()
 }
