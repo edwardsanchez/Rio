@@ -316,8 +316,6 @@ struct ChatInputView: View {
                     }
                 }
 
-                chatData.setTypingIndicator(false, for: randomUser.id, in: chat.id)
-
                 // Pick a random response and add final message
                 let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
                 let finalMessage = Message(
@@ -328,6 +326,8 @@ struct ChatInputView: View {
                 newMessageId = finalMessage.id
                 messages.append(finalMessage)
                 chatData.addMessage(finalMessage, to: chat.id)
+
+                chatData.setTypingIndicator(false, for: randomUser.id, in: chat.id)
 
                 // Clear the pending state and typing indicator ID
                 isInboundResponsePending = false

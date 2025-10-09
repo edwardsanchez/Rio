@@ -40,6 +40,7 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+    let activeTypingUserIds: Set<UUID>
 
     init(
         message: Message,
@@ -51,7 +52,8 @@ struct MessageBubbleView: View {
         scrollVelocity: CGFloat = 0,
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
-        theme: ChatTheme = .defaultTheme
+        theme: ChatTheme = .defaultTheme,
+        activeTypingUserIds: Set<UUID> = []
     ) {
         self.message = message
         self.showTail = showTail
@@ -63,6 +65,7 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self.activeTypingUserIds = activeTypingUserIds
     }
 
     var body: some View {
@@ -118,20 +121,61 @@ struct MessageBubbleView: View {
         }
     }
 
+    private enum InboundAnimationScenario {
+        case standard
+        case typingReplacement
+    }
+
+    // Animation distances keep inbound avatar/bubble behaviors predictable
+    private var standardInboundTravelDistance: CGFloat { 50 }
+    private var typingReplacementTravelDistance: CGFloat { 16 }
+
+    private var inboundAnimationScenario: InboundAnimationScenario? {
+        guard message.messageType == .inbound else { return nil }
+
+        if message.replacesTypingIndicator {
+            return .typingReplacement
+        }
+
+        if activeTypingUserIds.contains(message.user.id) && !message.isTypingIndicator {
+            return .typingReplacement
+        }
+
+        return .standard
+    }
+
     private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
 
         switch message.messageType {
         case .inbound:
-            return message.replacesTypingIndicator ? 0 : 50
+            switch inboundAnimationScenario {
+            case .standard:
+                return standardInboundTravelDistance
+            case .typingReplacement:
+                return 0
+            case .none:
+                return 0
+            }
         case .outbound:
             return calculateYOffset()
         }
     }
 
     private var bubbleYOffset: CGFloat {
-        guard isNew && message.messageType == .inbound else { return 0 }
-        return message.replacesTypingIndicator ? 16 : 0
+        guard isNew else { return 0 }
+
+        switch message.messageType {
+        case .inbound:
+            switch inboundAnimationScenario {
+            case .typingReplacement:
+                return typingReplacementTravelDistance
+            default:
+                return 0
+            }
+        case .outbound:
+            return 0
+        }
     }
 
     private var xOffset: CGFloat {
@@ -151,18 +195,22 @@ struct MessageBubbleView: View {
     }
 
     private var bubbleOpacity: Double {
-        if message.messageType == .inbound && isNew {
-            return 0
-        }
-        return 1
+        guard message.messageType == .inbound else { return 1 }
+        return isNew ? 0 : 1
     }
 
     private var inboundAvatarOpacity: Double {
         guard message.messageType == .inbound else { return 1 }
-        if isNew && !message.replacesTypingIndicator {
+        guard isNew else { return 1 }
+
+        switch inboundAnimationScenario {
+        case .standard:
             return 0
+        case .typingReplacement:
+            return 1
+        case .none:
+            return 1
         }
-        return 1
     }
 
     // Physics-based parallax offset for cascading jelly effect

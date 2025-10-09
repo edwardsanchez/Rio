@@ -47,7 +47,8 @@ struct ChatDetailView: View {
                     scrollViewFrame: scrollViewFrame,
                     scrollVelocity: scrollVelocity,
                     scrollPhase: scrollPhase,
-                    theme: chat.theme
+                    theme: chat.theme,
+                    activeTypingUserIds: chatData.activeTypingIndicators[chat.id] ?? []
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
