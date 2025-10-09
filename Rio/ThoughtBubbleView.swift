@@ -23,22 +23,12 @@ struct ThoughtBubbleView: View {
     @State private var animationSeed: UInt64
     @State private var circleTransitions: [CircleTransition]
     @State private var nextCircleID: Int
-    @State private var animatedWidth: CGFloat
-    @State private var animatedHeight: CGFloat
+    @State private var rectangleTransition: RectangleTransition
     @State private var startTime: Date
 
     // Padding around the inner rectangle to accommodate circles + blur
     var padding: CGFloat {
         maxDiameter / 2 + blurRadius
-    }
-
-    // Canvas dimensions (larger than inner rectangle to fit circles + blur)
-    var canvasWidth: CGFloat {
-        animatedWidth + maxDiameter + 2 * blurRadius
-    }
-
-    var canvasHeight: CGFloat {
-        animatedHeight + maxDiameter + 2 * blurRadius
     }
 
     init(
@@ -74,12 +64,16 @@ struct ThoughtBubbleView: View {
             self.hasInvalidInput = false
         }
 
+        let now = Date()
         _animationSeed = State(initialValue: UInt64.random(in: 0...UInt64.max))
         _circleTransitions = State(initialValue: [])
         _nextCircleID = State(initialValue: 0)
-        _animatedWidth = State(initialValue: width)
-        _animatedHeight = State(initialValue: height)
-        _startTime = State(initialValue: Date())
+        _rectangleTransition = State(initialValue: RectangleTransition(
+            startSize: CGSize(width: width, height: height),
+            endSize: CGSize(width: width, height: height),
+            startTime: now
+        ))
+        _startTime = State(initialValue: now)
     }
 
     private struct CircleTransition: Identifiable {
@@ -97,6 +91,23 @@ struct ThoughtBubbleView: View {
             let progress = CGFloat(clamped)
             let eased = CGFloat(0.5 - 0.5 * cos(Double(progress) * .pi))
             return startValue + (endValue - startValue) * eased
+        }
+    }
+
+    private struct RectangleTransition {
+        var startSize: CGSize
+        var endSize: CGSize
+        var startTime: Date
+
+        func value(at date: Date, duration: TimeInterval) -> CGSize {
+            guard duration > 0 else { return endSize }
+            let elapsed = date.timeIntervalSince(startTime)
+            let clamped = max(0, min(1, elapsed / duration))
+            let progress = CGFloat(clamped)
+            let eased = CGFloat(0.5 - 0.5 * cos(Double(progress) * .pi))
+            let width = startSize.width + (endSize.width - startSize.width) * eased
+            let height = startSize.height + (endSize.height - startSize.height) * eased
+            return CGSize(width: width, height: height)
         }
     }
 
@@ -185,11 +196,14 @@ struct ThoughtBubbleView: View {
             }
     }
 
-    private func animateRectangleSize(to size: CGSize) {
-        withAnimation(.easeInOut(duration: transitionDuration)) {
-            animatedWidth = size.width
-            animatedHeight = size.height
-        }
+    private func updateRectangleTransition(to size: CGSize) {
+        let now = Date()
+        let currentSize = rectangleTransition.value(at: now, duration: transitionDuration)
+        rectangleTransition = RectangleTransition(
+            startSize: currentSize,
+            endSize: size,
+            startTime: now
+        )
     }
 
     var body: some View {
@@ -201,15 +215,21 @@ struct ThoughtBubbleView: View {
         TimelineView(.animation) { timeline in
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
+            let animatedSize = rectangleTransition.value(at: now, duration: transitionDuration)
+            let currentWidth = max(animatedSize.width, 0)
+            let currentHeight = max(animatedSize.height, 0)
+            let currentCornerRadius = min(cornerRadius, min(currentWidth, currentHeight) / 2)
+            let canvasWidth = currentWidth + maxDiameter + 2 * blurRadius
+            let canvasHeight = currentHeight + maxDiameter + 2 * blurRadius
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
 
             let baseDiameters = currentBaseDiameters(at: now)
             let currentPerimeter = calculateRoundedRectPerimeter(
-                width: animatedWidth,
-                height: animatedHeight,
-                cornerRadius: cornerRadius
+                width: currentWidth,
+                height: currentHeight,
+                cornerRadius: currentCornerRadius
             )
 
             let animationData = computeAnimationData(
@@ -235,8 +255,9 @@ struct ThoughtBubbleView: View {
                 diameters: animatedDiameters,
                 movementProgress: movementProgress,
                 perimeter: currentPerimeter,
-                width: animatedWidth,
-                height: animatedHeight
+                width: currentWidth,
+                height: currentHeight,
+                cornerRadius: currentCornerRadius
             )
 
             // Canvas with metaball effect
@@ -246,8 +267,8 @@ struct ThoughtBubbleView: View {
                 context.addFilter(.blur(radius: blurRadius))
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
-                    let rectPath = RoundedRectangle(cornerRadius: cornerRadius)
-                        .path(in: CGRect(x: padding, y: padding, width: animatedWidth, height: animatedHeight))
+                    let rectPath = RoundedRectangle(cornerRadius: currentCornerRadius)
+                        .path(in: CGRect(x: padding, y: padding, width: currentWidth, height: currentHeight))
                     ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
@@ -272,22 +293,20 @@ struct ThoughtBubbleView: View {
             .frame(width: canvasWidth, height: canvasHeight)
         }
         .onAppear {
-            animatedWidth = width
-            animatedHeight = height
             startTime = Date()
             if circleTransitions.isEmpty {
                 configureInitialTransitions(targetDiameters: targetDiameters)
             } else {
                 updateCircleTransitions(targetDiameters: targetDiameters)
             }
+            updateRectangleTransition(to: CGSize(width: width, height: height))
         }
         .onChange(of: CGSize(width: width, height: height)) { _, newSize in
-            animateRectangleSize(to: newSize)
+            updateRectangleTransition(to: newSize)
         }
         .onChange(of: targetDiameters) { _, newDiameters in
             updateCircleTransitions(targetDiameters: newDiameters)
         }
-        .frame(width: canvasWidth, height: canvasHeight)
     }
 
     // Calculate center positions for each circle along the rounded rectangle path
@@ -297,7 +316,8 @@ struct ThoughtBubbleView: View {
         movementProgress: CGFloat,
         perimeter: CGFloat,
         width: CGFloat,
-        height: CGFloat
+        height: CGFloat,
+        cornerRadius: CGFloat
     ) -> [CGPoint] {
         var positions: [CGPoint] = []
 
@@ -683,7 +703,9 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
 
 
 #Preview("Thinking Bubble") {
-    @Previewable @State var bubbleText = "hello how are yyou"
+    @Previewable @State var bubbleText = "hello how are you"
+    
+    @Previewable @State var changeSize = false
 
     VStack(alignment: .leading, spacing: 50) {
         // Input field to change the text
@@ -703,6 +725,22 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
                 tailType: .thinking
             )
 //            .scaleEffect(2)
+        
+        RoundedRectangle(cornerRadius: 20)
+            .foregroundStyle(.primary)
+            .frame(width: changeSize ? 50 : 100, height: 30)
+            .chatBubble(
+                messageType: .inbound,
+                backgroundColor: .Default.inboundBubble,
+                showTail: true,
+                tailType: .thinking
+            )
+        
+        Button("Toggle") {
+            withAnimation {
+                changeSize.toggle()
+            }
+        }
 
         TypingIndicatorView()
             .foregroundStyle(.primary)
