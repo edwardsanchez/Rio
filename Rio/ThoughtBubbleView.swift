@@ -5,7 +5,6 @@
 //  Created by Edward Sanchez on 10/6/25.
 //
 
-
 import SwiftUI
 
 struct ThoughtBubbleView: View {
@@ -700,7 +699,6 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
-
 
 #Preview("Thinking Bubble") {
     @Previewable @State var bubbleText = "hello how are you"
