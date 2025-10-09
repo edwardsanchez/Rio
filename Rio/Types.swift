@@ -41,6 +41,13 @@ enum MessageType {
     case outbound
 }
 
+// MARK: - Bubble Mode
+
+enum BubbleMode {
+    case thinking
+    case talking
+}
+
 struct ChatTheme {
     let backgroundColor: Color
     let inboundTextColor: Color

@@ -41,17 +41,8 @@ private struct ChatBubbleModifier: ViewModifier {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
 
-    private var opticalReduction: CGFloat {
-        bubbleMode == .thinking ? bubbleMaxDiameter * 0.8 : 0
-    }
-
-    private var bubbleWidth: CGFloat {
-        max(measuredWidth - opticalReduction, 12)
-    }
-
-    private var bubbleHeight: CGFloat {
-        max(measuredHeight - opticalReduction * 0.6, 12)
-    }
+    private var bubbleWidth: CGFloat { measuredWidth }
+    private var bubbleHeight: CGFloat { measuredHeight }
 
     private var bubbleCornerRadius: CGFloat { 20 }
     private var bubbleMinDiameter: CGFloat { 13 }

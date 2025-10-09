@@ -123,7 +123,7 @@ struct MessageBubbleView: View {
 
         switch message.messageType {
         case .inbound:
-            return 50
+            return 0
         case .outbound:
             return calculateYOffset()
         }
@@ -258,8 +258,18 @@ struct MessageBubbleView: View {
             backgroundColor: backgroundColor,
             showTail: showTail,
             bubbleMode: message.bubbleMode,
-            animationWidth: isNew ? inputFieldFrame.width : nil,
-            animationHeight: isNew ? inputFieldFrame.height : nil
+            animationWidth: outboundAnimationWidth,
+            animationHeight: outboundAnimationHeight
         )
+    }
+
+    private var outboundAnimationWidth: CGFloat? {
+        guard message.messageType == .outbound, isNew else { return nil }
+        return inputFieldFrame.width
+    }
+
+    private var outboundAnimationHeight: CGFloat? {
+        guard message.messageType == .outbound, isNew else { return nil }
+        return inputFieldFrame.height
     }
 }

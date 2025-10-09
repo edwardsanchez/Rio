@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-enum BubbleMode {
-    case thinking, talking
-}
-
 struct BubbleView: View {
 
     let width: CGFloat  // Inner rectangle width
@@ -34,6 +30,8 @@ struct BubbleView: View {
     @State private var modeAnimationStart: Date
     @State private var modeAnimationFrom: CGFloat
     @State private var modeAnimationTo: CGFloat
+    @State private var pendingRectangleSize: CGSize?
+    @State private var pendingRectangleScheduled = false
 
     // Padding around the inner rectangle to accommodate circles + blur
     private var basePadding: CGFloat {
@@ -213,12 +211,37 @@ struct BubbleView: View {
 
     private func updateRectangleTransition(to size: CGSize) {
         let now = Date()
+        let progress = modeProgress(at: now)
+        if mode == .talking && progress < 0.98 {
+            pendingRectangleSize = size
+            schedulePendingRectangleApplication()
+            return
+        }
+        applyRectangleSize(size)
+    }
+
+    private func applyRectangleSize(_ size: CGSize) {
+        let now = Date()
         let currentSize = rectangleTransition.value(at: now, duration: transitionDuration)
         rectangleTransition = RectangleTransition(
             startSize: currentSize,
             endSize: size,
             startTime: now
         )
+        pendingRectangleSize = nil
+        pendingRectangleScheduled = false
+    }
+
+    private func schedulePendingRectangleApplication() {
+        guard !pendingRectangleScheduled else { return }
+        pendingRectangleScheduled = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.defaultModeAnimationDuration) {
+            if let pending = pendingRectangleSize {
+                applyRectangleSize(pending)
+            } else {
+                pendingRectangleScheduled = false
+            }
+        }
     }
 
     var body: some View {
@@ -333,6 +356,7 @@ struct BubbleView: View {
                 }
             }
             .frame(width: canvasWidth, height: canvasHeight)
+
         }
         .onAppear {
             startTime = Date()
