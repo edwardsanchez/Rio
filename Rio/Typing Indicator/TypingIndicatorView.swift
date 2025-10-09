@@ -29,8 +29,14 @@ struct TypingIndicatorView: View {
                     )
             }
         }
+        .frame(height: 20) //TODO: This should vary based on font size
         .onAppear {
             isAnimating = true
         }
     }
+}
+
+#Preview("TypingIndicatorView") {
+    TypingIndicatorView()
+        .padding()
 }
