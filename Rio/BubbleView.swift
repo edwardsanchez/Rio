@@ -301,9 +301,8 @@ struct BubbleView: View {
             // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
                 context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
-                if currentBlurRadius > 0 {
-                    context.addFilter(.blur(radius: currentBlurRadius))
-                }
+                context.addFilter(.blur(radius: currentBlurRadius))
+                
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
