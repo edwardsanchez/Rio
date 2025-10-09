@@ -197,10 +197,12 @@ struct ChatInputView: View {
                 text: typingIndicator.text,
                 user: typingIndicator.user,
                 date: Date.now, // Update timestamp to current time
-                isTypingIndicator: typingIndicator.isTypingIndicator
+                isTypingIndicator: typingIndicator.isTypingIndicator,
+                replacesTypingIndicator: typingIndicator.replacesTypingIndicator
             )
             messages.append(updatedTypingIndicator)
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
+            chatData.setTypingIndicator(true, for: typingIndicator.user.id, in: chat.id)
         }
 
         // Restore focus after a brief delay to ensure text clearing completes
@@ -221,7 +223,10 @@ struct ChatInputView: View {
         // Remove any existing typing indicator
         if let typingIndicatorId = currentTypingIndicatorId,
            let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-            messages.remove(at: typingIndex)
+            let typingIndicatorUserId = messages[typingIndex].user.id
+            withAnimation(.none) {
+                messages.remove(at: typingIndex)
+            }
 
             // Also remove from chatData
             if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
@@ -239,6 +244,8 @@ struct ChatInputView: View {
                     chatData.chats[chatIndex] = updatedChat
                 }
             }
+
+            chatData.setTypingIndicator(false, for: typingIndicatorUserId, in: chat.id)
         }
 
         // Reset state variables
@@ -278,14 +285,19 @@ struct ChatInputView: View {
                 newMessageId = typingIndicatorMessage.id
                 messages.append(typingIndicatorMessage)
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
+                chatData.setTypingIndicator(true, for: randomUser.id, in: chat.id)
             }
 
             // Stage 3: After 10 seconds, replace typing indicator with final message
             autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+                let indicatorWasVisible = chatData.isTypingIndicatorVisible(for: randomUser.id, in: chat.id)
+
                 // Remove any existing typing indicator message
                 if let typingIndicatorId = currentTypingIndicatorId,
                    let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    messages.remove(at: typingIndex)
+                    withAnimation(.none) {
+                        messages.remove(at: typingIndex)
+                    }
                     // Also remove from chatData
                     if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
                         var updatedChat = chatData.chats[chatIndex]
@@ -304,9 +316,15 @@ struct ChatInputView: View {
                     }
                 }
 
+                chatData.setTypingIndicator(false, for: randomUser.id, in: chat.id)
+
                 // Pick a random response and add final message
                 let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
-                let finalMessage = Message(text: randomResponse, user: randomUser)
+                let finalMessage = Message(
+                    text: randomResponse,
+                    user: randomUser,
+                    replacesTypingIndicator: indicatorWasVisible
+                )
                 newMessageId = finalMessage.id
                 messages.append(finalMessage)
                 chatData.addMessage(finalMessage, to: chat.id)

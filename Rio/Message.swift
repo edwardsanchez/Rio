@@ -69,10 +69,13 @@ struct MessageBubbleView: View {
         HStack(alignment: .bottom, spacing: 12) {
             if message.messageType == .inbound {
                 inboundAvatar
+                    .opacity(inboundAvatarOpacity)
                 bubbleView(
                     textColor: theme.inboundTextColor,
                     backgroundColor: theme.inboundBackgroundColor
                 )
+                .opacity(bubbleOpacity)
+                .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
                 // beyond the available width while still allowing natural sizing
@@ -91,12 +94,12 @@ struct MessageBubbleView: View {
                     textColor: theme.outboundTextColor,
                     backgroundColor: theme.outboundBackgroundColor
                 )
+                .opacity(bubbleOpacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
-        .offset(x: xOffset, y: yOffset + parallaxOffset)
+        .offset(x: xOffset, y: rowYOffset + parallaxOffset)
         .animation(.interactiveSpring, value: parallaxOffset)
-        .opacity(opacity)
         .onAppear {
             if isNew {
                 withAnimation(.smooth(duration: 0.5)) {
@@ -115,14 +118,20 @@ struct MessageBubbleView: View {
         }
     }
 
-    private var yOffset: CGFloat {
+    private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
 
-        if message.messageType == .inbound {
-            return 50
-        } else {
+        switch message.messageType {
+        case .inbound:
+            return message.replacesTypingIndicator ? 0 : 50
+        case .outbound:
             return calculateYOffset()
         }
+    }
+
+    private var bubbleYOffset: CGFloat {
+        guard isNew && message.messageType == .inbound else { return 0 }
+        return message.replacesTypingIndicator ? 16 : 0
     }
 
     private var xOffset: CGFloat {
@@ -141,8 +150,16 @@ struct MessageBubbleView: View {
         return textFieldRelativeToContent
     }
 
-    private var opacity: Double {
+    private var bubbleOpacity: Double {
         if message.messageType == .inbound && isNew {
+            return 0
+        }
+        return 1
+    }
+
+    private var inboundAvatarOpacity: Double {
+        guard message.messageType == .inbound else { return 1 }
+        if isNew && !message.replacesTypingIndicator {
             return 0
         }
         return 1
