@@ -16,7 +16,6 @@ struct MessageListView: View {
     let scrollVelocity: CGFloat
     let scrollPhase: ScrollPhase
     let theme: ChatTheme
-    let activeTypingUserIds: Set<UUID>
     
     var body: some View {
         VStack(spacing: 0) {
@@ -46,8 +45,7 @@ struct MessageListView: View {
                         scrollVelocity: scrollVelocity,
                         scrollPhase: scrollPhase,
                         visibleMessageIndex: index,
-                        theme: theme,
-                        activeTypingUserIds: activeTypingUserIds
+                        theme: theme
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work

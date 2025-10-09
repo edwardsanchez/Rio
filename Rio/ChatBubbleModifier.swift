@@ -10,7 +10,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let messageType: MessageType
     let backgroundColor: Color
     let showTail: Bool
-    let tailType: BubbleType
+    let bubbleMode: BubbleMode
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
 
@@ -33,13 +33,38 @@ private struct ChatBubbleModifier: ViewModifier {
         messageType == .inbound ? 0.6 : 1.0
     }
 
+    private var measuredWidth: CGFloat {
+        max(contentSize.width, animationWidth ?? 0, 12)
+    }
+
+    private var measuredHeight: CGFloat {
+        max(contentSize.height, animationHeight ?? 0, 12)
+    }
+
+    private var opticalReduction: CGFloat {
+        bubbleMode == .thinking ? bubbleMaxDiameter * 0.8 : 0
+    }
+
+    private var bubbleWidth: CGFloat {
+        max(measuredWidth - opticalReduction, 12)
+    }
+
+    private var bubbleHeight: CGFloat {
+        max(measuredHeight - opticalReduction * 0.6, 12)
+    }
+
+    private var bubbleCornerRadius: CGFloat { 20 }
+    private var bubbleMinDiameter: CGFloat { 13 }
+    private var bubbleMaxDiameter: CGFloat { 23 }
+    private var bubbleBlurRadius: CGFloat { 4 }
+
     func body(content: Content) -> some View {
         content
             .padding()
             .background(alignment: .leading) {
-                backgroundView
+                bubbleBackground
             }
-            .offset(y: tailType == .thinking ? -5 : 0)
+            .offset(y: bubbleMode == .thinking ? -5 : 0)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
@@ -48,102 +73,41 @@ private struct ChatBubbleModifier: ViewModifier {
     }
 
     @ViewBuilder
-    private var backgroundView: some View {
-        switch tailType {
-        case .talking:
-            // Standard rounded rectangle background
-            let base = RoundedRectangle(cornerRadius: 20)
-                .fill(backgroundColor)
-//                .frame(width: width, height: height)
-                .overlay(alignment: tailAlignment) {
-                    tailView
-                }
+    private var bubbleBackground: some View {
+        let width = bubbleWidth
+        let height = bubbleHeight
 
-            base
-                .compositingGroup()
-                .opacity(backgroundOpacity)
-
-        case .thinking:
-            // Use ThoughtBubbleView for thinking bubbles
-            let bubbleWidth = contentSize.width
-            let bubbleHeight = contentSize.height
-
-            // Parameters for ThoughtBubbleView
-            let maxDiameter: CGFloat = 23
-            let minDiameter: CGFloat = 13
-            let blurRadius: CGFloat = 4
-
-            // Optical size compensation algorithm:
-            //
-            // Problem: ThoughtBubbleView draws circles centered on the perimeter of the inner
-            // rectangle. These circles extend maxDiameter/2 both inward and outward, adding
-            // visual weight that makes the bubble appear larger than a talking bubble with
-            // the same content.
-            //
-            // Solution Strategy:
-            // We want the overall visual bounds to match contentSize, but the circles add
-            // visual weight. We have two approaches:
-            //
-            // Approach A: Reduce inner rectangle, keep content size
-            // - Problem: Background becomes smaller than content (content overflows)
-            //
-            // Approach B: Keep inner rectangle at content size, apply extra negative padding
-            // - Problem: Negative padding clips the canvas, but circles still extend
-            //
-            // Hybrid Approach (current):
-            // 1. Slightly reduce inner rectangle to reduce overall footprint
-            // 2. The content will naturally center within the available space
-            // 3. Apply negative padding to remove canvas borders
-            //
-            // The reduction factor is empirically tuned for optimal visual balance.
-            // Factor of 1.0 would reduce by full maxDiameter (maxDiameter/2 on each side).
-            // Factor of 0.5 would reduce by maxDiameter/2 total.
-            // We use 0.8 to significantly reduce visual weight while maintaining bubble integrity.
-            let opticalReductionFactor: CGFloat = 0.8
-            let sizeReduction = maxDiameter * opticalReductionFactor
-
-            // Reduce inner rectangle dimensions to compensate for circle extension
-            let adjustedWidth = max(bubbleWidth - sizeReduction, 20)  // Ensure minimum size
-            let adjustedHeight = max(bubbleHeight - sizeReduction, 20)
-
-            // Canvas padding to remove (brings canvas edges closer to inner rectangle)
-            let canvasPadding = maxDiameter / 2 + blurRadius
-
-            if bubbleWidth > 0 && bubbleHeight > 0 {
-                ThoughtBubbleView(
-                    width: adjustedWidth,
-                    height: adjustedHeight,
-                    cornerRadius: 20,
-                    minDiameter: minDiameter,
-                    maxDiameter: maxDiameter,
-                    blurRadius: blurRadius,
-                    color: backgroundColor
-                )
-                // Apply negative padding to compensate for canvas padding
-                .padding(-canvasPadding)
-                .padding(.leading, 10)
-                .overlay(alignment: tailAlignment) {
-                    tailView
-                }
-                .compositingGroup()
-                .opacity(backgroundOpacity)
-            } else {
-                // Temporary placeholder while size is being measured
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(backgroundColor)
-                    .frame(width: animationWidth, height: animationHeight)
-                    .overlay(alignment: tailAlignment) {
-                        tailView
-                    }
-                    .compositingGroup()
-                    .opacity(backgroundOpacity)
+        if width > 0 && height > 0 {
+            BubbleView(
+                width: width,
+                height: height,
+                cornerRadius: bubbleCornerRadius,
+                minDiameter: bubbleMinDiameter,
+                maxDiameter: bubbleMaxDiameter,
+                blurRadius: bubbleBlurRadius,
+                color: backgroundColor,
+                mode: bubbleMode
+            )
+            .overlay(alignment: tailAlignment) {
+                tailView
             }
+            .compositingGroup()
+            .opacity(backgroundOpacity)
+        } else {
+            RoundedRectangle(cornerRadius: bubbleCornerRadius)
+                .fill(backgroundColor)
+                .frame(width: animationWidth, height: animationHeight)
+                .overlay(alignment: tailAlignment) {
+                    tailView
+                }
+                .compositingGroup()
+                .opacity(backgroundOpacity)
         }
     }
 
     @ViewBuilder
     private var tailView: some View {
-        switch tailType {
+        switch bubbleMode {
         case .talking:
             Image(.cartouche)
                 .resizable()
@@ -184,7 +148,7 @@ extension View {
         messageType: MessageType,
         backgroundColor: Color,
         showTail: Bool,
-        tailType: BubbleType = .talking,
+        bubbleMode: BubbleMode = .talking,
         animationWidth: CGFloat? = nil,
         animationHeight: CGFloat? = nil
     ) -> some View {
@@ -193,7 +157,7 @@ extension View {
                 messageType: messageType,
                 backgroundColor: backgroundColor,
                 showTail: showTail,
-                tailType: tailType,
+                bubbleMode: bubbleMode,
                 animationWidth: animationWidth,
                 animationHeight: animationHeight
             )

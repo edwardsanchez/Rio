@@ -41,13 +41,6 @@ enum MessageType {
     case outbound
 }
 
-// MARK: - Bubble Type
-
-enum BubbleType {
-    case thinking
-    case talking
-}
-
 struct ChatTheme {
     let backgroundColor: Color
     let inboundTextColor: Color
@@ -88,6 +81,7 @@ struct Message: Identifiable {
     let date: Date
     let isTypingIndicator: Bool
     let replacesTypingIndicator: Bool
+    let bubbleMode: BubbleMode
 
     var messageType: MessageType {
         // We'll determine this based on the user - for now, any user that isn't "Edward" is outbound
@@ -100,13 +94,16 @@ struct Message: Identifiable {
         user: User,
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
-        replacesTypingIndicator: Bool = false
+        replacesTypingIndicator: Bool = false,
+        bubbleMode: BubbleMode? = nil
     ) {
         self.id = id
         self.text = text
         self.user = user
         self.date = date
-        self.isTypingIndicator = isTypingIndicator
+        let resolvedBubbleMode = bubbleMode ?? (isTypingIndicator ? .thinking : .talking)
+        self.bubbleMode = resolvedBubbleMode
+        self.isTypingIndicator = isTypingIndicator || resolvedBubbleMode == .thinking
         self.replacesTypingIndicator = replacesTypingIndicator
     }
 }

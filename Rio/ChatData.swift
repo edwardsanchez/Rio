@@ -100,6 +100,23 @@ class ChatData {
         }
     }
 
+    func updateMessage(_ message: Message, in chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        var updatedChat = chats[chatIndex]
+        var updatedMessages = updatedChat.messages
+        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == message.id }) {
+            updatedMessages[messageIndex] = message
+            updatedChat = Chat(
+                id: updatedChat.id,
+                title: updatedChat.title,
+                participants: updatedChat.participants,
+                messages: updatedMessages,
+                theme: updatedChat.theme
+            )
+            chats[chatIndex] = updatedChat
+        }
+    }
+
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
         var indicatorSet = activeTypingIndicators[chatId] ?? []
         if visible {

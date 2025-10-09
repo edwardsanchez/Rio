@@ -224,9 +224,7 @@ struct ChatInputView: View {
         if let typingIndicatorId = currentTypingIndicatorId,
            let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
             let typingIndicatorUserId = messages[typingIndex].user.id
-            withAnimation(.none) {
-                messages.remove(at: typingIndex)
-            }
+            messages.remove(at: typingIndex)
 
             // Also remove from chatData
             if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
@@ -279,7 +277,8 @@ struct ChatInputView: View {
                 let typingIndicatorMessage = Message(
                     text: "", // Text is not used for typing indicator
                     user: randomUser,
-                    isTypingIndicator: true
+                    isTypingIndicator: true,
+                    bubbleMode: .thinking
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
@@ -292,40 +291,33 @@ struct ChatInputView: View {
             autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
                 let indicatorWasVisible = chatData.isTypingIndicatorVisible(for: randomUser.id, in: chat.id)
 
-                // Remove any existing typing indicator message
+                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+
                 if let typingIndicatorId = currentTypingIndicatorId,
                    let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    withAnimation(.none) {
-                        messages.remove(at: typingIndex)
-                    }
-                    // Also remove from chatData
-                    if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                        var updatedChat = chatData.chats[chatIndex]
-                        var updatedMessages = updatedChat.messages
-                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                            updatedMessages.remove(at: messageIndex)
-                            updatedChat = Chat(
-                                id: updatedChat.id,
-                                title: updatedChat.title,
-                                participants: updatedChat.participants,
-                                messages: updatedMessages,
-                                theme: updatedChat.theme
-                            )
-                            chatData.chats[chatIndex] = updatedChat
-                        }
-                    }
+                    let updatedMessage = Message(
+                        id: typingIndicatorId,
+                        text: randomResponse,
+                        user: randomUser,
+                        date: Date.now,
+                        isTypingIndicator: false,
+                        replacesTypingIndicator: indicatorWasVisible,
+                        bubbleMode: .talking
+                    )
+                    messages[typingIndex] = updatedMessage
+                    chatData.updateMessage(updatedMessage, in: chat.id)
+                    newMessageId = nil
+                } else {
+                    let fallbackMessage = Message(
+                        text: randomResponse,
+                        user: randomUser,
+                        replacesTypingIndicator: indicatorWasVisible,
+                        bubbleMode: .talking
+                    )
+                    newMessageId = fallbackMessage.id
+                    messages.append(fallbackMessage)
+                    chatData.addMessage(fallbackMessage, to: chat.id)
                 }
-
-                // Pick a random response and add final message
-                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
-                let finalMessage = Message(
-                    text: randomResponse,
-                    user: randomUser,
-                    replacesTypingIndicator: indicatorWasVisible
-                )
-                newMessageId = finalMessage.id
-                messages.append(finalMessage)
-                chatData.addMessage(finalMessage, to: chat.id)
 
                 chatData.setTypingIndicator(false, for: randomUser.id, in: chat.id)
 

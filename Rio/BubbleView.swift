@@ -7,11 +7,11 @@
 
 import SwiftUI
 
+enum BubbleMode {
+    case thinking, talking
+}
+
 struct BubbleView: View {
-    enum BubbleMode {
-        case thinking
-        case talking
-    }
 
     let width: CGFloat  // Inner rectangle width
     let height: CGFloat  // Inner rectangle height
@@ -234,11 +234,9 @@ struct BubbleView: View {
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let compensation = morphProgress * maxDiameter * 0.6
-            let displayWidth = baseWidth + compensation
-            let displayHeight = baseHeight + compensation * 0.75
-            let baseCornerRadius = min(cornerRadius, min(baseWidth, baseHeight) / 2)
-            let displayCornerRadius = min(baseCornerRadius + compensation * 0.3, min(displayWidth, displayHeight) / 2)
+            let displayWidth = baseWidth
+            let displayHeight = baseHeight
+            let displayCornerRadius = min(cornerRadius, min(displayWidth, displayHeight) / 2)
             let effectivePadding = basePadding * (1 - morphProgress)
             let canvasWidth = displayWidth + effectivePadding * 2
             let canvasHeight = displayHeight + effectivePadding * 2
@@ -300,9 +298,15 @@ struct BubbleView: View {
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
-                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
-                context.addFilter(.blur(radius: currentBlurRadius))
-                
+                if alphaThresholdMin > 0.001 {
+                    // Keep alpha threshold active only when needed to avoid gray background artifacts
+                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+                }
+                if currentBlurRadius > 0.05 {
+                    // Blur is disabled once the talking morph completes to keep the canvas transparent
+                    context.addFilter(.blur(radius: currentBlurRadius))
+                }
+
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
