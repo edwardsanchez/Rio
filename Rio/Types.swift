@@ -41,11 +41,11 @@ enum MessageType {
     case outbound
 }
 
-// MARK: - Bubble Tail Type
+// MARK: - Bubble Type
 
-enum BubbleTailType {
-    case talking
+enum BubbleType {
     case thinking
+    case talking
 }
 
 struct ChatTheme {

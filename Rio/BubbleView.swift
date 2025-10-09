@@ -1,5 +1,5 @@
 //
-//  ThoughtBubbleView.swift
+//  BubbleView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/6/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ThoughtBubbleView: View {
+struct BubbleView: View {
     enum BubbleMode {
         case thinking
         case talking
@@ -36,7 +36,7 @@ struct ThoughtBubbleView: View {
     @State private var modeAnimationTo: CGFloat
 
     // Padding around the inner rectangle to accommodate circles + blur
-    var padding: CGFloat {
+    private var basePadding: CGFloat {
         maxDiameter / 2 + blurRadius
     }
 
@@ -231,12 +231,17 @@ struct ThoughtBubbleView: View {
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
             let animatedSize = rectangleTransition.value(at: now, duration: transitionDuration)
-            let currentWidth = max(animatedSize.width, 0)
-            let currentHeight = max(animatedSize.height, 0)
-            let currentCornerRadius = min(cornerRadius, min(currentWidth, currentHeight) / 2)
-            let canvasWidth = currentWidth + maxDiameter + 2 * blurRadius
-            let canvasHeight = currentHeight + maxDiameter + 2 * blurRadius
+            let baseWidth = max(animatedSize.width, 0)
+            let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
+            let compensation = morphProgress * maxDiameter * 0.6
+            let displayWidth = baseWidth + compensation
+            let displayHeight = baseHeight + compensation * 0.75
+            let baseCornerRadius = min(cornerRadius, min(baseWidth, baseHeight) / 2)
+            let displayCornerRadius = min(baseCornerRadius + compensation * 0.3, min(displayWidth, displayHeight) / 2)
+            let effectivePadding = basePadding * (1 - morphProgress)
+            let canvasWidth = displayWidth + effectivePadding * 2
+            let canvasHeight = displayHeight + effectivePadding * 2
             let currentBlurRadius = blurRadius * (1 - morphProgress)
             let alphaThresholdMin = 0.2 * (1 - morphProgress)
 
@@ -245,9 +250,9 @@ struct ThoughtBubbleView: View {
 
             let baseDiameters = currentBaseDiameters(at: now)
             let currentPerimeter = calculateRoundedRectPerimeter(
-                width: currentWidth,
-                height: currentHeight,
-                cornerRadius: currentCornerRadius
+                width: displayWidth,
+                height: displayHeight,
+                cornerRadius: displayCornerRadius
             )
 
             let animationData = computeAnimationData(
@@ -273,22 +278,23 @@ struct ThoughtBubbleView: View {
                 diameters: animatedDiameters,
                 movementProgress: movementProgress,
                 perimeter: currentPerimeter,
-                width: currentWidth,
-                height: currentHeight,
-                cornerRadius: currentCornerRadius
+                width: displayWidth,
+                height: displayHeight,
+                cornerRadius: displayCornerRadius
             )
 
             let centerPoint = CGPoint(
-                x: currentWidth / 2,
-                y: currentHeight / 2
+                x: displayWidth / 2,
+                y: displayHeight / 2
             )
 
-            let morphedPositions = positions.enumerated().map { index, point in
-                interpolate(point, to: centerPoint, progress: morphProgress)
+            let outwardProgress = max(0, min(1, 1 - morphProgress))
+            let morphedPositions = positions.map { point in
+                interpolate(centerPoint, to: point, progress: outwardProgress)
             }
 
             let morphedDiameters = animatedDiameters.map { diameter in
-                max(0, diameter * (1 - morphProgress))
+                max(0, diameter * outwardProgress)
             }
 
             // Canvas with metaball effect
@@ -297,11 +303,11 @@ struct ThoughtBubbleView: View {
                 context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
                 if currentBlurRadius > 0 {
                     context.addFilter(.blur(radius: currentBlurRadius))
-                } //COMMENTED OUT FOR DEBUGGIING, DO NOT DELETE
+                }
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
-                    let rectPath = RoundedRectangle(cornerRadius: currentCornerRadius)
-                        .path(in: CGRect(x: padding, y: padding, width: currentWidth, height: currentHeight))
+                    let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
+                        .path(in: CGRect(x: effectivePadding, y: effectivePadding, width: displayWidth, height: displayHeight))
                     ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
@@ -309,8 +315,8 @@ struct ThoughtBubbleView: View {
                         if let circleSymbol = ctx.resolveSymbol(id: index) {
                             // Offset position by padding to account for canvas border
                             let position = CGPoint(
-                                x: morphedPositions[index].x + padding,
-                                y: morphedPositions[index].y + padding
+                                x: morphedPositions[index].x + effectivePadding,
+                                y: morphedPositions[index].y + effectivePadding
                             )
                             ctx.draw(circleSymbol, at: position)
                         }
@@ -738,11 +744,11 @@ private func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, corn
 }
 
 // MARK: - Preview
-struct ThoughtBubbleView_Previews: PreviewProvider {
+struct BubbleView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading, spacing: 16) {
 //            Text("Small rounded rectangle")
-            ThoughtBubbleView(
+            BubbleView(
                 width: 68,
                 height: 40,
                 cornerRadius: 20,
@@ -753,25 +759,27 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
 //                .border(.gray)
 
 //            Text("Square with rounded corners")
-//            ThoughtBubbleView(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
+//            BubbleView(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
 //                .border(.gray)
 //
 //            Text("Wide rectangle")
-//            ThoughtBubbleView(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+//            BubbleView(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
 ////                .border(.gray)
 //
 //            Text("Tall rectangle")
-//            ThoughtBubbleView(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
+//            BubbleView(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
 //                .border(.gray)
 //
 //            Text("Sharp corners (radius = 0)")
-//            ThoughtBubbleView(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
+//            BubbleView(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
 //                .border(.gray)
         }
         .padding()
         .previewLayout(.sizeThatFits)
     }
 }
+
+typealias ThoughtBubbleView = BubbleView
 
 #Preview("Thought Bubble Morph") {
     struct MorphPreview: View {
@@ -781,7 +789,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
 
         var body: some View {
             VStack(spacing: 24) {
-                ThoughtBubbleView(
+                BubbleView(
                     width: width,
                     height: height,
                     cornerRadius: 26,
@@ -801,7 +809,7 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
                 .buttonStyle(.borderedProminent)
             }
             .padding()
-            .background(Color.base)
+//            .background(Color.base)
         }
     }
 

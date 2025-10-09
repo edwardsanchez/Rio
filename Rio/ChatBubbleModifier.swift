@@ -10,7 +10,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let messageType: MessageType
     let backgroundColor: Color
     let showTail: Bool
-    let tailType: BubbleTailType
+    let tailType: BubbleType
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
 
@@ -184,7 +184,7 @@ extension View {
         messageType: MessageType,
         backgroundColor: Color,
         showTail: Bool,
-        tailType: BubbleTailType = .talking,
+        tailType: BubbleType = .talking,
         animationWidth: CGFloat? = nil,
         animationHeight: CGFloat? = nil
     ) -> some View {
