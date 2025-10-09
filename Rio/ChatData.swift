@@ -16,7 +16,7 @@ class ChatData {
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
     let liamUser = User(id: UUID(), name: "Liam", avatar: .joaquin)
-    let zoeUser = User(id: UUID(), name: "Zoe", avatar: nil)
+    let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)
     
     init() {
         generateSampleChats()
@@ -56,17 +56,17 @@ class ChatData {
 
         // Chat 3: Edward, Sophia, Liam, and Zoe (4 participants)
         let chat3Messages = [
-            Message(text: "Welcome to the group chat!", user: zoeUser, date: Date().addingTimeInterval(-10800)),
+            Message(text: "Welcome to the group chat!", user: amyUser, date: Date().addingTimeInterval(-10800)),
             Message(text: "Thanks for adding me!", user: edwardUser, date: Date().addingTimeInterval(-10700)),
             Message(text: "Great to have you here Edward", user: sophiaUser, date: Date().addingTimeInterval(-10600)),
             Message(text: "We were just discussing weekend plans", user: liamUser, date: Date().addingTimeInterval(-10500)),
-            Message(text: "I'm thinking of going hiking. Anyone interested?", user: zoeUser, date: Date().addingTimeInterval(-10400)),
+            Message(text: "I'm thinking of going hiking. Anyone interested?", user: amyUser, date: Date().addingTimeInterval(-10400)),
             Message(text: "Count me in! I love hiking", user: edwardUser, date: Date().addingTimeInterval(-10300))
         ]
 
         let chat3 = Chat(
             title: "Adventure Crew",
-            participants: [edwardUser, sophiaUser, liamUser, zoeUser],
+            participants: [edwardUser, sophiaUser, liamUser, amyUser],
             messages: chat3Messages,
             theme: .theme2
         )
