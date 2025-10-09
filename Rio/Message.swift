@@ -273,3 +273,57 @@ struct MessageBubbleView: View {
         return inputFieldFrame.height
     }
 }
+
+private struct MessageBubblePreviewContainer: View {
+    @State private var isThinking = true
+    @State private var newMessageId: UUID? = nil
+
+    private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
+    private var thinkingMessage: Message {
+        Message(
+            text: "",
+            user: sampleUser,
+            isTypingIndicator: true,
+            bubbleMode: .thinking
+        )
+    }
+
+    private var talkingMessage: Message {
+        Message(
+            text: "How are you?",
+            user: sampleUser,
+            bubbleMode: .talking
+        )
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
+            MessageBubbleView(
+                message: isThinking ? thinkingMessage : talkingMessage,
+                showTail: true,
+                isNew: false,
+                inputFieldFrame: .zero,
+                scrollViewFrame: .zero,
+                newMessageId: $newMessageId,
+                scrollVelocity: 0,
+                scrollPhase: .idle,
+                visibleMessageIndex: 0,
+                theme: .defaultTheme
+            )
+            .padding(.horizontal, 20)
+
+            Button(isThinking ? "Switch to talking" : "Switch to thinking") {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    isThinking.toggle()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .background(Color.base)
+    }
+}
+
+#Preview("Message Bubble Morph") {
+    MessageBubblePreviewContainer()
+}
