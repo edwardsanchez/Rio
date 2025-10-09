@@ -8,6 +8,11 @@
 import SwiftUI
 
 struct ThoughtBubbleView: View {
+    enum BubbleMode {
+        case thinking
+        case talking
+    }
+
     let width: CGFloat  // Inner rectangle width
     let height: CGFloat  // Inner rectangle height
     let cornerRadius: CGFloat
@@ -16,14 +21,19 @@ struct ThoughtBubbleView: View {
     let hasInvalidInput: Bool
     let blurRadius: CGFloat
     let color: Color
+    let mode: BubbleMode
 
     private let transitionDuration: TimeInterval = 0.3
+    private static let defaultModeAnimationDuration: TimeInterval = 2.4
 
     @State private var animationSeed: UInt64
     @State private var circleTransitions: [CircleTransition]
     @State private var nextCircleID: Int
     @State private var rectangleTransition: RectangleTransition
     @State private var startTime: Date
+    @State private var modeAnimationStart: Date
+    @State private var modeAnimationFrom: CGFloat
+    @State private var modeAnimationTo: CGFloat
 
     // Padding around the inner rectangle to accommodate circles + blur
     var padding: CGFloat {
@@ -37,7 +47,8 @@ struct ThoughtBubbleView: View {
         minDiameter: CGFloat,
         maxDiameter: CGFloat,
         blurRadius: CGFloat = 4,
-        color: Color
+        color: Color,
+        mode: BubbleMode = .thinking
     ) {
         let cornerRadius = cornerRadius ?? min(height, width) / 2
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
@@ -49,6 +60,7 @@ struct ThoughtBubbleView: View {
         self.blurRadius = blurRadius
         self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
         self.color = color
+        self.mode = mode
 
         // Calculate perimeter based on the inner rectangle dimensions
         let perimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: self.cornerRadius)
@@ -73,6 +85,10 @@ struct ThoughtBubbleView: View {
             startTime: now
         ))
         _startTime = State(initialValue: now)
+        let initialProgress: CGFloat = mode == .thinking ? 0 : 1
+        _modeAnimationStart = State(initialValue: now.addingTimeInterval(-Self.defaultModeAnimationDuration))
+        _modeAnimationFrom = State(initialValue: initialProgress)
+        _modeAnimationTo = State(initialValue: initialProgress)
     }
 
     private struct CircleTransition: Identifiable {
@@ -220,6 +236,9 @@ struct ThoughtBubbleView: View {
             let currentCornerRadius = min(cornerRadius, min(currentWidth, currentHeight) / 2)
             let canvasWidth = currentWidth + maxDiameter + 2 * blurRadius
             let canvasHeight = currentHeight + maxDiameter + 2 * blurRadius
+            let morphProgress = modeProgress(at: now)
+            let currentBlurRadius = blurRadius * (1 - morphProgress)
+            let alphaThresholdMin = 0.2 * (1 - morphProgress)
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
@@ -259,11 +278,26 @@ struct ThoughtBubbleView: View {
                 cornerRadius: currentCornerRadius
             )
 
+            let centerPoint = CGPoint(
+                x: currentWidth / 2,
+                y: currentHeight / 2
+            )
+
+            let morphedPositions = positions.enumerated().map { index, point in
+                interpolate(point, to: centerPoint, progress: morphProgress)
+            }
+
+            let morphedDiameters = animatedDiameters.map { diameter in
+                max(0, diameter * (1 - morphProgress))
+            }
+
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
-                context.addFilter(.alphaThreshold(min: 0.2, color: isValid ? color : Color.red.opacity(0.5)))
-                context.addFilter(.blur(radius: blurRadius))
+                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+                if currentBlurRadius > 0 {
+                    context.addFilter(.blur(radius: currentBlurRadius))
+                } //COMMENTED OUT FOR DEBUGGIING, DO NOT DELETE
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
                     let rectPath = RoundedRectangle(cornerRadius: currentCornerRadius)
@@ -271,19 +305,19 @@ struct ThoughtBubbleView: View {
                     ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
-                    for (index, _) in animatedDiameters.enumerated() {
+                    for (index, _) in morphedDiameters.enumerated() {
                         if let circleSymbol = ctx.resolveSymbol(id: index) {
                             // Offset position by padding to account for canvas border
                             let position = CGPoint(
-                                x: positions[index].x + padding,
-                                y: positions[index].y + padding
+                                x: morphedPositions[index].x + padding,
+                                y: morphedPositions[index].y + padding
                             )
                             ctx.draw(circleSymbol, at: position)
                         }
                     }
                 }
             } symbols: {
-                ForEach(Array(animatedDiameters.enumerated()), id: \.offset) { index, diameter in
+                ForEach(Array(morphedDiameters.enumerated()), id: \.offset) { index, diameter in
                     Circle()
                         .frame(width: diameter, height: diameter)
                         .tag(index)
@@ -306,6 +340,45 @@ struct ThoughtBubbleView: View {
         .onChange(of: targetDiameters) { _, newDiameters in
             updateCircleTransitions(targetDiameters: newDiameters)
         }
+        .onChange(of: mode) { _, newMode in
+            let target = newMode == .thinking ? CGFloat(0) : CGFloat(1)
+            startModeAnimation(target: target)
+        }
+    }
+
+    private func interpolate(_ start: CGPoint, to end: CGPoint, progress: CGFloat) -> CGPoint {
+        CGPoint(
+            x: start.x + (end.x - start.x) * progress,
+            y: start.y + (end.y - start.y) * progress
+        )
+    }
+
+    private func startModeAnimation(target: CGFloat) {
+        let current = modeProgress(at: Date())
+        modeAnimationFrom = current
+        modeAnimationTo = target
+        modeAnimationStart = Date()
+    }
+
+    private func modeProgress(at now: Date) -> CGFloat {
+        let duration = Self.defaultModeAnimationDuration
+        guard duration > 0 else { return modeAnimationTo }
+        let elapsed = now.timeIntervalSince(modeAnimationStart)
+        if elapsed <= 0 {
+            return modeAnimationFrom
+        }
+        if elapsed >= duration {
+            return modeAnimationTo
+        }
+        let fraction = CGFloat(elapsed / duration)
+        let eased = easeInOutProgress(fraction)
+        return modeAnimationFrom + (modeAnimationTo - modeAnimationFrom) * eased
+    }
+
+    private func easeInOutProgress(_ value: CGFloat) -> CGFloat {
+        // cosine-based ease for smooth acceleration/deceleration
+        let clamped = min(max(value, 0), 1)
+        return CGFloat(0.5 - 0.5 * cos(Double(clamped) * Double.pi))
     }
 
     // Calculate center positions for each circle along the rounded rectangle path
@@ -700,78 +773,37 @@ struct ThoughtBubbleView_Previews: PreviewProvider {
     }
 }
 
-#Preview("Thinking Bubble") {
-    @Previewable @State var bubbleText = "hello how are you"
-    
-    @Previewable @State var changeSize = false
+#Preview("Thought Bubble Morph") {
+    struct MorphPreview: View {
+        @State private var isTalking = false
+        @State private var width: CGFloat = 220
+        @State private var height: CGFloat = 120
 
-    VStack(alignment: .leading, spacing: 50) {
-        // Input field to change the text
-        TextField("Enter text", text: $bubbleText)
-            .textFieldStyle(.roundedBorder)
-            .onSubmit {
-                // Text is already bound, so it updates automatically
-            }
+        var body: some View {
+            VStack(spacing: 24) {
+                ThoughtBubbleView(
+                    width: width,
+                    height: height,
+                    cornerRadius: 26,
+                    minDiameter: 16,
+                    maxDiameter: 28,
+                    blurRadius: 6,
+                    color: .Default.inboundBubble,
+                    mode: isTalking ? .talking : .thinking
+                )
+                .frame(width: width + 120, height: height + 120)
 
-        // Thinking bubble (inbound style)
-        Text(bubbleText)
-            .foregroundStyle(.primary)
-            .chatBubble(
-                messageType: .inbound,
-                backgroundColor: .Default.inboundBubble,
-                showTail: true,
-                tailType: .thinking
-            )
-//            .scaleEffect(2)
-        
-        RoundedRectangle(cornerRadius: 20)
-            .foregroundStyle(.primary)
-            .frame(width: changeSize ? 50 : 100, height: 30)
-            .chatBubble(
-                messageType: .inbound,
-                backgroundColor: .Default.inboundBubble,
-                showTail: true,
-                tailType: .thinking
-            )
-        
-        Button("Toggle") {
-            withAnimation {
-                changeSize.toggle()
+                Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
+                    withAnimation(.easeInOut(duration: 2.4)) {
+                        isTalking.toggle()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
             }
+            .padding()
+            .background(Color.base)
         }
-
-        TypingIndicatorView()
-            .foregroundStyle(.primary)
-            .chatBubble(
-                messageType: .inbound,
-                backgroundColor: .Default.inboundBubble,
-                showTail: true,
-                tailType: .thinking
-            )
-//            .scaleEffect(2)
-
-        // Talking bubble for comparison (inbound style)
-        Text("Message")
-            .foregroundStyle(.primary)
-            .chatBubble(
-                messageType: .inbound,
-                backgroundColor: .Default.inboundBubble,
-                showTail: true,
-                tailType: .talking
-            )
-            .hidden()
-
-        // Outbound talking bubble
-        Text("Message")
-            .foregroundStyle(.white)
-            .chatBubble(
-                messageType: .outbound,
-                backgroundColor: .Default.outboundBubble,
-                showTail: true,
-                tailType: .talking
-            )
-            .hidden()
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding()
+
+    return MorphPreview()
 }
