@@ -39,11 +39,11 @@ private struct ChatBubbleModifier: ViewModifier {
             .background(alignment: .leading) {
                 backgroundView
             }
+            .offset(y: tailType == .thinking ? -5 : 0)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
                 contentSize = newSize
-                print(newSize)
             }
     }
 
@@ -161,8 +161,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 14, height: 14)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? 12 : -12,
-                        y: 17
+                        x: tailAlignment == .bottomLeading ? 3 : -12,
+                        y: 14
                     )
 
                 // Smaller circle (further from bubble)
@@ -170,8 +170,8 @@ private struct ChatBubbleModifier: ViewModifier {
                     .fill(backgroundColor)
                     .frame(width: 8, height: 8)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? 8 : -8,
-                        y: 26
+                        x: tailAlignment == .bottomLeading ? -2 : 1,
+                        y: 21
                     )
             }
             .opacity(showTail ? 1 : 0)
