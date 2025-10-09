@@ -243,7 +243,7 @@ struct BubbleView: View {
             let canvasWidth = displayWidth + effectivePadding * 2
             let canvasHeight = displayHeight + effectivePadding * 2
             let currentBlurRadius = blurRadius * (1 - morphProgress)
-            let alphaThresholdMin = 0.2 * (1 - morphProgress)
+            let alphaThresholdMin = max(0.001, 0.2 * (1 - morphProgress))
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
