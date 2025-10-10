@@ -22,6 +22,8 @@ struct BubbleView: View {
     private let circleTransitionDuration: TimeInterval = 0.3
     static let morphDuration: TimeInterval = 0.4
     static let resizeDuration: TimeInterval = 0.55
+    static let textRevealDelay: TimeInterval = morphDuration + resizeDuration
+
 
     @State private var animationSeed: UInt64
     @State private var circleTransitions: [CircleTransition]
@@ -81,7 +83,8 @@ struct BubbleView: View {
         _rectangleTransition = State(initialValue: RectangleTransition(
             startSize: CGSize(width: width, height: height),
             endSize: CGSize(width: width, height: height),
-            startTime: now
+            startTime: now,
+            initialVelocity: .zero
         ))
         _startTime = State(initialValue: now)
         let initialProgress: CGFloat = mode == .thinking ? 0 : 1
@@ -112,16 +115,85 @@ struct BubbleView: View {
         var startSize: CGSize
         var endSize: CGSize
         var startTime: Date
+        var initialVelocity: CGSize  // Initial velocity in points per second
+
+        // Spring parameters
+        static let dampingRatio: CGFloat = 0.7  // 0.7 gives a nice bounce (< 1 = underdamped/bouncy, 1 = critically damped, > 1 = overdamped)
+        static let response: CGFloat = 0.35     // Response time in seconds (how quickly it settles)
 
         func value(at date: Date, duration: TimeInterval) -> CGSize {
             guard duration > 0 else { return endSize }
-            let elapsed = date.timeIntervalSince(startTime)
-            let clamped = max(0, min(1, elapsed / duration))
-            let progress = CGFloat(clamped)
-            let eased = CGFloat(0.5 - 0.5 * cos(Double(progress) * .pi))
-            let width = startSize.width + (endSize.width - startSize.width) * eased
-            let height = startSize.height + (endSize.height - startSize.height) * eased
-            return CGSize(width: width, height: height)
+            let elapsed = CGFloat(date.timeIntervalSince(startTime))
+
+            // If animation is complete, return end value
+            if elapsed >= CGFloat(duration) {
+                return endSize
+            }
+
+            // Calculate spring progress for width and height independently
+            let widthDelta = endSize.width - startSize.width
+            let heightDelta = endSize.height - startSize.height
+
+            let widthProgress = springValue(
+                elapsed: elapsed,
+                delta: widthDelta,
+                initialVelocity: initialVelocity.width
+            )
+            let heightProgress = springValue(
+                elapsed: elapsed,
+                delta: heightDelta,
+                initialVelocity: initialVelocity.height
+            )
+
+            return CGSize(
+                width: startSize.width + widthProgress,
+                height: startSize.height + heightProgress
+            )
+        }
+
+        /// Calculate spring-damped value using physics simulation
+        /// - Parameters:
+        ///   - elapsed: Time elapsed since animation start
+        ///   - delta: Total change from start to end
+        ///   - initialVelocity: Initial velocity in points per second
+        /// - Returns: Current displacement from start position
+        private func springValue(elapsed: CGFloat, delta: CGFloat, initialVelocity: CGFloat) -> CGFloat {
+            // Spring physics parameters
+            let zeta = Self.dampingRatio  // Damping ratio
+            let omega0 = 2 * .pi / Self.response  // Natural frequency (rad/s)
+
+            // Normalize to unit spring (target = 1, start = 0)
+            let normalizedVelocity = delta != 0 ? initialVelocity / delta : 0
+
+            let result: CGFloat
+
+            if zeta < 1 {
+                // Underdamped (bouncy) - most common case
+                let omegaD = omega0 * sqrt(1 - zeta * zeta)  // Damped frequency
+                let A: CGFloat = 1  // Initial displacement (normalized)
+                let B = (normalizedVelocity + zeta * omega0 * A) / omegaD
+
+                let envelope = exp(-zeta * omega0 * elapsed)
+                let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
+                result = 1 - envelope * oscillation
+
+            } else if zeta == 1 {
+                // Critically damped (no overshoot)
+                let A: CGFloat = 1
+                let B = normalizedVelocity + omega0 * A
+                result = 1 - (A + B * elapsed) * exp(-omega0 * elapsed)
+
+            } else {
+                // Overdamped (slow, no overshoot)
+                let r1 = -omega0 * (zeta + sqrt(zeta * zeta - 1))
+                let r2 = -omega0 * (zeta - sqrt(zeta * zeta - 1))
+                let A = (normalizedVelocity - r2) / (r1 - r2)
+                let B: CGFloat = 1 - A
+                result = 1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed))
+            }
+
+            // Scale back to actual delta
+            return result * delta
         }
     }
 
@@ -224,10 +296,29 @@ struct BubbleView: View {
     private func applyRectangleSize(_ size: CGSize) {
         let now = Date()
         let currentSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
+
+        // Calculate current velocity based on the spring animation
+        // This gives continuity when interrupting an ongoing animation
+        let dt: CGFloat = 0.016  // ~1 frame at 60fps
+        let futureSize = rectangleTransition.value(at: now.addingTimeInterval(dt), duration: Self.resizeDuration)
+        let currentVelocity = CGSize(
+            width: (futureSize.width - currentSize.width) / dt,
+            height: (futureSize.height - currentSize.height) / dt
+        )
+
+        // Add some initial velocity in the direction of change for snappier feel
+        let velocityBoost: CGFloat = 200  // points per second
+        let widthDirection: CGFloat = size.width > currentSize.width ? 1 : -1
+        let heightDirection: CGFloat = size.height > currentSize.height ? 1 : -1
+
         rectangleTransition = RectangleTransition(
             startSize: currentSize,
             endSize: size,
-            startTime: now
+            startTime: now,
+            initialVelocity: CGSize(
+                width: currentVelocity.width + widthDirection * velocityBoost,
+                height: currentVelocity.height + heightDirection * velocityBoost
+            )
         )
         pendingRectangleSize = nil
         pendingRectangleScheduled = false
