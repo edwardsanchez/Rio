@@ -47,11 +47,17 @@ private struct ChatBubbleModifier: ViewModifier {
     private var bubbleCornerRadius: CGFloat { 20 }
     private var bubbleMinDiameter: CGFloat { 13 }
     private var bubbleMaxDiameter: CGFloat { 23 }
-    private var bubbleBlurRadius: CGFloat { 4 }
+    private var bubbleBlurRadius: CGFloat { 2 }
 
     func body(content: Content) -> some View {
-        content
-            .padding()
+        let verticalPadding: CGFloat = 12
+        let leadingPadding: CGFloat = 16 //FIXME: This is odd as a requirement
+        let trailingPadding: CGFloat = bubbleMode == .thinking ? 10 : 16 //FIXME: This should not be required
+
+        return content
+            .padding(.vertical, verticalPadding)
+            .padding(.leading, leadingPadding)
+            .padding(.trailing, trailingPadding)
             .background(alignment: .leading) {
                 BubbleView(
                     width: bubbleWidth,

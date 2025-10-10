@@ -263,8 +263,9 @@ struct BubbleView: View {
             let currentBlurRadius = blurRadius * (1 - morphProgress)
 
             // Geometry splits
-            let circleTrackWidth = baseWidth
-            let circleTrackHeight = baseHeight
+            let adaptiveInset = basePadding * thinkingInsetScale * (1 - morphProgress)
+            let circleTrackWidth = max(0, baseWidth - adaptiveInset * 2)
+            let circleTrackHeight = max(0, baseHeight - adaptiveInset * 2)
             let circleTrackCornerRadius = min(cornerRadius, min(circleTrackWidth, circleTrackHeight) / 2)
 
             // Remove only the portion of the padding caused by the circles (not the blur) to keep the visual footprint consistent.
