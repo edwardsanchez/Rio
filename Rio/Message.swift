@@ -442,7 +442,7 @@ private struct MessageBubblePreviewContainer: View {
         VStack(spacing: 24) {
             MessageBubbleView(
                 message: isThinking ? thinkingMessage : talkingMessage,
-                showTail: false,
+                showTail: true,
                 isNew: false,
                 inputFieldFrame: .zero,
                 scrollViewFrame: .zero,
