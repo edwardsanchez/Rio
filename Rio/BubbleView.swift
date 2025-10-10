@@ -48,8 +48,8 @@ struct BubbleView: View {
         messageType == .inbound ? .bottomLeading : .bottomTrailing
     }
 
-    private var tailOffset: CGSize {
-        messageType == .inbound ? CGSize(width: 5, height: 5.5) : CGSize(width: -5, height: 5.5)
+    private var tailOffset: CGPoint {
+        messageType == .inbound ? CGPoint(x: 5, y: 5.5) : CGPoint(x: -5, y: 5.5)
     }
 
     private var tailRotation: Angle {
@@ -368,13 +368,13 @@ struct BubbleView: View {
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let effectivePadding = basePadding * (1 - morphProgress)
+            let effectivePadding = basePadding //* (1 - morphProgress)
             let currentBlurRadius = blurRadius * (1 - morphProgress)
             
-            let thinkingInsetScale = 0.4
+            let thinkingInsetScale = 1.0
 
             // Geometry splits
-            let adaptiveInset = basePadding * thinkingInsetScale * (1 - morphProgress)
+            let adaptiveInset = basePadding * thinkingInsetScale //* (1 - morphProgress)
             let circleTrackWidth = max(0, baseWidth - adaptiveInset * 2)
             let circleTrackHeight = max(0, baseHeight - adaptiveInset * 2)
             let circleTrackCornerRadius = min(cornerRadius, min(circleTrackWidth, circleTrackHeight) / 2)
@@ -442,14 +442,14 @@ struct BubbleView: View {
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
             Canvas { context, size in
-                if alphaThresholdMin > 0.001 {
-                    // Keep alpha threshold active only when needed to avoid gray background artifacts
-                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
-                }
-                if currentBlurRadius > 0.05 {
-                    // Blur is disabled once the talking morph completes to keep the canvas transparent
-                    context.addFilter(.blur(radius: currentBlurRadius))
-                }
+//                if alphaThresholdMin > 0.001 {
+//                    // Keep alpha threshold active only when needed to avoid gray background artifacts
+//                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+//                }
+//                if currentBlurRadius > 0.05 {
+//                    // Blur is disabled once the talking morph completes to keep the canvas transparent
+//                    context.addFilter(.blur(radius: currentBlurRadius))
+//                }
 
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
@@ -484,6 +484,7 @@ struct BubbleView: View {
             .overlay(alignment: tailAlignment) {
                 tailView
             }
+            .background(.red)
         }
         .onAppear {
             startTime = Date()
@@ -514,8 +515,8 @@ struct BubbleView: View {
                 .resizable()
                 .frame(width: 15, height: 15)
                 .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
-                .offset(x: tailOffset.width, y: tailOffset.height)
-                .offset(x: isThinking ? 15 : 0, y:  isThinking ? -15 : 0)
+                .offset(x: tailOffset.x, y: tailOffset.y)
+                .offset(x: isThinking ? 15 : 3, y:  isThinking ? -15 : -1)
                 .foregroundStyle(color)
                 .opacity(showTail ? 1 : 0)
                 .animation(.spring(duration: 0.3).delay(0.3), value: mode)
@@ -928,44 +929,41 @@ private func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, corn
     return 2 * straightWidth + 2 * straightHeight + arcLength
 }
 
-// MARK: - Preview
-struct BubbleView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(alignment: .leading, spacing: 16) {
-//            Text("Small rounded rectangle")
-            BubbleView(
-                width: 68,
-                height: 40,
-                cornerRadius: 20,
-                minDiameter: 10,
-                maxDiameter: 22,
-                color: .blue
-            )
-//                .border(.gray)
-
-//            Text("Square with rounded corners")
-//            BubbleView(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
-//                .border(.gray)
-//
-//            Text("Wide rectangle")
-//            BubbleView(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
-////                .border(.gray)
-//
-//            Text("Tall rectangle")
-//            BubbleView(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
-//                .border(.gray)
-//
-//            Text("Sharp corners (radius = 0)")
-//            BubbleView(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
-//                .border(.gray)
-        }
-        .padding()
-        .previewLayout(.sizeThatFits)
+#Preview("Bubble View"){
+    VStack(alignment: .leading, spacing: 16) {
+        //            Text("Small rounded rectangle")
+        BubbleView(
+            width: 68,
+            height: 40,
+            cornerRadius: 20,
+            minDiameter: 12,
+            maxDiameter: 25,
+            color: .blue
+        )
+        //                .border(.gray)
+        
+        //            Text("Square with rounded corners")
+        //            BubbleView(width: 150, height: 150, cornerRadius: 70, minDiameter: 15, maxDiameter: 40)
+        //                .border(.gray)
+        //
+        //            Text("Wide rectangle")
+        //            BubbleView(width: 300, height: 120, minDiameter: 50, maxDiameter: 80)
+        ////                .border(.gray)
+        //
+        //            Text("Tall rectangle")
+        //            BubbleView(width: 100, height: 250, cornerRadius: 20, minDiameter: 15, maxDiameter: 35)
+        //                .border(.gray)
+        //
+        //            Text("Sharp corners (radius = 0)")
+        //            BubbleView(width: 200, height: 120, cornerRadius: 0, minDiameter: 15, maxDiameter: 40)
+        //                .border(.gray)
     }
+    .padding()
+//    .previewLayout(.sizeThatFits)
 }
 
 struct MorphPreview: View {
-    @State private var isTalking = false
+    @State private var isTalking = true
     @State private var width: CGFloat = 220
     @State private var height: CGFloat = 120
     
@@ -979,7 +977,8 @@ struct MorphPreview: View {
                 maxDiameter: 28,
                 blurRadius: 6,
                 color: .Default.inboundBubble,
-                mode: isTalking ? .talking : .thinking
+                mode: isTalking ? .talking : .thinking,
+                showTail: true,
             )
             .frame(width: width + 120, height: height + 120)
             
