@@ -16,19 +16,6 @@ private struct ChatBubbleModifier: ViewModifier {
 
     @State private var contentSize: CGSize = .zero
 
-    // Computed properties derived from messageType
-    private var tailAlignment: Alignment {
-        messageType == .inbound ? .bottomLeading : .bottomTrailing
-    }
-
-    private var tailOffset: CGSize {
-        messageType == .inbound ? CGSize(width: 5, height: 5.5) : CGSize(width: -5, height: 5.5)
-    }
-
-    private var tailRotation: Angle {
-        messageType == .inbound ? Angle(degrees: 180) : .zero
-    }
-
     private var backgroundOpacity: Double {
         messageType == .inbound ? 0.6 : 1.0
     }
@@ -64,11 +51,10 @@ private struct ChatBubbleModifier: ViewModifier {
                     maxDiameter: bubbleMaxDiameter,
                     blurRadius: bubbleBlurRadius,
                     color: backgroundColor,
-                    mode: bubbleMode
+                    mode: bubbleMode,
+                    showTail: showTail,
+                    messageType: messageType
                 )
-                .overlay(alignment: tailAlignment) {
-                    tailView
-                }
                 .compositingGroup()
                 .opacity(backgroundOpacity)
             }
@@ -78,44 +64,6 @@ private struct ChatBubbleModifier: ViewModifier {
             } action: { newSize in
                 contentSize = newSize
             }
-    }
-
-    @ViewBuilder
-    private var tailView: some View {
-        switch bubbleMode {
-        case .talking:
-            Image(.cartouche)
-                .resizable()
-                .frame(width: 15, height: 15)
-                .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
-                .offset(x: tailOffset.width, y: tailOffset.height)
-                .foregroundStyle(backgroundColor)
-                .opacity(showTail ? 1 : 0)
-
-        case .thinking:
-            // Thinking bubble tail with two circles
-            ZStack(alignment: tailAlignment == .bottomLeading ? .bottomLeading : .bottomTrailing) {
-                // Larger circle (closer to bubble)
-                Circle()
-                    .fill(backgroundColor)
-                    .frame(width: 14, height: 14)
-                    .offset(
-                        x: tailAlignment == .bottomLeading ? 3 : -12,
-                        y: 14
-                    )
-
-                // Smaller circle (further from bubble)
-                Circle()
-                    .fill(backgroundColor)
-                    .frame(width: 8, height: 8)
-                    .offset(
-                        x: tailAlignment == .bottomLeading ? -2 : 1,
-                        y: 21
-                    )
-            }
-            .offset(x: 5, y: -20)
-            .opacity(showTail ? 1 : 0)
-        }
     }
 }
 

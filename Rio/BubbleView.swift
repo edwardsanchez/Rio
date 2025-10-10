@@ -18,6 +18,8 @@ struct BubbleView: View {
     let blurRadius: CGFloat
     let color: Color
     let mode: BubbleMode
+    let showTail: Bool
+    let messageType: MessageType
 
     private let circleTransitionDuration: TimeInterval = 0.3
     static let morphDuration: TimeInterval = 0.4
@@ -41,6 +43,19 @@ struct BubbleView: View {
         maxDiameter / 2 + blurRadius
     }
 
+    // Tail-related computed properties
+    private var tailAlignment: Alignment {
+        messageType == .inbound ? .bottomLeading : .bottomTrailing
+    }
+
+    private var tailOffset: CGSize {
+        messageType == .inbound ? CGSize(width: 5, height: 5.5) : CGSize(width: -5, height: 5.5)
+    }
+
+    private var tailRotation: Angle {
+        messageType == .inbound ? Angle(degrees: 180) : .zero
+    }
+
     init(
         width: CGFloat,
         height: CGFloat,
@@ -49,7 +64,9 @@ struct BubbleView: View {
         maxDiameter: CGFloat,
         blurRadius: CGFloat = 4,
         color: Color,
-        mode: BubbleMode = .thinking
+        mode: BubbleMode = .thinking,
+        showTail: Bool = false,
+        messageType: MessageType = .inbound
     ) {
         let cornerRadius = cornerRadius ?? min(height, width) / 2
         precondition(minDiameter > 0 && maxDiameter > 0, "Diameters must be positive.")
@@ -62,6 +79,8 @@ struct BubbleView: View {
         self.cornerRadius = min(cornerRadius, min(width, height) / 2) // Clamp corner radius
         self.color = color
         self.mode = mode
+        self.showTail = showTail
+        self.messageType = messageType
 
         // Calculate perimeter based on the inner rectangle dimensions
         let perimeter = calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: self.cornerRadius)
@@ -462,6 +481,9 @@ struct BubbleView: View {
                 }
             }
             .frame(width: canvasWidth, height: canvasHeight)
+            .overlay(alignment: tailAlignment) {
+                tailView
+            }
 
         }
         .onAppear {
@@ -482,6 +504,44 @@ struct BubbleView: View {
         .onChange(of: mode) { _, newMode in
             let target = newMode == .thinking ? CGFloat(0) : CGFloat(1)
             startModeAnimation(target: target)
+        }
+    }
+
+    @ViewBuilder
+    private var tailView: some View {
+        switch mode {
+        case .talking:
+            Image(.cartouche)
+                .resizable()
+                .frame(width: 15, height: 15)
+                .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
+                .offset(x: tailOffset.width, y: tailOffset.height)
+                .foregroundStyle(color)
+                .opacity(showTail ? 1 : 0)
+
+        case .thinking:
+            // Thinking bubble tail with two circles
+            ZStack(alignment: tailAlignment == .bottomLeading ? .bottomLeading : .bottomTrailing) {
+                // Larger circle (closer to bubble)
+                Circle()
+                    .fill(color)
+                    .frame(width: 14, height: 14)
+                    .offset(
+                        x: tailAlignment == .bottomLeading ? 3 : -12,
+                        y: 14
+                    )
+
+                // Smaller circle (further from bubble)
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+                    .offset(
+                        x: tailAlignment == .bottomLeading ? -2 : 1,
+                        y: 21
+                    )
+            }
+            .offset(x: 5, y: -20)
+            .opacity(showTail ? 1 : 0)
         }
     }
 
