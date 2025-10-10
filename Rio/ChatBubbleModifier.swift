@@ -72,7 +72,7 @@ private struct ChatBubbleModifier: ViewModifier {
                 .compositingGroup()
                 .opacity(backgroundOpacity)
             }
-//            .offset(y: bubbleMode == .thinking ? -5 : 0)
+            .offset(x: bubbleMode == .thinking ? -8 : 0)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
