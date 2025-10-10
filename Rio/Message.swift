@@ -260,17 +260,16 @@ struct MessageBubbleView: View {
             if hasText {
                 talkingTextView(textColor: textColor)
                     .opacity(0)
-                    .accessibilityHidden(true)
             }
 
             if showTypingIndicatorContent {
                 TypingIndicatorView()
                     .opacity(showTypingIndicatorContent ? 1 : 0)
-                    .onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.size.width
-                    } action: { newWidth in
-                        updateThinkingWidth(newWidth)
-                    }
+//                    .onGeometryChange(for: CGFloat.self) { proxy in
+//                        proxy.size.width
+//                    } action: { newWidth in
+//                        updateThinkingWidth(newWidth)
+//                    } //DO NOT DELETE
             }
 
             if hasText {
@@ -302,15 +301,16 @@ struct MessageBubbleView: View {
         return thinkingContentWidth
     }
 
-    private func updateThinkingWidth(_ width: CGFloat) {
-        guard width > 0 else { return }
-        if abs(thinkingContentWidth - width) > 0.5 {
-            thinkingContentWidth = width
-        }
-        if message.bubbleMode == .thinking {
-            isWidthLocked = true
-        }
-    }
+    //DO NOT DELETE
+//    private func updateThinkingWidth(_ width: CGFloat) {
+//        guard width > 0 else { return }
+//        if abs(thinkingContentWidth - width) > 0.5 {
+//            thinkingContentWidth = width
+//        }
+//        if message.bubbleMode == .thinking {
+//            isWidthLocked = true
+//        }
+//    }
 
     private func configureInitialContentState() {
         cancelPendingContentTransitions()
@@ -455,7 +455,7 @@ private struct MessageBubblePreviewContainer: View {
             .padding(.horizontal, 20)
 
             Button(isThinking ? "Switch to talking" : "Switch to thinking") {
-                withAnimation(.easeInOut(duration: 2.4)) {
+                withAnimation(.easeInOut(duration: 0.4)) {
                     isThinking.toggle()
                 }
             }

@@ -20,7 +20,7 @@ struct BubbleView: View {
     let mode: BubbleMode
 
     private let circleTransitionDuration: TimeInterval = 0.3
-    static let morphDuration: TimeInterval = 2.4
+    static let morphDuration: TimeInterval = 0.4
     static let resizeDuration: TimeInterval = 0.55
     static let textRevealDelay: TimeInterval = morphDuration + resizeDuration
 
@@ -842,7 +842,7 @@ struct MorphPreview: View {
             .frame(width: width + 120, height: height + 120)
             
             Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
-                withAnimation(.easeInOut(duration: 2.4)) {
+                withAnimation(.easeInOut(duration: 0.4)) {
                     isTalking.toggle()
                 }
             }
