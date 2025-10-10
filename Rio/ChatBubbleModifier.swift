@@ -53,47 +53,28 @@ private struct ChatBubbleModifier: ViewModifier {
         content
             .padding()
             .background(alignment: .leading) {
-                bubbleBackground
-            }
-            .offset(y: bubbleMode == .thinking ? -5 : 0)
-            .onGeometryChange(for: CGSize.self) { proxy in
-                proxy.size
-            } action: { newSize in
-                contentSize = newSize
-            }
-    }
-
-    @ViewBuilder
-    private var bubbleBackground: some View {
-        let width = bubbleWidth
-        let height = bubbleHeight
-
-        if width > 0 && height > 0 {
-            BubbleView(
-                width: width,
-                height: height,
-                cornerRadius: bubbleCornerRadius,
-                minDiameter: bubbleMinDiameter,
-                maxDiameter: bubbleMaxDiameter,
-                blurRadius: bubbleBlurRadius,
-                color: backgroundColor,
-                mode: bubbleMode
-            )
-            .overlay(alignment: tailAlignment) {
-                tailView
-            }
-            .compositingGroup()
-            .opacity(backgroundOpacity)
-        } else {
-            RoundedRectangle(cornerRadius: bubbleCornerRadius)
-                .fill(backgroundColor)
-                .frame(width: animationWidth, height: animationHeight)
+                BubbleView(
+                    width: bubbleWidth,
+                    height: bubbleHeight,
+                    cornerRadius: bubbleCornerRadius,
+                    minDiameter: bubbleMinDiameter,
+                    maxDiameter: bubbleMaxDiameter,
+                    blurRadius: bubbleBlurRadius,
+                    color: backgroundColor,
+                    mode: bubbleMode
+                )
                 .overlay(alignment: tailAlignment) {
                     tailView
                 }
                 .compositingGroup()
                 .opacity(backgroundOpacity)
-        }
+            }
+//            .offset(y: bubbleMode == .thinking ? -5 : 0)
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                contentSize = newSize
+            }
     }
 
     @ViewBuilder

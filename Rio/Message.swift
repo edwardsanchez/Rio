@@ -41,6 +41,13 @@ struct MessageBubbleView: View {
     let visibleMessageIndex: Int
     let theme: ChatTheme
 
+    @State private var showTypingIndicatorContent = false
+    @State private var showTalkingContent = false
+    @State private var thinkingContentWidth: CGFloat = 0
+    @State private var isWidthLocked = false
+    @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
+    @State private var revealWorkItem: DispatchWorkItem? = nil
+
     init(
         message: Message,
         showTail: Bool = true,
@@ -106,6 +113,13 @@ struct MessageBubbleView: View {
                     newMessageId = nil
                 }
             }
+            configureInitialContentState()
+        }
+        .onChange(of: message.bubbleMode) { oldMode, newMode in
+            handleBubbleModeChange(from: oldMode, to: newMode)
+        }
+        .onDisappear {
+            cancelPendingContentTransitions()
         }
     }
 
@@ -240,19 +254,33 @@ struct MessageBubbleView: View {
         backgroundColor: Color
     ) -> some View {
 
-        Group {
-            if message.isTypingIndicator {
+        let hasText = !message.text.isEmpty
+
+        ZStack(alignment: .leading) {
+            if hasText {
+                talkingTextView(textColor: textColor)
+                    .opacity(0)
+                    .accessibilityHidden(true)
+            }
+
+            if showTypingIndicatorContent {
                 TypingIndicatorView()
-                    .transition(.opacity.animation(.easeIn(duration: 0.2)))
-            } else {
-                Text(message.text)
-                    .foregroundStyle(textColor)
-                    // Prevent horizontal expansion while allowing vertical growth
-                    // This ensures text wraps properly within the bubble
-                    .fixedSize(horizontal: false, vertical: true)
-                    .transition(.opacity.animation(.smooth(duration: 0.2)))
+                    .opacity(showTypingIndicatorContent ? 1 : 0)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.width
+                    } action: { newWidth in
+                        updateThinkingWidth(newWidth)
+                    }
+            }
+
+            if hasText {
+                talkingTextView(textColor: textColor)
+                    .opacity(showTalkingContent ? 1 : 0)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: showTypingIndicatorContent)
+        .animation(.easeInOut(duration: 0.35), value: showTalkingContent)
+        .frame(width: lockedWidth, alignment: .leading)
         .chatBubble(
             messageType: message.messageType,
             backgroundColor: backgroundColor,
@@ -261,6 +289,120 @@ struct MessageBubbleView: View {
             animationWidth: outboundAnimationWidth,
             animationHeight: outboundAnimationHeight
         )
+    }
+
+    private func talkingTextView(textColor: Color) -> some View {
+        Text(message.text)
+            .foregroundStyle(textColor)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var lockedWidth: CGFloat? {
+        guard isWidthLocked, thinkingContentWidth > 0 else { return nil }
+        return thinkingContentWidth
+    }
+
+    private func updateThinkingWidth(_ width: CGFloat) {
+        guard width > 0 else { return }
+        if abs(thinkingContentWidth - width) > 0.5 {
+            thinkingContentWidth = width
+        }
+        if message.bubbleMode == .thinking {
+            isWidthLocked = true
+        }
+    }
+
+    private func configureInitialContentState() {
+        cancelPendingContentTransitions()
+        switch message.bubbleMode {
+        case .thinking:
+            isWidthLocked = true
+            showTypingIndicatorContent = true
+            showTalkingContent = false
+        case .talking:
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = !message.text.isEmpty
+        }
+    }
+
+    private func handleBubbleModeChange(from oldMode: BubbleMode, to newMode: BubbleMode) {
+        guard oldMode != newMode else { return }
+        cancelPendingContentTransitions()
+        if oldMode == .thinking && newMode == .talking {
+            startTalkingTransition()
+        } else if oldMode == .talking && newMode == .thinking {
+            startThinkingState()
+        } else {
+            configureInitialContentState()
+        }
+    }
+
+    private func startTalkingTransition() {
+        if message.text.isEmpty {
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            return
+        }
+
+        if thinkingContentWidth > 0 {
+            isWidthLocked = true
+        }
+
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showTypingIndicatorContent = false
+        }
+
+        showTalkingContent = false
+
+        scheduleWidthUnlock()
+        scheduleTalkingReveal()
+    }
+
+    private func startThinkingState() {
+        isWidthLocked = true
+        showTalkingContent = false
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showTypingIndicatorContent = true
+        }
+    }
+
+    private func scheduleWidthUnlock() {
+        let unlockItem = DispatchWorkItem {
+            withAnimation(.easeInOut(duration: BubbleView.resizeDuration)) {
+                isWidthLocked = false
+            }
+        }
+
+        widthUnlockWorkItem = unlockItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.morphDuration) {
+            guard !unlockItem.isCancelled else { return }
+            unlockItem.perform()
+            widthUnlockWorkItem = nil
+        }
+    }
+
+    private func scheduleTalkingReveal() {
+        let revealItem = DispatchWorkItem {
+            withAnimation(.easeInOut(duration: 0.35)) {
+                showTalkingContent = true
+            }
+        }
+
+        revealWorkItem = revealItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.textRevealDelay) {
+            guard !revealItem.isCancelled else { return }
+            revealItem.perform()
+            revealWorkItem = nil
+        }
+    }
+
+    private func cancelPendingContentTransitions() {
+        widthUnlockWorkItem?.cancel()
+        widthUnlockWorkItem = nil
+        revealWorkItem?.cancel()
+        revealWorkItem = nil
     }
 
     private var outboundAnimationWidth: CGFloat? {
@@ -300,7 +442,7 @@ private struct MessageBubblePreviewContainer: View {
         VStack(spacing: 24) {
             MessageBubbleView(
                 message: isThinking ? thinkingMessage : talkingMessage,
-                showTail: true,
+                showTail: false,
                 isNew: false,
                 inputFieldFrame: .zero,
                 scrollViewFrame: .zero,
@@ -313,7 +455,7 @@ private struct MessageBubblePreviewContainer: View {
             .padding(.horizontal, 20)
 
             Button(isThinking ? "Switch to talking" : "Switch to thinking") {
-                withAnimation(.easeInOut(duration: 0.4)) {
+                withAnimation(.easeInOut(duration: 2.4)) {
                     isThinking.toggle()
                 }
             }

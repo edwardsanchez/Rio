@@ -19,8 +19,10 @@ struct BubbleView: View {
     let color: Color
     let mode: BubbleMode
 
-    private let transitionDuration: TimeInterval = 0.3
-    private static let defaultModeAnimationDuration: TimeInterval = 2.4
+    private let circleTransitionDuration: TimeInterval = 0.3
+    static let morphDuration: TimeInterval = 2.4
+    static let resizeDuration: TimeInterval = 0.55
+    static let textRevealDelay: TimeInterval = morphDuration + resizeDuration
 
     @State private var animationSeed: UInt64
     @State private var circleTransitions: [CircleTransition]
@@ -84,7 +86,7 @@ struct BubbleView: View {
         ))
         _startTime = State(initialValue: now)
         let initialProgress: CGFloat = mode == .thinking ? 0 : 1
-        _modeAnimationStart = State(initialValue: now.addingTimeInterval(-Self.defaultModeAnimationDuration))
+        _modeAnimationStart = State(initialValue: now.addingTimeInterval(-Self.morphDuration))
         _modeAnimationFrom = State(initialValue: initialProgress)
         _modeAnimationTo = State(initialValue: initialProgress)
     }
@@ -148,7 +150,7 @@ struct BubbleView: View {
 
         for i in 0..<sharedCount {
             var transition = existing[i]
-            let currentValue = transition.value(at: now, duration: transitionDuration)
+            let currentValue = transition.value(at: now, duration: circleTransitionDuration)
             transition.startValue = currentValue
             transition.endValue = targetDiameters[i]
             transition.startTime = now
@@ -160,7 +162,7 @@ struct BubbleView: View {
         if existing.count > targetDiameters.count {
             for i in targetDiameters.count..<existing.count {
                 var transition = existing[i]
-                let currentValue = transition.value(at: now, duration: transitionDuration)
+                let currentValue = transition.value(at: now, duration: circleTransitionDuration)
                 transition.startValue = currentValue
                 transition.endValue = 0
                 transition.startTime = now
@@ -192,7 +194,7 @@ struct BubbleView: View {
     }
 
     private func scheduleRemoval(of id: Int) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + transitionDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + circleTransitionDuration) {
             circleTransitions.removeAll { $0.id == id && $0.isDisappearing }
         }
     }
@@ -201,7 +203,7 @@ struct BubbleView: View {
         circleTransitions
             .sorted { $0.index < $1.index }
             .compactMap { transition in
-                let value = transition.value(at: date, duration: transitionDuration)
+                let value = transition.value(at: date, duration: circleTransitionDuration)
                 if transition.isDisappearing && value <= 0.01 {
                     return nil
                 }
@@ -222,7 +224,7 @@ struct BubbleView: View {
 
     private func applyRectangleSize(_ size: CGSize) {
         let now = Date()
-        let currentSize = rectangleTransition.value(at: now, duration: transitionDuration)
+        let currentSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
         rectangleTransition = RectangleTransition(
             startSize: currentSize,
             endSize: size,
@@ -235,7 +237,7 @@ struct BubbleView: View {
     private func schedulePendingRectangleApplication() {
         guard !pendingRectangleScheduled else { return }
         pendingRectangleScheduled = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.defaultModeAnimationDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.morphDuration) {
             if let pending = pendingRectangleSize {
                 applyRectangleSize(pending)
             } else {
@@ -253,7 +255,7 @@ struct BubbleView: View {
         TimelineView(.animation) { timeline in
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
-            let animatedSize = rectangleTransition.value(at: now, duration: transitionDuration)
+            let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
@@ -394,7 +396,7 @@ struct BubbleView: View {
     }
 
     private func modeProgress(at now: Date) -> CGFloat {
-        let duration = Self.defaultModeAnimationDuration
+        let duration = Self.morphDuration
         guard duration > 0 else { return modeAnimationTo }
         let elapsed = now.timeIntervalSince(modeAnimationStart)
         if elapsed <= 0 {
