@@ -270,12 +270,10 @@ struct BubbleView: View {
             let circleTrackHeight = max(0, baseHeight - adaptiveInset * 2)
             let circleTrackCornerRadius = min(cornerRadius, min(circleTrackWidth, circleTrackHeight) / 2)
 
-            // Remove only the portion of the padding caused by the circles (not the blur) to keep the visual footprint consistent.
-            let circleExtent = max(0, effectivePadding - currentBlurRadius)
-            let compensationFactor: CGFloat = 0.75
-            let displayWidth = max(0, circleTrackWidth - circleExtent * 2 * compensationFactor)
-            let displayHeight = max(0, circleTrackHeight - circleExtent * 2 * compensationFactor)
-            let displayCornerRadius = min(cornerRadius, min(displayWidth, displayHeight) / 2)
+            // Keep the inner rectangle locked to the circle track so it grows while the dots retract.
+            let displayWidth = circleTrackWidth
+            let displayHeight = circleTrackHeight
+            let displayCornerRadius = circleTrackCornerRadius
             let canvasWidth = circleTrackWidth + effectivePadding * 2
             let canvasHeight = circleTrackHeight + effectivePadding * 2
             let alphaThresholdMin = max(0.001, 0.2 * (1 - morphProgress))
