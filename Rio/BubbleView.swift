@@ -256,11 +256,9 @@ struct BubbleView: View {
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
             let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
-            let baseWidth = max(animatedSize.width, 0)
-            let baseHeight = max(animatedSize.height, 0)
+            let displayWidth = max(animatedSize.width, 0)
+            let displayHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let displayWidth = baseWidth
-            let displayHeight = baseHeight
             let displayCornerRadius = min(cornerRadius, min(displayWidth, displayHeight) / 2)
             let effectivePadding = basePadding * (1 - morphProgress)
             let canvasWidth = displayWidth + effectivePadding * 2
