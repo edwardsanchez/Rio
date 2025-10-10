@@ -24,7 +24,7 @@ struct BubbleView: View {
     private let circleTransitionDuration: TimeInterval = 0.3
     static let morphDuration: TimeInterval = 0.4
     static let resizeDuration: TimeInterval = 0.55
-    static let textRevealDelay: TimeInterval = morphDuration + resizeDuration
+    static let textRevealDelay: TimeInterval = (morphDuration + resizeDuration) * 0.5
 
 
     @State private var animationSeed: UInt64
@@ -40,7 +40,7 @@ struct BubbleView: View {
 
     // Padding around the inner rectangle to accommodate circles + blur
     private var basePadding: CGFloat {
-        maxDiameter / 2 + blurRadius
+        (maxDiameter / 2 + blurRadius) * 0.9
     }
 
     // Tail-related computed properties
@@ -484,7 +484,6 @@ struct BubbleView: View {
             .overlay(alignment: tailAlignment) {
                 tailView
             }
-
         }
         .onAppear {
             startTime = Date()
@@ -509,39 +508,32 @@ struct BubbleView: View {
 
     @ViewBuilder
     private var tailView: some View {
-        switch mode {
-        case .talking:
+        let isThinking = mode == .thinking
+        Group {
             Image(.cartouche)
                 .resizable()
                 .frame(width: 15, height: 15)
                 .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
                 .offset(x: tailOffset.width, y: tailOffset.height)
+                .offset(x: isThinking ? 15 : 0, y:  isThinking ? -15 : 0)
                 .foregroundStyle(color)
                 .opacity(showTail ? 1 : 0)
-
-        case .thinking:
+                .animation(.spring(duration: 0.3).delay(0.3), value: mode)
+            
             // Thinking bubble tail with two circles
             ZStack(alignment: tailAlignment == .bottomLeading ? .bottomLeading : .bottomTrailing) {
-                // Larger circle (closer to bubble)
-                Circle()
-                    .fill(color)
-                    .frame(width: 14, height: 14)
-                    .offset(
-                        x: tailAlignment == .bottomLeading ? 3 : -12,
-                        y: 14
-                    )
-
                 // Smaller circle (further from bubble)
                 Circle()
                     .fill(color)
                     .frame(width: 8, height: 8)
                     .offset(
-                        x: tailAlignment == .bottomLeading ? -2 : 1,
+                        x: tailAlignment == .bottomLeading ? 4 : -4,
                         y: 21
                     )
             }
-            .offset(x: 5, y: -20)
-            .opacity(showTail ? 1 : 0)
+            .offset(x: 0, y: -13)
+            .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -10)
+            .animation(.easeIn(duration: 0.2), value: mode)
         }
     }
 
@@ -992,9 +984,7 @@ struct MorphPreview: View {
             .frame(width: width + 120, height: height + 120)
             
             Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    isTalking.toggle()
-                }
+                isTalking.toggle()
             }
             .buttonStyle(.borderedProminent)
         }

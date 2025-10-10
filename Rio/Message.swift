@@ -262,15 +262,13 @@ struct MessageBubbleView: View {
                     .opacity(0)
             }
 
-            if showTypingIndicatorContent {
-                TypingIndicatorView()
-                    .opacity(showTypingIndicatorContent ? 1 : 0)
-//                    .onGeometryChange(for: CGFloat.self) { proxy in
-//                        proxy.size.width
-//                    } action: { newWidth in
-//                        updateThinkingWidth(newWidth)
-//                    } //DO NOT DELETE
-            }
+            TypingIndicatorView(isVisible: showTypingIndicatorContent)
+//                .opacity(showTypingIndicatorContent ? 1 : 0)
+            //                    .onGeometryChange(for: CGFloat.self) { proxy in
+            //                        proxy.size.width
+            //                    } action: { newWidth in
+            //                        updateThinkingWidth(newWidth)
+            //                    } //DO NOT DELETE
 
             if hasText {
                 talkingTextView(textColor: textColor)
