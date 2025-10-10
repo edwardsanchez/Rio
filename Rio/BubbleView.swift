@@ -256,14 +256,25 @@ struct BubbleView: View {
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
             let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
-            let displayWidth = max(animatedSize.width, 0)
-            let displayHeight = max(animatedSize.height, 0)
+            let baseWidth = max(animatedSize.width, 0)
+            let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let displayCornerRadius = min(cornerRadius, min(displayWidth, displayHeight) / 2)
             let effectivePadding = basePadding * (1 - morphProgress)
-            let canvasWidth = displayWidth + effectivePadding * 2
-            let canvasHeight = displayHeight + effectivePadding * 2
             let currentBlurRadius = blurRadius * (1 - morphProgress)
+
+            // Geometry splits
+            let circleTrackWidth = baseWidth
+            let circleTrackHeight = baseHeight
+            let circleTrackCornerRadius = min(cornerRadius, min(circleTrackWidth, circleTrackHeight) / 2)
+
+            // Remove only the portion of the padding caused by the circles (not the blur) to keep the visual footprint consistent.
+            let circleExtent = max(0, effectivePadding - currentBlurRadius)
+            let compensationFactor: CGFloat = 0.75
+            let displayWidth = max(0, circleTrackWidth - circleExtent * 2 * compensationFactor)
+            let displayHeight = max(0, circleTrackHeight - circleExtent * 2 * compensationFactor)
+            let displayCornerRadius = min(cornerRadius, min(displayWidth, displayHeight) / 2)
+            let canvasWidth = circleTrackWidth + effectivePadding * 2
+            let canvasHeight = circleTrackHeight + effectivePadding * 2
             let alphaThresholdMin = max(0.001, 0.2 * (1 - morphProgress))
 
             // Size oscillation progress (3 second cycle)
@@ -271,9 +282,9 @@ struct BubbleView: View {
 
             let baseDiameters = currentBaseDiameters(at: now)
             let currentPerimeter = calculateRoundedRectPerimeter(
-                width: displayWidth,
-                height: displayHeight,
-                cornerRadius: displayCornerRadius
+                width: circleTrackWidth,
+                height: circleTrackHeight,
+                cornerRadius: circleTrackCornerRadius
             )
 
             let animationData = computeAnimationData(
@@ -299,14 +310,14 @@ struct BubbleView: View {
                 diameters: animatedDiameters,
                 movementProgress: movementProgress,
                 perimeter: currentPerimeter,
-                width: displayWidth,
-                height: displayHeight,
-                cornerRadius: displayCornerRadius
+                width: circleTrackWidth,
+                height: circleTrackHeight,
+                cornerRadius: circleTrackCornerRadius
             )
 
             let centerPoint = CGPoint(
-                x: displayWidth / 2,
-                y: displayHeight / 2
+                x: circleTrackWidth / 2,
+                y: circleTrackHeight / 2
             )
 
             let outwardProgress = max(0, min(1, 1 - morphProgress))
@@ -332,8 +343,12 @@ struct BubbleView: View {
 
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
+                    let rectOrigin = CGPoint(
+                        x: effectivePadding + (circleTrackWidth - displayWidth) / 2,
+                        y: effectivePadding + (circleTrackHeight - displayHeight) / 2
+                    )
                     let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
-                        .path(in: CGRect(x: effectivePadding, y: effectivePadding, width: displayWidth, height: displayHeight))
+                        .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
                     ctx.fill(rectPath, with: .color(color))
 
                     // Draw circles around the path
@@ -806,39 +821,37 @@ struct BubbleView_Previews: PreviewProvider {
     }
 }
 
-typealias ThoughtBubbleView = BubbleView
+struct MorphPreview: View {
+    @State private var isTalking = false
+    @State private var width: CGFloat = 220
+    @State private var height: CGFloat = 120
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            BubbleView(
+                width: width,
+                height: height,
+                cornerRadius: 26,
+                minDiameter: 16,
+                maxDiameter: 28,
+                blurRadius: 6,
+                color: .Default.inboundBubble,
+                mode: isTalking ? .talking : .thinking
+            )
+            .frame(width: width + 120, height: height + 120)
+            
+            Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
+                withAnimation(.easeInOut(duration: 2.4)) {
+                    isTalking.toggle()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        //            .background(Color.base)
+    }
+}
 
 #Preview("Thought Bubble Morph") {
-    struct MorphPreview: View {
-        @State private var isTalking = false
-        @State private var width: CGFloat = 220
-        @State private var height: CGFloat = 120
-
-        var body: some View {
-            VStack(spacing: 24) {
-                BubbleView(
-                    width: width,
-                    height: height,
-                    cornerRadius: 26,
-                    minDiameter: 16,
-                    maxDiameter: 28,
-                    blurRadius: 6,
-                    color: .Default.inboundBubble,
-                    mode: isTalking ? .talking : .thinking
-                )
-                .frame(width: width + 120, height: height + 120)
-
-                Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
-                    withAnimation(.easeInOut(duration: 2.4)) {
-                        isTalking.toggle()
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .padding()
-//            .background(Color.base)
-        }
-    }
-
-    return MorphPreview()
+     MorphPreview()
 }
