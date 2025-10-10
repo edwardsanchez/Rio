@@ -22,7 +22,6 @@ struct BubbleView: View {
     private let circleTransitionDuration: TimeInterval = 0.3
     static let morphDuration: TimeInterval = 0.4
     static let resizeDuration: TimeInterval = 0.55
-    static let textRevealDelay: TimeInterval = morphDuration + resizeDuration
 
     @State private var animationSeed: UInt64
     @State private var circleTransitions: [CircleTransition]

@@ -41,14 +41,11 @@ private struct ChatBubbleModifier: ViewModifier {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
 
-    private var bubbleWidth: CGFloat { measuredWidth }
-    private var bubbleHeight: CGFloat { measuredHeight }
-
-    private var bubbleCornerRadius: CGFloat { 20 }
-    private var bubbleMinDiameter: CGFloat { 13 }
-    private var bubbleMaxDiameter: CGFloat { 23 }
-    private var bubbleBlurRadius: CGFloat { 2 }
-
+    let bubbleCornerRadius: CGFloat = 20
+    let bubbleMinDiameter: CGFloat = 13
+    let bubbleMaxDiameter: CGFloat = 23
+    let bubbleBlurRadius: CGFloat = 2
+    
     func body(content: Content) -> some View {
         let verticalPadding: CGFloat = 10
         let leadingPadding: CGFloat = bubbleMode == .thinking ? 19 : 16 //FIXME: This is odd as a requirement
@@ -60,8 +57,8 @@ private struct ChatBubbleModifier: ViewModifier {
             .padding(.trailing, trailingPadding)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: bubbleWidth,
-                    height: bubbleHeight,
+                    width: measuredWidth,
+                    height: measuredHeight,
                     cornerRadius: bubbleCornerRadius,
                     minDiameter: bubbleMinDiameter,
                     maxDiameter: bubbleMaxDiameter,
@@ -116,6 +113,7 @@ private struct ChatBubbleModifier: ViewModifier {
                         y: 21
                     )
             }
+            .offset(x: 5, y: -20)
             .opacity(showTail ? 1 : 0)
         }
     }
