@@ -261,6 +261,8 @@ struct BubbleView: View {
             let morphProgress = modeProgress(at: now)
             let effectivePadding = basePadding * (1 - morphProgress)
             let currentBlurRadius = blurRadius * (1 - morphProgress)
+            
+            let thinkingInsetScale = 0.4
 
             // Geometry splits
             let adaptiveInset = basePadding * thinkingInsetScale * (1 - morphProgress)
