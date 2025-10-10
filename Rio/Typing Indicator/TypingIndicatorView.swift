@@ -42,10 +42,8 @@ struct TypingIndicatorView: View {
             isAnimating = true
         }
         .onChange(of: isVisible) { oldValue, newValue in
-            if oldValue {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    shown = newValue
-                }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                shown = newValue
             }
         }
     }
