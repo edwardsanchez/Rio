@@ -564,11 +564,11 @@ struct BubbleView: View {
             )
 
             let morphedPositions = positions.map { point in
-                interpolate(centerPoint, to: point, progress: 0.5 + outwardProgress * 0.5)
+                interpolate(centerPoint, to: point, progress: outwardProgress)
             }
 
             let morphedDiameters = animatedDiameters.map { diameter in
-                max(0, diameter * (0.5 + outwardProgress * 0.5))
+                max(0, diameter * outwardProgress)
             }
 
             // Canvas with metaball effect
@@ -604,7 +604,6 @@ struct BubbleView: View {
                     }
                 }
             } symbols: {
-                //Decorative Thinking Circles
                 ForEach(Array(morphedDiameters.enumerated()), id: \.offset) { index, diameter in
                     Circle()
                         .frame(width: diameter, height: diameter)
