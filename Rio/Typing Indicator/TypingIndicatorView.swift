@@ -13,10 +13,18 @@ struct TypingIndicatorView: View {
     var isVisible: Bool
     @State private var isAnimating = false
     @State private var shown = true
+    @State private var height: CGFloat = 0
 
     var body: some View {
-        Group {
+        ZStack {
             if shown {
+                Text("Heigh")
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { newHeight in
+                        height = newHeight
+                    }
+                    .hidden()
                 HStack(spacing: 5) {
                     ForEach(0..<3) { index in
                         Circle()
@@ -37,7 +45,7 @@ struct TypingIndicatorView: View {
                 }
             }
         }
-        .frame(height: 20) //TODO: This should vary based on font size
+        .frame(height: height)
         .onAppear {
             isAnimating = true
         }
