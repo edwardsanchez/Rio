@@ -216,6 +216,69 @@ struct BubbleView: View {
         }
     }
 
+    private struct BubbleMorphLayout {
+        let morphProgress: CGFloat
+        let outwardProgress: CGFloat
+        let canvasPadding: CGFloat
+        let blurRadius: CGFloat
+        let circleTrackSize: CGSize
+        let circleTrackCornerRadius: CGFloat
+        let displaySize: CGSize
+        let displayCornerRadius: CGFloat
+        let canvasSize: CGSize
+        let alphaThreshold: CGFloat
+        let circleTrackInset: CGFloat
+
+        init(
+            baseSize: CGSize,
+            baseCornerRadius: CGFloat,
+            basePadding: CGFloat,
+            blurRadius: CGFloat,
+            insetScale: CGFloat,
+            morphProgress: CGFloat
+        ) {
+            let clampedProgress = min(max(morphProgress, 0), 1)
+            let outwardProgress = 1 - clampedProgress
+            let canvasPadding = basePadding * outwardProgress
+            let inset = basePadding * insetScale * outwardProgress
+
+            let trackWidth = max(0, baseSize.width - inset * 2)
+            let trackHeight = max(0, baseSize.height - inset * 2)
+            let trackCornerRadius = min(baseCornerRadius, min(trackWidth, trackHeight) / 2)
+
+            self.morphProgress = clampedProgress
+            self.outwardProgress = outwardProgress
+            self.canvasPadding = canvasPadding
+            self.blurRadius = blurRadius * outwardProgress
+            self.circleTrackInset = inset
+            self.circleTrackSize = CGSize(width: trackWidth, height: trackHeight)
+            self.circleTrackCornerRadius = trackCornerRadius
+            self.displaySize = circleTrackSize
+            self.displayCornerRadius = trackCornerRadius
+            self.canvasSize = CGSize(
+                width: trackWidth + canvasPadding * 2,
+                height: trackHeight + canvasPadding * 2
+            )
+            self.alphaThreshold = max(0.001, 0.2 * outwardProgress)
+        }
+
+        var circleTrackWidth: CGFloat { circleTrackSize.width }
+        var circleTrackHeight: CGFloat { circleTrackSize.height }
+
+        func rectangleOrigin(for displaySize: CGSize) -> CGPoint {
+            CGPoint(
+                x: canvasPadding + (circleTrackSize.width - displaySize.width) / 2,
+                y: canvasPadding + (circleTrackSize.height - displaySize.height) / 2
+            )
+        }
+    }
+
+    private struct CircleTargetState {
+        let targets: [CGFloat]
+        let minimum: CGFloat
+        let maximum: CGFloat
+    }
+
     private func configureInitialTransitions(targetDiameters: [CGFloat]) {
         let now = Date()
         circleTransitions = targetDiameters.enumerated().map { index, value in
@@ -301,6 +364,54 @@ struct BubbleView: View {
             }
     }
 
+    private func currentTargetDiameters(tolerance: CGFloat = 0.001) -> [CGFloat] {
+        circleTransitions
+            .sorted { $0.index < $1.index }
+            .compactMap { transition in
+                let value = transition.endValue
+                return value > tolerance ? value : nil
+            }
+    }
+
+    private func almostEqual(_ lhs: [CGFloat], _ rhs: [CGFloat], tolerance: CGFloat = 0.1) -> Bool {
+        guard lhs.count == rhs.count else { return false }
+        for (l, r) in zip(lhs, rhs) where abs(l - r) > tolerance {
+            return false
+        }
+        return true
+    }
+
+    private func effectiveDiameterBounds(outwardProgress: CGFloat) -> (min: CGFloat, max: CGFloat)? {
+        let clamped = min(max(outwardProgress, 0), 1)
+        guard clamped > 0 else { return nil }
+        let minBound = max(minDiameter * clamped, 0.5)
+        let maxBound = max(maxDiameter * clamped, minBound)
+        return (min: minBound, max: maxBound)
+    }
+
+    private func circleTargetState(perimeter: CGFloat, outwardProgress: CGFloat, seed: UInt64) -> CircleTargetState {
+        guard let bounds = effectiveDiameterBounds(outwardProgress: outwardProgress), perimeter > 0.001 else {
+            return CircleTargetState(targets: [], minimum: minDiameter, maximum: maxDiameter)
+        }
+
+        var targets = computeDiameters(
+            length: perimeter,
+            min: bounds.min,
+            max: bounds.max,
+            seed: seed
+        ).diameters
+
+        let sum = targets.reduce(0, +)
+        if sum > 0 {
+            let scale = perimeter / sum
+            if abs(scale - 1) > 0.01 {
+                targets = targets.map { max(0, $0 * scale) }
+            }
+        }
+
+        return CircleTargetState(targets: targets, minimum: bounds.min, maximum: bounds.max)
+    }
+
     private func updateRectangleTransition(to size: CGSize) {
         let now = Date()
         let progress = modeProgress(at: now)
@@ -361,31 +472,35 @@ struct BubbleView: View {
         let targetDiameters = packingResult.diameters
         let isValid = packingResult.isValid && !hasInvalidInput
 
-        TimelineView(.animation) { timeline in
+        return TimelineView(.animation) { timeline in
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
             let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let effectivePadding = basePadding //* (1 - morphProgress)
-            let currentBlurRadius = blurRadius * (1 - morphProgress)
-            
-            let thinkingInsetScale = 1.0
-
-            // Geometry splits
-            let adaptiveInset = basePadding * thinkingInsetScale //* (1 - morphProgress)
-            let circleTrackWidth = max(0, baseWidth - adaptiveInset * 2)
-            let circleTrackHeight = max(0, baseHeight - adaptiveInset * 2)
-            let circleTrackCornerRadius = min(cornerRadius, min(circleTrackWidth, circleTrackHeight) / 2)
+            let thinkingInsetScale: CGFloat = 1.0
+            let layout = BubbleMorphLayout(
+                baseSize: CGSize(width: baseWidth, height: baseHeight),
+                baseCornerRadius: cornerRadius,
+                basePadding: basePadding,
+                blurRadius: blurRadius,
+                insetScale: thinkingInsetScale,
+                morphProgress: morphProgress
+            )
+            let currentBlurRadius = layout.blurRadius
+            let circleTrackWidth = layout.circleTrackWidth
+            let circleTrackHeight = layout.circleTrackHeight
+            let circleTrackCornerRadius = layout.circleTrackCornerRadius
+            let outwardProgress = layout.outwardProgress
 
             // Keep the inner rectangle locked to the circle track so it grows while the dots retract.
-            let displayWidth = circleTrackWidth
-            let displayHeight = circleTrackHeight
-            let displayCornerRadius = circleTrackCornerRadius
-            let canvasWidth = circleTrackWidth + effectivePadding * 2
-            let canvasHeight = circleTrackHeight + effectivePadding * 2
-            let alphaThresholdMin = max(0.001, 0.2 * (1 - morphProgress))
+            let displayWidth = layout.displaySize.width
+            let displayHeight = layout.displaySize.height
+            let displayCornerRadius = layout.displayCornerRadius
+            let canvasWidth = layout.canvasSize.width
+            let canvasHeight = layout.canvasSize.height
+            let alphaThresholdMin = layout.alphaThreshold
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
@@ -397,10 +512,29 @@ struct BubbleView: View {
                 cornerRadius: circleTrackCornerRadius
             )
 
+            let circleState = circleTargetState(
+                perimeter: currentPerimeter,
+                outwardProgress: outwardProgress,
+                seed: animationSeed
+            )
+            let desiredTargets = circleState.targets
+            let existingTargets = currentTargetDiameters()
+            if !almostEqual(existingTargets, desiredTargets) {
+                DispatchQueue.main.async {
+                    let refreshedTargets = currentTargetDiameters()
+                    if !almostEqual(refreshedTargets, desiredTargets) {
+                        updateCircleTransitions(targetDiameters: desiredTargets)
+                    }
+                }
+            }
+
+            let effectiveMin = circleState.minimum
+            let effectiveMax = circleState.maximum
+
             let animationData = computeAnimationData(
                 baseDiameters: baseDiameters,
-                min: minDiameter,
-                max: maxDiameter,
+                min: effectiveMin,
+                max: effectiveMax,
                 seed: animationSeed
             )
 
@@ -408,8 +542,8 @@ struct BubbleView: View {
                 animationData: animationData,
                 progress: sizeProgress,
                 totalLength: currentPerimeter,
-                min: minDiameter,
-                max: maxDiameter
+                min: effectiveMin,
+                max: effectiveMax
             )
 
             // Movement progress - circles complete one full loop every 10 seconds
@@ -430,7 +564,6 @@ struct BubbleView: View {
                 y: circleTrackHeight / 2
             )
 
-            let outwardProgress = max(0, min(1, 1 - morphProgress))
             let morphedPositions = positions.map { point in
                 interpolate(centerPoint, to: point, progress: outwardProgress)
             }
@@ -441,7 +574,7 @@ struct BubbleView: View {
 
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
-            Canvas { context, size in
+            return Canvas { context, size in
 //                if alphaThresholdMin > 0.001 {
 //                    // Keep alpha threshold active only when needed to avoid gray background artifacts
 //                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
@@ -449,14 +582,12 @@ struct BubbleView: View {
 //                if currentBlurRadius > 0.05 {
 //                    // Blur is disabled once the talking morph completes to keep the canvas transparent
 //                    context.addFilter(.blur(radius: currentBlurRadius))
-//                }
+//                } //DO NOT DELETE
 
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
-                    let rectOrigin = CGPoint(
-                        x: effectivePadding + (circleTrackWidth - displayWidth) / 2,
-                        y: effectivePadding + (circleTrackHeight - displayHeight) / 2
-                    )
+                    let rectOrigin = layout.rectangleOrigin(for: CGSize(width: displayWidth, height: displayHeight))
+                    let trackOrigin = layout.rectangleOrigin(for: layout.circleTrackSize)
                     let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
                         .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
                     ctx.fill(rectPath, with: .color(color))
@@ -466,8 +597,8 @@ struct BubbleView: View {
                         if let circleSymbol = ctx.resolveSymbol(id: index) {
                             // Offset position by padding to account for canvas border
                             let position = CGPoint(
-                                x: morphedPositions[index].x + effectivePadding,
-                                y: morphedPositions[index].y + effectivePadding
+                                x: morphedPositions[index].x + trackOrigin.x,
+                                y: morphedPositions[index].y + trackOrigin.y
                             )
                             ctx.draw(circleSymbol, at: position)
                         }
