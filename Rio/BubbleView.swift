@@ -234,13 +234,12 @@ struct BubbleView: View {
             baseCornerRadius: CGFloat,
             basePadding: CGFloat,
             blurRadius: CGFloat,
-            insetScale: CGFloat,
             morphProgress: CGFloat
         ) {
             let clampedProgress = min(max(morphProgress, 0), 1)
             let outwardProgress = 1 - clampedProgress
             let canvasPadding = basePadding * outwardProgress
-            let inset = basePadding * insetScale * outwardProgress
+            let inset = basePadding * outwardProgress
 
             let trackWidth = max(0, baseSize.width - inset * 2)
             let trackHeight = max(0, baseSize.height - inset * 2)
@@ -479,15 +478,15 @@ struct BubbleView: View {
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
-            let thinkingInsetScale: CGFloat = 1.0
+
             let layout = BubbleMorphLayout(
                 baseSize: CGSize(width: baseWidth, height: baseHeight),
                 baseCornerRadius: cornerRadius,
                 basePadding: basePadding,
                 blurRadius: blurRadius,
-                insetScale: thinkingInsetScale,
                 morphProgress: morphProgress
             )
+            
             let currentBlurRadius = layout.blurRadius
             let circleTrackWidth = layout.circleTrackWidth
             let circleTrackHeight = layout.circleTrackHeight
@@ -575,14 +574,14 @@ struct BubbleView: View {
             // Canvas with metaball effect
             // Canvas is sized to accommodate circles around the inner rectangle
             return Canvas { context, size in
-//                if alphaThresholdMin > 0.001 {
-//                    // Keep alpha threshold active only when needed to avoid gray background artifacts
-//                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
-//                }
-//                if currentBlurRadius > 0.05 {
-//                    // Blur is disabled once the talking morph completes to keep the canvas transparent
-//                    context.addFilter(.blur(radius: currentBlurRadius))
-//                } //DO NOT DELETE
+                if alphaThresholdMin > 0.001 {
+                    // Keep alpha threshold active only when needed to avoid gray background artifacts
+                    context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+                }
+                if currentBlurRadius > 0.05 {
+                    // Blur is disabled once the talking morph completes to keep the canvas transparent
+                    context.addFilter(.blur(radius: currentBlurRadius))
+                } //DO NOT DELETE
 
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding

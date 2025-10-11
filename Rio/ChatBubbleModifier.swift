@@ -34,9 +34,8 @@ private struct ChatBubbleModifier: ViewModifier {
     let bubbleBlurRadius: CGFloat = 2
     
     func body(content: Content) -> some View {
-        let verticalPadding: CGFloat = 20
-        let leadingPadding: CGFloat = bubbleMode == .thinking ? 19 : 16 //FIXME: This is odd as a requirement
-        let trailingPadding: CGFloat = 23
+        let verticalPadding: CGFloat = bubbleMode == .thinking ? 15 : 10
+        let trailingPadding: CGFloat = bubbleMode == .thinking ? 17 : 13
 
         return content
             .padding(.vertical, verticalPadding)
