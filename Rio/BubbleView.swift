@@ -483,9 +483,10 @@ struct BubbleView: View {
         let now = Date()
         let progress = modeProgress(at: now)
         if mode == .talking && progress < 0.98 {
-            // During morph phase, apply width immediately but constrain height to single-line
+            // During morph phase, keep width constant and constrain height to single-line
+            let currentWidth = rectangleTransition.endSize.width
             let morphSize = CGSize(
-                width: size.width,
+                width: currentWidth,  // Preserve current width during morph
                 height: singleLineTextHeight > 0 ? singleLineTextHeight : size.height
             )
             applyRectangleSize(morphSize)
@@ -694,7 +695,6 @@ struct BubbleView: View {
             .overlay(alignment: tailAlignment) {
                 tailView
             }
-            .background(.red)
             .background {
                 // Hidden text to measure single-line height
                 Text("X")
