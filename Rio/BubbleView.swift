@@ -83,7 +83,7 @@ struct BubbleView: View {
     }
 
     private var tailOffset: CGPoint {
-        messageType == .inbound ? CGPoint(x: 5, y: 5.5) : CGPoint(x: -5, y: 5.5)
+        messageType == .inbound ? CGPoint(x: 5.5, y: 10.5) : CGPoint(x: -5.5, y: 10.5)
     }
 
     private var tailRotation: Angle {
@@ -739,31 +739,29 @@ struct BubbleView: View {
     /// Decorative bubble tail that switches layouts depending on the current mode.
     private var tailView: some View {
         let isThinking = mode == .thinking
-        Group {
+        ZStack(alignment: tailAlignment) {
             Image(.cartouche)
                 .resizable()
                 .frame(width: 15, height: 15)
                 .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
                 .offset(x: tailOffset.x, y: tailOffset.y)
-                .offset(x: isThinking ? 15 : 3, y:  isThinking ? -15 : -1)
+                .offset(x: isThinking ? 15 : 3, y:  isThinking ? -23 : -1)
                 .foregroundStyle(color)
                 .opacity(showTail ? 1 : 0)
                 .animation(.spring(duration: 0.3).delay(0.3), value: mode)
             
-            // Thinking bubble tail with two circles
-            ZStack(alignment: tailAlignment == .bottomLeading ? .bottomLeading : .bottomTrailing) {
-                // Smaller circle (further from bubble)
-                Circle()
-                    .fill(color)
-                    .frame(width: 8, height: 8)
-                    .offset(
-                        x: tailAlignment == .bottomLeading ? 4 : -4,
-                        y: 21
-                    )
-            }
-            .offset(x: 0, y: -13)
-            .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -10)
-            .animation(.easeIn(duration: 0.2), value: mode)
+            // Thinking bubble tail
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+                .offset(
+                    x: tailAlignment == .bottomLeading ? 4 : -4,
+                    y: 21
+                )
+                .offset(x: 0, y: -13)
+                .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
+                .animation(.easeIn(duration: 0.2), value: mode)
+                .opacity(messageType == .inbound ? 1 : 0)
         }
     }
 
