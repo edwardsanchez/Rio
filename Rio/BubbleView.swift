@@ -66,6 +66,8 @@ struct BubbleView: View {
     @State private var pendingRectangleSize: CGSize?
     /// Guards against scheduling the rectangle update multiple times.
     @State private var pendingRectangleScheduled = false
+    /// Height of a single line of text for constraining during morph.
+    @State private var singleLineTextHeight: CGFloat = 0
 
     // MARK: - Derived Layout
 
@@ -481,6 +483,13 @@ struct BubbleView: View {
         let now = Date()
         let progress = modeProgress(at: now)
         if mode == .talking && progress < 0.98 {
+            // During morph phase, apply width immediately but constrain height to single-line
+            let morphSize = CGSize(
+                width: size.width,
+                height: singleLineTextHeight > 0 ? singleLineTextHeight : size.height
+            )
+            applyRectangleSize(morphSize)
+            // Store the full size to apply after morph completes
             pendingRectangleSize = size
             schedulePendingRectangleApplication()
             return
@@ -686,6 +695,19 @@ struct BubbleView: View {
                 tailView
             }
             .background(.red)
+            .background {
+                // Hidden text to measure single-line height
+                Text("X")
+                    .font(.body)
+                    .padding(.vertical, 10) // Match the bubble's internal text padding
+                    .fixedSize()
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { newHeight in
+                        singleLineTextHeight = newHeight
+                    }
+                    .hidden()
+            }
         }
         .onAppear {
             startTime = Date()
@@ -702,9 +724,14 @@ struct BubbleView: View {
         .onChange(of: targetDiameters) { _, newDiameters in
             updateCircleTransitions(targetDiameters: newDiameters)
         }
-        .onChange(of: mode) { _, newMode in
+        .onChange(of: mode) { oldMode, newMode in
             let target = newMode == .thinking ? CGFloat(0) : CGFloat(1)
             startModeAnimation(target: target)
+            // When transitioning from thinking to talking, update rectangle transition
+            // to use single-line height during morph
+            if oldMode == .thinking && newMode == .talking {
+                updateRectangleTransition(to: CGSize(width: width, height: height))
+            }
         }
     }
 
