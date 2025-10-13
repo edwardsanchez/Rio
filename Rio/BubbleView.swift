@@ -73,7 +73,7 @@ struct BubbleView: View {
 
     /// Padding around the inner rectangle to accommodate circles and blur.
     private var basePadding: CGFloat {
-        (maxDiameter / 2 + blurRadius) * 0.9
+        (maxDiameter / 2 + blurRadius) * 1
     }
 
     // MARK: - Tail Geometry
