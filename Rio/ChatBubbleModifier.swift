@@ -39,7 +39,7 @@ private struct ChatBubbleModifier: ViewModifier {
             .padding(.horizontal, bubbleMode == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: measuredWidth,
+                    width: bubbleMode == .thinking ? 80 : measuredWidth,
                     height: bubbleMode == .thinking ? measuredHeight + 15 : measuredHeight,
                     cornerRadius: bubbleCornerRadius,
                     minDiameter: bubbleMinDiameter,

@@ -18,13 +18,6 @@ struct TypingIndicatorView: View {
     var body: some View {
         ZStack {
             if shown {
-                Text("H")
-                    .onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.size.height
-                    } action: { newHeight in
-                        height = newHeight
-                    }
-                    .hidden()
                 HStack(spacing: 5) {
                     ForEach(0..<3) { index in
                         Circle()
@@ -45,7 +38,6 @@ struct TypingIndicatorView: View {
                 }
             }
         }
-        .frame(height: height)
         .onAppear {
             isAnimating = true
         }

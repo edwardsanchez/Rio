@@ -262,12 +262,8 @@ struct MessageBubbleView: View {
         let hasText = !message.text.isEmpty
 
         ZStack(alignment: .leading) {
-            Text(showTypingIndicatorContent ? "HHHH" : "H")
+            Text("H") //Measure Spacer
                 .opacity(0)
-                .overlay {
-                    TypingIndicatorView(isVisible: showTypingIndicatorContent)
-                        .frame(width: 100)
-                }
 
             if hasText {
                 Text(message.text)
@@ -287,6 +283,10 @@ struct MessageBubbleView: View {
             animationWidth: outboundAnimationWidth,
             animationHeight: outboundAnimationHeight
         )
+        .overlay(alignment: .leading) {
+            TypingIndicatorView(isVisible: showTypingIndicatorContent)
+                .padding(.leading, 20)
+        }
     }
 
     private var lockedWidth: CGFloat? {
