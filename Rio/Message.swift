@@ -75,12 +75,14 @@ struct MessageBubbleView: View {
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
             if message.messageType == .inbound {
-                inboundAvatar
-                    .opacity(inboundAvatarOpacity)
-                bubbleView(
-                    textColor: theme.inboundTextColor,
-                    backgroundColor: theme.inboundBackgroundColor
-                )
+                Group {
+                    inboundAvatar
+                        .opacity(inboundAvatarOpacity)
+                    bubbleView(
+                        textColor: theme.inboundTextColor,
+                        backgroundColor: theme.inboundBackgroundColor
+                    )
+                }
                 .opacity(bubbleOpacity)
                 .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
