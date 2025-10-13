@@ -262,21 +262,17 @@ struct MessageBubbleView: View {
         let hasText = !message.text.isEmpty
 
         ZStack(alignment: .leading) {
-            if hasText {
-                talkingTextView(textColor: textColor)
-                    .opacity(0)
-            }
-
-            TypingIndicatorView(isVisible: showTypingIndicatorContent)
-//                .opacity(showTypingIndicatorContent ? 1 : 0)
-            //                    .onGeometryChange(for: CGFloat.self) { proxy in
-            //                        proxy.size.width
-            //                    } action: { newWidth in
-            //                        updateThinkingWidth(newWidth)
-            //                    } //DO NOT DELETE
+            Text(showTypingIndicatorContent ? "HHHH" : "H")
+                .opacity(0)
+                .overlay {
+                    TypingIndicatorView(isVisible: showTypingIndicatorContent)
+                        .frame(width: 100)
+                }
 
             if hasText {
-                talkingTextView(textColor: textColor)
+                Text(message.text)
+                    .foregroundStyle(textColor)
+                    .fixedSize(horizontal: false, vertical: true)
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }
@@ -291,12 +287,6 @@ struct MessageBubbleView: View {
             animationWidth: outboundAnimationWidth,
             animationHeight: outboundAnimationHeight
         )
-    }
-
-    private func talkingTextView(textColor: Color) -> some View {
-        Text(message.text)
-            .foregroundStyle(textColor)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var lockedWidth: CGFloat? {

@@ -34,16 +34,13 @@ private struct ChatBubbleModifier: ViewModifier {
     let bubbleBlurRadius: CGFloat = 2
     
     func body(content: Content) -> some View {
-        let verticalPadding: CGFloat = bubbleMode == .thinking ? 15 : 10
-        let trailingPadding: CGFloat = bubbleMode == .thinking ? 17 : 13
-
-        return content
-            .padding(.vertical, verticalPadding)
-            .padding(.horizontal, trailingPadding)
+        content
+            .padding(.vertical, 10)
+            .padding(.horizontal, bubbleMode == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
                     width: measuredWidth,
-                    height: measuredHeight,
+                    height: bubbleMode == .thinking ? measuredHeight + 15 : measuredHeight,
                     cornerRadius: bubbleCornerRadius,
                     minDiameter: bubbleMinDiameter,
                     maxDiameter: bubbleMaxDiameter,
@@ -56,7 +53,6 @@ private struct ChatBubbleModifier: ViewModifier {
                 .compositingGroup()
                 .opacity(backgroundOpacity)
             }
-//            .offset(x: -8)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
