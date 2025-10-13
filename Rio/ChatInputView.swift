@@ -143,6 +143,7 @@ struct ChatInputView: View {
         }
         .buttonBorderShape(.circle)
         .buttonStyle(.borderedProminent)
+        .tint(chat.theme.outboundBackgroundColor)
         .opacity(isEmpty ? 0 : 1)
         .scaleEffect(isEmpty ? 0.9  : 1)
         .animation(.smooth(duration: 0.2), value: isEmpty)

@@ -146,7 +146,7 @@ struct ChatDetailView: View {
                     autoReplyEnabled.toggle()
                 } label: {
                     Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .foregroundColor(autoReplyEnabled ? .accentColor : .gray)
+                        .foregroundColor(autoReplyEnabled ? chat.theme.outboundBackgroundColor : .primary.opacity(0.3))
                 }
             }
         }
