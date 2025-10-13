@@ -423,9 +423,17 @@ private struct MessageBubblePreviewContainer: View {
         )
     }
 
-    private var talkingMessage: Message {
+    private var talkingMessageShort: Message {
         Message(
             text: "How are you?",
+            user: sampleUser,
+            bubbleMode: .talking
+        )
+    }
+    
+    private var talkingMessageLong: Message {
+        Message(
+            text: "How are you? It's been so very long! We should catch up in person soon!",
             user: sampleUser,
             bubbleMode: .talking
         )
@@ -434,7 +442,7 @@ private struct MessageBubblePreviewContainer: View {
     var body: some View {
         VStack(spacing: 24) {
             MessageBubbleView(
-                message: isThinking ? thinkingMessage : talkingMessage,
+                message: isThinking ? thinkingMessage : talkingMessageShort,
                 showTail: true,
                 isNew: false,
                 inputFieldFrame: .zero,
@@ -445,7 +453,20 @@ private struct MessageBubblePreviewContainer: View {
                 visibleMessageIndex: 0,
                 theme: .defaultTheme
             )
-            .padding(.horizontal, 20)
+            
+            MessageBubbleView(
+                message: isThinking ? thinkingMessage : talkingMessageLong,
+                showTail: true,
+                isNew: false,
+                inputFieldFrame: .zero,
+                scrollViewFrame: .zero,
+                newMessageId: $newMessageId,
+                scrollVelocity: 0,
+                scrollPhase: .idle,
+                visibleMessageIndex: 0,
+                theme: .defaultTheme
+            )
+            .frame(height: 200)
 
             Button(isThinking ? "Switch to talking" : "Switch to thinking") {
                 withAnimation(.easeInOut(duration: 0.4)) {
