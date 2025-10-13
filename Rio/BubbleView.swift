@@ -39,10 +39,10 @@ struct BubbleView: View {
 
     /// Duration used for circle size interpolation.
     private let circleTransitionDuration: TimeInterval = 0.3
-    static let morphDuration: TimeInterval = 0.4
-    static let resizeDuration: TimeInterval = 0.55
+    static let morphDuration: TimeInterval = 0.2
+    static let resizeDuration: TimeInterval = 1
     /// External callers coordinate text reveals with this delay to match the morph.
-    static let textRevealDelay: TimeInterval = (morphDuration + resizeDuration) * 0.5
+    static let textRevealDelay: TimeInterval = (morphDuration + resizeDuration) * 0.25
 
     // MARK: - Animation State
 
@@ -187,8 +187,8 @@ struct BubbleView: View {
         var initialVelocity: CGSize  // Initial velocity in points per second
 
         // Spring parameters
-        static let dampingRatio: CGFloat = 0.7  // 0.7 gives a nice bounce (< 1 = underdamped/bouncy, 1 = critically damped, > 1 = overdamped)
-        static let response: CGFloat = 0.35     // Response time in seconds (how quickly it settles)
+        static let dampingRatio: CGFloat = 0.6  // 0.7 gives a nice bounce (< 1 = underdamped/bouncy, 1 = critically damped, > 1 = overdamped)
+        static let response: CGFloat = 0.24     // Response time in seconds (how quickly it settles)
 
         func value(at date: Date, duration: TimeInterval) -> CGSize {
             guard duration > 0 else { return endSize }
@@ -754,7 +754,7 @@ struct BubbleView: View {
                 .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
                 .foregroundStyle(color)
                 .opacity(showTail ? 1 : 0)
-                .animation(.spring(duration: 0.3).delay(0.3), value: mode)
+                .animation(.spring(duration: 0.3).delay(0.2), value: mode)
             
             // Thinking bubble tail
             Circle()
