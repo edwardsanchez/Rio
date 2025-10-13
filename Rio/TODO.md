@@ -2,6 +2,7 @@
 
 [ ] Test transition from thinking to large bubble
 [ ] Fix bubble losing tail when it's before the date header
+[ ] Fix animation for outbound messages so they come from input field
 
 [ ] Ability to view photo as message
 [ ] Ability to view multiple photos - likely a caroussel
