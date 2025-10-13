@@ -1,9 +1,13 @@
 #  TODO
 
+---
+
+### Bugs
 [ ] Test transition from thinking to large bubble
 [ ] Fix bubble losing tail when it's before the date header
 [ ] Fix animation for outbound messages so they come from input field
 
+### New Features
 [ ] Ability to view photo as message
 [ ] Ability to view multiple photos - likely a caroussel
 [ ] Ability to send just emoji, without the bubble wrapper
@@ -16,7 +20,7 @@
 [ ] Ability to copy message content
 [ ] Ability to edit message
 
-
+### Long Term
 [ ] Ability to create new bots
 [ ] Ability to browse existing bot catalog
 
