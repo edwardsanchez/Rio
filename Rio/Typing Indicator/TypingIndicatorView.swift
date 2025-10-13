@@ -48,6 +48,7 @@ struct TypingIndicatorView: View {
         .frame(height: height)
         .onAppear {
             isAnimating = true
+            shown = isVisible
         }
         .onChange(of: isVisible) { oldValue, newValue in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
