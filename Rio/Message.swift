@@ -107,6 +107,9 @@ struct MessageBubbleView: View {
         .frame(maxWidth: .infinity, alignment: frameAlignment)
         .offset(x: xOffset, y: rowYOffset + parallaxOffset)
         .animation(.interactiveSpring, value: parallaxOffset)
+        .animation(.smooth(duration: 0.4), value: rowYOffset)
+        .animation(.smooth(duration: 0.4), value: bubbleOpacity)
+        .animation(.smooth(duration: 0.4), value: inboundAvatarOpacity)
         .onAppear {
             if isNew {
                 withAnimation(.smooth(duration: 0.5)) {
@@ -137,7 +140,7 @@ struct MessageBubbleView: View {
 
         switch message.messageType {
         case .inbound:
-            return 0
+            return 20  // Slide up from 20px below final position
         case .outbound:
             return calculateYOffset()
         }
