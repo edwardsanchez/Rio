@@ -47,6 +47,7 @@ struct MessageBubbleView: View {
     @State private var isWidthLocked = false
     @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
     @State private var revealWorkItem: DispatchWorkItem? = nil
+    @State private var includeTalkingTextInLayout = false
 
     init(
         message: Message,
@@ -265,7 +266,7 @@ struct MessageBubbleView: View {
             Text("H") //Measure Spacer
                 .opacity(0)
 
-            if hasText {
+            if hasText && includeTalkingTextInLayout {
                 Text(message.text)
                     .foregroundStyle(textColor)
                     .fixedSize(horizontal: false, vertical: true)
@@ -312,10 +313,12 @@ struct MessageBubbleView: View {
             isWidthLocked = true
             showTypingIndicatorContent = true
             showTalkingContent = false
+            includeTalkingTextInLayout = false
         case .talking:
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = !message.text.isEmpty
+            includeTalkingTextInLayout = !message.text.isEmpty
         }
     }
 
@@ -336,6 +339,7 @@ struct MessageBubbleView: View {
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = false
+            includeTalkingTextInLayout = false
             return
         }
 
@@ -348,7 +352,9 @@ struct MessageBubbleView: View {
         }
 
         showTalkingContent = false
+        includeTalkingTextInLayout = false
 
+        scheduleTextLayoutInclusion()
         scheduleWidthUnlock()
         scheduleTalkingReveal()
     }
@@ -356,8 +362,16 @@ struct MessageBubbleView: View {
     private func startThinkingState() {
         isWidthLocked = true
         showTalkingContent = false
+        includeTalkingTextInLayout = false
         withAnimation(.easeInOut(duration: 0.2)) {
             showTypingIndicatorContent = true
+        }
+    }
+
+    private func scheduleTextLayoutInclusion() {
+        // Include text in layout after morph phase, so it affects height during resize phase
+        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.morphDuration) {
+            includeTalkingTextInLayout = true
         }
     }
 
