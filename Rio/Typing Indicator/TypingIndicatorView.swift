@@ -18,7 +18,7 @@ struct TypingIndicatorView: View {
     var body: some View {
         ZStack {
             if shown {
-                Text("Heigh")
+                Text("H")
                     .onGeometryChange(for: CGFloat.self) { proxy in
                         proxy.size.height
                     } action: { newHeight in
@@ -40,7 +40,7 @@ struct TypingIndicatorView: View {
                             )
                             .scaleEffect(isVisible ? 1 : 0)
                             .opacity(isVisible ? 1 : 0)
-                            .animation(.easeIn(duration: 0.05).delay(CGFloat(index - 1) * 0.1), value: isVisible)
+                            .animation(.easeIn(duration: 0.05).delay(CGFloat(index - 1) * 0.1), value: isAnimating)
                     }
                 }
             }
@@ -48,7 +48,6 @@ struct TypingIndicatorView: View {
         .frame(height: height)
         .onAppear {
             isAnimating = true
-            shown = isVisible
         }
         .onChange(of: isVisible) { oldValue, newValue in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
