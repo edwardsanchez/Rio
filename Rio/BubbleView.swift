@@ -40,9 +40,11 @@ struct BubbleView: View {
     /// Duration used for circle size interpolation.
     private let circleTransitionDuration: TimeInterval = 0.3
     static let morphDuration: TimeInterval = 0.2
-    static let resizeDuration: TimeInterval = 1
+    /// Maximum duration for the spring-based resize animation before it's cut off.
+    /// The actual spring physics uses a response time of 0.55s, but this cutoff creates a snappier animation.
+    static let resizeCutoffDuration: TimeInterval = 1
     /// External callers coordinate text reveals with this delay to match the morph.
-    static let textRevealDelay: TimeInterval = (morphDuration + resizeDuration) * 0.25
+    static let textRevealDelay: TimeInterval = (morphDuration + resizeCutoffDuration) * 0.25
 
     // MARK: - Animation State
 
@@ -501,12 +503,12 @@ struct BubbleView: View {
     /// Applies the requested rectangle size immediately, capturing the current velocity to avoid pops.
     private func applyRectangleSize(_ size: CGSize) {
         let now = Date()
-        let currentSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
+        let currentSize = rectangleTransition.value(at: now, duration: Self.resizeCutoffDuration)
 
         // Calculate current velocity based on the spring animation
         // This gives continuity when interrupting an ongoing animation
         let dt: CGFloat = 0.016  // ~1 frame at 60fps
-        let futureSize = rectangleTransition.value(at: now.addingTimeInterval(dt), duration: Self.resizeDuration)
+        let futureSize = rectangleTransition.value(at: now.addingTimeInterval(dt), duration: Self.resizeCutoffDuration)
         let currentVelocity = CGSize(
             width: (futureSize.width - currentSize.width) / dt,
             height: (futureSize.height - currentSize.height) / dt
@@ -555,7 +557,7 @@ struct BubbleView: View {
         return TimelineView(.animation) { timeline in
             let now = timeline.date
             let elapsed = now.timeIntervalSince(startTime)
-            let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeDuration)
+            let animatedSize = rectangleTransition.value(at: now, duration: Self.resizeCutoffDuration)
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)

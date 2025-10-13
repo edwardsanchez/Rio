@@ -377,7 +377,7 @@ struct MessageBubbleView: View {
 
     private func scheduleWidthUnlock() {
         let unlockItem = DispatchWorkItem {
-            withAnimation(.easeInOut(duration: BubbleView.resizeDuration)) {
+            withAnimation(.easeInOut(duration: BubbleView.resizeCutoffDuration)) {
                 isWidthLocked = false
             }
         }
