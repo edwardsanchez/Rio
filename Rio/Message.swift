@@ -481,6 +481,7 @@ private struct MessageBubblePreviewContainer: View {
                 theme: .defaultTheme
             )
             .frame(height: 200)
+            .hidden()
 
             Button(isThinking ? "Switch to talking" : "Switch to thinking") {
                 withAnimation(.easeInOut(duration: 0.4)) {
@@ -488,6 +489,7 @@ private struct MessageBubblePreviewContainer: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            .padding(.top, 50)
         }
         .padding()
     }
