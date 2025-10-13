@@ -467,3 +467,44 @@ private struct MessageBubblePreviewContainer: View {
 #Preview("Message Bubble Morph") {
     MessageBubblePreviewContainer()
 }
+
+#Preview("Message States") {
+    VStack(spacing: 20) {
+        // 1. Inbound thinking
+        MessageBubbleView(
+            message: Message(
+                text: "",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                isTypingIndicator: true,
+                bubbleMode: .thinking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+
+        // 2. Inbound talking
+        MessageBubbleView(
+            message: Message(
+                text: "Hey! How's it going?",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                bubbleMode: .talking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+
+        // 3. Outbound talking
+        MessageBubbleView(
+            message: Message(
+                text: "Great! Just working on some code.",
+                user: User(id: UUID(), name: "Edward", avatar: .edward),
+                bubbleMode: .talking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+    }
+    .padding(.horizontal, 20)
+    .padding(.vertical, 40)
+    .background(Color.base)
+}
