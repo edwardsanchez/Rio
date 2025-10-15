@@ -19,7 +19,7 @@ struct ShaderTestView: View {
     @State private var sliderValue: Double = 0.0
     @State private var bubbleSize: CGSize = .zero
     @State private var explosionCenterX: CGFloat = 0.88  // 0.0 = left, 1.0 = right
-    @State private var explosionCenterY: CGFloat = 0.26  // 0.0 = top, 1.0 = bottom
+    @State private var explosionCenterY: CGFloat = 0.57  // 0.0 = top, 1.0 = bottom
     @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
     
     private let outboundAnimationWidth: CGFloat? = nil
