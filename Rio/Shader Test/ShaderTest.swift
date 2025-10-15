@@ -20,6 +20,7 @@ struct ShaderTestView: View {
     @State private var bubbleSize: CGSize = .zero
     @State private var explosionCenterX: CGFloat = 0.88  // 0.0 = left, 1.0 = right
     @State private var explosionCenterY: CGFloat = 0.26  // 0.0 = top, 1.0 = bottom
+    @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -54,11 +55,12 @@ struct ShaderTestView: View {
                     .float(currentPixelSize),
                     .float2(bubbleSize),
                     .float(currentExplosionAmount),
-                    .float2(explosionCenterX, explosionCenterY)
+                    .float2(explosionCenterX, explosionCenterY),
+                    .float(speedVariance)
                 ),
                 maxSampleOffset: CGSize(
-                    width: bubbleSize.width * currentExplosionAmount,
-                    height: bubbleSize.height * currentExplosionAmount
+                    width: bubbleSize.width * currentExplosionAmount * (1.0 + speedVariance),
+                    height: bubbleSize.height * currentExplosionAmount * (1.0 + speedVariance)
                 )
             )
             .scaleEffect(2)
@@ -105,6 +107,15 @@ struct ShaderTestView: View {
                         .foregroundStyle(.secondary)
                     
                     Slider(value: $explosionCenterY, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Speed Variance: \(String(format: "%.2f", speedVariance))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $speedVariance, in: 0...1)
                 }
                 .padding(.horizontal)
             }

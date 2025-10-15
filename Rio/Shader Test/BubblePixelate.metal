@@ -16,7 +16,8 @@ using namespace metal;
     float pixelSize,
     float2 layerSize,
     float explosionSpacing,
-    float2 explosionCenter
+    float2 explosionCenter,
+    float speedVariance
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
@@ -30,7 +31,6 @@ using namespace metal;
     // Reverse the spacing to find the original position
     float2 originalPosition = position;
     if (distanceFromCenter > 0.001 && explosionSpacing > 0.001) {
-        float2 direction = offsetFromCenter / distanceFromCenter;
         // Move back toward center by the explosion spacing amount
         originalPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
     }
@@ -39,6 +39,15 @@ using namespace metal;
     float2 blockPosition = floor(originalPosition / pixelSize) * pixelSize;
     float2 originalBlockCenter = blockPosition + (pixelSize * 0.5);
     
+    // Generate deterministic random value for this particle based on its block position
+    // Simple hash function to get a pseudo-random value between 0 and 1
+    float particleSeed = fract(sin(dot(originalBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+    
+    // Calculate speed multiplier: ranges from (1.0 - speedVariance) to (1.0 + speedVariance)
+    // speedVariance of 0.0 = no variance (all particles move at same speed)
+    // speedVariance of 0.5 = particles can be 50% slower or 50% faster
+    float speedMultiplier = 1.0 + (particleSeed * 2.0 - 1.0) * speedVariance;
+    
     // Step 2: Calculate where this block center moves to with explosion
     float2 blockOffsetFromCenter = originalBlockCenter - layerCenter;
     float blockDistanceFromCenter = length(blockOffsetFromCenter);
@@ -46,8 +55,8 @@ using namespace metal;
     float2 explodedBlockCenter = originalBlockCenter;
     if (blockDistanceFromCenter > 0.001 && explosionSpacing > 0.001) {
         float2 blockDirection = blockOffsetFromCenter / blockDistanceFromCenter;
-        // Move block center away from layer center
-        explodedBlockCenter = originalBlockCenter + (blockDirection * blockDistanceFromCenter * explosionSpacing);
+        // Move block center away from layer center, applying speed variance
+        explodedBlockCenter = originalBlockCenter + (blockDirection * blockDistanceFromCenter * explosionSpacing * speedMultiplier);
     }
     
     // Step 3: Sample color from the original block center
