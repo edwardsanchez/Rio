@@ -59,8 +59,8 @@ struct ShaderTestView: View {
                     .float(speedVariance)
                 ),
                 maxSampleOffset: CGSize(
-                    width: bubbleSize.width * currentExplosionAmount * (1.0 + speedVariance),
-                    height: bubbleSize.height * currentExplosionAmount * (1.0 + speedVariance)
+                    width: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.0,
+                    height: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.0
                 )
             )
             .scaleEffect(2)

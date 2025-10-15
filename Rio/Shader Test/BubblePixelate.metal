@@ -22,44 +22,60 @@ using namespace metal;
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
     
-    // Step 1: Find which block this pixel would belong to in the ORIGINAL (non-exploded) layout
-    // We need to reverse-map: where would this pixel come from if particles are spaced out?
-    
     float2 offsetFromCenter = position - layerCenter;
     float distanceFromCenter = length(offsetFromCenter);
     
-    // Reverse the spacing to find the original position
-    float2 originalPosition = position;
+    // Make an initial guess for the original position
+    float2 guessPosition = position;
     if (distanceFromCenter > 0.001 && explosionSpacing > 0.001) {
-        // Move back toward center by the explosion spacing amount
-        originalPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
+        guessPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
     }
     
-    // Find which block the original position belongs to
-    float2 blockPosition = floor(originalPosition / pixelSize) * pixelSize;
-    float2 originalBlockCenter = blockPosition + (pixelSize * 0.5);
+    // Find the approximate block
+    float2 guessBlockPos = floor(guessPosition / pixelSize) * pixelSize;
+    float2 guessBlockCenter = guessBlockPos + (pixelSize * 0.5);
     
-    // Generate deterministic random value for this particle based on its block position
-    // Simple hash function to get a pseudo-random value between 0 and 1
-    float particleSeed = fract(sin(dot(originalBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+    // Search in a 3x3 grid around the guessed block to find the closest exploded particle
+    float closestDistance = 999999.0;
+    float2 closestOriginalCenter = guessBlockCenter;
+    float2 closestExplodedCenter = guessBlockCenter;
+    half4 closestColor = half4(0.0);
     
-    // Calculate speed multiplier: ranges from (1.0 - speedVariance) to (1.0 + speedVariance)
-    // speedVariance of 0.0 = no variance (all particles move at same speed)
-    // speedVariance of 0.5 = particles can be 50% slower or 50% faster
-    float speedMultiplier = 1.0 + (particleSeed * 2.0 - 1.0) * speedVariance;
-    
-    // Step 2: Calculate where this block center moves to with explosion
-    float2 blockOffsetFromCenter = originalBlockCenter - layerCenter;
-    float blockDistanceFromCenter = length(blockOffsetFromCenter);
-    
-    float2 explodedBlockCenter = originalBlockCenter;
-    if (blockDistanceFromCenter > 0.001 && explosionSpacing > 0.001) {
-        float2 blockDirection = blockOffsetFromCenter / blockDistanceFromCenter;
-        // Move block center away from layer center, applying speed variance
-        explodedBlockCenter = originalBlockCenter + (blockDirection * blockDistanceFromCenter * explosionSpacing * speedMultiplier);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            // Calculate the original block center for this neighbor
+            float2 testBlockCenter = guessBlockCenter + float2(float(dx) * pixelSize, float(dy) * pixelSize);
+            
+            // Get speed multiplier for this particle
+            float testSeed = fract(sin(dot(testBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+            float testSpeedMult = 1.0 + (testSeed * 2.0 - 1.0) * speedVariance;
+            
+            // Calculate where this particle explodes to
+            float2 testOffset = testBlockCenter - layerCenter;
+            float testDistance = length(testOffset);
+            
+            float2 testExplodedCenter = testBlockCenter;
+            if (testDistance > 0.001 && explosionSpacing > 0.001) {
+                float2 testDirection = testOffset / testDistance;
+                testExplodedCenter = testBlockCenter + (testDirection * testDistance * explosionSpacing * testSpeedMult);
+            }
+            
+            // Check distance from current position to this exploded particle
+            float dist = length(position - testExplodedCenter);
+            
+            if (dist < closestDistance) {
+                closestDistance = dist;
+                closestOriginalCenter = testBlockCenter;
+                closestExplodedCenter = testExplodedCenter;
+            }
+        }
     }
     
-    // Step 3: Sample color from the original block center
+    // Use the closest particle
+    float2 originalBlockCenter = closestOriginalCenter;
+    float2 explodedBlockCenter = closestExplodedCenter;
+    
+    // Sample color from the original block center
     half4 color = layer.sample(originalBlockCenter);
     
     // Step 4: Check if current pixel is within the circle at the EXPLODED position
