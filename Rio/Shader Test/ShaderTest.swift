@@ -15,12 +15,15 @@ struct ShaderTestView: View {
     @State private var includeTalkingTextInLayout = false
     @State private var thinkingContentWidth: CGFloat = 0
     @State private var isWidthLocked = false
-    @State private var isPixelated = false
     @State private var animatedPixelSize: CGFloat = 0.1
     @State private var sliderValue: Double = 0.0
+    @State private var bubbleSize: CGSize = .zero
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
+    
+    // Controllable parameters
+    private let maxExplosionSpread: CGFloat = 1.0  // How much spacing increases between particles
     
     init(message: Message? = nil, showTail: Bool = true) {
         let defaultMessage = Message(
@@ -39,18 +42,29 @@ struct ShaderTestView: View {
                 textColor: .white,
                 backgroundColor: .gray
             )
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                bubbleSize = newSize
+            }
             .layerEffect(
-                ShaderLibrary.pixelate(.float(animatedPixelSize)),
-                maxSampleOffset: .zero
+                ShaderLibrary.pixelate(
+                    .float(currentPixelSize),
+                    .float2(bubbleSize),
+                    .float(currentExplosionAmount)
+                ),
+                maxSampleOffset: CGSize(
+                    width: bubbleSize.width * currentExplosionAmount,
+                    height: bubbleSize.height * currentExplosionAmount
+                )
             )
             .scaleEffect(2)
             .padding(.bottom, 60)
             
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
-                    Button("Pixelate") {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            animatedPixelSize = 2.0
+                    Button("Explode") {
+                        withAnimation(.easeInOut(duration: 1.05)) {
                             sliderValue = 1.0
                         }
                     }
@@ -58,7 +72,6 @@ struct ShaderTestView: View {
                     
                     Button("Reset") {
                         withAnimation(.easeInOut(duration: 1.0)) {
-                            animatedPixelSize = 0.1
                             sliderValue = 0.0
                         }
                     }
@@ -66,19 +79,38 @@ struct ShaderTestView: View {
                 }
                 
                 VStack(spacing: 8) {
-                    Text("Transition: \(String(format: "%.2f", sliderValue))")
+                    Text("Animation: \(String(format: "%.2f", sliderValue))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     
                     Slider(value: $sliderValue, in: 0...1)
-                        .onChange(of: sliderValue) { _, newValue in
-                            // Map 0...1 to 0.1...2.0
-                            animatedPixelSize = 0.1 + (newValue * 1.9)
-                        }
                 }
                 .padding(.horizontal)
             }
         }
+    }
+    
+    // Computed values based on slider position
+    private var currentPixelSize: CGFloat {
+        // 0.0 - 0.05: transition from 0.1 to 2.0 (pixelate + form circles)
+        let circleFormationEnd: Double = 0.05
+        if sliderValue <= circleFormationEnd {
+            let progress = sliderValue / circleFormationEnd
+            return 0.1 + (progress * 1.9)
+        }
+        // After circle formation: stay at 2.0 (don't scale particles)
+        return 2.0
+    }
+    
+    private var currentExplosionAmount: CGFloat {
+        let circleFormationEnd: Double = 0.05
+        // 0.0 - 0.05: no explosion (forming circles)
+        if sliderValue <= circleFormationEnd {
+            return 0.0
+        }
+        // 0.05 - 1.0: particles space out from center
+        let explosionProgress = (sliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
+        return CGFloat(explosionProgress) * maxExplosionSpread
     }
     
     @ViewBuilder
