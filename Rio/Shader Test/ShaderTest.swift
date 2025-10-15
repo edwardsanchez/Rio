@@ -15,6 +15,7 @@ struct ShaderTestView: View {
     @State private var includeTalkingTextInLayout = false
     @State private var thinkingContentWidth: CGFloat = 0
     @State private var isWidthLocked = false
+    @State private var isPixelated = false
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -31,10 +32,28 @@ struct ShaderTestView: View {
     }
     
     var body: some View {
-        bubbleView(
-            textColor: .white,
-            backgroundColor: .gray
-        )
+        VStack(spacing: 20) {
+            bubbleView(
+                textColor: .white,
+                backgroundColor: .gray
+            )
+            .layerEffect(
+                ShaderLibrary.pixelate(.float(isPixelated ? 2.0 : 0.1)),
+                maxSampleOffset: .zero
+            )
+            
+            HStack(spacing: 16) {
+                Button("Pixelate") {
+                    isPixelated = true
+                }
+                .buttonStyle(.borderedProminent)
+                
+                Button("Reset") {
+                    isPixelated = false
+                }
+                .buttonStyle(.bordered)
+            }
+        }
     }
     
     @ViewBuilder
