@@ -17,6 +17,7 @@ struct ShaderTestView: View {
     @State private var isWidthLocked = false
     @State private var isPixelated = false
     @State private var animatedPixelSize: CGFloat = 0.1
+    @State private var sliderValue: Double = 0.0
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -45,20 +46,37 @@ struct ShaderTestView: View {
             .scaleEffect(2)
             .padding(.bottom, 60)
             
-            HStack(spacing: 16) {
-                Button("Pixelate") {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        animatedPixelSize = 2.0
+            VStack(spacing: 16) {
+                HStack(spacing: 16) {
+                    Button("Pixelate") {
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            animatedPixelSize = 2.0
+                            sliderValue = 1.0
+                        }
                     }
+                    .buttonStyle(.borderedProminent)
+                    
+                    Button("Reset") {
+                        withAnimation(.easeInOut(duration: 1.0)) {
+                            animatedPixelSize = 0.1
+                            sliderValue = 0.0
+                        }
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.borderedProminent)
                 
-                Button("Reset") {
-                    withAnimation(.easeInOut(duration: 1.0)) {
-                        animatedPixelSize = 0.1
-                    }
+                VStack(spacing: 8) {
+                    Text("Transition: \(String(format: "%.2f", sliderValue))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $sliderValue, in: 0...1)
+                        .onChange(of: sliderValue) { _, newValue in
+                            // Map 0...1 to 0.1...2.0
+                            animatedPixelSize = 0.1 + (newValue * 1.9)
+                        }
                 }
-                .buttonStyle(.bordered)
+                .padding(.horizontal)
             }
         }
     }
