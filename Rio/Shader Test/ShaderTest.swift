@@ -23,6 +23,8 @@ struct ShaderTestView: View {
     @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
     @State private var gravity: CGFloat = 1.0  // 0.0 = no gravity, 1.0 = max gravity
     @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
+    @State private var growth: CGFloat = 0.65  // 0.0 = no growth, 1.0 = double size
+    @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -60,12 +62,11 @@ struct ShaderTestView: View {
                     .float2(explosionCenterX, explosionCenterY),
                     .float(speedVariance),
                     .float(gravity),
-                    .float(turbulence)
+                    .float(turbulence),
+                    .float(growth),
+                    .float(growthVariance)
                 ),
-                maxSampleOffset: CGSize(
-                    width: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.0 * (1.0 + turbulence),
-                    height: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.5 * (1.0 + turbulence)
-                )
+                maxSampleOffset: maxSampleOffsetSize
             )
             .scaleEffect(2)
             .padding(.bottom, 60)
@@ -140,6 +141,24 @@ struct ShaderTestView: View {
                     Slider(value: $turbulence, in: 0...1)
                 }
                 .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Growth: \(String(format: "%.2f", growth))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $growth, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Growth Variance: \(String(format: "%.2f", growthVariance))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $growthVariance, in: 0...1)
+                }
+                .padding(.horizontal)
             }
         }
     }
@@ -165,6 +184,19 @@ struct ShaderTestView: View {
         // 0.05 - 1.0: particles space out from center
         let explosionProgress = (sliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
         return CGFloat(explosionProgress) * maxExplosionSpread
+    }
+    
+    private var maxSampleOffsetSize: CGSize {
+        let maxDimension = max(bubbleSize.width, bubbleSize.height)
+        let baseOffset = maxDimension * currentExplosionAmount
+        let speedFactor = 1.0 + speedVariance
+        let turbulenceFactor = 1.0 + turbulence
+        let growthFactor = 1.0 + growth * (1.0 + growthVariance)
+        
+        let widthOffset = baseOffset * speedFactor * 2.0 * turbulenceFactor * growthFactor
+        let heightOffset = baseOffset * speedFactor * 2.5 * turbulenceFactor * growthFactor
+        
+        return CGSize(width: widthOffset, height: heightOffset)
     }
     
     @ViewBuilder

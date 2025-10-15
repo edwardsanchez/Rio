@@ -47,7 +47,9 @@ float2 turbulence2D(float2 p, float time) {
     float2 explosionCenter,
     float speedVariance,
     float gravity,
-    float turbulence
+    float turbulence,
+    float growth,
+    float growthVariance
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
@@ -108,6 +110,17 @@ float2 turbulence2D(float2 p, float time) {
     float seed = fract(sin(dot(seedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
     float speedMult = 1.0 + (seed * 2.0 - 1.0) * speedVariance;
     
+    // Calculate growth multiplier for this particle
+    // Use a different seed offset for growth to get independent variation
+    float growthSeed = fract(sin(dot(seedBlockCenter, float2(73.156, 41.923))) * 37281.6547);
+    // Base growth increases with explosion progress
+    float baseGrowth = 1.0 + (growth * explosionSpacing);
+    // Apply variance: starts minimal, increases with explosion progress
+    // Variance effect scales with explosionSpacing so it's subtle at first
+    float varianceAmount = growthVariance * explosionSpacing;
+    float growthVariation = 1.0 + (growthSeed * 2.0 - 1.0) * varianceAmount;
+    float growthMult = baseGrowth * growthVariation;
+    
     // Compute exploded center for this specific block
     float2 blockOffset = originalBlockCenter - layerCenter;
     float blockDistance = length(blockOffset);
@@ -146,8 +159,9 @@ float2 turbulence2D(float2 p, float time) {
     // Calculate blend factor: 0 = square, 1 = circle
     float blendFactor = smoothstep(0.1, 2.0, pixelSize);
     
-    // Circle radius is half the block size
-    float radius = pixelSize * 0.5;
+    // Circle radius is half the block size, scaled by growth
+    float baseRadius = pixelSize * 0.5;
+    float radius = baseRadius * growthMult;
     
     // Antialiased circle edge using screen-space derivative
     float edge = radius - distanceFromExplodedCenter;
