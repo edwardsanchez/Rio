@@ -8,6 +8,8 @@
 [ ] Fix animation for outbound messages so they come from input field
 
 ### New Features
+[ ] Add "read" status
+[ ] Add transitions from nothing to read, read to thinking, thinking to read, read to talking, etc.
 [ ] Ability to view photo as message
 [ ] Ability to view multiple photos - likely a caroussel
 [ ] Ability to send just emoji, without the bubble wrapper
@@ -19,6 +21,8 @@
 [ ] Ability to unsend messages
 [ ] Ability to copy message content
 [ ] Ability to edit message
+[ ] Ability to see time stamp on message
+[ ] ability to see how has read the message
 
 ### Long Term
 [ ] Ability to create new bots
