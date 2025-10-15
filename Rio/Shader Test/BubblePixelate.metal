@@ -17,7 +17,8 @@ using namespace metal;
     float2 layerSize,
     float explosionSpacing,
     float2 explosionCenter,
-    float speedVariance
+    float speedVariance,
+    float gravity
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
@@ -25,15 +26,15 @@ using namespace metal;
     float2 offsetFromCenter = position - layerCenter;
     float distanceFromCenter = length(offsetFromCenter);
     
-    // Iterative inverse mapping with speed variance convergence
+    // Iterative inverse mapping with speed variance and gravity convergence
     // Start with a guess, compute its speed variance, refine the inverse
     float2 invPosition = position;
     if (distanceFromCenter > 0.001 && explosionSpacing > 0.001) {
-        // Initial guess ignoring variance
+        // Initial guess ignoring variance and gravity
         invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
         
-        // Refine with 2 iterations to account for speed variance
-        for (int iter = 0; iter < 2; iter++) {
+        // Refine with 3 iterations to account for speed variance and gravity
+        for (int iter = 0; iter < 3; iter++) {
             float2 guessBlockPos = floor(invPosition / pixelSize) * pixelSize;
             float2 guessBlockCenter = guessBlockPos + (pixelSize * 0.5);
             
@@ -42,8 +43,16 @@ using namespace metal;
             float guessSeed = fract(sin(dot(seedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
             float guessSpeedMult = 1.0 + (guessSeed * 2.0 - 1.0) * speedVariance;
             
-            // Refine inverse using this block's actual speed
-            invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing * guessSpeedMult));
+            // Calculate expected gravity offset for this block
+            float2 guessOffset = guessBlockCenter - layerCenter;
+            float guessDistance = length(guessOffset);
+            float guessGravityOffset = explosionSpacing * guessDistance * gravity * 0.8;
+            
+            // Refine inverse by removing both explosion and gravity effects
+            float2 positionWithoutGravity = position;
+            positionWithoutGravity.y -= guessGravityOffset;
+            float2 offsetWithoutGravity = positionWithoutGravity - layerCenter;
+            invPosition = layerCenter + (offsetWithoutGravity / (1.0 + explosionSpacing * guessSpeedMult));
         }
     }
     
@@ -67,6 +76,12 @@ using namespace metal;
     if (blockDistance > 0.001 && explosionSpacing > 0.001) {
         float2 blockDir = blockOffset / blockDistance;
         explodedBlockCenter = originalBlockCenter + (blockDir * blockDistance * explosionSpacing * speedMult);
+        
+        // Apply gravity effect - particles that travel further fall more
+        // Gravity increases with distance traveled (flight time)
+        // explosionSpacing acts as "time" in the animation
+        float gravityFall = explosionSpacing * blockDistance * gravity * 0.8;
+        explodedBlockCenter.y += gravityFall;
     }
     
     // Sample color from the original block center
