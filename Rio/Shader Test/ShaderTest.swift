@@ -22,6 +22,7 @@ struct ShaderTestView: View {
     @State private var explosionCenterY: CGFloat = 0.57  // 0.0 = top, 1.0 = bottom
     @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
     @State private var gravity: CGFloat = 1.0  // 0.0 = no gravity, 1.0 = max gravity
+    @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -58,11 +59,12 @@ struct ShaderTestView: View {
                     .float(currentExplosionAmount),
                     .float2(explosionCenterX, explosionCenterY),
                     .float(speedVariance),
-                    .float(gravity)
+                    .float(gravity),
+                    .float(turbulence)
                 ),
                 maxSampleOffset: CGSize(
-                    width: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.0,
-                    height: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.5
+                    width: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.0 * (1.0 + turbulence),
+                    height: max(bubbleSize.width, bubbleSize.height) * currentExplosionAmount * (1.0 + speedVariance) * 2.5 * (1.0 + turbulence)
                 )
             )
             .scaleEffect(2)
@@ -71,7 +73,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.easeInOut(duration: 1.05)) {
+                        withAnimation(.snappy(duration: 0.5)) {
                             sliderValue = 1.0
                         }
                     }
@@ -127,6 +129,15 @@ struct ShaderTestView: View {
                         .foregroundStyle(.secondary)
                     
                     Slider(value: $gravity, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Turbulence: \(String(format: "%.2f", turbulence))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $turbulence, in: 0...1)
                 }
                 .padding(.horizontal)
             }
