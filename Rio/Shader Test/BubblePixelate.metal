@@ -25,55 +25,49 @@ using namespace metal;
     float2 offsetFromCenter = position - layerCenter;
     float distanceFromCenter = length(offsetFromCenter);
     
-    // Make an initial guess for the original position
-    float2 guessPosition = position;
+    // Iterative inverse mapping with speed variance convergence
+    // Start with a guess, compute its speed variance, refine the inverse
+    float2 invPosition = position;
     if (distanceFromCenter > 0.001 && explosionSpacing > 0.001) {
-        guessPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
-    }
-    
-    // Find the approximate block
-    float2 guessBlockPos = floor(guessPosition / pixelSize) * pixelSize;
-    float2 guessBlockCenter = guessBlockPos + (pixelSize * 0.5);
-    
-    // Search in a 3x3 grid around the guessed block to find the closest exploded particle
-    float closestDistance = 999999.0;
-    float2 closestOriginalCenter = guessBlockCenter;
-    float2 closestExplodedCenter = guessBlockCenter;
-    half4 closestColor = half4(0.0);
-    
-    for (int dy = -1; dy <= 1; dy++) {
-        for (int dx = -1; dx <= 1; dx++) {
-            // Calculate the original block center for this neighbor
-            float2 testBlockCenter = guessBlockCenter + float2(float(dx) * pixelSize, float(dy) * pixelSize);
+        // Initial guess ignoring variance
+        invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
+        
+        // Refine with 2 iterations to account for speed variance
+        for (int iter = 0; iter < 2; iter++) {
+            float2 guessBlockPos = floor(invPosition / pixelSize) * pixelSize;
+            float2 guessBlockCenter = guessBlockPos + (pixelSize * 0.5);
             
-            // Get speed multiplier for this particle
-            float testSeed = fract(sin(dot(testBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
-            float testSpeedMult = 1.0 + (testSeed * 2.0 - 1.0) * speedVariance;
+            // Use fixed seed grid to prevent hash changes during pixelSize animation
+            float2 seedBlockCenter = floor(invPosition / 2.0) * 2.0 + 1.0;
+            float guessSeed = fract(sin(dot(seedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+            float guessSpeedMult = 1.0 + (guessSeed * 2.0 - 1.0) * speedVariance;
             
-            // Calculate where this particle explodes to
-            float2 testOffset = testBlockCenter - layerCenter;
-            float testDistance = length(testOffset);
-            
-            float2 testExplodedCenter = testBlockCenter;
-            if (testDistance > 0.001 && explosionSpacing > 0.001) {
-                float2 testDirection = testOffset / testDistance;
-                testExplodedCenter = testBlockCenter + (testDirection * testDistance * explosionSpacing * testSpeedMult);
-            }
-            
-            // Check distance from current position to this exploded particle
-            float dist = length(position - testExplodedCenter);
-            
-            if (dist < closestDistance) {
-                closestDistance = dist;
-                closestOriginalCenter = testBlockCenter;
-                closestExplodedCenter = testExplodedCenter;
-            }
+            // Refine inverse using this block's actual speed
+            invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing * guessSpeedMult));
         }
     }
     
-    // Use the closest particle
-    float2 originalBlockCenter = closestOriginalCenter;
-    float2 explodedBlockCenter = closestExplodedCenter;
+    // Determine the original block from the refined inverse-mapped position
+    float2 blockPos = floor(invPosition / pixelSize) * pixelSize;
+    float2 originalBlockCenter = blockPos + (pixelSize * 0.5);
+    
+    // Use a FIXED grid for seeding to prevent hash changes during pixelSize animation
+    const float seedPixelSize = 2.0; // Match the final pixelSize value
+    float2 seedBlockPos = floor(invPosition / seedPixelSize) * seedPixelSize;
+    float2 seedBlockCenter = seedBlockPos + (seedPixelSize * 0.5);
+    
+    // Derive the speed multiplier from the stable seed grid
+    float seed = fract(sin(dot(seedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+    float speedMult = 1.0 + (seed * 2.0 - 1.0) * speedVariance;
+    
+    // Compute exploded center for this specific block
+    float2 blockOffset = originalBlockCenter - layerCenter;
+    float blockDistance = length(blockOffset);
+    float2 explodedBlockCenter = originalBlockCenter;
+    if (blockDistance > 0.001 && explosionSpacing > 0.001) {
+        float2 blockDir = blockOffset / blockDistance;
+        explodedBlockCenter = originalBlockCenter + (blockDir * blockDistance * explosionSpacing * speedMult);
+    }
     
     // Sample color from the original block center
     half4 color = layer.sample(originalBlockCenter);
@@ -88,15 +82,14 @@ using namespace metal;
     // Circle radius is half the block size
     float radius = pixelSize * 0.5;
     
-    // For circles, check if we're inside
-    if (blendFactor > 0.01) {
-        // Apply circular masking
-        if (distanceFromExplodedCenter > radius) {
-            // Outside the circle - fade out based on blend factor
-            float alpha = 1.0 - blendFactor;
-            color.a *= alpha;
-        }
-    }
+    // Antialiased circle edge using screen-space derivative
+    float edge = radius - distanceFromExplodedCenter;
+    float aaWidth = fwidth(edge);
+    float circleCoverage = smoothstep(-aaWidth, aaWidth, edge);
+    
+    // Blend between square (1.0) and circle coverage based on blendFactor
+    float alphaBlend = mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
+    color.a *= half(alphaBlend);
     
     return color;
 }
