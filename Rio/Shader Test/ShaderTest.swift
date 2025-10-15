@@ -16,6 +16,7 @@ struct ShaderTestView: View {
     @State private var thinkingContentWidth: CGFloat = 0
     @State private var isWidthLocked = false
     @State private var isPixelated = false
+    @State private var animatedPixelSize: CGFloat = 0.1
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -38,18 +39,22 @@ struct ShaderTestView: View {
                 backgroundColor: .gray
             )
             .layerEffect(
-                ShaderLibrary.pixelate(.float(isPixelated ? 2.0 : 0.1)),
+                ShaderLibrary.pixelate(.float(animatedPixelSize)),
                 maxSampleOffset: .zero
             )
             
             HStack(spacing: 16) {
                 Button("Pixelate") {
-                    isPixelated = true
+                    withAnimation(.easeInOut(duration: 1.0)) {
+                        animatedPixelSize = 2.0
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 
                 Button("Reset") {
-                    isPixelated = false
+                    withAnimation(.easeInOut(duration: 1.0)) {
+                        animatedPixelSize = 0.1
+                    }
                 }
                 .buttonStyle(.bordered)
             }
