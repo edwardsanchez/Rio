@@ -42,10 +42,12 @@ struct ShaderTestView: View {
                 ShaderLibrary.pixelate(.float(animatedPixelSize)),
                 maxSampleOffset: .zero
             )
+            .scaleEffect(2)
+            .padding(.bottom, 60)
             
             HStack(spacing: 16) {
                 Button("Pixelate") {
-                    withAnimation(.easeInOut(duration: 1.0)) {
+                    withAnimation(.easeInOut(duration: 0.1)) {
                         animatedPixelSize = 2.0
                     }
                 }
