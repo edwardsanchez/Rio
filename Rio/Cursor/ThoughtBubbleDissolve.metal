@@ -181,8 +181,9 @@ static float2 tb_curlNoise(float2 p, float time) {
         // This makes the texture "stick" to the particle as it moves
         half4 color = layer.sample(cellCenter);
         
-        // Soft edge falloff
-        float edgeFactor = 1.0 - smoothstep(radius * 0.6, radius, dist);
+        // Circular soft edge falloff for perfect circles
+        float edgeFactor = 1.0 - smoothstep(radius * 0.7, radius, dist);
+        edgeFactor = clamp(edgeFactor, 0.0, 1.0);
         
         // Fade out over particle lifetime
         float fade = 1.0;

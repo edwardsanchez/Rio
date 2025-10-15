@@ -78,9 +78,10 @@ extension View {
             ]
         )
         
+        // Large maxSampleOffset to allow particles to travel far beyond original bounds
         let maxOffset = CGSize(
-            width: max(200, params.speed * 2),
-            height: max(200, params.speed * 2)
+            width: max(400, params.speed * 4 + params.burstStrength * 4),
+            height: max(400, params.speed * 4 + params.burstStrength * 4)
         )
         
         return self.layerEffect(shader, maxSampleOffset: maxOffset)
@@ -118,9 +119,12 @@ struct ThoughtBubbleDissolveDemo: View {
                         TimelineView(.animation) { timeline in
                             let time = timeline.date.timeIntervalSinceReferenceDate
                             
-                            Circle()
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.2), radius: 10, y: 5)
+                            VStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .padding((50))
+                            }
+//                                .shadow(color: .black.opacity(0.2), radius: 10, y: 5)
                                 .thoughtBubbleDissolve(
                                     params,
                                     time: time,
@@ -173,7 +177,7 @@ struct ThoughtBubbleDissolveDemo: View {
                             SliderRow(
                                 title: "Particle Size",
                                 value: $params.particleSize,
-                                range: 3...20,
+                                range: 0.5...20,
                                 format: "%.1f px"
                             )
                             
