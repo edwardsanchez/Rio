@@ -15,10 +15,11 @@ using namespace metal;
     SwiftUI::Layer layer,
     float pixelSize,
     float2 layerSize,
-    float explosionSpacing
+    float explosionSpacing,
+    float2 explosionCenter
 ) {
-    // Calculate the center of the layer
-    float2 layerCenter = layerSize * 0.5;
+    // Calculate the center of the explosion (as percentage of layer size)
+    float2 layerCenter = layerSize * explosionCenter;
     
     // Step 1: Find which block this pixel would belong to in the ORIGINAL (non-exploded) layout
     // We need to reverse-map: where would this pixel come from if particles are spaced out?

@@ -18,12 +18,14 @@ struct ShaderTestView: View {
     @State private var animatedPixelSize: CGFloat = 0.1
     @State private var sliderValue: Double = 0.0
     @State private var bubbleSize: CGSize = .zero
+    @State private var explosionCenterX: CGFloat = 0.88  // 0.0 = left, 1.0 = right
+    @State private var explosionCenterY: CGFloat = 0.26  // 0.0 = top, 1.0 = bottom
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
     
     // Controllable parameters
-    private let maxExplosionSpread: CGFloat = 1.0  // How much spacing increases between particles
+    private let maxExplosionSpread: CGFloat = 0.4  // How much spacing increases between particles
     
     init(message: Message? = nil, showTail: Bool = true) {
         let defaultMessage = Message(
@@ -51,7 +53,8 @@ struct ShaderTestView: View {
                 ShaderLibrary.pixelate(
                     .float(currentPixelSize),
                     .float2(bubbleSize),
-                    .float(currentExplosionAmount)
+                    .float(currentExplosionAmount),
+                    .float2(explosionCenterX, explosionCenterY)
                 ),
                 maxSampleOffset: CGSize(
                     width: bubbleSize.width * currentExplosionAmount,
@@ -84,6 +87,24 @@ struct ShaderTestView: View {
                         .foregroundStyle(.secondary)
                     
                     Slider(value: $sliderValue, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Center X: \(String(format: "%.2f", explosionCenterX))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $explosionCenterX, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Center Y: \(String(format: "%.2f", explosionCenterY))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $explosionCenterY, in: 0...1)
                 }
                 .padding(.horizontal)
             }
