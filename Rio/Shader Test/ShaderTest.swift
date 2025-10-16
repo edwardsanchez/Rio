@@ -27,7 +27,7 @@ struct ShaderTestView: View {
     @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
     @State private var edgeVelocityBoost: CGFloat = 0.8  // 0.0 = uniform velocity, 1.0 = strong edge boost
     @State private var forceSquarePixels: Bool = false
-    @State private var fadeStart: CGFloat = 0.8  // When particles start fading (0-1)
+    @State private var fadeStart: CGFloat = 0.3  // When particles start fading (0-1)
     @State private var fadeVariance: CGFloat = 0.85  // Variance in fade timing (0-1)
     
     private let outboundAnimationWidth: CGFloat? = nil
@@ -85,7 +85,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.smooth(duration: 5.8)) {
+                        withAnimation(.smooth(duration: 0.3)) {
                             sliderValue = 1.0
                         }
                     }
