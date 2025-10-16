@@ -61,9 +61,9 @@ struct ShaderTestView: View {
             }
             .layerEffect(
                 ShaderLibrary.pixelate(
-                    .float(currentPixelSize),
+                    .float(2.0), // Fixed pixel size
                     .float2(bubbleSize),
-                    .float(currentExplosionAmount),
+                    .float(sliderValue), // Pass raw value, calculate everything in shader
                     .float2(explosionCenterX, explosionCenterY),
                     .float(speedVariance),
                     .float(gravity),
@@ -72,7 +72,7 @@ struct ShaderTestView: View {
                     .float(growthVariance),
                     .float(edgeVelocityBoost),
                     .float(forceSquarePixels ? 1.0 : 0.0),
-                    .float(sliderValue),
+                    .float(maxExplosionSpread), // Pass the constant
                     .float(fadeStart),
                     .float(fadeVariance),
                     .float(pinchDuration)
@@ -85,7 +85,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.smooth(duration: 0.8)) {
+                        withAnimation(.smooth(duration: 5.8)) {
                             sliderValue = 1.0
                         }
                     }
@@ -206,25 +206,39 @@ struct ShaderTestView: View {
     }
     
     // Computed values based on slider position
+    private var quantizedSliderValue: CGFloat {
+        // Quantize to 1000 discrete steps to eliminate micro-variations during animation
+        // This makes animated behavior match manual slider behavior
+        let steps: CGFloat = 1000
+        let quantized = round(sliderValue * steps) / steps
+
+        // Debug logging
+        if abs(sliderValue - quantized) > 0.0001 {
+            print("Quantizing: \(sliderValue) -> \(quantized)")
+        }
+
+        return quantized
+    }
+
     private var currentPixelSize: CGFloat {
         // 0.0 - 0.05: transition from 0.1 to 2.0 (pixelate + form circles)
         let circleFormationEnd: Double = 0.05
-        if sliderValue <= circleFormationEnd {
-            let progress = sliderValue / circleFormationEnd
+        if quantizedSliderValue <= circleFormationEnd {
+            let progress = quantizedSliderValue / circleFormationEnd
             return 0.1 + (progress * 1.9)
         }
         // After circle formation: stay at 2.0 (don't scale particles)
         return 2.0
     }
-    
+
     private var currentExplosionAmount: CGFloat {
         let circleFormationEnd: Double = 0.05
         // 0.0 - 0.05: no explosion (forming circles)
-        if sliderValue <= circleFormationEnd {
+        if quantizedSliderValue <= circleFormationEnd {
             return 0.0
         }
         // 0.05 - 1.0: particles space out from center
-        let explosionProgress = (sliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
+        let explosionProgress = (quantizedSliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
         return CGFloat(explosionProgress) * maxExplosionSpread
     }
     

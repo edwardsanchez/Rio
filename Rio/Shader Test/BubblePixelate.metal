@@ -44,7 +44,7 @@ float2 turbulence2D(float2 p, float time) {
     SwiftUI::Layer layer,
     float pixelSize,
     float2 layerSize,
-    float explosionSpacing,
+    float rawAnimationProgress,
     float2 explosionCenter,
     float speedVariance,
     float gravity,
@@ -53,11 +53,31 @@ float2 turbulence2D(float2 p, float time) {
     float growthVariance,
     float edgeVelocityBoost,
     float forceSquarePixels,
-    float animationProgress,
+    float maxExplosionSpread,
     float fadeStart,
     float fadeVariance,
     float pinchDuration
 ) {
+    // Calculate all derived values in the shader to ensure consistency
+    float animationProgress = rawAnimationProgress;
+
+    // Calculate pixel size based on animation progress
+    const float circleFormationEnd = 0.05;
+    if (animationProgress <= circleFormationEnd) {
+        float progress = animationProgress / circleFormationEnd;
+        pixelSize = 0.1 + (progress * 1.9);
+    } else {
+        pixelSize = 2.0;
+    }
+
+    // Calculate explosion amount based on animation progress
+    float explosionSpacing;
+    if (animationProgress <= circleFormationEnd) {
+        explosionSpacing = 0.0;
+    } else {
+        float explosionProgress = (animationProgress - circleFormationEnd) / (1.0 - circleFormationEnd);
+        explosionSpacing = explosionProgress * maxExplosionSpread;
+    }
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
     float maxDistance = length(layerSize * 0.5);
