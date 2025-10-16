@@ -334,7 +334,10 @@ struct MessageBubbleView: View {
             showTalkingContent = !message.text.isEmpty
             includeTalkingTextInLayout = !message.text.isEmpty
         case .read:
-            break
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
         }
     }
 
@@ -349,6 +352,10 @@ struct MessageBubbleView: View {
             startReadToThinkingTransition()
         } else if oldMode == .read && newMode == .talking {
             startReadToTalkingTransition()
+        } else if oldMode == .thinking && newMode == .read {
+            startThinkingToReadTransition()
+        } else if oldMode == .talking && newMode == .read {
+            startTalkingToReadTransition()
         } else {
             configureInitialContentState()
         }
@@ -417,6 +424,27 @@ struct MessageBubbleView: View {
         withAnimation(.easeInOut(duration: 0.3)) {
             showTalkingContent = true
         }
+    }
+    
+    private func startThinkingToReadTransition() {
+        // Fade out typing indicator and go to read state
+        withAnimation(.smooth(duration: 0.3)) {
+            showTypingIndicatorContent = false
+        }
+        isWidthLocked = false
+        showTalkingContent = false
+        includeTalkingTextInLayout = false
+    }
+    
+    //This should only happen if the message is unsent
+    private func startTalkingToReadTransition() {
+        // Fade out talking content and go to read state
+        withAnimation(.smooth(duration: 0.3)) {
+            showTalkingContent = false
+        }
+        isWidthLocked = false
+        showTypingIndicatorContent = false
+        includeTalkingTextInLayout = false
     }
 
     private func scheduleTextLayoutInclusion() {
