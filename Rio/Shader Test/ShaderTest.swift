@@ -60,7 +60,7 @@ struct ShaderTestView: View {
                 bubbleSize = newSize
             }
             .layerEffect(
-                ShaderLibrary.pixelate(
+                ShaderLibrary.explode(
                     .float(2.0), // Fixed pixel size
                     .float2(bubbleSize),
                     .float(sliderValue), // Pass raw value, calculate everything in shader
@@ -85,7 +85,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.smooth(duration: 0.3)) {
+                        withAnimation(.smooth(duration: 0.5)) {
                             sliderValue = 1.0
                         }
                     }

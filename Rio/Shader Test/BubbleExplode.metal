@@ -39,7 +39,7 @@ float2 turbulence2D(float2 p, float time) {
 }
 
 /// Pixelation effect that transitions from square to circular pixels and explodes
-[[ stitchable ]] half4 pixelate(
+[[ stitchable ]] half4 explode(
     float2 position,
     SwiftUI::Layer layer,
     float pixelSize,
