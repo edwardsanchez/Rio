@@ -697,6 +697,8 @@ struct BubbleView: View {
             .overlay(alignment: tailAlignment) {
                 tailView
             }
+            .compositingGroup()
+            .opacity(0.25) //Want 15 for light mode and 25 for dark mode
             .background {
                 // Hidden text to measure single-line height
                 Text("X")

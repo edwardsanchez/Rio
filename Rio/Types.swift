@@ -46,6 +46,19 @@ enum MessageType {
 enum BubbleMode {
     case thinking
     case talking
+    case read
+    
+    var isRead: Bool {
+        self == .read
+    }
+    
+    var isThinking: Bool {
+        self == .thinking
+    }
+    
+    var isTalking: Bool {
+        self == .talking
+    }
 }
 
 struct ChatTheme {

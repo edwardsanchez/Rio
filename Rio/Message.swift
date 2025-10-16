@@ -220,9 +220,11 @@ struct MessageBubbleView: View {
             if let avatar = message.user.avatar {
                 Image(avatar)
                     .resizable()
-                    .frame(width: 40, height: 40)
+                    .frame(width: message.bubbleMode.isRead ? 20 : 40, height: message.bubbleMode.isRead ? 20 : 40)
                     .clipShape(.circle)
+                    .frame(height: message.bubbleMode.isRead ? 0 : 40)
                     .offset(y: 10)
+                    .offset(x: message.bubbleMode.isRead ? 9 : 0)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -319,6 +321,8 @@ struct MessageBubbleView: View {
             showTypingIndicatorContent = false
             showTalkingContent = !message.text.isEmpty
             includeTalkingTextInLayout = !message.text.isEmpty
+        case .read:
+            break
         }
     }
 
@@ -501,6 +505,18 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Message States") {
     VStack(spacing: 20) {
+        
+        MessageBubbleView(
+            message: Message(
+                text: "",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                isTypingIndicator: true,
+                bubbleMode: .read
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+        
         // 1. Inbound thinking
         MessageBubbleView(
             message: Message(
