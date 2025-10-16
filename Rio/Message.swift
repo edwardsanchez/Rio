@@ -503,7 +503,7 @@ struct MessageBubbleView: View {
 }
 
 private struct MessageBubblePreviewContainer: View {
-    @State private var bubbleMode: BubbleMode? = .thinking
+    @State private var bubbleMode: BubbleMode? = .read
     @State private var newMessageId: UUID? = nil
     
     // Use a stable message ID that persists across state changes
