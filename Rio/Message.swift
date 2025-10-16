@@ -553,7 +553,7 @@ private struct MessageBubblePreviewContainer: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            if bubbleMode != nil {
+            if let bubbleMode {
                 MessageBubbleView(
                     message: currentMessage,
                     showTail: true,

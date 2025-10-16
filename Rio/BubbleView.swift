@@ -664,7 +664,7 @@ struct BubbleView: View {
                 if currentBlurRadius > 0.05 {
                     // Blur is disabled once the talking morph completes to keep the canvas transparent
                     context.addFilter(.blur(radius: currentBlurRadius))
-                } //DO NOT DELETE
+                }
 
                 context.drawLayer { ctx in
                     // Draw filled rounded rectangle centered in canvas with padding
@@ -687,6 +687,7 @@ struct BubbleView: View {
                     }
                 }
             } symbols: {
+                //Decorative circles
                 ForEach(Array(morphedDiameters.enumerated()), id: \.offset) { index, diameter in
                     Circle()
                         .frame(width: diameter, height: diameter)
