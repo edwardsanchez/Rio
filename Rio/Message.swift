@@ -143,7 +143,9 @@ struct MessageBubbleView: View {
 
         switch message.messageType {
         case .inbound:
-            return 20  // Slide up from 20px below final position
+            // Read state should not slide up, only scale avatar
+            // Thinking and Talking states slide up from 20px below
+            return message.bubbleMode.isRead ? 0 : 20
         case .outbound:
             return calculateYOffset()
         }
@@ -172,13 +174,20 @@ struct MessageBubbleView: View {
 
     private var bubbleOpacity: Double {
         guard message.messageType == .inbound else { return 1 }
+        // For read state, bubble is always hidden (handled by BubbleView)
+        // For thinking/talking, fade in when new
+        if message.bubbleMode.isRead {
+            return 1  // Let BubbleView handle opacity
+        }
         return isNew ? 0 : 1
     }
 
     private var inboundAvatarOpacity: Double {
         guard message.messageType == .inbound else { return 1 }
         guard isNew else { return 1 }
-        return 0
+        // For read state, avatar scales from 0, don't use opacity fade
+        // For thinking/talking, use opacity fade
+        return message.bubbleMode.isRead ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
@@ -468,13 +477,16 @@ struct MessageBubbleView: View {
 private struct MessageBubblePreviewContainer: View {
     @State private var bubbleMode: BubbleMode? = .thinking
     @State private var newMessageId: UUID? = nil
-
+    
+    // Use a stable message ID that persists across state changes
+    private let messageId = UUID()
     private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
     
     private var currentMessage: Message {
         switch bubbleMode {
         case .read:
             Message(
+                id: messageId,
                 text: "",
                 user: sampleUser,
                 isTypingIndicator: true,
@@ -482,6 +494,7 @@ private struct MessageBubblePreviewContainer: View {
             )
         case .thinking:
             Message(
+                id: messageId,
                 text: "",
                 user: sampleUser,
                 isTypingIndicator: true,
@@ -489,6 +502,7 @@ private struct MessageBubblePreviewContainer: View {
             )
         case .talking:
             Message(
+                id: messageId,
                 text: "How are you?",
                 user: sampleUser,
                 bubbleMode: .talking
@@ -496,6 +510,7 @@ private struct MessageBubblePreviewContainer: View {
         case .none:
             // Placeholder - won't be shown
             Message(
+                id: messageId,
                 text: "",
                 user: sampleUser,
                 bubbleMode: .talking
@@ -504,7 +519,7 @@ private struct MessageBubblePreviewContainer: View {
     }
     
     private var isNew: Bool {
-        currentMessage.id == newMessageId
+        messageId == newMessageId
     }
 
     var body: some View {
@@ -542,7 +557,7 @@ private struct MessageBubblePreviewContainer: View {
                         let wasNone = bubbleMode == nil
                         bubbleMode = .read
                         if wasNone {
-                            newMessageId = currentMessage.id
+                            newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -552,7 +567,7 @@ private struct MessageBubblePreviewContainer: View {
                         let wasNone = bubbleMode == nil
                         bubbleMode = .thinking
                         if wasNone {
-                            newMessageId = currentMessage.id
+                            newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -562,7 +577,7 @@ private struct MessageBubblePreviewContainer: View {
                         let wasNone = bubbleMode == nil
                         bubbleMode = .talking
                         if wasNone {
-                            newMessageId = currentMessage.id
+                            newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -575,7 +590,7 @@ private struct MessageBubblePreviewContainer: View {
     }
 }
 
-#Preview("Message Bubble Morph") {
+#Preview("Inbound Message Bubble Morph") {
     MessageBubblePreviewContainer()
 }
 
