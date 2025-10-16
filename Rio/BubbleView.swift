@@ -46,7 +46,7 @@ struct BubbleView: View {
     /// External callers coordinate text reveals with this delay to match the morph.
     static let textRevealDelay: TimeInterval = (morphDuration + resizeCutoffDuration) * 0.25
     /// Total duration for the read→thinking animation.
-    static let readToThinkingDuration: TimeInterval = 1.4
+    static let readToThinkingDuration: TimeInterval = 0.8
     /// Duration for the tail circle to scale up.
     private let tailScaleDuration: TimeInterval = 1.2
     /// Delay before decorative circles start animating.
@@ -975,6 +975,9 @@ struct BubbleView: View {
 //            let B: CGFloat = 1 - A
 //            return min(max(1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed)), 0), 1)
 //        }
+        
+        // Fallback (should never be reached with dampingRatio < 1)
+        return normalizedProgress >= 0.5 ? 1 : 0
     }
 
 }
