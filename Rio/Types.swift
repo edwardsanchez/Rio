@@ -39,6 +39,14 @@ struct Chat: Identifiable {
 enum MessageType {
     case inbound
     case outbound
+    
+    var isInbound: Bool {
+        self == .inbound
+    }
+    
+    var isOutbound: Bool {
+        self == .outbound
+    }
 }
 
 // MARK: - Bubble Mode

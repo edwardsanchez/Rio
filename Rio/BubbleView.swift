@@ -81,15 +81,15 @@ struct BubbleView: View {
     // MARK: - Tail Geometry
 
     private var tailAlignment: Alignment {
-        messageType == .inbound ? .bottomLeading : .bottomTrailing
+        messageType.isInbound ? .bottomLeading : .bottomTrailing
     }
 
     private var tailOffset: CGPoint {
-        messageType == .inbound ? CGPoint(x: 5.5, y: 10.5) : CGPoint(x: -5.5, y: 10.5)
+        messageType.isInbound ? CGPoint(x: 5.5, y: 10.5) : CGPoint(x: -5.5, y: 10.5)
     }
 
     private var tailRotation: Angle {
-        messageType == .inbound ? Angle(degrees: 180) : .zero
+        messageType.isInbound ? Angle(degrees: 180) : .zero
     }
 
     /// Creates a bubble with the provided geometry, animation bounds, and visual configuration.
@@ -154,7 +154,7 @@ struct BubbleView: View {
             initialVelocity: .zero
         ))
         _startTime = State(initialValue: now)
-        let initialProgress: CGFloat = mode == .thinking ? 0 : 1
+        let initialProgress: CGFloat = mode.isThinking ? 0 : 1
         _modeAnimationStart = State(initialValue: now.addingTimeInterval(-Self.morphDuration))
         _modeAnimationFrom = State(initialValue: initialProgress)
         _modeAnimationTo = State(initialValue: initialProgress)
@@ -484,7 +484,7 @@ struct BubbleView: View {
     private func updateRectangleTransition(to size: CGSize) {
         let now = Date()
         let progress = modeProgress(at: now)
-        if mode == .talking && progress < 0.98 {
+        if mode.isTalking && progress < 0.98 {
             // During morph phase, keep width constant and constrain height to single-line
             let currentWidth = rectangleTransition.endSize.width
             let morphSize = CGSize(
@@ -698,7 +698,7 @@ struct BubbleView: View {
                 tailView
             }
             .compositingGroup()
-            .opacity(0.25) //Want 15 for light mode and 25 for dark mode
+            .opacity(messageType.isOutbound ? 1 : 0.25) //Want 15 for light mode and 25 for dark mode
             .background {
                 // Hidden text to measure single-line height
                 Text("X")
@@ -729,11 +729,11 @@ struct BubbleView: View {
             updateCircleTransitions(targetDiameters: newDiameters)
         }
         .onChange(of: mode) { oldMode, newMode in
-            let target = newMode == .thinking ? CGFloat(0) : CGFloat(1)
+            let target = newMode.isThinking ? CGFloat(0) : CGFloat(1)
             startModeAnimation(target: target)
             // When transitioning from thinking to talking, update rectangle transition
             // to use single-line height during morph
-            if oldMode == .thinking && newMode == .talking {
+            if oldMode.isThinking && newMode.isTalking {
                 updateRectangleTransition(to: CGSize(width: width, height: height))
             }
         }
@@ -742,8 +742,8 @@ struct BubbleView: View {
     @ViewBuilder
     /// Decorative bubble tail that switches layouts depending on the current mode.
     private var tailView: some View {
-        let isThinking = mode == .thinking
-        let isInbound = messageType == .inbound
+        let isThinking = mode.isThinking
+        let isInbound = messageType.isInbound
 
         // Additional offsets for talking mode - mirrored for inbound/outbound
         let talkingXOffset: CGFloat = isInbound ? 3 : -3
@@ -771,7 +771,7 @@ struct BubbleView: View {
                 .offset(x: 0, y: -13)
                 .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
                 .animation(.easeIn(duration: 0.2), value: mode)
-                .opacity(messageType == .inbound ? 1 : 0)
+                .opacity(messageType.isInbound ? 1 : 0)
         }
     }
 
