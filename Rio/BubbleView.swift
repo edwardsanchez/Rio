@@ -961,19 +961,20 @@ struct BubbleView: View {
             let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
             
             return min(max(1 - envelope * oscillation, 0), 1)
-        } else if dampingRatio == 1 {
-            // Critically damped (no overshoot)
-            let A: CGFloat = 1 //Will never be executed
-            let B = omega0 * A
-            return min(max(1 - (A + B * elapsed) * exp(-omega0 * elapsed), 0), 1)
-        } else {
-            // Overdamped (slow, no overshoot)
-            let r1 = -omega0 * (dampingRatio + sqrt(dampingRatio * dampingRatio - 1)) //Will never be executed
-            let r2 = -omega0 * (dampingRatio - sqrt(dampingRatio * dampingRatio - 1))
-            let A = -r2 / (r1 - r2)
-            let B: CGFloat = 1 - A
-            return min(max(1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed)), 0), 1)
         }
+//        else if dampingRatio == 1 {
+//            // Critically damped (no overshoot)
+//            let A: CGFloat = 1 //Will never be executed
+//            let B = omega0 * A
+//            return min(max(1 - (A + B * elapsed) * exp(-omega0 * elapsed), 0), 1)
+//        } else {
+//            // Overdamped (slow, no overshoot)
+//            let r1 = -omega0 * (dampingRatio + sqrt(dampingRatio * dampingRatio - 1)) //Will never be executed
+//            let r2 = -omega0 * (dampingRatio - sqrt(dampingRatio * dampingRatio - 1))
+//            let A = -r2 / (r1 - r2)
+//            let B: CGFloat = 1 - A
+//            return min(max(1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed)), 0), 1)
+//        }
     }
 
 }
