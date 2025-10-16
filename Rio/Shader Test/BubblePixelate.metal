@@ -98,59 +98,68 @@ float2 turbulence2D(float2 p, float time) {
     }
     
     // Determine the original block from the refined inverse-mapped position
-    float2 blockPos = floor(invPosition / pixelSize) * pixelSize;
-    float2 originalBlockCenter = blockPos + (pixelSize * 0.5);
+    float2 baseBlockPos = floor(invPosition / pixelSize) * pixelSize;
     
     // Use a FIXED grid for seeding to prevent hash changes during pixelSize animation
     const float seedPixelSize = 2.0; // Match the final pixelSize value
-    float2 seedBlockPos = floor(invPosition / seedPixelSize) * seedPixelSize;
-    float2 seedBlockCenter = seedBlockPos + (seedPixelSize * 0.5);
     
-    // Derive the speed multiplier from the stable seed grid
-    float seed = fract(sin(dot(seedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
-    float speedMult = 1.0 + (seed * 2.0 - 1.0) * speedVariance;
+    float bestPixelDistance = 1e9;
+    float2 bestOriginalBlockCenter = baseBlockPos + (pixelSize * 0.5);
+    float2 bestSeedBlockCenter = floor(bestOriginalBlockCenter / seedPixelSize) * seedPixelSize + (seedPixelSize * 0.5);
+    float2 explodedBlockCenter = bestOriginalBlockCenter;
     
-    // Calculate growth multiplier for this particle
-    // Use a different seed offset for growth to get independent variation
-    float growthSeed = fract(sin(dot(seedBlockCenter, float2(73.156, 41.923))) * 37281.6547);
-    // Base growth increases with explosion progress
+    // Search neighboring blocks to find the exploded particle whose center is closest to this pixel.
+    // This prevents clipping artifacts when turbulence or variance pushes particles across cell boundaries.
+    for (int y = -2; y <= 2; ++y) {
+        for (int x = -2; x <= 2; ++x) {
+            float2 candidateBlockPos = baseBlockPos + float2(x, y) * pixelSize;
+            float2 candidateCenter = candidateBlockPos + (pixelSize * 0.5);
+            
+            float2 candidateSeedBlockPos = floor(candidateCenter / seedPixelSize) * seedPixelSize;
+            float2 candidateSeedBlockCenter = candidateSeedBlockPos + (seedPixelSize * 0.5);
+            
+            float candidateSeed = fract(sin(dot(candidateSeedBlockCenter, float2(12.9898, 78.233))) * 43758.5453);
+            float candidateSpeedMult = 1.0 + (candidateSeed * 2.0 - 1.0) * speedVariance;
+            
+            float2 candidateOffset = candidateCenter - layerCenter;
+            float candidateDistance = length(candidateOffset);
+            float2 candidateExplodedCenter = candidateCenter;
+            
+            if (candidateDistance > 0.001 && explosionSpacing > 0.001) {
+                float safeDistance = max(candidateDistance, 1e-5);
+                float2 candidateDir = candidateOffset / safeDistance;
+                candidateExplodedCenter = candidateCenter + (candidateDir * candidateDistance * explosionSpacing * candidateSpeedMult);
+                
+                if (turbulence > 0.001) {
+                    float turbulenceTime = explosionSpacing * 15.0;
+                    float2 turbulenceOffset = turbulence2D(candidateCenter, turbulenceTime);
+                    float turbulenceAmount = turbulence * explosionSpacing * 30.0;
+                    candidateExplodedCenter += turbulenceOffset * turbulenceAmount;
+                }
+                
+                float gravityFall = explosionSpacing * candidateDistance * gravity * 0.8;
+                candidateExplodedCenter.y += gravityFall;
+            }
+            
+            float pixelDistance = length(position - candidateExplodedCenter);
+            if (pixelDistance < bestPixelDistance) {
+                bestPixelDistance = pixelDistance;
+                bestOriginalBlockCenter = candidateCenter;
+                bestSeedBlockCenter = candidateSeedBlockCenter;
+                explodedBlockCenter = candidateExplodedCenter;
+            }
+        }
+    }
+    
+    // Calculate growth multiplier for this particle using the best matching seed center
+    float growthSeed = fract(sin(dot(bestSeedBlockCenter, float2(73.156, 41.923))) * 37281.6547);
     float baseGrowth = 1.0 + (growth * explosionSpacing);
-    // Apply variance: starts minimal, increases with explosion progress
-    // Variance effect scales with explosionSpacing so it's subtle at first
     float varianceAmount = growthVariance * explosionSpacing;
     float growthVariation = 1.0 + (growthSeed * 2.0 - 1.0) * varianceAmount;
     float growthMult = baseGrowth * growthVariation;
     
-    // Compute exploded center for this specific block
-    float2 blockOffset = originalBlockCenter - layerCenter;
-    float blockDistance = length(blockOffset);
-    float2 explodedBlockCenter = originalBlockCenter;
-    if (blockDistance > 0.001 && explosionSpacing > 0.001) {
-        float2 blockDir = blockOffset / blockDistance;
-        explodedBlockCenter = originalBlockCenter + (blockDir * blockDistance * explosionSpacing * speedMult);
-        
-        // Apply turbulence - increases with explosion progress (like wind affecting smoke/steam)
-        if (turbulence > 0.001) {
-            // Use the original block position as seed for turbulence to keep it stable per particle
-            // Use explosionSpacing as "time" - particles drift more as they travel further
-            float turbulenceTime = explosionSpacing * 15.0; // Scale for visible effect
-            float2 turbulenceOffset = turbulence2D(originalBlockCenter, turbulenceTime);
-            
-            // Scale turbulence by distance traveled and turbulence strength
-            // Particles that have traveled further are affected more by turbulence
-            float turbulenceAmount = turbulence * explosionSpacing * 30.0;
-            explodedBlockCenter += turbulenceOffset * turbulenceAmount;
-        }
-        
-        // Apply gravity effect - particles that travel further fall more
-        // Gravity increases with distance traveled (flight time)
-        // explosionSpacing acts as "time" in the animation
-        float gravityFall = explosionSpacing * blockDistance * gravity * 0.8;
-        explodedBlockCenter.y += gravityFall;
-    }
-    
     // Sample color from the original block center
-    half4 color = layer.sample(originalBlockCenter);
+    half4 color = layer.sample(bestOriginalBlockCenter);
     
     // Step 4: Check if current pixel is within the circle at the EXPLODED position
     float2 offsetFromExplodedCenter = position - explodedBlockCenter;
@@ -174,4 +183,3 @@ float2 turbulence2D(float2 p, float time) {
     
     return color;
 }
-
