@@ -50,7 +50,8 @@ float2 turbulence2D(float2 p, float time) {
     float gravity,
     float turbulence,
     float growth,
-    float growthVariance
+    float growthVariance,
+    float forceSquarePixels
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
@@ -80,13 +81,13 @@ float2 turbulence2D(float2 p, float time) {
             float guessDistance = length(guessOffset);
             float guessGravityOffset = explosionSpacing * guessDistance * gravity * 0.8;
             
-    // Calculate expected turbulence offset for this block
-    float2 guessTurbulenceOffset = float2(0.0);
-    if (turbulence > 0.001) {
-        // Sample the same static turbulence field used during the forward pass
-        float turbulenceTime = 0.0;
-        float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
-        float turbulenceAmount = turbulence * explosionSpacing * 30.0;
+            // Calculate expected turbulence offset for this block
+            float2 guessTurbulenceOffset = float2(0.0);
+            if (turbulence > 0.001) {
+                // Sample the same static turbulence field used during the forward pass
+                float turbulenceTime = 0.0;
+                float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
+                float turbulenceAmount = turbulence * explosionSpacing * 30.0;
                 guessTurbulenceOffset = turbulenceDir * turbulenceAmount;
             }
             
@@ -181,7 +182,8 @@ float2 turbulence2D(float2 p, float time) {
     float circleCoverage = smoothstep(-aaWidth, aaWidth, edge);
     
     // Blend between square (1.0) and circle coverage based on blendFactor
-    float alphaBlend = mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
+    bool useSquarePixels = forceSquarePixels > 0.5;
+    float alphaBlend = useSquarePixels ? 1.0 : mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
     color.a *= half(alphaBlend);
     
     return color;

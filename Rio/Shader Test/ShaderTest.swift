@@ -25,6 +25,7 @@ struct ShaderTestView: View {
     @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
     @State private var growth: CGFloat = 0.65  // 0.0 = no growth, 1.0 = double size
     @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
+    @State private var forceSquarePixels: Bool = false
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -64,7 +65,8 @@ struct ShaderTestView: View {
                     .float(gravity),
                     .float(turbulence),
                     .float(growth),
-                    .float(growthVariance)
+                    .float(growthVariance),
+                    .float(forceSquarePixels ? 1.0 : 0.0)
                 ),
                 maxSampleOffset: maxSampleOffsetSize
             )
@@ -159,6 +161,10 @@ struct ShaderTestView: View {
                     Slider(value: $growthVariance, in: 0...1)
                 }
                 .padding(.horizontal)
+                
+                Toggle("Force Square Pixels", isOn: $forceSquarePixels)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
             }
         }
     }
