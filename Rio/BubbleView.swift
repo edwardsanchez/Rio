@@ -667,13 +667,15 @@ struct BubbleView: View {
                 // Use the overall animation progress for smooth velocity decay
                 // This extends the deceleration over the entire animation duration
                 // creating a smooth transition from fast spin to normal orbital motion
-                let velocityMultiplier: CGFloat = 3.0  // Initial speed boost
+                let velocityMultiplier: CGFloat = 1.0  // Initial speed boost
                 let decayRate: CGFloat = 3.0  // Slower decay for smoother transition
                 let velocityOffset = velocityMultiplier * (1 - readToThinkingAnimProgress) * exp(-decayRate * readToThinkingAnimProgress)
                 
-                // Add the velocity offset to movement progress (clockwise direction)
-                let adjustedProgress = (baseMovementProgress + velocityOffset).truncatingRemainder(dividingBy: 1.0)
-                movementProgress = adjustedProgress
+                // SUBTRACT the velocity offset for clockwise motion during scale-up
+                // The path calculation combined with scale-from-center creates counter-clockwise
+                // appearance when velocity is added, so we subtract for true clockwise motion
+                let adjustedProgress = (baseMovementProgress - velocityOffset).truncatingRemainder(dividingBy: 1.0)
+                movementProgress = adjustedProgress >= 0 ? adjustedProgress : adjustedProgress + 1.0
             } else {
                 movementProgress = baseMovementProgress
             }
