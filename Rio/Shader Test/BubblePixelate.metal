@@ -16,21 +16,22 @@ float noise2D(float2 p) {
 
 /// Smooth turbulence using multi-octave noise
 float2 turbulence2D(float2 p, float time) {
+    (void)time; // Keep signature stable; turbulence is static in time to avoid per-frame flicker
     // Layer multiple octaves of noise for more natural turbulence
     float2 turb = float2(0.0);
     
     // First octave - large swirls
-    float2 p1 = p * 0.05 + float2(time * 0.3, time * 0.2);
+    float2 p1 = p * 0.05;
     turb.x += (noise2D(p1) - 0.5) * 2.0;
     turb.y += (noise2D(p1 + float2(17.3, 29.7)) - 0.5) * 2.0;
     
     // Second octave - medium details
-    float2 p2 = p * 0.1 + float2(time * 0.5, time * 0.4);
+    float2 p2 = p * 0.1;
     turb.x += (noise2D(p2) - 0.5) * 1.0;
     turb.y += (noise2D(p2 + float2(31.4, 47.2)) - 0.5) * 1.0;
     
     // Third octave - fine details
-    float2 p3 = p * 0.2 + float2(time * 0.8, time * 0.6);
+    float2 p3 = p * 0.2;
     turb.x += (noise2D(p3) - 0.5) * 0.5;
     turb.y += (noise2D(p3 + float2(53.7, 67.9)) - 0.5) * 0.5;
     
@@ -79,12 +80,13 @@ float2 turbulence2D(float2 p, float time) {
             float guessDistance = length(guessOffset);
             float guessGravityOffset = explosionSpacing * guessDistance * gravity * 0.8;
             
-            // Calculate expected turbulence offset for this block
-            float2 guessTurbulenceOffset = float2(0.0);
-            if (turbulence > 0.001) {
-                float turbulenceTime = explosionSpacing * 15.0;
-                float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
-                float turbulenceAmount = turbulence * explosionSpacing * 30.0;
+    // Calculate expected turbulence offset for this block
+    float2 guessTurbulenceOffset = float2(0.0);
+    if (turbulence > 0.001) {
+        // Sample the same static turbulence field used during the forward pass
+        float turbulenceTime = 0.0;
+        float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
+        float turbulenceAmount = turbulence * explosionSpacing * 30.0;
                 guessTurbulenceOffset = turbulenceDir * turbulenceAmount;
             }
             
@@ -131,7 +133,8 @@ float2 turbulence2D(float2 p, float time) {
                 candidateExplodedCenter = candidateCenter + (candidateDir * candidateDistance * explosionSpacing * candidateSpeedMult);
                 
                 if (turbulence > 0.001) {
-                    float turbulenceTime = explosionSpacing * 15.0;
+                    // Sample a static turbulence field so particles drift consistently between frames
+                    float turbulenceTime = 0.0;
                     float2 turbulenceOffset = turbulence2D(candidateCenter, turbulenceTime);
                     float turbulenceAmount = turbulence * explosionSpacing * 30.0;
                     candidateExplodedCenter += turbulenceOffset * turbulenceAmount;
