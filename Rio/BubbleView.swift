@@ -664,11 +664,12 @@ struct BubbleView: View {
             // During read→thinking, add damped velocity offset for clockwise motion
             let movementProgress: CGFloat
             if isReadToThinkingActive {
-                // Start with high velocity, decay to normal speed
-                // Use exponential decay for smooth deceleration
+                // Use the overall animation progress for smooth velocity decay
+                // This extends the deceleration over the entire animation duration
+                // creating a smooth transition from fast spin to normal orbital motion
                 let velocityMultiplier: CGFloat = 3.0  // Initial speed boost
-                let decayRate: CGFloat = 5.0  // How quickly it slows down
-                let velocityOffset = velocityMultiplier * (1 - decorativeProgress) * exp(-decayRate * decorativeProgress)
+                let decayRate: CGFloat = 3.0  // Slower decay for smoother transition
+                let velocityOffset = velocityMultiplier * (1 - readToThinkingAnimProgress) * exp(-decayRate * readToThinkingAnimProgress)
                 
                 // Add the velocity offset to movement progress (clockwise direction)
                 let adjustedProgress = (baseMovementProgress + velocityOffset).truncatingRemainder(dividingBy: 1.0)
