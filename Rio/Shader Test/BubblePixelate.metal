@@ -52,7 +52,10 @@ float2 turbulence2D(float2 p, float time) {
     float growth,
     float growthVariance,
     float edgeVelocityBoost,
-    float forceSquarePixels
+    float forceSquarePixels,
+    float animationProgress,
+    float fadeStart,
+    float fadeVariance
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
@@ -192,6 +195,20 @@ float2 turbulence2D(float2 p, float time) {
     bool useSquarePixels = forceSquarePixels > 0.5;
     float alphaBlend = useSquarePixels ? 1.0 : mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
     color.a *= half(alphaBlend);
+    
+    // Calculate per-particle fade-out
+    // Generate a unique fade seed for each particle
+    float fadeSeed = fract(sin(dot(bestSeedBlockCenter, float2(91.237, 58.164))) * 28491.3721);
+    
+    // Calculate when this specific particle should start fading
+    // The variance is scaled by (1.0 - fadeStart) to ensure all particles reach full transparency by animationProgress = 1.0
+    float particleFadeStart = fadeStart + (fadeSeed - 0.5) * fadeVariance * (1.0 - fadeStart);
+    
+    // Calculate fade opacity using smoothstep for a smooth fade
+    float fadeOpacity = 1.0 - smoothstep(particleFadeStart, 1.0, animationProgress);
+    
+    // Apply fade to the final color alpha
+    color.a *= half(fadeOpacity);
     
     return color;
 }

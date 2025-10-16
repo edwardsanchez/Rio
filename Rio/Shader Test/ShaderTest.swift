@@ -25,8 +25,10 @@ struct ShaderTestView: View {
     @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
     @State private var growth: CGFloat = 0.65  // 0.0 = no growth, 1.0 = double size
     @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
-    @State private var edgeVelocityBoost: CGFloat = 0.0  // 0.0 = uniform velocity, 1.0 = strong edge boost
+    @State private var edgeVelocityBoost: CGFloat = 0.8  // 0.0 = uniform velocity, 1.0 = strong edge boost
     @State private var forceSquarePixels: Bool = false
+    @State private var fadeStart: CGFloat = 0.8  // When particles start fading (0-1)
+    @State private var fadeVariance: CGFloat = 0.85  // Variance in fade timing (0-1)
     
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
@@ -68,7 +70,10 @@ struct ShaderTestView: View {
                     .float(growth),
                     .float(growthVariance),
                     .float(edgeVelocityBoost),
-                    .float(forceSquarePixels ? 1.0 : 0.0)
+                    .float(forceSquarePixels ? 1.0 : 0.0),
+                    .float(sliderValue),
+                    .float(fadeStart),
+                    .float(fadeVariance)
                 ),
                 maxSampleOffset: maxSampleOffsetSize
             )
@@ -78,7 +83,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.snappy(duration: 0.5)) {
+                        withAnimation(.snappy(duration: 0.6)) {
                             sliderValue = 1.0
                         }
                     }
@@ -101,23 +106,23 @@ struct ShaderTestView: View {
                 }
                 .padding(.horizontal)
                 
-                VStack(spacing: 8) {
-                    Text("Center X: \(String(format: "%.2f", explosionCenterX))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    
-                    Slider(value: $explosionCenterX, in: 0...1)
-                }
-                .padding(.horizontal)
-                
-                VStack(spacing: 8) {
-                    Text("Center Y: \(String(format: "%.2f", explosionCenterY))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    
-                    Slider(value: $explosionCenterY, in: 0...1)
-                }
-                .padding(.horizontal)
+//                VStack(spacing: 8) {
+//                    Text("Center X: \(String(format: "%.2f", explosionCenterX))")
+//                        .font(.caption)
+//                        .foregroundStyle(.secondary)
+//                    
+//                    Slider(value: $explosionCenterX, in: 0...1)
+//                }
+//                .padding(.horizontal)
+//                
+//                VStack(spacing: 8) {
+//                    Text("Center Y: \(String(format: "%.2f", explosionCenterY))")
+//                        .font(.caption)
+//                        .foregroundStyle(.secondary)
+//                    
+//                    Slider(value: $explosionCenterY, in: 0...1)
+//                }
+//                .padding(.horizontal)
                 
                 VStack(spacing: 8) {
                     Text("Speed Variance: \(String(format: "%.2f", speedVariance))")
@@ -128,14 +133,14 @@ struct ShaderTestView: View {
                 }
                 .padding(.horizontal)
                 
-                VStack(spacing: 8) {
-                    Text("Gravity: \(String(format: "%.2f", gravity))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    
-                    Slider(value: $gravity, in: 0...1)
-                }
-                .padding(.horizontal)
+//                VStack(spacing: 8) {
+//                    Text("Gravity: \(String(format: "%.2f", gravity))")
+//                        .font(.caption)
+//                        .foregroundStyle(.secondary)
+//                    
+//                    Slider(value: $gravity, in: 0...1)
+//                }
+//                .padding(.horizontal)
                 
                 VStack(spacing: 8) {
                     Text("Turbulence: \(String(format: "%.2f", turbulence))")
@@ -176,6 +181,24 @@ struct ShaderTestView: View {
                 Toggle("Force Square Pixels", isOn: $forceSquarePixels)
                     .padding(.horizontal)
                     .padding(.top, 4)
+                
+                VStack(spacing: 8) {
+                    Text("Fade Start: \(String(format: "%.2f", fadeStart))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $fadeStart, in: 0...1)
+                }
+                .padding(.horizontal)
+                
+                VStack(spacing: 8) {
+                    Text("Fade Variance: \(String(format: "%.2f", fadeVariance))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $fadeVariance, in: 0...1)
+                }
+                .padding(.horizontal)
             }
         }
     }
