@@ -154,7 +154,7 @@ struct BubbleView: View {
             initialVelocity: .zero
         ))
         _startTime = State(initialValue: now)
-        let initialProgress: CGFloat = mode.isThinking ? 0 : 1
+        let initialProgress: CGFloat = (mode.isThinking || mode.isRead) ? 0 : 1
         _modeAnimationStart = State(initialValue: now.addingTimeInterval(-Self.morphDuration))
         _modeAnimationFrom = State(initialValue: initialProgress)
         _modeAnimationTo = State(initialValue: initialProgress)
@@ -698,7 +698,7 @@ struct BubbleView: View {
                 tailView
             }
             .compositingGroup()
-            .opacity(messageType.isOutbound ? 1 : 0.25) //Want 15 for light mode and 25 for dark mode
+            .opacity(mode.isRead ? 0 : (messageType.isOutbound ? 1 : 0.25)) //Want 15 for light mode and 25 for dark mode
             .background {
                 // Hidden text to measure single-line height
                 Text("X")
@@ -729,11 +729,11 @@ struct BubbleView: View {
             updateCircleTransitions(targetDiameters: newDiameters)
         }
         .onChange(of: mode) { oldMode, newMode in
-            let target = newMode.isThinking ? CGFloat(0) : CGFloat(1)
+            let target = (newMode.isThinking || newMode.isRead) ? CGFloat(0) : CGFloat(1)
             startModeAnimation(target: target)
             // When transitioning from thinking to talking, update rectangle transition
             // to use single-line height during morph
-            if oldMode.isThinking && newMode.isTalking {
+            if (oldMode.isThinking || oldMode.isRead) && newMode.isTalking {
                 updateRectangleTransition(to: CGSize(width: width, height: height))
             }
         }
@@ -742,7 +742,7 @@ struct BubbleView: View {
     @ViewBuilder
     /// Decorative bubble tail that switches layouts depending on the current mode.
     private var tailView: some View {
-        let isThinking = mode.isThinking
+        let isThinking = mode.isThinking || mode.isRead
         let isInbound = messageType.isInbound
 
         // Additional offsets for talking mode - mirrored for inbound/outbound
