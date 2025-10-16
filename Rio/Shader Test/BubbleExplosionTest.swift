@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ShaderTestView: View {
+struct BubbleExplosionTestView: View {
     @State private var message: Message
     @State private var showTail: Bool = true
     @State private var showTypingIndicatorContent = true
@@ -299,7 +299,7 @@ struct ShaderTestView: View {
 }
 
 #Preview("Shader Test") {
-    ShaderTestView(
+    BubbleExplosionTestView(
         message: Message(
             text: "",
             user: User(id: UUID(), name: "Maya", avatar: .scarlet),
