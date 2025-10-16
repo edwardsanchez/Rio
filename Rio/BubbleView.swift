@@ -45,6 +45,14 @@ struct BubbleView: View {
     static let resizeCutoffDuration: TimeInterval = 1
     /// External callers coordinate text reveals with this delay to match the morph.
     static let textRevealDelay: TimeInterval = (morphDuration + resizeCutoffDuration) * 0.25
+    /// Total duration for the read→thinking animation.
+    static let readToThinkingDuration: TimeInterval = 1.4
+    /// Duration for the tail circle to scale up.
+    private let tailScaleDuration: TimeInterval = 1.2
+    /// Delay before decorative circles start animating.
+    private let decorativeCirclesDelay: TimeInterval = 0.1
+    /// Duration for decorative circles to scale and position.
+    private let decorativeCirclesDuration: TimeInterval = 0.3
 
     // MARK: - Animation State
 
@@ -70,6 +78,8 @@ struct BubbleView: View {
     @State private var pendingRectangleScheduled = false
     /// Height of a single line of text for constraining during morph.
     @State private var singleLineTextHeight: CGFloat = 0
+    /// Start timestamp for the read→thinking animation.
+    @State private var readToThinkingStart: Date?
 
     // MARK: - Derived Layout
 
@@ -562,6 +572,10 @@ struct BubbleView: View {
             let baseHeight = max(animatedSize.height, 0)
             let morphProgress = modeProgress(at: now)
 
+            // Check if we're in read→thinking animation
+            let readToThinkingAnimProgress = readToThinkingProgress(at: now)
+            let isReadToThinkingActive = mode.isThinking && readToThinkingStart != nil && readToThinkingAnimProgress < 1
+            
             let layout = BubbleMorphLayout(
                 baseSize: CGSize(width: baseWidth, height: baseHeight),
                 baseCornerRadius: cornerRadius,
@@ -570,19 +584,35 @@ struct BubbleView: View {
                 morphProgress: morphProgress
             )
             
-            let currentBlurRadius = layout.blurRadius
+            // During read→thinking, force blur and alpha to full strength for metaball effect
+            let currentBlurRadius = isReadToThinkingActive ? blurRadius : layout.blurRadius
             let circleTrackWidth = layout.circleTrackWidth
             let circleTrackHeight = layout.circleTrackHeight
             let circleTrackCornerRadius = layout.circleTrackCornerRadius
             let outwardProgress = layout.outwardProgress
 
             // Keep the inner rectangle locked to the circle track so it grows while the dots retract.
-            let displayWidth = layout.displaySize.width
-            let displayHeight = layout.displaySize.height
-            let displayCornerRadius = layout.displayCornerRadius
+            // During read→thinking, scale the display rectangle along with the decorative circles
+            let decorativeProgress = decorativeCirclesProgress(progress: readToThinkingAnimProgress)
+            let displayWidth: CGFloat
+            let displayHeight: CGFloat
+            let displayCornerRadius: CGFloat
+            
+            if isReadToThinkingActive {
+                // Scale rectangle with decorative circles animation
+                displayWidth = layout.displaySize.width * decorativeProgress
+                displayHeight = layout.displaySize.height * decorativeProgress
+                displayCornerRadius = layout.displayCornerRadius * decorativeProgress
+            } else {
+                displayWidth = layout.displaySize.width
+                displayHeight = layout.displaySize.height
+                displayCornerRadius = layout.displayCornerRadius
+            }
+            
             let canvasWidth = layout.canvasSize.width
             let canvasHeight = layout.canvasSize.height
-            let alphaThresholdMin = layout.alphaThreshold
+            // During read→thinking, force alpha threshold to full strength for metaball effect
+            let alphaThresholdMin = isReadToThinkingActive ? 0.2 : layout.alphaThreshold
 
             // Size oscillation progress (3 second cycle)
             let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
@@ -629,9 +659,26 @@ struct BubbleView: View {
             )
 
             // Movement progress - circles complete one full loop every 10 seconds
-            let movementProgress = CGFloat(elapsed / 10.0).truncatingRemainder(dividingBy: 1.0)
+            let baseMovementProgress = CGFloat(elapsed / 10.0).truncatingRemainder(dividingBy: 1.0)
+            
+            // During read→thinking, add damped velocity offset for clockwise motion
+            let movementProgress: CGFloat
+            if isReadToThinkingActive {
+                // Start with high velocity, decay to normal speed
+                // Use exponential decay for smooth deceleration
+                let velocityMultiplier: CGFloat = 3.0  // Initial speed boost
+                let decayRate: CGFloat = 5.0  // How quickly it slows down
+                let velocityOffset = velocityMultiplier * (1 - decorativeProgress) * exp(-decayRate * decorativeProgress)
+                
+                // Add the velocity offset to movement progress (clockwise direction)
+                let adjustedProgress = (baseMovementProgress + velocityOffset).truncatingRemainder(dividingBy: 1.0)
+                movementProgress = adjustedProgress
+            } else {
+                movementProgress = baseMovementProgress
+            }
 
-            // Calculate positions for each circle along the rounded rectangle path
+            // Calculate positions for each circle along the FULL rounded rectangle path
+            // Always use the full path - we'll scale positions from center later
             let positions = Self.calculatePositions(
                 diameters: animatedDiameters,
                 movementProgress: movementProgress,
@@ -646,12 +693,33 @@ struct BubbleView: View {
                 y: circleTrackHeight / 2
             )
 
-            let morphedPositions = positions.map { point in
-                interpolate(centerPoint, to: point, progress: outwardProgress)
-            }
-
-            let morphedDiameters = animatedDiameters.map { diameter in
-                max(0, diameter * outwardProgress)
+            // For read→thinking: scale positions uniformly from center
+            // For thinking→talking morph: interpolate from positions to center
+            let morphedPositions: [CGPoint]
+            let morphedDiameters: [CGFloat]
+            
+            if isReadToThinkingActive {
+                // During read→thinking, scale entire coordinate system from center
+                // This maintains relative positions and creates smooth outward growth
+                morphedPositions = positions.map { point in
+                    let offset = CGPoint(x: point.x - centerPoint.x, y: point.y - centerPoint.y)
+                    let scaledOffset = CGPoint(x: offset.x * decorativeProgress, y: offset.y * decorativeProgress)
+                    return CGPoint(x: centerPoint.x + scaledOffset.x, y: centerPoint.y + scaledOffset.y)
+                }
+                
+                // Scale circle sizes
+                morphedDiameters = animatedDiameters.map { diameter in
+                    max(0, diameter * decorativeProgress)
+                }
+            } else {
+                // Normal thinking→talking morph behavior
+                morphedPositions = positions.map { point in
+                    interpolate(centerPoint, to: point, progress: outwardProgress)
+                }
+                
+                morphedDiameters = animatedDiameters.map { diameter in
+                    max(0, diameter * outwardProgress)
+                }
             }
 
             // Canvas with metaball effect
@@ -732,6 +800,19 @@ struct BubbleView: View {
         .onChange(of: mode) { oldMode, newMode in
             let target = (newMode.isThinking || newMode.isRead) ? CGFloat(0) : CGFloat(1)
             startModeAnimation(target: target)
+            
+            // Start read→thinking animation when transitioning from read to thinking
+            if oldMode.isRead && newMode.isThinking {
+                readToThinkingStart = Date()
+                // Schedule cleanup after animation completes
+                DispatchQueue.main.asyncAfter(deadline: .now() + Self.readToThinkingDuration) {
+                    self.readToThinkingStart = nil
+                }
+            } else if !newMode.isThinking {
+                // Reset read→thinking animation if we're no longer in thinking mode
+                readToThinkingStart = nil
+            }
+            
             // When transitioning from thinking to talking, update rectangle transition
             // to use single-line height during morph
             if (oldMode.isThinking || oldMode.isRead) && newMode.isTalking {
@@ -743,36 +824,44 @@ struct BubbleView: View {
     @ViewBuilder
     /// Decorative bubble tail that switches layouts depending on the current mode.
     private var tailView: some View {
-        let isThinking = mode.isThinking || mode.isRead
-        let isInbound = messageType.isInbound
-
-        // Additional offsets for talking mode - mirrored for inbound/outbound
-        let talkingXOffset: CGFloat = isInbound ? 3 : -3
-        let thinkingXOffset: CGFloat = isInbound ? 15 : -15
-
-        ZStack(alignment: tailAlignment) {
-            Image(.cartouche)
-                .resizable()
-                .frame(width: 15, height: 15)
-                .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
-                .offset(x: tailOffset.x, y: tailOffset.y)
-                .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
-                .foregroundStyle(color)
-                .opacity(showTail ? 1 : 0)
-                .animation(.spring(duration: 0.3).delay(0.2), value: mode)
+        TimelineView(.animation) { timeline in
+            let now = timeline.date
+            let readToThinkingAnimProgress = readToThinkingProgress(at: now)
+            let tailScale = mode.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
             
-            // Thinking bubble tail
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
-                .offset(
-                    x: tailAlignment == .bottomLeading ? 4 : -4,
-                    y: 21
-                )
-                .offset(x: 0, y: -13)
-                .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
-                .animation(.easeIn(duration: 0.2), value: mode)
-                .opacity(messageType.isInbound ? 1 : 0)
+            let isThinking = mode.isThinking || mode.isRead
+            let isInbound = messageType.isInbound
+
+            // Additional offsets for talking mode - mirrored for inbound/outbound
+            let talkingXOffset: CGFloat = isInbound ? 3 : -3
+            let thinkingXOffset: CGFloat = isInbound ? 15 : -15
+
+            ZStack(alignment: tailAlignment) {
+                // Talking bubble tail - only visible in talking mode
+                Image(.cartouche)
+                    .resizable()
+                    .frame(width: 15, height: 15)
+                    .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
+                    .offset(x: tailOffset.x, y: tailOffset.y)
+                    .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
+                    .foregroundStyle(color)
+                    .opacity(showTail && mode.isTalking ? 1 : 0)
+                    .animation(.spring(duration: 0.3).delay(0.2), value: mode)
+                
+                // Thinking bubble tail
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(tailScale, anchor: .center)
+                    .offset(
+                        x: tailAlignment == .bottomLeading ? 4 : -4,
+                        y: 21
+                    )
+                    .offset(x: 0, y: -13)
+                    .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
+                    .animation(.easeIn(duration: 0.2), value: mode)
+                    .opacity(messageType.isInbound ? 1 : 0)
+            }
         }
     }
 
@@ -815,6 +904,76 @@ struct BubbleView: View {
         // cosine-based ease for smooth acceleration/deceleration
         let clamped = min(max(value, 0), 1)
         return CGFloat(0.5 - 0.5 * cos(Double(clamped) * Double.pi))
+    }
+
+    /// Returns the progress for the read→thinking animation at a given timestamp.
+    /// - Returns: A value from 0 to 1, where 0 is the start and 1 is complete.
+    private func readToThinkingProgress(at now: Date) -> CGFloat {
+        guard let start = readToThinkingStart else { return 1 }
+        let elapsed = now.timeIntervalSince(start)
+        if elapsed <= 0 {
+            return 0
+        }
+        if elapsed >= Self.readToThinkingDuration {
+            return 1
+        }
+        return CGFloat(elapsed / Self.readToThinkingDuration)
+    }
+
+    /// Returns the tail circle scale for the read→thinking animation.
+    /// - Parameter progress: Overall animation progress from 0 to 1.
+    /// - Returns: Scale value from 0 to 1.
+    private func tailCircleScale(progress: CGFloat) -> CGFloat {
+        // Tail animates from 0 to 0.2 of total timeline (0.2s out of 0.4s)
+        let tailProgress = min(max(progress / 0.5, 0), 1) // 0.5 = 0.2s / 0.4s
+        // Apply bouncy spring easing manually (simplified spring curve)
+        return tailProgress
+    }
+
+    /// Returns the decorative circles scale/position progress with bouncy spring easing.
+    /// Uses proper spring physics based on duration and damping ratio.
+    /// - Parameter progress: Overall animation progress from 0 to 1.
+    /// - Returns: Scale value from 0 to 1.
+    private func decorativeCirclesProgress(progress: CGFloat) -> CGFloat {
+        // Decorative circles start at decorativeCirclesDelay (0.1s) and run for decorativeCirclesDuration (0.3s)
+        let startPoint = decorativeCirclesDelay / Self.readToThinkingDuration
+        if progress < startPoint {
+            return 0
+        }
+        let normalizedProgress = (progress - startPoint) / (1 - startPoint)
+        let elapsed = normalizedProgress * decorativeCirclesDuration
+        
+        // Spring physics parameters (matching SwiftUI's approach)
+        let dampingRatio: CGFloat = 0.6  // Controls bounciness (< 1 = bouncy, 1 = no overshoot, > 1 = slow)
+        let response: CGFloat = decorativeCirclesDuration  // Response time matches animation duration
+        
+        // Calculate natural frequency (rad/s)
+        let omega0 = 2 * .pi / response
+        
+        // For underdamped springs (dampingRatio < 1), calculate damped frequency
+        if dampingRatio < 1 {
+            let omegaD = omega0 * sqrt(1 - dampingRatio * dampingRatio)
+            
+            // Spring equation for underdamped case (normalized from 0 to 1)
+            let envelope = exp(-dampingRatio * omega0 * elapsed)
+            let A: CGFloat = 1  // Initial displacement
+            let B = (dampingRatio * omega0 * A) / omegaD
+            let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
+            
+            return min(max(1 - envelope * oscillation, 0), 1)
+        } else if dampingRatio == 1 {
+            // Critically damped (no overshoot)
+            let A: CGFloat = 1 //Will never be executed
+            let B = omega0 * A
+            return min(max(1 - (A + B * elapsed) * exp(-omega0 * elapsed), 0), 1)
+        } else {
+            // Overdamped (slow, no overshoot)
+            let r1 = -omega0 * (dampingRatio + sqrt(dampingRatio * dampingRatio - 1)) //Will never be executed
+            let r2 = -omega0 * (dampingRatio - sqrt(dampingRatio * dampingRatio - 1))
+            let A = -r2 / (r1 - r2)
+            let B: CGFloat = 1 - A
+            return min(max(1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed)), 0), 1)
+        }
     }
 
 }

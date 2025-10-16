@@ -397,13 +397,16 @@ struct MessageBubbleView: View {
     }
     
     private func startReadToThinkingTransition() {
-        // TODO: This will be replaced with a morph animation later
-        // For now, use a fade transition
+        // Delay typing indicator until read→thinking animation completes
         isWidthLocked = true
         showTalkingContent = false
         includeTalkingTextInLayout = false
-        withAnimation(.smooth(duration: 0.4)) {
-            showTypingIndicatorContent = true
+        
+        // Wait for the bubble animation to complete before showing typing indicator
+        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.readToThinkingDuration / 3) {
+            withAnimation(.smooth(duration: 0.3)) {
+                self.showTypingIndicatorContent = true
+            }
         }
     }
     
@@ -553,7 +556,7 @@ private struct MessageBubblePreviewContainer: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            if let bubbleMode {
+            if bubbleMode != nil {
                 MessageBubbleView(
                     message: currentMessage,
                     showTail: true,
