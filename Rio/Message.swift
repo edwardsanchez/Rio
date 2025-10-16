@@ -223,8 +223,11 @@ struct MessageBubbleView: View {
                     .frame(width: message.bubbleMode.isRead ? 20 : 40, height: message.bubbleMode.isRead ? 20 : 40)
                     .clipShape(.circle)
                     .frame(height: message.bubbleMode.isRead ? 0 : 40)
+                    .scaleEffect(isNew && message.bubbleMode.isRead ? 0 : 1)
                     .offset(y: 10)
                     .offset(x: message.bubbleMode.isRead ? 9 : 0)
+                    .animation(.bouncy(duration: 0.3), value: message.bubbleMode)
+                    .animation(.bouncy(duration: 0.3), value: isNew)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -333,6 +336,10 @@ struct MessageBubbleView: View {
             startTalkingTransition()
         } else if oldMode == .talking && newMode == .thinking {
             startThinkingState()
+        } else if oldMode == .read && newMode == .thinking {
+            startReadToThinkingTransition()
+        } else if oldMode == .read && newMode == .talking {
+            startReadToTalkingTransition()
         } else {
             configureInitialContentState()
         }
@@ -369,6 +376,37 @@ struct MessageBubbleView: View {
         includeTalkingTextInLayout = false
         withAnimation(.easeInOut(duration: 0.2)) {
             showTypingIndicatorContent = true
+        }
+    }
+    
+    private func startReadToThinkingTransition() {
+        // TODO: This will be replaced with a morph animation later
+        // For now, use a fade transition
+        isWidthLocked = true
+        showTalkingContent = false
+        includeTalkingTextInLayout = false
+        withAnimation(.smooth(duration: 0.4)) {
+            showTypingIndicatorContent = true
+        }
+    }
+    
+    private func startReadToTalkingTransition() {
+        // Quick opacity fade when going from read to talking (fast response)
+        if message.text.isEmpty {
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
+            return
+        }
+        
+        isWidthLocked = false
+        showTypingIndicatorContent = false
+        includeTalkingTextInLayout = true
+        
+        // Quick fade in without offset animation
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showTalkingContent = true
         }
     }
 
@@ -428,71 +466,109 @@ struct MessageBubbleView: View {
 }
 
 private struct MessageBubblePreviewContainer: View {
-    @State private var isThinking = true
+    @State private var bubbleMode: BubbleMode? = .thinking
     @State private var newMessageId: UUID? = nil
 
     private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
-    private var thinkingMessage: Message {
-        Message(
-            text: "",
-            user: sampleUser,
-            isTypingIndicator: true,
-            bubbleMode: .thinking
-        )
-    }
-
-    private var talkingMessageShort: Message {
-        Message(
-            text: "How are you?",
-            user: sampleUser,
-            bubbleMode: .talking
-        )
+    
+    private var currentMessage: Message {
+        switch bubbleMode {
+        case .read:
+            Message(
+                text: "",
+                user: sampleUser,
+                isTypingIndicator: true,
+                bubbleMode: .read
+            )
+        case .thinking:
+            Message(
+                text: "",
+                user: sampleUser,
+                isTypingIndicator: true,
+                bubbleMode: .thinking
+            )
+        case .talking:
+            Message(
+                text: "How are you?",
+                user: sampleUser,
+                bubbleMode: .talking
+            )
+        case .none:
+            // Placeholder - won't be shown
+            Message(
+                text: "",
+                user: sampleUser,
+                bubbleMode: .talking
+            )
+        }
     }
     
-    private var talkingMessageLong: Message {
-        Message(
-            text: "How are you? It's been so very long! We should catch up in person soon!",
-            user: sampleUser,
-            bubbleMode: .talking
-        )
+    private var isNew: Bool {
+        currentMessage.id == newMessageId
     }
 
     var body: some View {
         VStack(spacing: 24) {
-            MessageBubbleView(
-                message: isThinking ? thinkingMessage : talkingMessageShort,
-                showTail: true,
-                isNew: false,
-                inputFieldFrame: .zero,
-                scrollViewFrame: .zero,
-                newMessageId: $newMessageId,
-                scrollVelocity: 0,
-                scrollPhase: .idle,
-                visibleMessageIndex: 0,
-                theme: .defaultTheme
-            )
-            
-            MessageBubbleView(
-                message: isThinking ? thinkingMessage : talkingMessageLong,
-                showTail: true,
-                isNew: false,
-                inputFieldFrame: .zero,
-                scrollViewFrame: .zero,
-                newMessageId: $newMessageId,
-                scrollVelocity: 0,
-                scrollPhase: .idle,
-                visibleMessageIndex: 0,
-                theme: .defaultTheme
-            )
-            .frame(height: 200)
-            .hidden()
+            if bubbleMode != nil {
+                MessageBubbleView(
+                    message: currentMessage,
+                    showTail: true,
+                    isNew: isNew,
+                    inputFieldFrame: .zero,
+                    scrollViewFrame: .zero,
+                    newMessageId: $newMessageId,
+                    scrollVelocity: 0,
+                    scrollPhase: .idle,
+                    visibleMessageIndex: 0,
+                    theme: .defaultTheme
+                )
+                .frame(height: 100)
+            } else {
+                // Empty space when no message
+                Color.clear
+                    .frame(height: 100)
+            }
 
-            Button(isThinking ? "Switch to talking" : "Switch to thinking") {
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    isThinking.toggle()
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Button("None") {
+                        bubbleMode = nil
+                        newMessageId = nil
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == nil ? .blue : .gray)
+                    
+                    Button("Read") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .read
+                        if wasNone {
+                            newMessageId = currentMessage.id
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .read ? .blue : .gray)
+                    
+                    Button("Thinking") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .thinking
+                        if wasNone {
+                            newMessageId = currentMessage.id
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .thinking ? .blue : .gray)
+                    
+                    Button("Talking") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .talking
+                        if wasNone {
+                            newMessageId = currentMessage.id
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .talking ? .blue : .gray)
                 }
             }
-            .buttonStyle(.borderedProminent)
             .padding(.top, 50)
         }
         .padding()

@@ -54,6 +54,8 @@ struct ChatInputView: View {
             .onDisappear {
                 autoReplyTimer?.invalidate()
                 autoReplyTimer = nil
+                readToThinkingTimer?.invalidate()
+                readToThinkingTimer = nil
                 isInboundResponsePending = false
                 currentTypingIndicatorId = nil
             }
@@ -220,6 +222,8 @@ struct ChatInputView: View {
         // Cancel any existing timer
         autoReplyTimer?.invalidate()
         autoReplyTimer = nil
+        readToThinkingTimer?.invalidate()
+        readToThinkingTimer = nil
 
         // Remove any existing typing indicator
         if let typingIndicatorId = currentTypingIndicatorId,
@@ -268,30 +272,57 @@ struct ChatInputView: View {
         // Cancel existing timer if any (but don't remove existing typing indicator)
         autoReplyTimer?.invalidate()
 
-        // Stage 1: Wait 1 second before showing typing indicator
+        // Stage 1: Wait 1 second before showing typing indicator in .read state
         autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
             // Only show typing indicator if no typing indicator is currently displayed
             let hasExistingTypingIndicator = messages.contains { $0.isTypingIndicator }
 
             if !hasExistingTypingIndicator {
-                // Stage 2: Show typing indicator for 10 seconds
+                // Stage 2: Show typing indicator in .read state
                 let typingIndicatorMessage = Message(
                     text: "", // Text is not used for typing indicator
                     user: randomUser,
                     isTypingIndicator: true,
-                    bubbleMode: .thinking
+                    bubbleMode: .read
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
                 messages.append(typingIndicatorMessage)
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
                 chatData.setTypingIndicator(true, for: randomUser.id, in: chat.id)
+                
+                // Schedule transition from .read to .thinking after 3 seconds
+                readToThinkingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                    if let indicatorId = currentTypingIndicatorId,
+                       let indicatorIndex = messages.firstIndex(where: { $0.id == indicatorId }) {
+                        let currentIndicator = messages[indicatorIndex]
+                        // Only transition if still in .read state
+                        if currentIndicator.bubbleMode == .read {
+                            let updatedIndicator = Message(
+                                id: currentIndicator.id,
+                                text: currentIndicator.text,
+                                user: currentIndicator.user,
+                                date: currentIndicator.date,
+                                isTypingIndicator: true,
+                                replacesTypingIndicator: false,
+                                bubbleMode: .thinking
+                            )
+                            messages[indicatorIndex] = updatedIndicator
+                            chatData.updateMessage(updatedIndicator, in: chat.id)
+                        }
+                    }
+                    readToThinkingTimer = nil
+                }
             }
 
-            // Stage 3: After 10 seconds, replace typing indicator with final message
-            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+            // Stage 3: After 5 more seconds (8 total), replace typing indicator with final message
+            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: false) { _ in
                 let indicatorWasVisible = chatData.isTypingIndicatorVisible(for: randomUser.id, in: chat.id)
 
+                // Cancel read-to-thinking timer since we're going straight to talking
+                readToThinkingTimer?.invalidate()
+                readToThinkingTimer = nil
+                
                 let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
 
                 if let typingIndicatorId = currentTypingIndicatorId,
