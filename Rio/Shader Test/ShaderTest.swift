@@ -25,6 +25,7 @@ struct ShaderTestView: View {
     @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
     @State private var growth: CGFloat = 0.65  // 0.0 = no growth, 1.0 = double size
     @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
+    @State private var edgeVelocityBoost: CGFloat = 0.0  // 0.0 = uniform velocity, 1.0 = strong edge boost
     @State private var forceSquarePixels: Bool = false
     
     private let outboundAnimationWidth: CGFloat? = nil
@@ -66,6 +67,7 @@ struct ShaderTestView: View {
                     .float(turbulence),
                     .float(growth),
                     .float(growthVariance),
+                    .float(edgeVelocityBoost),
                     .float(forceSquarePixels ? 1.0 : 0.0)
                 ),
                 maxSampleOffset: maxSampleOffsetSize
@@ -162,6 +164,15 @@ struct ShaderTestView: View {
                 }
                 .padding(.horizontal)
                 
+                VStack(spacing: 8) {
+                    Text("Edge Velocity Boost: \(String(format: "%.2f", edgeVelocityBoost))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Slider(value: $edgeVelocityBoost, in: 0...1)
+                }
+                .padding(.horizontal)
+                
                 Toggle("Force Square Pixels", isOn: $forceSquarePixels)
                     .padding(.horizontal)
                     .padding(.top, 4)
@@ -198,9 +209,10 @@ struct ShaderTestView: View {
         let speedFactor = 1.0 + speedVariance
         let turbulenceFactor = 1.0 + turbulence
         let growthFactor = 1.0 + growth * (1.0 + growthVariance)
+        let edgeFactor = 1.0 + edgeVelocityBoost * 1.5
         
-        let widthOffset = baseOffset * speedFactor * 2.0 * turbulenceFactor * growthFactor
-        let heightOffset = baseOffset * speedFactor * 2.5 * turbulenceFactor * growthFactor
+        let widthOffset = baseOffset * speedFactor * 2.0 * turbulenceFactor * growthFactor * edgeFactor
+        let heightOffset = baseOffset * speedFactor * 2.5 * turbulenceFactor * growthFactor * edgeFactor
         
         return CGSize(width: widthOffset, height: heightOffset)
     }

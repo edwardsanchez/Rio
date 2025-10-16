@@ -51,10 +51,12 @@ float2 turbulence2D(float2 p, float time) {
     float turbulence,
     float growth,
     float growthVariance,
+    float edgeVelocityBoost,
     float forceSquarePixels
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
+    float maxDistance = length(layerSize * 0.5);
     
     float2 offsetFromCenter = position - layerCenter;
     float distanceFromCenter = length(offsetFromCenter);
@@ -79,6 +81,8 @@ float2 turbulence2D(float2 p, float time) {
             // Calculate expected gravity offset for this block
             float2 guessOffset = guessBlockCenter - layerCenter;
             float guessDistance = length(guessOffset);
+            float guessNormalizedDistance = (maxDistance > 0.001) ? clamp(guessDistance / maxDistance, 0.0, 1.0) : 0.0;
+            float guessEdgeFactor = 1.0 + edgeVelocityBoost * guessNormalizedDistance * guessNormalizedDistance;
             float guessGravityOffset = explosionSpacing * guessDistance * gravity * 0.8;
             
             // Calculate expected turbulence offset for this block
@@ -87,7 +91,7 @@ float2 turbulence2D(float2 p, float time) {
                 // Sample the same static turbulence field used during the forward pass
                 float turbulenceTime = 0.0;
                 float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
-                float turbulenceAmount = turbulence * explosionSpacing * 30.0;
+                float turbulenceAmount = turbulence * explosionSpacing * 30.0 * guessEdgeFactor;
                 guessTurbulenceOffset = turbulenceDir * turbulenceAmount;
             }
             
@@ -96,7 +100,8 @@ float2 turbulence2D(float2 p, float time) {
             positionWithoutEffects.y -= guessGravityOffset;
             positionWithoutEffects -= guessTurbulenceOffset;
             float2 offsetWithoutEffects = positionWithoutEffects - layerCenter;
-            invPosition = layerCenter + (offsetWithoutEffects / (1.0 + explosionSpacing * guessSpeedMult));
+            float effectiveExplosion = explosionSpacing * guessSpeedMult * guessEdgeFactor;
+            invPosition = layerCenter + (offsetWithoutEffects / (1.0 + effectiveExplosion));
         }
     }
     
@@ -126,18 +131,20 @@ float2 turbulence2D(float2 p, float time) {
             
             float2 candidateOffset = candidateCenter - layerCenter;
             float candidateDistance = length(candidateOffset);
+            float candidateNormalizedDistance = (maxDistance > 0.001) ? clamp(candidateDistance / maxDistance, 0.0, 1.0) : 0.0;
+            float candidateEdgeFactor = 1.0 + edgeVelocityBoost * candidateNormalizedDistance * candidateNormalizedDistance;
             float2 candidateExplodedCenter = candidateCenter;
             
             if (candidateDistance > 0.001 && explosionSpacing > 0.001) {
                 float safeDistance = max(candidateDistance, 1e-5);
                 float2 candidateDir = candidateOffset / safeDistance;
-                candidateExplodedCenter = candidateCenter + (candidateDir * candidateDistance * explosionSpacing * candidateSpeedMult);
+                candidateExplodedCenter = candidateCenter + (candidateDir * candidateDistance * explosionSpacing * candidateSpeedMult * candidateEdgeFactor);
                 
                 if (turbulence > 0.001) {
                     // Sample a static turbulence field so particles drift consistently between frames
                     float turbulenceTime = 0.0;
                     float2 turbulenceOffset = turbulence2D(candidateCenter, turbulenceTime);
-                    float turbulenceAmount = turbulence * explosionSpacing * 30.0;
+                    float turbulenceAmount = turbulence * explosionSpacing * 30.0 * candidateEdgeFactor;
                     candidateExplodedCenter += turbulenceOffset * turbulenceAmount;
                 }
                 
