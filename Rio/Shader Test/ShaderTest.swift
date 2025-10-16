@@ -35,6 +35,7 @@ struct ShaderTestView: View {
     
     // Controllable parameters
     private let maxExplosionSpread: CGFloat = 0.4  // How much spacing increases between particles
+    private let pinchDuration: CGFloat = 0.05  // Duration of the initial pinch effect (as % of animation, 0.05 = 5%)
     
     init(message: Message? = nil, showTail: Bool = true) {
         let defaultMessage = Message(
@@ -73,7 +74,8 @@ struct ShaderTestView: View {
                     .float(forceSquarePixels ? 1.0 : 0.0),
                     .float(sliderValue),
                     .float(fadeStart),
-                    .float(fadeVariance)
+                    .float(fadeVariance),
+                    .float(pinchDuration)
                 ),
                 maxSampleOffset: maxSampleOffsetSize
             )
@@ -83,7 +85,7 @@ struct ShaderTestView: View {
             VStack(spacing: 16) {
                 HStack(spacing: 16) {
                     Button("Explode") {
-                        withAnimation(.snappy(duration: 0.6)) {
+                        withAnimation(.smooth(duration: 0.8)) {
                             sliderValue = 1.0
                         }
                     }

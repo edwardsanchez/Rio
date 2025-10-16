@@ -55,18 +55,34 @@ float2 turbulence2D(float2 p, float time) {
     float forceSquarePixels,
     float animationProgress,
     float fadeStart,
-    float fadeVariance
+    float fadeVariance,
+    float pinchDuration
 ) {
     // Calculate the center of the explosion (as percentage of layer size)
     float2 layerCenter = layerSize * explosionCenter;
     float maxDistance = length(layerSize * 0.5);
     
-    float2 offsetFromCenter = position - layerCenter;
+    // Apply pinch effect at the start of animation
+    // Pinch toward the explosion center for the first pinchDuration% of animation
+    float2 pinchPosition = position;
+    if (animationProgress < pinchDuration) {
+        // Calculate pinch intensity (0.95 = 5% smaller at peak)
+        float pinchIntensity = 1.2;
+        // Gradually increase pinch from 1.0 to pinchIntensity over the pinch duration
+        float pinchProgress = animationProgress / pinchDuration;
+        float currentPinch = 1.0 - (1.0 - pinchIntensity) * pinchProgress;
+        
+        // Scale position toward the explosion center
+        float2 offsetFromExplosionCenter = position - layerCenter;
+        pinchPosition = layerCenter + offsetFromExplosionCenter * currentPinch;
+    }
+    
+    float2 offsetFromCenter = pinchPosition - layerCenter;
     float distanceFromCenter = length(offsetFromCenter);
     
     // Iterative inverse mapping with speed variance, gravity, and turbulence convergence
     // Start with a guess, compute its speed variance, refine the inverse
-    float2 invPosition = position;
+    float2 invPosition = pinchPosition;
     if (distanceFromCenter > 0.001 && explosionSpacing > 0.001) {
         // Initial guess ignoring variance, gravity, and turbulence
         invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
@@ -99,7 +115,7 @@ float2 turbulence2D(float2 p, float time) {
             }
             
             // Refine inverse by removing explosion, gravity, and turbulence effects
-            float2 positionWithoutEffects = position;
+            float2 positionWithoutEffects = pinchPosition;
             positionWithoutEffects.y -= guessGravityOffset;
             positionWithoutEffects -= guessTurbulenceOffset;
             float2 offsetWithoutEffects = positionWithoutEffects - layerCenter;
@@ -155,7 +171,7 @@ float2 turbulence2D(float2 p, float time) {
                 candidateExplodedCenter.y += gravityFall;
             }
             
-            float pixelDistance = length(position - candidateExplodedCenter);
+            float pixelDistance = length(pinchPosition - candidateExplodedCenter);
             if (pixelDistance < bestPixelDistance) {
                 bestPixelDistance = pixelDistance;
                 bestOriginalBlockCenter = candidateCenter;
@@ -176,7 +192,7 @@ float2 turbulence2D(float2 p, float time) {
     half4 color = layer.sample(bestOriginalBlockCenter);
     
     // Step 4: Check if current pixel is within the circle at the EXPLODED position
-    float2 offsetFromExplodedCenter = position - explodedBlockCenter;
+    float2 offsetFromExplodedCenter = pinchPosition - explodedBlockCenter;
     float distanceFromExplodedCenter = length(offsetFromExplodedCenter);
     
     // Calculate blend factor: 0 = square, 1 = circle
