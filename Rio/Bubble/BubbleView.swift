@@ -748,6 +748,7 @@ struct BubbleView: View {
                 }
             }
             .frame(width: canvasWidth, height: canvasHeight)
+            .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: canvasWidth, height: canvasHeight))
             .overlay(alignment: tailAlignment) {
                 tailView
             }
@@ -768,7 +769,6 @@ struct BubbleView: View {
                     }
                     .hidden()
             }
-            .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: canvasWidth, height: canvasHeight))
             // Apply explosion shader when transitioning from thinking to read
 
         }
@@ -843,11 +843,25 @@ struct BubbleView: View {
 
             // Check if we're in explosion animation (computed internally)
             let isExploding = isInternallyExploding(at: now)
+            let explosionProgress = thinkingToReadExplosionProgress(at: now)
 
             // During explosion, keep tail in thinking position
             // Otherwise use normal logic (read and thinking both use thinking tail position)
             let isThinking = mode.isThinking || (mode.isRead && !isExploding) || isExploding
             let isInbound = messageType.isInbound
+
+            // Calculate fade-out opacity for thinking→read transition
+            // When exploding (thinking→read), fade out the circle
+            // Otherwise, use full opacity for inbound messages
+            let thinkingCircleOpacity: CGFloat = {
+                if isExploding {
+                    // Fade out during explosion
+                    return 1 - explosionProgress
+                } else {
+                    // Normal opacity based on message type
+                    return messageType.isInbound ? 1 : 0
+                }
+            }()
 
             // Additional offsets for talking mode - mirrored for inbound/outbound
             let talkingXOffset: CGFloat = isInbound ? 3 : -3
@@ -877,6 +891,7 @@ struct BubbleView: View {
                     .offset(x: 0, y: -13)
                     .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
                     .animation(.easeIn(duration: 0.2), value: mode)
+                    .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: 8, height: 8))
                     .opacity(messageType.isInbound ? 1 : 0)
             }
         }

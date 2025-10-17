@@ -32,13 +32,13 @@ private struct ExplosionEffectModifier: ViewModifier {
                         .float(2.0), // Fixed pixel size
                         .float2(canvasSize),
                         .float(progress),
-                        .float2(0.5, 0.57), // explosionCenter
+                        .float2(0.5, 0.5), // explosionCenter
                         .float(0.5), // speedVariance
                         .float(1.0), // gravity
                         .float(0.2), // turbulence
                         .float(0.65), // growth
                         .float(0.65), // growthVariance
-                        .float(0.8), // edgeVelocityBoost
+                        .float(2), // edgeVelocityBoost
                         .float(0.0), // forceSquarePixels (false)
                         .float(0.4), // maxExplosionSpread
                         .float(0.3), // fadeStart
