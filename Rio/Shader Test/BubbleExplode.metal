@@ -215,7 +215,6 @@ float2 turbulence2D(float2 p, float time) {
         growthMult = baseGrowth * megaScale;
     } else {
         // Regular particles: highly varied growth from 0.3x to 5x
-        float varianceAmount = growthVariance * explosionSpacing;
         // Use cubic distribution to create more interesting variance
         float varianceFactor = pow(growthSeed, 1.5); // Skew toward smaller sizes
         float growthVariation = 0.3 + varianceFactor * 4.7; // Range: 0.3 to 5.0
