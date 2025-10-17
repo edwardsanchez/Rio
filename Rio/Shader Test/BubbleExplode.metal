@@ -203,10 +203,24 @@ float2 turbulence2D(float2 p, float time) {
     
     // Calculate growth multiplier for this particle using the best matching seed center
     float growthSeed = fract(sin(dot(bestSeedBlockCenter, float2(73.156, 41.923))) * 37281.6547);
+    float sizeVarianceSeed = fract(sin(dot(bestSeedBlockCenter, float2(41.234, 89.567))) * 51923.8274);
+    
     float baseGrowth = 1.0 + (growth * explosionSpacing);
-    float varianceAmount = growthVariance * explosionSpacing;
-    float growthVariation = 1.0 + (growthSeed * 2.0 - 1.0) * varianceAmount;
-    float growthMult = baseGrowth * growthVariation;
+    float growthMult;
+    
+    // 10% chance of being a "mega" particle (10x size)
+    if (sizeVarianceSeed < 0.1) {
+        // Mega particles: 8x to 12x the base growth
+        float megaScale = 8.0 + (growthSeed * 4.0);
+        growthMult = baseGrowth * megaScale;
+    } else {
+        // Regular particles: highly varied growth from 0.3x to 5x
+        float varianceAmount = growthVariance * explosionSpacing;
+        // Use cubic distribution to create more interesting variance
+        float varianceFactor = pow(growthSeed, 1.5); // Skew toward smaller sizes
+        float growthVariation = 0.3 + varianceFactor * 4.7; // Range: 0.3 to 5.0
+        growthMult = baseGrowth * growthVariation;
+    }
     
     // Sample color from the original block center
     half4 color = layer.sample(bestOriginalBlockCenter);
@@ -235,6 +249,10 @@ float2 turbulence2D(float2 p, float time) {
     // Calculate per-particle fade-out
     // Generate a unique fade seed for each particle
     float fadeSeed = fract(sin(dot(bestSeedBlockCenter, float2(91.237, 58.164))) * 28491.3721);
+    float opacitySeed = fract(sin(dot(bestSeedBlockCenter, float2(23.891, 67.432))) * 19384.2156);
+    
+    // Add significant per-particle opacity variance (0.3 to 1.0 range)
+    float baseOpacity = 0.3 + (pow(opacitySeed, 0.8) * 0.7);
     
     // Calculate when this specific particle should start fading
     // The variance is scaled by (1.0 - fadeStart) to ensure all particles reach full transparency by animationProgress = 1.0
@@ -243,8 +261,8 @@ float2 turbulence2D(float2 p, float time) {
     // Calculate fade opacity using smoothstep for a smooth fade
     float fadeOpacity = 1.0 - smoothstep(particleFadeStart, 1.0, animationProgress);
     
-    // Apply fade to the final color alpha
-    color.a *= half(fadeOpacity);
+    // Apply both base opacity variance and fade to the final color alpha
+    color.a *= half(baseOpacity * fadeOpacity);
     
     return color;
 }
