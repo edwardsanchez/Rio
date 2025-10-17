@@ -1009,7 +1009,7 @@ struct BubbleView: View {
 //        }
         
         // Fallback (should never be reached with dampingRatio < 1)
-        return normalizedProgress >= 0.5 ? 1 : 0
+//        return normalizedProgress >= 0.5 ? 1 : 0
     }
 
 }
