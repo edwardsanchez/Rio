@@ -1,0 +1,6 @@
+Target dependency graph (3 targets)
+Target 'Rio' in project 'Rio'
+➜ Explicit dependency on target 'SVGPath' in project 'SVGPath'
+Target 'SVGPath' in project 'SVGPath'
+➜ Explicit dependency on target 'SVGPath' in project 'SVGPath'
+Target 'SVGPath' in project 'SVGPath' (no dependencies)

@@ -1,0 +1,12 @@
+{
+  "/Users/edwardsanchez/Sources/Rio/Rio/Shader Test/BubbleExplosionTest.swift" : {
+    "abi-baseline-json" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio.abi.json",
+    "const-values" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.swiftconstvalues",
+    "dependencies" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.d",
+    "diagnostics" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.dia",
+    "objc-header" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-Swift.h",
+    "swiftdoc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio.swiftdoc",
+    "swiftmodule" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio.swiftmodule",
+    "swiftsourceinfo" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio.swiftsourceinfo"
+  }
+}

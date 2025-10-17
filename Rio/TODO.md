@@ -3,13 +3,11 @@
 ---
 
 ### Bugs
-[ ] Test transition from thinking to large bubble
 [ ] Fix bubble losing tail when it's before the date header
 [ ] Fix animation for outbound messages so they come from input field
+[ ] Solve for transition between read and talking (without going through thinking)
 
 ### New Features
-[ ] Add "read" status
-[ ] Add transitions from nothing to read, read to thinking, thinking to read, read to talking, etc.
 [ ] Ability to view photo as message
 [ ] Ability to view multiple photos - likely a caroussel
 [ ] Ability to send just emoji, without the bubble wrapper

@@ -1,0 +1,21 @@
+{
+  "" : {
+    "const-values" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary.swiftconstvalues",
+    "dependencies" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary.d",
+    "diagnostics" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary.dia",
+    "emit-module-dependencies" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary-emit-module.dia",
+    "pch" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath-primary.swiftdeps"
+  },
+  "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/Sources/SVGPath+CoreGraphics.swift" : {
+    "index-unit-output-path" : "/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath+CoreGraphics.o",
+    "llvm-bc" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath+CoreGraphics.bc",
+    "object" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath+CoreGraphics.o"
+  },
+  "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/Sources/SVGPath.swift" : {
+    "index-unit-output-path" : "/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath.o",
+    "llvm-bc" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath.bc",
+    "object" : "/Users/edwardsanchez/Library/Developer/Xcode/DerivedData/Rio-aikbunuldogtbdcsqbqplaavxpol/SourcePackages/checkouts/SVGPath/build/SVGPath.build/Release-iphoneos/SVGPath.build/Objects-normal/arm64/SVGPath.o"
+  }
+}

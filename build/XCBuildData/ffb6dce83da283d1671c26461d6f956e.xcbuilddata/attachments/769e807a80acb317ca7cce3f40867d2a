@@ -1,0 +1,4 @@
+module SVGPath {
+header "SVGPath-Swift.h"
+export *
+}

@@ -1,0 +1,126 @@
+{
+  "" : {
+    "const-values" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.swiftconstvalues",
+    "dependencies" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.d",
+    "diagnostics" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.dia",
+    "emit-module-dependencies" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary-emit-module.dia",
+    "pch" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Rio-primary.swiftdeps"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/BubbleConfiguration.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleConfiguration.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleConfiguration.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleConfiguration.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/BubbleView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ChatBubbleModifier.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatBubbleModifier.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatBubbleModifier.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatBubbleModifier.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ChatData.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatData.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatData.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatData.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ChatDetailView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatDetailView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatDetailView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatDetailView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ChatInputView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatInputView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatInputView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatInputView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ChatListView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatListView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatListView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ChatListView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/ContentView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/DateHeaderView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/DateHeaderView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/DateHeaderView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/DateHeaderView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Item.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Item.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Item.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Item.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Logger.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Logger.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Logger.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Logger.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Message.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Message.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Message.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Message.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/MessageListView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/MessageListView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/MessageListView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/MessageListView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/RioApp.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/RioApp.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/RioApp.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/RioApp.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Shader Test/BubbleExplosionTest.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleExplosionTest.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleExplosionTest.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/BubbleExplosionTest.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Shader Test/ExplosionEffectModifier.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ExplosionEffectModifier.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ExplosionEffectModifier.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/ExplosionEffectModifier.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Types.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Types.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Types.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/Types.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Typing Indicator/AnimatedCursiveTextView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/AnimatedCursiveTextView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/AnimatedCursiveTextView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/AnimatedCursiveTextView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Typing Indicator/CursiveLetter.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveLetter.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveLetter.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveLetter.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Typing Indicator/CursiveTestView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveTestView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveTestView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/CursiveTestView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Typing Indicator/PathXAnalyzer.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/PathXAnalyzer.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/PathXAnalyzer.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/PathXAnalyzer.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/Rio/Typing Indicator/TypingIndicatorView.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/TypingIndicatorView.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/TypingIndicatorView.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/TypingIndicatorView.o"
+  },
+  "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/edwardsanchez/Sources/Rio/build/Rio.build/Release-iphoneos/Rio.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}
