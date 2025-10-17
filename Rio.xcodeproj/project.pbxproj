@@ -19,6 +19,7 @@
 		6DF3150C2EA2BA3D00A0BD0F /* Exceptions for "Rio" folder in "Shader Test" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Message/BubbleExplode.metal,
 				Message/ParticleExplosion.metal,
 			);
 			target = 6DF314FF2EA2BA2F00A0BD0F /* Shader Test */;
