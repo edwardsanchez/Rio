@@ -34,24 +34,9 @@ struct Chat: Identifiable {
     }
 }
 
-// MARK: - Message Type
+// MARK: - Bubble Type
 
-enum MessageType {
-    case inbound
-    case outbound
-    
-    var isInbound: Bool {
-        self == .inbound
-    }
-    
-    var isOutbound: Bool {
-        self == .outbound
-    }
-}
-
-// MARK: - Bubble Mode
-
-enum BubbleMode {
+enum BubbleType {
     case thinking
     case talking
     case read
@@ -66,6 +51,32 @@ enum BubbleMode {
     
     var isTalking: Bool {
         self == .talking
+    }
+}
+
+// MARK: - Message Type
+
+enum MessageType {
+    case inbound(BubbleType)
+    case outbound
+    
+    var isInbound: Bool {
+        if case .inbound = self { return true }
+        return false
+    }
+    
+    var isOutbound: Bool {
+        if case .outbound = self { return true }
+        return false
+    }
+    
+    var bubbleType: BubbleType {
+        switch self {
+        case .inbound(let type):
+            return type
+        case .outbound:
+            return .talking
+        }
     }
 }
 
@@ -109,11 +120,10 @@ struct Message: Identifiable {
     let date: Date
     let isTypingIndicator: Bool
     let replacesTypingIndicator: Bool
-    let bubbleMode: BubbleMode
+    let messageType: MessageType
 
-    var messageType: MessageType {
-        // We'll determine this based on the user - for now, any user that isn't "Edward" is outbound
-        user.name == "Edward" ? .outbound : .inbound
+    var bubbleType: BubbleType {
+        messageType.bubbleType
     }
 
     init(
@@ -123,15 +133,16 @@ struct Message: Identifiable {
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
         replacesTypingIndicator: Bool = false,
-        bubbleMode: BubbleMode? = nil
+        messageType: MessageType
     ) {
         self.id = id
         self.text = text
         self.user = user
         self.date = date
-        let resolvedBubbleMode = bubbleMode ?? (isTypingIndicator ? .thinking : .talking)
-        self.bubbleMode = resolvedBubbleMode
-        self.isTypingIndicator = isTypingIndicator || resolvedBubbleMode == .thinking
         self.replacesTypingIndicator = replacesTypingIndicator
+        self.messageType = messageType
+        
+        // Update isTypingIndicator based on bubble type
+        self.isTypingIndicator = isTypingIndicator || messageType.bubbleType.isThinking
     }
 }

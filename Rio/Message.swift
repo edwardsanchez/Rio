@@ -48,7 +48,7 @@ struct MessageBubbleView: View {
     @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
     @State private var revealWorkItem: DispatchWorkItem? = nil
     @State private var includeTalkingTextInLayout = false
-    @State private var displayedBubbleMode: BubbleMode
+    @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem? = nil
     
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -75,13 +75,13 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
-        // Initialize displayedBubbleMode to match actual mode
-        self._displayedBubbleMode = State(initialValue: message.bubbleMode)
+        // Initialize displayedBubbleType to match actual bubbleType
+        self._displayedBubbleType = State(initialValue: message.bubbleType)
     }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            if message.messageType == .inbound {
+            if message.messageType.isInbound {
                 Group {
                     inboundAvatar
                         .opacity(inboundAvatarOpacity)
@@ -125,10 +125,10 @@ struct MessageBubbleView: View {
                     newMessageId = nil
                 }
             }
-            configureInitialContentState()
+                configureInitialContentState()
         }
-        .onChange(of: message.bubbleMode) { oldMode, newMode in
-            handleBubbleModeChange(from: oldMode, to: newMode)
+        .onChange(of: message.bubbleType) { oldType, newType in
+            handleBubbleTypeChange(from: oldType, to: newType)
         }
         .onDisappear {
             cancelPendingContentTransitions()
@@ -137,7 +137,7 @@ struct MessageBubbleView: View {
 
     // Computed properties for positioning and animation
     private var frameAlignment: Alignment {
-        if message.messageType == .inbound {
+        if message.messageType.isInbound {
             return .leading
         } else {
             return isNew ? .leading : .trailing
@@ -147,12 +147,11 @@ struct MessageBubbleView: View {
     private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
 
-        switch message.messageType {
-        case .inbound:
+        if message.messageType.isInbound {
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
-            return displayedBubbleMode.isRead ? 0 : 20
-        case .outbound:
+            return displayedBubbleType.isRead ? 0 : 20
+        } else {
             return calculateYOffset()
         }
     }
@@ -163,7 +162,7 @@ struct MessageBubbleView: View {
     }
 
     private var xOffset: CGFloat {
-        guard isNew && message.messageType == .outbound else { return 0 }
+        guard isNew && message.messageType.isOutbound else { return 0 }
 
         let logger = Logger(subsystem: "Rio", category: "Animation")
 
@@ -179,21 +178,21 @@ struct MessageBubbleView: View {
     }
 
     private var bubbleOpacity: Double {
-        guard message.messageType == .inbound else { return 1 }
+        guard message.messageType.isInbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
         // For thinking/talking, fade in when new
-        if displayedBubbleMode.isRead {
+        if displayedBubbleType.isRead {
             return 1  // Let BubbleView handle opacity
         }
         return isNew ? 0 : 1
     }
 
     private var inboundAvatarOpacity: Double {
-        guard message.messageType == .inbound else { return 1 }
+        guard message.messageType.isInbound else { return 1 }
         guard isNew else { return 1 }
         // For read state, avatar scales from 0, don't use opacity fade
         // For thinking/talking, use opacity fade
-        return displayedBubbleMode.isRead ? 1 : 0
+        return displayedBubbleType.isRead ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
@@ -229,21 +228,21 @@ struct MessageBubbleView: View {
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
-                let avatarSize: CGFloat = displayedBubbleMode.isRead ? 20 : 40
-                let avatarFrameHeight: CGFloat = displayedBubbleMode.isRead ? 0 : 40
-                let avatarOffsetX: CGFloat = displayedBubbleMode.isRead ? 9 : 0
+                let avatarSize: CGFloat = displayedBubbleType.isRead ? 20 : 40
+                let avatarFrameHeight: CGFloat = displayedBubbleType.isRead ? 0 : 40
+                let avatarOffsetX: CGFloat = displayedBubbleType.isRead ? 9 : 0
 
                 Image(avatar)
                     .resizable()
                     .frame(width: avatarSize, height: avatarSize)
                     .clipShape(.circle)
                     .frame(height: avatarFrameHeight)
-                    .scaleEffect(isNew && displayedBubbleMode.isRead ? 0 : 1, anchor: .center)
-                    .opacity(isNew && displayedBubbleMode.isRead ? 0 : 1)
+                    .scaleEffect(isNew && displayedBubbleType.isRead ? 0 : 1, anchor: .center)
+                    .opacity(isNew && displayedBubbleType.isRead ? 0 : 1)
                     .offset(y: 10)
                     .offset(x: avatarOffsetX)
                     .animation(.bouncy(duration: 0.3), value: isNew)
-                    .animation(.bouncy(duration: 0.3), value: displayedBubbleMode)
+                    .animation(.bouncy(duration: 0.3), value: displayedBubbleType)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -266,9 +265,9 @@ struct MessageBubbleView: View {
         guard scrollWidth > 0 else { return nil }
 
         let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
-        let avatarWidth: CGFloat = message.messageType == .inbound ? 40 : 0
-        let bubbleSpacing: CGFloat = message.messageType == .inbound ? 12 : 0
-        let trailingSpacer: CGFloat = message.messageType == .inbound ? 10 : 0
+        let avatarWidth: CGFloat = message.messageType.isInbound ? 40 : 0
+        let bubbleSpacing: CGFloat = message.messageType.isInbound ? 12 : 0
+        let trailingSpacer: CGFloat = message.messageType.isInbound ? 10 : 0
 
         let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
         return width > 0 ? width : nil
@@ -301,8 +300,8 @@ struct MessageBubbleView: View {
             messageType: message.messageType,
             backgroundColor: backgroundColor,
             showTail: showTail,
-            bubbleMode: message.bubbleMode,
-            layoutMode: displayedBubbleMode,
+            bubbleType: message.bubbleType,
+            layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,
             animationHeight: outboundAnimationHeight
         )
@@ -323,14 +322,14 @@ struct MessageBubbleView: View {
 //        if abs(thinkingContentWidth - width) > 0.5 {
 //            thinkingContentWidth = width
 //        }
-//        if message.bubbleMode == .thinking {
+//        if message.bubbleType == .thinking {
 //            isWidthLocked = true
 //        }
 //    }
 
     private func configureInitialContentState() {
         cancelPendingContentTransitions()
-        switch message.bubbleMode {
+        switch message.bubbleType {
         case .thinking:
             isWidthLocked = true
             showTypingIndicatorContent = true
@@ -349,29 +348,29 @@ struct MessageBubbleView: View {
         }
     }
 
-    private func handleBubbleModeChange(from oldMode: BubbleMode, to newMode: BubbleMode) {
-        guard oldMode != newMode else { return }
+    private func handleBubbleTypeChange(from oldType: BubbleType, to newType: BubbleType) {
+        guard oldType != newType else { return }
         cancelPendingContentTransitions()
         
-        // Handle displayedBubbleMode delay for thinking→read transition
-        if oldMode == .thinking && newMode == .read {
-            // Keep displayedBubbleMode at .thinking during explosion
+        // Handle displayedBubbleType delay for thinking→read transition
+        if oldType == .thinking && newType == .read {
+            // Keep displayedBubbleType at .thinking during explosion
             // It will be updated to .read after explosion completes
             startThinkingToReadTransition()
-            scheduleDisplayedModeUpdate(to: newMode, delay: bubbleConfig.explosionDuration)
+            scheduleDisplayedTypeUpdate(to: newType, delay: bubbleConfig.explosionDuration)
         } else {
-            // For all other transitions, update displayedBubbleMode immediately
-            displayedBubbleMode = newMode
+            // For all other transitions, update displayedBubbleType immediately
+            displayedBubbleType = newType
             
-            if oldMode == .thinking && newMode == .talking {
+            if oldType == .thinking && newType == .talking {
                 startTalkingTransition()
-            } else if oldMode == .talking && newMode == .thinking {
+            } else if oldType == .talking && newType == .thinking {
                 startThinkingState()
-            } else if oldMode == .read && newMode == .thinking {
+            } else if oldType == .read && newType == .thinking {
                 startReadToThinkingTransition()
-            } else if oldMode == .read && newMode == .talking {
+            } else if oldType == .read && newType == .talking {
                 startReadToTalkingTransition()
-            } else if oldMode == .talking && newMode == .read {
+            } else if oldType == .talking && newType == .read {
                 startTalkingToReadTransition()
             } else {
                 configureInitialContentState()
@@ -448,10 +447,10 @@ struct MessageBubbleView: View {
     }
     
     private func startThinkingToReadTransition() {
-        // Immediately hide typing indicator (no animation) when mode changes to read
+        // Immediately hide typing indicator (no animation) when bubbleType changes to read
         showTypingIndicatorContent = false
 
-        // After explosion completes (managed by displayedBubbleMode delay), clean up remaining state
+        // After explosion completes (managed by displayedBubbleType delay), clean up remaining state
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
             self.isWidthLocked = false
             self.showTalkingContent = false
@@ -507,12 +506,12 @@ struct MessageBubbleView: View {
         }
     }
 
-    private func scheduleDisplayedModeUpdate(to mode: BubbleMode, delay: TimeInterval) {
-        // Cancel any pending mode updates
+    private func scheduleDisplayedTypeUpdate(to type: BubbleType, delay: TimeInterval) {
+        // Cancel any pending bubbleType updates
         modeDelayWorkItem?.cancel()
         
         let delayItem = DispatchWorkItem {
-            self.displayedBubbleMode = mode
+            self.displayedBubbleType = type
         }
         
         modeDelayWorkItem = delayItem
@@ -533,18 +532,18 @@ struct MessageBubbleView: View {
     }
 
     private var outboundAnimationWidth: CGFloat? {
-        guard message.messageType == .outbound, isNew else { return nil }
+        guard message.messageType.isOutbound, isNew else { return nil }
         return inputFieldFrame.width
     }
 
     private var outboundAnimationHeight: CGFloat? {
-        guard message.messageType == .outbound, isNew else { return nil }
+        guard message.messageType.isOutbound, isNew else { return nil }
         return inputFieldFrame.height
     }
 }
 
 private struct MessageBubblePreviewContainer: View {
-    @State private var bubbleMode: BubbleMode? = .read
+    @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID? = nil
     
     // Use a stable message ID that persists across state changes
@@ -552,14 +551,14 @@ private struct MessageBubblePreviewContainer: View {
     private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
     
     private var currentMessage: Message {
-        switch bubbleMode {
+        switch bubbleType {
         case .read:
             Message(
                 id: messageId,
                 text: "",
                 user: sampleUser,
                 isTypingIndicator: true,
-                bubbleMode: .read
+                messageType: .inbound(.read)
             )
         case .thinking:
             Message(
@@ -567,14 +566,14 @@ private struct MessageBubblePreviewContainer: View {
                 text: "",
                 user: sampleUser,
                 isTypingIndicator: true,
-                bubbleMode: .thinking
+                messageType: .inbound(.thinking)
             )
         case .talking:
             Message(
                 id: messageId,
                 text: "How are you?",
                 user: sampleUser,
-                bubbleMode: .talking
+                messageType: .inbound(.talking)
             )
         case .none:
             // Placeholder - won't be shown
@@ -582,7 +581,7 @@ private struct MessageBubblePreviewContainer: View {
                 id: messageId,
                 text: "",
                 user: sampleUser,
-                bubbleMode: .talking
+                messageType: .inbound(.talking)
             )
         }
     }
@@ -593,7 +592,7 @@ private struct MessageBubblePreviewContainer: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            if bubbleMode != nil {
+            if bubbleType != nil {
                 MessageBubbleView(
                     message: currentMessage,
                     showTail: true,
@@ -616,41 +615,41 @@ private struct MessageBubblePreviewContainer: View {
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Button("None") {
-                        bubbleMode = nil
+                        bubbleType = nil
                         newMessageId = nil
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(bubbleMode == nil ? .blue : .gray)
+                    .tint(bubbleType == nil ? .blue : .gray)
                     
                     Button("Read") {
-                        let wasNone = bubbleMode == nil
-                        bubbleMode = .read
+                        let wasNone = bubbleType == nil
+                        bubbleType = .read
                         if wasNone {
                             newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(bubbleMode == .read ? .blue : .gray)
+                    .tint(bubbleType == .read ? .blue : .gray)
                     
                     Button("Thinking") {
-                        let wasNone = bubbleMode == nil
-                        bubbleMode = .thinking
+                        let wasNone = bubbleType == nil
+                        bubbleType = .thinking
                         if wasNone {
                             newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(bubbleMode == .thinking ? .blue : .gray)
+                    .tint(bubbleType == .thinking ? .blue : .gray)
                     
                     Button("Talking") {
-                        let wasNone = bubbleMode == nil
-                        bubbleMode = .talking
+                        let wasNone = bubbleType == nil
+                        bubbleType = .talking
                         if wasNone {
                             newMessageId = messageId
                         }
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(bubbleMode == .talking ? .blue : .gray)
+                    .tint(bubbleType == .talking ? .blue : .gray)
                 }
             }
             .padding(.top, 50)
@@ -676,7 +675,7 @@ private struct MessageBubblePreviewContainer: View {
                 text: "",
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
-                bubbleMode: .read
+                messageType: .inbound(.read)
             ),
             showTail: true,
             theme: .theme1
@@ -688,7 +687,7 @@ private struct MessageBubblePreviewContainer: View {
                 text: "",
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
-                bubbleMode: .thinking
+                messageType: .inbound(.thinking)
             ),
             showTail: true,
             theme: .theme1
@@ -699,7 +698,7 @@ private struct MessageBubblePreviewContainer: View {
             message: Message(
                 text: "Hey! How's it going?",
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
-                bubbleMode: .talking
+                messageType: .inbound(.talking)
             ),
             showTail: true,
             theme: .theme1
@@ -710,7 +709,7 @@ private struct MessageBubblePreviewContainer: View {
             message: Message(
                 text: "Great! Just working on some code.",
                 user: User(id: UUID(), name: "Edward", avatar: .edward),
-                bubbleMode: .talking
+                messageType: .outbound
             ),
             showTail: true,
             theme: .theme1

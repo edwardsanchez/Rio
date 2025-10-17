@@ -71,7 +71,7 @@ struct MessageListView: View {
         let isNextSameUser = current.user.id == next.user.id
         
         // For outbound messages (from Edward), only show tail if it's the last in a sequence
-        if current.messageType == .outbound {
+        if current.messageType.isOutbound {
             // Only show tail if the next message is from a different user (end of outbound sequence)
             return !isNextSameUser
         }

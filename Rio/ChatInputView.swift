@@ -190,7 +190,7 @@ struct ChatInputView: View {
         }
 
         // Create and send the message
-        let newMessage = Message(text: messageText, user: chatData.edwardUser)
+        let newMessage = Message(text: messageText, user: chatData.edwardUser, messageType: .outbound)
         newMessageId = newMessage.id
         messages.append(newMessage)
         chatData.addMessage(newMessage, to: chat.id)
@@ -203,7 +203,8 @@ struct ChatInputView: View {
                 user: typingIndicator.user,
                 date: Date.now, // Update timestamp to current time
                 isTypingIndicator: typingIndicator.isTypingIndicator,
-                replacesTypingIndicator: typingIndicator.replacesTypingIndicator
+                replacesTypingIndicator: typingIndicator.replacesTypingIndicator,
+                messageType: typingIndicator.messageType
             )
             messages.append(updatedTypingIndicator)
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
@@ -285,7 +286,7 @@ struct ChatInputView: View {
                     text: "", // Text is not used for typing indicator
                     user: randomUser,
                     isTypingIndicator: true,
-                    bubbleMode: .read
+                    messageType: .inbound(.read)
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
@@ -299,7 +300,7 @@ struct ChatInputView: View {
                        let indicatorIndex = messages.firstIndex(where: { $0.id == indicatorId }) {
                         let currentIndicator = messages[indicatorIndex]
                         // Only transition if still in .read state
-                        if currentIndicator.bubbleMode.isRead {
+                        if currentIndicator.bubbleType.isRead {
                             let updatedIndicator = Message(
                                 id: currentIndicator.id,
                                 text: currentIndicator.text,
@@ -307,7 +308,7 @@ struct ChatInputView: View {
                                 date: currentIndicator.date,
                                 isTypingIndicator: true,
                                 replacesTypingIndicator: false,
-                                bubbleMode: .thinking
+                                messageType: .inbound(.thinking)
                             )
                             messages[indicatorIndex] = updatedIndicator
                             chatData.updateMessage(updatedIndicator, in: chat.id)
@@ -336,7 +337,7 @@ struct ChatInputView: View {
                         date: Date.now,
                         isTypingIndicator: false,
                         replacesTypingIndicator: indicatorWasVisible,
-                        bubbleMode: .talking
+                        messageType: .inbound(.talking)
                     )
                     messages[typingIndex] = updatedMessage
                     chatData.updateMessage(updatedMessage, in: chat.id)
@@ -346,7 +347,7 @@ struct ChatInputView: View {
                         text: randomResponse,
                         user: randomUser,
                         replacesTypingIndicator: indicatorWasVisible,
-                        bubbleMode: .talking
+                        messageType: .inbound(.talking)
                     )
                     newMessageId = fallbackMessage.id
                     messages.append(fallbackMessage)

@@ -10,8 +10,8 @@ private struct ChatBubbleModifier: ViewModifier {
     let messageType: MessageType
     let backgroundColor: Color
     let showTail: Bool
-    let bubbleMode: BubbleMode
-    let layoutMode: BubbleMode
+    let bubbleType: BubbleType
+    let layoutType: BubbleType
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
 
@@ -33,13 +33,13 @@ private struct ChatBubbleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(.vertical, 10)
-            .padding(.horizontal, layoutMode == .thinking ? 17 : 13)
+            .padding(.horizontal, layoutType == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: layoutMode == .thinking ? 80 : measuredWidth,
-                    height: layoutMode == .thinking ? measuredHeight + 15 : measuredHeight,
+                    width: layoutType == .thinking ? 80 : measuredWidth,
+                    height: layoutType == .thinking ? measuredHeight + 15 : measuredHeight,
                     color: backgroundColor,
-                    mode: bubbleMode,
+                    type: bubbleType,
                     showTail: showTail,
                     messageType: messageType
                 )
@@ -59,8 +59,8 @@ extension View {
         messageType: MessageType,
         backgroundColor: Color,
         showTail: Bool,
-        bubbleMode: BubbleMode = .talking,
-        layoutMode: BubbleMode? = nil,
+        bubbleType: BubbleType = .talking,
+        layoutType: BubbleType? = nil,
         animationWidth: CGFloat? = nil,
         animationHeight: CGFloat? = nil
     ) -> some View {
@@ -69,8 +69,8 @@ extension View {
                 messageType: messageType,
                 backgroundColor: backgroundColor,
                 showTail: showTail,
-                bubbleMode: bubbleMode,
-                layoutMode: layoutMode ?? bubbleMode,
+                bubbleType: bubbleType,
+                layoutType: layoutType ?? bubbleType,
                 animationWidth: animationWidth,
                 animationHeight: animationHeight
             )

@@ -20,8 +20,8 @@ struct BubbleView: View {
     let cornerRadius: CGFloat?
     /// Fill color for the bubble and metaballs.
     let color: Color
-    /// Current behavioural mode (thinking vs talking).
-    let mode: BubbleMode
+    /// Current behavioural bubbleType (thinking vs talking).
+    let bubbleType: BubbleType
     /// Whether to render the decorative bubble tail.
     let showTail: Bool
     /// Message direction used to align the bubble tail.
@@ -98,7 +98,7 @@ struct BubbleView: View {
     ///   - height: Target height of the inner rectangle.
     ///   - cornerRadius: Optional override for the rounded corners. Defaults to config or pill shape.
     ///   - color: Fill color used for the bubble and circles.
-    ///   - mode: Talking/thinking state. Influences morph progression.
+    ///   - bubbleType: Talking/thinking state. Influences morph progression.
     ///   - showTail: Whether to draw the decorative tail assets.
     ///   - messageType: Layout direction for the tail and alignment.
     init(
@@ -106,15 +106,15 @@ struct BubbleView: View {
         height: CGFloat,
         cornerRadius: CGFloat? = nil,
         color: Color,
-        mode: BubbleMode = .thinking,
+        type: BubbleType = .thinking,
         showTail: Bool = false,
-        messageType: MessageType = .inbound
+        messageType: MessageType = .inbound(.thinking)
     ) {
         self.width = width
         self.height = height
         self.cornerRadius = cornerRadius
         self.color = color
-        self.mode = mode
+        self.bubbleType = type
         self.showTail = showTail
         self.messageType = messageType
 
@@ -131,7 +131,7 @@ struct BubbleView: View {
             initialVelocity: .zero
         ))
         _startTime = State(initialValue: now)
-        let initialProgress: CGFloat = (mode.isThinking || mode.isRead) ? 0 : 1
+        let initialProgress: CGFloat = (type.isThinking || type.isRead) ? 0 : 1
         _modeAnimationStart = State(initialValue: now.addingTimeInterval(-config.morphDuration))
         _modeAnimationFrom = State(initialValue: initialProgress)
         _modeAnimationTo = State(initialValue: initialProgress)
@@ -457,11 +457,11 @@ struct BubbleView: View {
 
     // MARK: - Rectangle Size Management
 
-    /// Ensures the inner rectangle resizes with a spring while respecting mode transitions.
+    /// Ensures the inner rectangle resizes with a spring while respecting bubbleType transitions.
     private func updateRectangleTransition(to size: CGSize) {
         let now = Date()
         let progress = modeProgress(at: now)
-        if mode.isTalking && progress < 0.98 {
+        if bubbleType.isTalking && progress < 0.98 {
             // During morph phase, keep width constant and constrain height to single-line
             let currentWidth = rectangleTransition.endSize.width
             let morphSize = CGSize(
@@ -554,7 +554,7 @@ struct BubbleView: View {
 
             // Check if we're in read→thinking animation
             let readToThinkingAnimProgress = readToThinkingProgress(at: now)
-            let isReadToThinkingActive = mode.isThinking && readToThinkingStart != nil && readToThinkingAnimProgress < 1
+            let isReadToThinkingActive = bubbleType.isThinking && readToThinkingStart != nil && readToThinkingAnimProgress < 1
             
             let layout = BubbleMorphLayout(
                 baseSize: CGSize(width: baseWidth, height: baseHeight),
@@ -753,9 +753,9 @@ struct BubbleView: View {
                 tailView
             }
             .compositingGroup()
-            // During explosion, keep bubble visible even if mode is .read
+            // During explosion, keep bubble visible even if bubbleType is .read
             // Only hide after explosion completes
-            .opacity((mode.isRead && !isExploding) ? 0 : (messageType.isOutbound ? 1 : 0.25)) //Want 15 for light mode and 25 for dark mode
+            .opacity((bubbleType.isRead && !isExploding) ? 0 : (messageType.isOutbound ? 1 : 0.25)) //Want 15 for light mode and 25 for dark mode
             .background {
                 // Hidden text to measure single-line height
                 Text("X")
@@ -787,14 +787,14 @@ struct BubbleView: View {
         .onChange(of: targetDiameters) { _, newDiameters in
             updateCircleTransitions(targetDiameters: newDiameters)
         }
-        .onChange(of: mode) { oldMode, newMode in
+        .onChange(of: bubbleType) { oldType, newType in
             // Start thinking→read explosion animation (self-managed)
-            if oldMode.isThinking && newMode.isRead {
+            if oldType.isThinking && newType.isRead {
                 // Freeze current morphProgress (should be 0 for thinking state)
                 frozenMorphProgress = modeProgress(at: Date())
                 internalExplosionStart = Date()
 
-                // CRITICAL: Set the mode animation to stay frozen at current value
+                // CRITICAL: Set the bubbleType animation to stay frozen at current value
                 // This prevents any morphing during the explosion
                 let current = modeProgress(at: Date())
                 modeAnimationFrom = current
@@ -805,41 +805,41 @@ struct BubbleView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
                     self.internalExplosionStart = nil
                     // Explosion complete - morphProgress is controlled by frozenMorphProgress during explosion
-                    // No need to call startModeAnimation - read mode doesn't need animation
+                    // No need to call startModeAnimation - read bubbleType doesn't need animation
                 }
             } else {
-                // For all other mode transitions, proceed normally
-                let target = (newMode.isThinking || newMode.isRead) ? CGFloat(0) : CGFloat(1)
+                // For all other bubbleType transitions, proceed normally
+                let target = (newType.isThinking || newType.isRead) ? CGFloat(0) : CGFloat(1)
                 startModeAnimation(target: target)
             }
 
             // Start read→thinking animation when transitioning from read to thinking
-            if oldMode.isRead && newMode.isThinking {
+            if oldType.isRead && newType.isThinking {
                 readToThinkingStart = Date()
                 // Schedule cleanup after animation completes
                 DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration) {
                     self.readToThinkingStart = nil
                 }
-            } else if !newMode.isThinking {
-                // Reset read→thinking animation if we're no longer in thinking mode
+            } else if !newType.isThinking {
+                // Reset read→thinking animation if we're no longer in thinking bubbleType
                 readToThinkingStart = nil
             }
             
             // When transitioning from thinking to talking, update rectangle transition
             // to use single-line height during morph
-            if (oldMode.isThinking || oldMode.isRead) && newMode.isTalking {
+            if (oldType.isThinking || oldType.isRead) && newType.isTalking {
                 updateRectangleTransition(to: CGSize(width: width, height: height))
             }
         }
     }
 
     @ViewBuilder
-    /// Decorative bubble tail that switches layouts depending on the current mode.
+    /// Decorative bubble tail that switches layouts depending on the current bubbleType.
     private var tailView: some View {
         TimelineView(.animation) { timeline in
             let now = timeline.date
             let readToThinkingAnimProgress = readToThinkingProgress(at: now)
-            let tailScale = mode.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
+            let tailScale = bubbleType.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
 
             // Check if we're in explosion animation (computed internally)
             let isExploding = isInternallyExploding(at: now)
@@ -847,7 +847,7 @@ struct BubbleView: View {
 
             // During explosion, keep tail in thinking position
             // Otherwise use normal logic (read and thinking both use thinking tail position)
-            let isThinking = mode.isThinking || (mode.isRead && !isExploding) || isExploding
+            let isThinking = bubbleType.isThinking || (bubbleType.isRead && !isExploding) || isExploding
             let isInbound = messageType.isInbound
 
             // Calculate fade-out opacity for thinking→read transition
@@ -876,8 +876,8 @@ struct BubbleView: View {
                     .offset(x: tailOffset.x, y: tailOffset.y)
                     .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
                     .foregroundStyle(color)
-                    .opacity(showTail && mode.isTalking ? 1 : 0)
-                    .animation(.spring(duration: 0.3).delay(0.2), value: mode)
+                    .opacity(showTail && bubbleType.isTalking ? 1 : 0)
+                    .animation(.spring(duration: 0.3).delay(0.2), value: bubbleType)
                 
                 // Thinking bubble tail
                 Circle()
@@ -890,7 +890,7 @@ struct BubbleView: View {
                     )
                     .offset(x: 0, y: -13)
                     .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
-                    .animation(.easeIn(duration: 0.2), value: mode)
+                    .animation(.easeIn(duration: 0.2), value: bubbleType)
                     .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: 8, height: 8))
                     .opacity(messageType.isInbound ? 1 : 0)
             }
@@ -1044,7 +1044,7 @@ struct BubbleView: View {
             height: height,
             cornerRadius: 26,
             color: .Default.inboundBubble,
-            mode: isTalking ? .talking : .thinking,
+            type: isTalking ? .talking : .thinking,
             showTail: true
         )
         .frame(width: width + 120, height: height + 120)
