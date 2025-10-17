@@ -74,6 +74,10 @@ struct BubbleView: View {
     @State private var previousBubbleType: BubbleType?
     /// Flag to disable size animations during read→talking transition
     @State private var skipSizeAnimation: Bool = false
+    /// Tracks the tail position offset for explicit animation control
+    @State private var tailPositionOffset: CGPoint = CGPoint(x: 15, y: -23) // Start at thinking position
+    /// Work item for cancelling delayed tail position updates
+    @State private var tailPositionWorkItem: DispatchWorkItem?
     
     /// Creates a bubble with the provided geometry and visual configuration.
     /// - Parameters:
@@ -120,6 +124,15 @@ struct BubbleView: View {
         _modeAnimationStart = State(initialValue: now.addingTimeInterval(-config.morphDuration))
         _modeAnimationFrom = State(initialValue: initialProgress)
         _modeAnimationTo = State(initialValue: initialProgress)
+        
+        // Initialize tail position based on initial bubble type
+        let initialTailPosition: CGPoint
+        if type.isTalking {
+            initialTailPosition = CGPoint(x: 3, y: -1)  // Talking position
+        } else {
+            initialTailPosition = CGPoint(x: 15, y: -23)  // Thinking/Read position
+        }
+        _tailPositionOffset = State(initialValue: initialTailPosition)
     }
     
     // MARK: - Tail Geometry
@@ -418,32 +431,33 @@ struct BubbleView: View {
     
     /// Talking tail view - uses pure SwiftUI state-based animations without TimelineView.
     private var talkingTailView: some View {
-        // Detect if we're in read→talking delay period
-        let isReadToTalkingDelay = layoutType == .read && bubbleType == .talking
-        
-        // Use layoutType ONLY during read→talking delay, otherwise use bubbleType for normal animations
-        let effectiveTypeForPosition = isReadToTalkingDelay ? (layoutType ?? bubbleType) : bubbleType
-        let isThinking = effectiveTypeForPosition.isThinking || effectiveTypeForPosition.isRead
+        let effectiveType = layoutType ?? bubbleType
         let isInbound = messageType.isInbound
         
-        // Additional offsets for talking mode - mirrored for inbound/outbound
-        let talkingXOffset: CGFloat = isInbound ? 3 : -3
-        let thinkingXOffset: CGFloat = isInbound ? 15 : -15
+        // Apply direction-specific offset based on message type
+        let directionAdjustedOffset = CGPoint(
+            x: isInbound ? tailPositionOffset.x : -tailPositionOffset.x,
+            y: tailPositionOffset.y
+        )
         
-        // Animate for all transitions EXCEPT read→talking (where there's no visible tail to animate from)
-        let shouldAnimateTail = previousBubbleType != .read
+        // Determine if we should animate (not from read state)
+        let shouldAnimate = previousBubbleType != .read
         
-        let effectiveType = layoutType ?? bubbleType
+        let targetOpacity: CGFloat = showTail && effectiveType.isTalking ? 1 : 0
+        
+        // Debug
+        let _ = print("🎯 Talking tail: showTail=\(showTail), bubbleType=\(bubbleType), layoutType=\(String(describing: layoutType)), effectiveType=\(effectiveType), opacity=\(targetOpacity), position=\(tailPositionOffset)")
         
         return Image(.cartouche)
             .resizable()
             .frame(width: 15, height: 15)
             .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
             .offset(x: tailOffset.x, y: tailOffset.y)
-            .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
+            .offset(x: directionAdjustedOffset.x, y: directionAdjustedOffset.y)
             .foregroundStyle(color)
-            .opacity(showTail && effectiveType.isTalking ? 1 : 0)
-            .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
+            .opacity(targetOpacity)
+            .animation(shouldAnimate ? .spring(duration: 0.3).delay(0.2) : nil, value: tailPositionOffset)
+            .animation(shouldAnimate ? .easeIn(duration: 0.2) : nil, value: bubbleType)
     }
     
     /// Thinking tail view - uses TimelineView for time-based animations.
@@ -738,6 +752,36 @@ extension BubbleView {
         // Track previous bubble type for conditional animation
         // Update immediately so tail view can use it to determine animation behavior
         previousBubbleType = oldType
+        
+        // Cancel any pending tail position updates
+        tailPositionWorkItem?.cancel()
+        tailPositionWorkItem = nil
+        
+        // Manage tail position based on state transitions
+        let thinkingPosition = CGPoint(x: 15, y: -23)
+        let talkingPosition = CGPoint(x: 3, y: -1)
+        
+        if newType.isThinking || newType.isRead {
+            // Moving to thinking or read state - set tail to thinking position
+            tailPositionOffset = thinkingPosition
+        } else if newType.isTalking {
+            if oldType.isRead {
+                // Read→Talking: Set position instantly to talking position
+                tailPositionOffset = talkingPosition
+            } else if oldType.isThinking {
+                // Thinking→Talking: Start at thinking position, then animate to talking after delay
+                tailPositionOffset = thinkingPosition
+                
+                let workItem = DispatchWorkItem {
+                    self.tailPositionOffset = talkingPosition
+                }
+                tailPositionWorkItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
+            } else {
+                // Other→Talking: Set to talking position
+                tailPositionOffset = talkingPosition
+            }
+        }
         
         // Start thinking→read explosion animation (self-managed)
         if oldType.isThinking && newType.isRead {
