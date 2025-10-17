@@ -18,8 +18,8 @@ struct BubbleExplosionTestView: View {
     @State private var animatedPixelSize: CGFloat = 0.1
     @State private var sliderValue: Double = 0.0
     @State private var bubbleSize: CGSize = .zero
-    @State private var explosionCenterX: CGFloat = 0.88  // 0.0 = left, 1.0 = right
-    @State private var explosionCenterY: CGFloat = 0.57  // 0.0 = top, 1.0 = bottom
+    @State private var explosionCenterX: CGFloat = 0.5  // 0.0 = left, 1.0 = right
+    @State private var explosionCenterY: CGFloat = 0.5  // 0.0 = top, 1.0 = bottom
     @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
     @State private var gravity: CGFloat = 1.0  // 0.0 = no gravity, 1.0 = max gravity
     @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
@@ -265,8 +265,7 @@ struct BubbleExplosionTestView: View {
         let hasText = !message.text.isEmpty
         
         ZStack(alignment: .leading) {
-            Text("H") //Measure Spacer
-                .opacity(0)
+            Circle()
             
             if hasText && includeTalkingTextInLayout {
                 Text(message.text)
@@ -278,14 +277,6 @@ struct BubbleExplosionTestView: View {
         .animation(.easeInOut(duration: 0.2), value: showTypingIndicatorContent)
         .animation(.easeInOut(duration: 0.35), value: showTalkingContent)
         .frame(width: lockedWidth, alignment: .leading)
-        .chatBubble(
-            messageType: message.messageType,
-            backgroundColor: backgroundColor,
-            showTail: showTail,
-            bubbleType: message.bubbleType,
-            animationWidth: outboundAnimationWidth,
-            animationHeight: outboundAnimationHeight
-        )
         .overlay(alignment: .leading) {
 //            TypingIndicatorView(isVisible: showTypingIndicatorContent)
 //                .padding(.leading, 20)
