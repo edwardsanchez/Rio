@@ -12,12 +12,31 @@
 
 /* Begin PBXFileReference section */
 		6D3EE7F02E7E6D9B00F81D31 /* Rio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DF315002EA2BA2F00A0BD0F /* Shader Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Shader Test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6DF3150C2EA2BA3D00A0BD0F /* Exceptions for "Rio" folder in "Shader Test" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Message/ParticleExplosion.metal,
+			);
+			target = 6DF314FF2EA2BA2F00A0BD0F /* Shader Test */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6D3EE7F22E7E6D9B00F81D31 /* Rio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6DF3150C2EA2BA3D00A0BD0F /* Exceptions for "Rio" folder in "Shader Test" target */,
+			);
 			path = Rio;
+			sourceTree = "<group>";
+		};
+		6DF315012EA2BA2F00A0BD0F /* Shader Test */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Shader Test";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +50,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6DF314FD2EA2BA2F00A0BD0F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				6D3EE7F22E7E6D9B00F81D31 /* Rio */,
+				6DF315012EA2BA2F00A0BD0F /* Shader Test */,
 				6D3EE7F12E7E6D9B00F81D31 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				6D3EE7F02E7E6D9B00F81D31 /* Rio.app */,
+				6DF315002EA2BA2F00A0BD0F /* Shader Test.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,6 +104,28 @@
 			productReference = 6D3EE7F02E7E6D9B00F81D31 /* Rio.app */;
 			productType = "com.apple.product-type.application";
 		};
+		6DF314FF2EA2BA2F00A0BD0F /* Shader Test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DF3150A2EA2BA3000A0BD0F /* Build configuration list for PBXNativeTarget "Shader Test" */;
+			buildPhases = (
+				6DF314FC2EA2BA2F00A0BD0F /* Sources */,
+				6DF314FD2EA2BA2F00A0BD0F /* Frameworks */,
+				6DF314FE2EA2BA2F00A0BD0F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6DF315012EA2BA2F00A0BD0F /* Shader Test */,
+			);
+			name = "Shader Test";
+			packageProductDependencies = (
+			);
+			productName = "Shader Test";
+			productReference = 6DF315002EA2BA2F00A0BD0F /* Shader Test.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -87,6 +137,9 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					6D3EE7EF2E7E6D9B00F81D31 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					6DF314FF2EA2BA2F00A0BD0F = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -109,6 +162,7 @@
 			projectRoot = "";
 			targets = (
 				6D3EE7EF2E7E6D9B00F81D31 /* Rio */,
+				6DF314FF2EA2BA2F00A0BD0F /* Shader Test */,
 			);
 		};
 /* End PBXProject section */
@@ -121,10 +175,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6DF314FE2EA2BA2F00A0BD0F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6D3EE7EC2E7E6D9B00F81D31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6DF314FC2EA2BA2F00A0BD0F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -319,6 +387,74 @@
 			};
 			name = Release;
 		};
+		6DF315082EA2BA3000A0BD0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V2D2TL57B8;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "app.amorfati.Shader-Test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6DF315092EA2BA3000A0BD0F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V2D2TL57B8;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "app.amorfati.Shader-Test";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -336,6 +472,15 @@
 			buildConfigurations = (
 				6D3EE7FE2E7E6D9D00F81D31 /* Debug */,
 				6D3EE7FF2E7E6D9D00F81D31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6DF3150A2EA2BA3000A0BD0F /* Build configuration list for PBXNativeTarget "Shader Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6DF315082EA2BA3000A0BD0F /* Debug */,
+				6DF315092EA2BA3000A0BD0F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
