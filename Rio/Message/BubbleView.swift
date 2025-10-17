@@ -914,15 +914,7 @@ struct BubbleView: View {
                 // Don't animate when transitioning from read (no visible tail to animate from)
                 let shouldAnimateTail = previousBubbleType == .thinking && bubbleType.isTalking
                 
-                Image(.cartouche)
-                    .resizable()
-                    .frame(width: 15, height: 15)
-                    .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
-                    .offset(x: tailOffset.x, y: tailOffset.y)
-                    .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
-                    .foregroundStyle(color)
-                    .opacity(showTail && bubbleType.isTalking ? 1 : 0)
-                    .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
+                talkingTail(isThinking: isThinking, thinkingXOffset: thinkingXOffset, talkingXOffset: talkingXOffset, shouldAnimateTail: shouldAnimateTail)
                 
                 // Thinking bubble tail
                 // Only animate when NOT transitioning from read (read state has no visible tail)
@@ -937,21 +929,56 @@ struct BubbleView: View {
                     return (effectiveType.isThinking || effectiveType.isRead) ? 1 : 0
                 }()
                 
-                Circle()
-                    .fill(color)
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(tailScale, anchor: .center)
-                    .offset(
-                        x: tailAlignment == .bottomLeading ? 4 : -4,
-                        y: 21
-                    )
-                    .offset(x: 0, y: -13)
-                    .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
-                    .explosionEffect(isActive: isExploding, progress: explosionProgress)
-                    .opacity(circleOpacity)
-                    .animation(shouldAnimateCircle ? .easeIn(duration: 0.2) : nil, value: bubbleType)
+                thinkingTail(
+                    tailScale: tailScale,
+                    isThinking: isThinking,
+                    isExploding: isExploding,
+                    circleOpacity: circleOpacity,
+                    shouldAnimateCircle: shouldAnimateCircle,
+                    explosionProgress: explosionProgress
+                )
             }
         }
+    }
+    
+    func thinkingTail(
+        tailScale: CGFloat,
+        isThinking: Bool,
+        isExploding: Bool,
+        circleOpacity: CGFloat,
+        shouldAnimateCircle: Bool,
+        explosionProgress: CGFloat
+    ) -> some View {
+        Circle()
+            .fill(color)
+            .frame(width: 8, height: 8)
+            .scaleEffect(tailScale, anchor: .center)
+            .offset(
+                x: tailAlignment == .bottomLeading ? 4 : -4,
+                y: 21
+            )
+            .offset(x: 0, y: -13)
+            .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
+            .explosionEffect(isActive: isExploding, progress: explosionProgress)
+            .opacity(circleOpacity)
+            .animation(shouldAnimateCircle ? .easeIn(duration: 0.2) : nil, value: bubbleType)
+    }
+    
+    func talkingTail(
+        isThinking: Bool,
+        thinkingXOffset: CGFloat,
+        talkingXOffset: CGFloat,
+        shouldAnimateTail: Bool
+    ) -> some View {
+        Image(.cartouche)
+            .resizable()
+            .frame(width: 15, height: 15)
+            .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
+            .offset(x: tailOffset.x, y: tailOffset.y)
+            .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
+            .foregroundStyle(color)
+            .opacity(showTail && bubbleType.isTalking ? 1 : 0)
+            .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
     }
 
     // MARK: - Misc Helpers
