@@ -9,7 +9,7 @@
       "hidden" : false,
       "layers" : [
         {
-          "blend-mode" : "plus-lighter",
+          "blend-mode" : "normal",
           "glass" : true,
           "hidden" : false,
           "image-name" : "Fill 1.png",
@@ -34,12 +34,12 @@
         ]
       },
       "shadow" : {
-        "kind" : "neutral",
+        "kind" : "none",
         "opacity" : 1
       },
       "specular" : true,
       "translucency" : {
-        "enabled" : true,
+        "enabled" : false,
         "value" : 1
       }
     },
