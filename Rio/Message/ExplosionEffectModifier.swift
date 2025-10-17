@@ -6,53 +6,10 @@
 //
 import SwiftUI
 
-extension View {
-    func explosionEffect(
-        isActive: Bool,
-        progress: CGFloat,
-        pixelSize: CGFloat = 2.0,
-        explosionCenter: CGPoint = CGPoint(x: 0.5, y: 0.5),
-        speedVariance: CGFloat = 0.5,
-        gravity: CGFloat = 1.0,
-        turbulence: CGFloat = 0.2,
-        growth: CGFloat = 0.65,
-        growthVariance: CGFloat = 0.65,
-        edgeVelocityBoost: CGFloat = 2.0,
-        forceSquarePixels: Bool = false,
-        maxExplosionSpread: CGFloat = 0.4,
-        fadeStart: CGFloat = 0.3,
-        fadeVariance: CGFloat = 0.85,
-        pinchDuration: CGFloat = 0.05
-    ) -> some View {
-        modifier(ExplosionEffectModifier(
-            isActive: isActive,
-            progress: progress,
-            pixelSize: pixelSize,
-            explosionCenter: explosionCenter,
-            speedVariance: speedVariance,
-            gravity: gravity,
-            turbulence: turbulence,
-            growth: growth,
-            growthVariance: growthVariance,
-            edgeVelocityBoost: edgeVelocityBoost,
-            forceSquarePixels: forceSquarePixels,
-            maxExplosionSpread: maxExplosionSpread,
-            fadeStart: fadeStart,
-            fadeVariance: fadeVariance,
-            pinchDuration: pinchDuration
-        ))
-    }
-}
+// MARK: - Explosion Configuration
 
-// MARK: - Explosion Effect Modifier
-
-/// View modifier that applies the explosion shader effect during thinking→read transition.
-private struct ExplosionEffectModifier: ViewModifier {
-    // Required parameters (no defaults)
-    let isActive: Bool
-    let progress: CGFloat
-    
-    // Optional parameters (with defaults)
+/// Configuration for explosion effect parameters
+struct ExplosionConfiguration {
     let pixelSize: CGFloat
     let explosionCenter: CGPoint
     let speedVariance: CGFloat
@@ -67,6 +24,62 @@ private struct ExplosionEffectModifier: ViewModifier {
     let fadeVariance: CGFloat
     let pinchDuration: CGFloat
     
+    /// Default explosion configuration
+    static let `default` = ExplosionConfiguration()
+    
+    init(
+        pixelSize: CGFloat = 2.0,
+        explosionCenter: CGPoint = CGPoint(x: 0.5, y: 0.5),
+        speedVariance: CGFloat = 0.5,
+        gravity: CGFloat = 1.0,
+        turbulence: CGFloat = 0.2,
+        growth: CGFloat = 0.65,
+        growthVariance: CGFloat = 0.65,
+        edgeVelocityBoost: CGFloat = 2.0,
+        forceSquarePixels: Bool = false,
+        maxExplosionSpread: CGFloat = 0.4,
+        fadeStart: CGFloat = 0.3,
+        fadeVariance: CGFloat = 0.85,
+        pinchDuration: CGFloat = 0.05
+    ) {
+        self.pixelSize = pixelSize
+        self.explosionCenter = explosionCenter
+        self.speedVariance = speedVariance
+        self.gravity = gravity
+        self.turbulence = turbulence
+        self.growth = growth
+        self.growthVariance = growthVariance
+        self.edgeVelocityBoost = edgeVelocityBoost
+        self.forceSquarePixels = forceSquarePixels
+        self.maxExplosionSpread = maxExplosionSpread
+        self.fadeStart = fadeStart
+        self.fadeVariance = fadeVariance
+        self.pinchDuration = pinchDuration
+    }
+}
+
+extension View {
+    func explosionEffect(
+        isActive: Bool,
+        progress: CGFloat,
+        configuration: ExplosionConfiguration = .default
+    ) -> some View {
+        modifier(ExplosionEffectModifier(
+            isActive: isActive,
+            progress: progress,
+            configuration: configuration
+        ))
+    }
+}
+
+// MARK: - Explosion Effect Modifier
+
+/// View modifier that applies the explosion shader effect during thinking→read transition.
+private struct ExplosionEffectModifier: ViewModifier {
+    let isActive: Bool
+    let progress: CGFloat
+    let configuration: ExplosionConfiguration
+    
     @State private var canvasSize: CGSize = .zero
 
     func body(content: Content) -> some View {
@@ -79,21 +92,21 @@ private struct ExplosionEffectModifier: ViewModifier {
                 }
                 .layerEffect(
                     ShaderLibrary.explode(
-                        .float(pixelSize),
+                        .float(configuration.pixelSize),
                         .float2(canvasSize),
                         .float(progress),
-                        .float2(explosionCenter.x, explosionCenter.y),
-                        .float(speedVariance),
-                        .float(gravity),
-                        .float(turbulence),
-                        .float(growth),
-                        .float(growthVariance),
-                        .float(edgeVelocityBoost),
-                        .float(forceSquarePixels ? 1.0 : 0.0),
-                        .float(maxExplosionSpread),
-                        .float(fadeStart),
-                        .float(fadeVariance),
-                        .float(pinchDuration)
+                        .float2(configuration.explosionCenter.x, configuration.explosionCenter.y),
+                        .float(configuration.speedVariance),
+                        .float(configuration.gravity),
+                        .float(configuration.turbulence),
+                        .float(configuration.growth),
+                        .float(configuration.growthVariance),
+                        .float(configuration.edgeVelocityBoost),
+                        .float(configuration.forceSquarePixels ? 1.0 : 0.0),
+                        .float(configuration.maxExplosionSpread),
+                        .float(configuration.fadeStart),
+                        .float(configuration.fadeVariance),
+                        .float(configuration.pinchDuration)
                     ),
                     maxSampleOffset: maxSampleOffsetSize
                 )
@@ -104,11 +117,11 @@ private struct ExplosionEffectModifier: ViewModifier {
 
     private var maxSampleOffsetSize: CGSize {
         let maxDimension = max(canvasSize.width, canvasSize.height)
-        let baseOffset = maxDimension * maxExplosionSpread * progress
-        let speedFactor = 1.0 + speedVariance
-        let turbulenceFactor = 1.0 + turbulence
-        let growthFactor = 1.0 + growth * (1.0 + growthVariance)
-        let edgeFactor = 1.0 + 0.8 * edgeVelocityBoost
+        let baseOffset = maxDimension * configuration.maxExplosionSpread * progress
+        let speedFactor = 1.0 + configuration.speedVariance
+        let turbulenceFactor = 1.0 + configuration.turbulence
+        let growthFactor = 1.0 + configuration.growth * (1.0 + configuration.growthVariance)
+        let edgeFactor = 1.0 + 0.8 * configuration.edgeVelocityBoost
 
         let widthOffset = baseOffset * speedFactor * 2.0 * turbulenceFactor * growthFactor * edgeFactor
         let heightOffset = baseOffset * speedFactor * 2.5 * turbulenceFactor * growthFactor * edgeFactor
