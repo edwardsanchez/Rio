@@ -298,8 +298,8 @@ struct MessageBubbleView: View {
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: showTypingIndicatorContent)
-        .animation(.easeInOut(duration: 0.35), value: showTalkingContent)
+        .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
+        .animation(.smooth(duration: 0.35), value: showTalkingContent)
         .frame(width: lockedWidth, alignment: .leading)
         .chatBubble(
             messageType: message.messageType,
@@ -389,7 +389,7 @@ struct MessageBubbleView: View {
             isWidthLocked = true
         }
 
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.smooth(duration: 0.2)) {
             showTypingIndicatorContent = false
         }
 
@@ -405,7 +405,7 @@ struct MessageBubbleView: View {
         isWidthLocked = true
         showTalkingContent = false
         includeTalkingTextInLayout = false
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.smooth(duration: 0.2)) {
             showTypingIndicatorContent = true
         }
     }
@@ -439,7 +439,7 @@ struct MessageBubbleView: View {
         includeTalkingTextInLayout = true
         
         // Quick fade in without offset animation
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(.smooth(duration: 0.3)) {
             showTalkingContent = true
         }
     }
@@ -451,16 +451,13 @@ struct MessageBubbleView: View {
         // Mark as exploding to prevent avatar size change
         isExploding = true
 
-        // CRITICAL: Keep typing indicator visible during entire explosion
-        // Do NOT change showTypingIndicatorContent - it should stay true
+        // Immediately hide typing indicator (no animation) when mode changes to read
+        showTypingIndicatorContent = false
 
-        // Only after explosion completes, hide everything
+        // Only after explosion completes, clean up remaining state
         DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.explosionDuration) {
             // Explosion complete - now allow transition to read state
             self.isExploding = false
-
-            // Now hide typing indicator (no animation needed, bubble is invisible by this point)
-            self.showTypingIndicatorContent = false
             self.isWidthLocked = false
             self.showTalkingContent = false
             self.includeTalkingTextInLayout = false
@@ -487,7 +484,7 @@ struct MessageBubbleView: View {
 
     private func scheduleWidthUnlock() {
         let unlockItem = DispatchWorkItem {
-            withAnimation(.easeInOut(duration: BubbleView.resizeCutoffDuration)) {
+            withAnimation(.smooth(duration: BubbleView.resizeCutoffDuration)) {
                 isWidthLocked = false
             }
         }
@@ -502,7 +499,7 @@ struct MessageBubbleView: View {
 
     private func scheduleTalkingReveal() {
         let revealItem = DispatchWorkItem {
-            withAnimation(.easeInOut(duration: 0.35)) {
+            withAnimation(.smooth(duration: 0.35)) {
                 showTalkingContent = true
             }
         }
