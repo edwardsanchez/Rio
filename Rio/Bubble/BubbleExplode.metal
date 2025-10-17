@@ -40,27 +40,27 @@ float2 turbulence2D(float2 p, float time) {
 
 /// Pixelation effect that transitions from square to circular pixels and explodes
 [[ stitchable ]] half4 explode(
-    float2 position,
-    SwiftUI::Layer layer,
-    float pixelSize,
-    float2 layerSize,
-    float rawAnimationProgress,
-    float2 explosionCenter,
-    float speedVariance,
-    float gravity,
-    float turbulence,
-    float growth,
-    float growthVariance,
-    float edgeVelocityBoost,
-    float forceSquarePixels,
-    float maxExplosionSpread,
-    float fadeStart,
-    float fadeVariance,
-    float pinchDuration
-) {
+                               float2 position,
+                               SwiftUI::Layer layer,
+                               float pixelSize,
+                               float2 layerSize,
+                               float rawAnimationProgress,
+                               float2 explosionCenter,
+                               float speedVariance,
+                               float gravity,
+                               float turbulence,
+                               float growth,
+                               float growthVariance,
+                               float edgeVelocityBoost,
+                               float forceSquarePixels,
+                               float maxExplosionSpread,
+                               float fadeStart,
+                               float fadeVariance,
+                               float pinchDuration
+                               ) {
     // Calculate all derived values in the shader to ensure consistency
     float animationProgress = rawAnimationProgress;
-
+    
     // Calculate pixel size based on animation progress
     const float circleFormationEnd = 0.05;
     if (animationProgress <= circleFormationEnd) {
@@ -69,7 +69,7 @@ float2 turbulence2D(float2 p, float time) {
     } else {
         pixelSize = 2.0;
     }
-
+    
     // Calculate explosion amount based on animation progress
     float explosionSpacing;
     if (animationProgress <= circleFormationEnd) {
@@ -107,8 +107,8 @@ float2 turbulence2D(float2 p, float time) {
         // Initial guess ignoring variance, gravity, and turbulence
         invPosition = layerCenter + (offsetFromCenter / (1.0 + explosionSpacing));
         
-        // Refine with 4 iterations to account for speed variance, gravity, and turbulence
-        for (int iter = 0; iter < 4; iter++) {
+        // Refine with 8 iterations to account for speed variance, gravity, and turbulence
+        for (int iter = 0; iter < 8; iter++) {
             float2 guessBlockPos = floor(invPosition / pixelSize) * pixelSize;
             float2 guessBlockCenter = guessBlockPos + (pixelSize * 0.5);
             
@@ -150,15 +150,22 @@ float2 turbulence2D(float2 p, float time) {
     // Use a FIXED grid for seeding to prevent hash changes during pixelSize animation
     const float seedPixelSize = 2.0; // Match the final pixelSize value
     
-    float bestPixelDistance = 1e9;
-    float2 bestOriginalBlockCenter = baseBlockPos + (pixelSize * 0.5);
-    float2 bestSeedBlockCenter = floor(bestOriginalBlockCenter / seedPixelSize) * seedPixelSize + (seedPixelSize * 0.5);
-    float2 explodedBlockCenter = bestOriginalBlockCenter;
+    // Track top 3 closest particles for blending
+    const int maxBlendParticles = 3;
+    float particleDistances[maxBlendParticles];
+    float2 particleOriginalCenters[maxBlendParticles];
+    float2 particleSeedCenters[maxBlendParticles];
+    float2 particleExplodedCenters[maxBlendParticles];
     
-    // Search neighboring blocks to find the exploded particle whose center is closest to this pixel.
+    // Initialize with large distances
+    for (int i = 0; i < maxBlendParticles; ++i) {
+        particleDistances[i] = 1e9;
+    }
+    
+    // Search neighboring blocks to find the exploded particles closest to this pixel.
     // This prevents clipping artifacts when turbulence or variance pushes particles across cell boundaries.
-    for (int y = -2; y <= 2; ++y) {
-        for (int x = -2; x <= 2; ++x) {
+    for (int y = -3; y <= 3; ++y) {
+        for (int x = -3; x <= 3; ++x) {
             float2 candidateBlockPos = baseBlockPos + float2(x, y) * pixelSize;
             float2 candidateCenter = candidateBlockPos + (pixelSize * 0.5);
             
@@ -192,76 +199,100 @@ float2 turbulence2D(float2 p, float time) {
             }
             
             float pixelDistance = length(pinchPosition - candidateExplodedCenter);
-            if (pixelDistance < bestPixelDistance) {
-                bestPixelDistance = pixelDistance;
-                bestOriginalBlockCenter = candidateCenter;
-                bestSeedBlockCenter = candidateSeedBlockCenter;
-                explodedBlockCenter = candidateExplodedCenter;
+            
+            // Insert this particle into the top 3 if it's close enough
+            for (int i = 0; i < maxBlendParticles; ++i) {
+                if (pixelDistance < particleDistances[i]) {
+                    // Shift worse candidates down
+                    for (int j = maxBlendParticles - 1; j > i; --j) {
+                        particleDistances[j] = particleDistances[j - 1];
+                        particleOriginalCenters[j] = particleOriginalCenters[j - 1];
+                        particleSeedCenters[j] = particleSeedCenters[j - 1];
+                        particleExplodedCenters[j] = particleExplodedCenters[j - 1];
+                    }
+                    // Insert new candidate
+                    particleDistances[i] = pixelDistance;
+                    particleOriginalCenters[i] = candidateCenter;
+                    particleSeedCenters[i] = candidateSeedBlockCenter;
+                    particleExplodedCenters[i] = candidateExplodedCenter;
+                    break;
+                }
             }
         }
     }
     
-    // Calculate growth multiplier for this particle using the best matching seed center
-    float growthSeed = fract(sin(dot(bestSeedBlockCenter, float2(73.156, 41.923))) * 37281.6547);
-    float sizeVarianceSeed = fract(sin(dot(bestSeedBlockCenter, float2(41.234, 89.567))) * 51923.8274);
-    
-    float baseGrowth = 1.0 + (growth * explosionSpacing);
-    float growthMult;
-    
-    // 10% chance of being a "mega" particle (10x size)
-    if (sizeVarianceSeed < 0.1) {
-        // Mega particles: 8x to 12x the base growth
-        float megaScale = 8.0 + (growthSeed * 4.0);
-        growthMult = baseGrowth * megaScale;
-    } else {
-        // Regular particles: highly varied growth from 0.3x to 5x
-        // Use cubic distribution to create more interesting variance
-        float varianceFactor = pow(growthSeed, 1.5); // Skew toward smaller sizes
-        float growthVariation = 0.3 + varianceFactor * 4.7; // Range: 0.3 to 5.0
-        growthMult = baseGrowth * growthVariation;
-    }
-    
-    // Sample color from the original block center
-    half4 color = layer.sample(bestOriginalBlockCenter);
-    
-    // Step 4: Check if current pixel is within the circle at the EXPLODED position
-    float2 offsetFromExplodedCenter = pinchPosition - explodedBlockCenter;
-    float distanceFromExplodedCenter = length(offsetFromExplodedCenter);
+    // Blend colors from multiple nearby particles
+    half4 finalColor = half4(0.0);
+    float totalWeight = 0.0;
     
     // Calculate blend factor: 0 = square, 1 = circle
     float blendFactor = smoothstep(0.1, 2.0, pixelSize);
-    
-    // Circle radius is half the block size, scaled by growth
-    float baseRadius = pixelSize * 0.5;
-    float radius = baseRadius * growthMult;
-    
-    // Antialiased circle edge using screen-space derivative
-    float edge = radius - distanceFromExplodedCenter;
-    float aaWidth = fwidth(edge);
-    float circleCoverage = smoothstep(-aaWidth, aaWidth, edge);
-    
-    // Blend between square (1.0) and circle coverage based on blendFactor
     bool useSquarePixels = forceSquarePixels > 0.5;
-    float alphaBlend = useSquarePixels ? 1.0 : mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
-    color.a *= half(alphaBlend);
     
-    // Calculate per-particle fade-out
-    // Generate a unique fade seed for each particle
-    float fadeSeed = fract(sin(dot(bestSeedBlockCenter, float2(91.237, 58.164))) * 28491.3721);
-    float opacitySeed = fract(sin(dot(bestSeedBlockCenter, float2(23.891, 67.432))) * 19384.2156);
+    for (int i = 0; i < maxBlendParticles; ++i) {
+        if (particleDistances[i] >= 1e8) {
+            // No more valid particles
+            break;
+        }
+        
+        float2 particleOriginalCenter = particleOriginalCenters[i];
+        float2 particleSeedCenter = particleSeedCenters[i];
+        float2 particleExplodedCenter = particleExplodedCenters[i];
+        float pixelDistance = particleDistances[i];
+        
+        // Calculate growth multiplier for this particle
+        float growthSeed = fract(sin(dot(particleSeedCenter, float2(73.156, 41.923))) * 37281.6547);
+        float baseGrowth = 1.0 + (growth * explosionSpacing);
+        float varianceAmount = growthVariance * explosionSpacing;
+        float growthVariation = 1.0 + (growthSeed * 2.0 - 1.0) * varianceAmount;
+        float growthMult = baseGrowth * growthVariation;
+        
+        // Circle radius is half the block size, scaled by growth
+        float baseRadius = pixelSize * 0.5;
+        float radius = baseRadius * growthMult;
+        
+        // Check if pixel is within this particle's radius
+        float2 offsetFromExplodedCenter = pinchPosition - particleExplodedCenter;
+        float distanceFromExplodedCenter = length(offsetFromExplodedCenter);
+        
+        // Antialiased circle edge using screen-space derivative
+        float edge = radius - distanceFromExplodedCenter;
+        float aaWidth = fwidth(edge);
+        float circleCoverage = smoothstep(-aaWidth, aaWidth, edge);
+        
+        // Blend between square (1.0) and circle coverage based on blendFactor
+        float alphaBlend = useSquarePixels ? 1.0 : mix(1.0, circleCoverage, clamp(blendFactor, 0.0, 1.0));
+        
+        // Skip particles that don't contribute (outside their radius)
+        if (alphaBlend < 0.01) {
+            continue;
+        }
+        
+        // Calculate per-particle fade-out
+        float fadeSeed = fract(sin(dot(particleSeedCenter, float2(91.237, 58.164))) * 28491.3721);
+        float particleFadeStart = fadeStart + (fadeSeed - 0.5) * fadeVariance * (1.0 - fadeStart);
+        float fadeOpacity = 1.0 - smoothstep(particleFadeStart, 1.0, animationProgress);
+        
+        // Sample color from the original block center
+        half4 particleColor = layer.sample(particleOriginalCenter);
+        particleColor.a *= half(alphaBlend * fadeOpacity);
+        
+        // Calculate weight based on inverse distance (closer = more weight)
+        // Add small epsilon to avoid division by zero
+        float weight = 1.0 / (pixelDistance + 0.01);
+        
+        // Also factor in the alpha contribution for better blending
+        weight *= float(particleColor.a);
+        
+        // Accumulate weighted color
+        finalColor += particleColor * half(weight);
+        totalWeight += weight;
+    }
     
-    // Add significant per-particle opacity variance (0.3 to 1.0 range)
-    float baseOpacity = 0.3 + (pow(opacitySeed, 0.8) * 0.7);
+    // Normalize by total weight
+    if (totalWeight > 0.001) {
+        finalColor /= half(totalWeight);
+    }
     
-    // Calculate when this specific particle should start fading
-    // The variance is scaled by (1.0 - fadeStart) to ensure all particles reach full transparency by animationProgress = 1.0
-    float particleFadeStart = fadeStart + (fadeSeed - 0.5) * fadeVariance * (1.0 - fadeStart);
-    
-    // Calculate fade opacity using smoothstep for a smooth fade
-    float fadeOpacity = 1.0 - smoothstep(particleFadeStart, 1.0, animationProgress);
-    
-    // Apply both base opacity variance and fade to the final color alpha
-    color.a *= half(baseOpacity * fadeOpacity);
-    
-    return color;
+    return finalColor;
 }
