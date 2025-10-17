@@ -48,6 +48,7 @@ struct MessageBubbleView: View {
     @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
     @State private var revealWorkItem: DispatchWorkItem? = nil
     @State private var includeTalkingTextInLayout = false
+    @State private var isExploding = false
 
     init(
         message: Message,
@@ -145,7 +146,8 @@ struct MessageBubbleView: View {
         case .inbound:
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
-            return message.bubbleMode.isRead ? 0 : 20
+            // During explosion, keep thinking position
+            return (message.bubbleMode.isRead && !isExploding) ? 0 : 20
         case .outbound:
             return calculateYOffset()
         }
@@ -176,7 +178,8 @@ struct MessageBubbleView: View {
         guard message.messageType == .inbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
         // For thinking/talking, fade in when new
-        if message.bubbleMode.isRead {
+        // During explosion, keep thinking opacity
+        if message.bubbleMode.isRead && !isExploding {
             return 1  // Let BubbleView handle opacity
         }
         return isNew ? 0 : 1
@@ -187,7 +190,8 @@ struct MessageBubbleView: View {
         guard isNew else { return 1 }
         // For read state, avatar scales from 0, don't use opacity fade
         // For thinking/talking, use opacity fade
-        return message.bubbleMode.isRead ? 1 : 0
+        // During explosion, keep thinking opacity
+        return (message.bubbleMode.isRead && !isExploding) ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
@@ -227,17 +231,23 @@ struct MessageBubbleView: View {
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
+                // During explosion, keep avatar at 40pt (thinking size)
+                // After explosion completes, allow shrink to 20pt (read size)
+                let avatarSize: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 20 : 40
+                let avatarFrameHeight: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 0 : 40
+                let avatarOffsetX: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 9 : 0
+
                 Image(avatar)
                     .resizable()
-                    .frame(width: message.bubbleMode.isRead ? 20 : 40, height: message.bubbleMode.isRead ? 20 : 40)
+                    .frame(width: avatarSize, height: avatarSize)
                     .clipShape(.circle)
-                    .frame(height: message.bubbleMode.isRead ? 0 : 40)
+                    .frame(height: avatarFrameHeight)
                     .scaleEffect(isNew && message.bubbleMode.isRead ? 0 : 1, anchor: .center)
                     .opacity(isNew && message.bubbleMode.isRead ? 0 : 1)
                     .offset(y: 10)
-                    .offset(x: message.bubbleMode.isRead ? 9 : 0)
-                    .animation(.bouncy(duration: 0.3), value: message.bubbleMode)
+                    .offset(x: avatarOffsetX)
                     .animation(.bouncy(duration: 0.3), value: isNew)
+                    .animation(.bouncy(duration: 0.3), value: isExploding ? nil : message.bubbleMode)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -297,7 +307,8 @@ struct MessageBubbleView: View {
             showTail: showTail,
             bubbleMode: message.bubbleMode,
             animationWidth: outboundAnimationWidth,
-            animationHeight: outboundAnimationHeight
+            animationHeight: outboundAnimationHeight,
+            isExploding: isExploding
         )
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: showTypingIndicatorContent)
@@ -329,16 +340,19 @@ struct MessageBubbleView: View {
             showTypingIndicatorContent = true
             showTalkingContent = false
             includeTalkingTextInLayout = false
+            isExploding = false
         case .talking:
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = !message.text.isEmpty
             includeTalkingTextInLayout = !message.text.isEmpty
+            isExploding = false
         case .read:
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = false
             includeTalkingTextInLayout = false
+            isExploding = false
         }
     }
 
@@ -431,13 +445,26 @@ struct MessageBubbleView: View {
     }
     
     private func startThinkingToReadTransition() {
-        // Fade out typing indicator and go to read state
-        withAnimation(.smooth(duration: 0.3)) {
-            showTypingIndicatorContent = false
+        // Keep content locked during explosion (0.5s)
+        // The bubble stays in thinking mode visually while the explosion plays
+
+        // Mark as exploding to prevent avatar size change
+        isExploding = true
+
+        // CRITICAL: Keep typing indicator visible during entire explosion
+        // Do NOT change showTypingIndicatorContent - it should stay true
+
+        // Only after explosion completes, hide everything
+        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.explosionDuration) {
+            // Explosion complete - now allow transition to read state
+            self.isExploding = false
+
+            // Now hide typing indicator (no animation needed, bubble is invisible by this point)
+            self.showTypingIndicatorContent = false
+            self.isWidthLocked = false
+            self.showTalkingContent = false
+            self.includeTalkingTextInLayout = false
         }
-        isWidthLocked = false
-        showTalkingContent = false
-        includeTalkingTextInLayout = false
     }
     
     //This should only happen if the message is unsent

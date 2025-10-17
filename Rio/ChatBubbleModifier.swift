@@ -13,6 +13,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let bubbleMode: BubbleMode
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
+    let isExploding: Bool
 
     @State private var contentSize: CGSize = .zero
 
@@ -32,15 +33,24 @@ private struct ChatBubbleModifier: ViewModifier {
     let bubbleMinDiameter: CGFloat = 13
     let bubbleMaxDiameter: CGFloat = 23
     let bubbleBlurRadius: CGFloat = 2
-    
+
+    // During explosion, keep bubble in thinking mode layout
+    // After explosion, allow transition to read mode
+    private var effectiveMode: BubbleMode {
+        if isExploding {
+            return .thinking
+        }
+        return bubbleMode
+    }
+
     func body(content: Content) -> some View {
         content
             .padding(.vertical, 10)
-            .padding(.horizontal, bubbleMode == .thinking ? 17 : 13)
+            .padding(.horizontal, effectiveMode == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: bubbleMode == .thinking ? 80 : measuredWidth,
-                    height: bubbleMode == .thinking ? measuredHeight + 15 : measuredHeight,
+                    width: effectiveMode == .thinking ? 80 : measuredWidth,
+                    height: effectiveMode == .thinking ? measuredHeight + 15 : measuredHeight,
                     cornerRadius: bubbleCornerRadius,
                     minDiameter: bubbleMinDiameter,
                     maxDiameter: bubbleMaxDiameter,
@@ -68,7 +78,8 @@ extension View {
         showTail: Bool,
         bubbleMode: BubbleMode = .talking,
         animationWidth: CGFloat? = nil,
-        animationHeight: CGFloat? = nil
+        animationHeight: CGFloat? = nil,
+        isExploding: Bool = false
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -77,7 +88,8 @@ extension View {
                 showTail: showTail,
                 bubbleMode: bubbleMode,
                 animationWidth: animationWidth,
-                animationHeight: animationHeight
+                animationHeight: animationHeight,
+                isExploding: isExploding
             )
         )
     }
