@@ -10,7 +10,6 @@ extension View {
     func explosionEffect(
         isActive: Bool,
         progress: CGFloat,
-        canvasSize: CGSize,
         pixelSize: CGFloat = 2.0,
         explosionCenter: CGPoint = CGPoint(x: 0.5, y: 0.5),
         speedVariance: CGFloat = 0.5,
@@ -28,7 +27,6 @@ extension View {
         modifier(ExplosionEffectModifier(
             isActive: isActive,
             progress: progress,
-            canvasSize: canvasSize,
             pixelSize: pixelSize,
             explosionCenter: explosionCenter,
             speedVariance: speedVariance,
@@ -53,7 +51,6 @@ private struct ExplosionEffectModifier: ViewModifier {
     // Required parameters (no defaults)
     let isActive: Bool
     let progress: CGFloat
-    let canvasSize: CGSize
     
     // Optional parameters (with defaults)
     let pixelSize: CGFloat
@@ -69,10 +66,17 @@ private struct ExplosionEffectModifier: ViewModifier {
     let fadeStart: CGFloat
     let fadeVariance: CGFloat
     let pinchDuration: CGFloat
+    
+    @State private var canvasSize: CGSize = .zero
 
     func body(content: Content) -> some View {
         if isActive {
             content
+                .onGeometryChange(for: CGSize.self) { proxy in
+                    proxy.size
+                } action: { newSize in
+                    canvasSize = newSize
+                }
                 .layerEffect(
                     ShaderLibrary.explode(
                         .float(pixelSize),

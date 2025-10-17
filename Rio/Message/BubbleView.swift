@@ -748,7 +748,7 @@ struct BubbleView: View {
                 }
             }
             .frame(width: canvasWidth, height: canvasHeight)
-            .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: canvasWidth, height: canvasHeight))
+            .explosionEffect(isActive: isExploding, progress: explosionProgress)
             .overlay(alignment: tailAlignment) {
                 tailView
             }
@@ -891,7 +891,7 @@ struct BubbleView: View {
                     .offset(x: 0, y: -13)
                     .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
                     .animation(.easeIn(duration: 0.2), value: bubbleType)
-                    .explosionEffect(isActive: isExploding, progress: explosionProgress, canvasSize: CGSize(width: 8, height: 8))
+                    .explosionEffect(isActive: isExploding, progress: explosionProgress)
                     .opacity(messageType.isInbound ? 1 : 0)
             }
         }
