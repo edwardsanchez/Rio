@@ -989,33 +989,15 @@ struct BubbleView: View {
         let omega0 = 2 * .pi / response
         
         // For underdamped springs (dampingRatio < 1), calculate damped frequency
-        if dampingRatio < 1 {
-            let omegaD = omega0 * sqrt(1 - dampingRatio * dampingRatio)
-            
-            // Spring equation for underdamped case (normalized from 0 to 1)
-            let envelope = exp(-dampingRatio * omega0 * elapsed)
-            let A: CGFloat = 1  // Initial displacement
-            let B = (dampingRatio * omega0 * A) / omegaD
-            let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
-            
-            return min(max(1 - envelope * oscillation, 0), 1)
-        }
-//        else if dampingRatio == 1 {
-//            // Critically damped (no overshoot)
-//            let A: CGFloat = 1 //Will never be executed
-//            let B = omega0 * A
-//            return min(max(1 - (A + B * elapsed) * exp(-omega0 * elapsed), 0), 1)
-//        } else {
-//            // Overdamped (slow, no overshoot)
-//            let r1 = -omega0 * (dampingRatio + sqrt(dampingRatio * dampingRatio - 1)) //Will never be executed
-//            let r2 = -omega0 * (dampingRatio - sqrt(dampingRatio * dampingRatio - 1))
-//            let A = -r2 / (r1 - r2)
-//            let B: CGFloat = 1 - A
-//            return min(max(1 - (A * exp(r1 * elapsed) + B * exp(r2 * elapsed)), 0), 1)
-//        }
+        let omegaD = omega0 * sqrt(1 - dampingRatio * dampingRatio)
         
-        // Fallback (should never be reached with dampingRatio < 1)
-        return 0
+        // Spring equation for underdamped case (normalized from 0 to 1)
+        let envelope = exp(-dampingRatio * omega0 * elapsed)
+        let A: CGFloat = 1  // Initial displacement
+        let B = (dampingRatio * omega0 * A) / omegaD
+        let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
+        
+        return min(max(1 - envelope * oscillation, 0), 1)
     }
 
 }
