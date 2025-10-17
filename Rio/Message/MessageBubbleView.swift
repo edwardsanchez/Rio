@@ -358,6 +358,12 @@ struct MessageBubbleView: View {
             // It will be updated to .read after explosion completes
             startThinkingToReadTransition()
             scheduleDisplayedTypeUpdate(to: newType, delay: bubbleConfig.explosionDuration)
+        } else if oldType == .read && newType == .talking {
+            // Handle displayedBubbleType delay for read→talking transition
+            // Use a tiny delay (0.02s) to let geometry settle before showing bubble
+            // This ensures the bubble appears with its final size and tail position already in place
+            startReadToTalkingTransition()
+            scheduleDisplayedTypeUpdate(to: newType, delay: 0.02)
         } else {
             // For all other transitions, update displayedBubbleType immediately
             displayedBubbleType = newType
@@ -368,8 +374,6 @@ struct MessageBubbleView: View {
                 startThinkingState()
             } else if oldType == .read && newType == .thinking {
                 startReadToThinkingTransition()
-            } else if oldType == .read && newType == .talking {
-                startReadToTalkingTransition()
             } else if oldType == .talking && newType == .read {
                 startTalkingToReadTransition()
             } else {

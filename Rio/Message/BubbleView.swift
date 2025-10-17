@@ -26,6 +26,8 @@ struct BubbleView: View {
     let showTail: Bool
     /// Message direction used to align the bubble tail.
     let messageType: MessageType
+    /// Layout type for visual display (may be delayed relative to bubbleType)
+    let layoutType: BubbleType?
     
     // MARK: - Environment
     
@@ -70,6 +72,10 @@ struct BubbleView: View {
     @State private var internalExplosionStart: Date?
     /// Stores the morphProgress value to freeze during explosion.
     @State private var frozenMorphProgress: CGFloat = 0
+    /// Tracks the previous bubbleType to determine animation behavior
+    @State private var previousBubbleType: BubbleType?
+    /// Flag to disable size animations during read→talking transition
+    @State private var skipSizeAnimation: Bool = false
 
     // MARK: - Derived Layout
 
@@ -108,7 +114,8 @@ struct BubbleView: View {
         color: Color,
         type: BubbleType = .thinking,
         showTail: Bool = false,
-        messageType: MessageType = .inbound(.thinking)
+        messageType: MessageType = .inbound(.thinking),
+        layoutType: BubbleType? = nil
     ) {
         self.width = width
         self.height = height
@@ -117,6 +124,7 @@ struct BubbleView: View {
         self.bubbleType = type
         self.showTail = showTail
         self.messageType = messageType
+        self.layoutType = layoutType
 
         let now = Date()
         let config = BubbleConfiguration()
@@ -480,6 +488,20 @@ struct BubbleView: View {
     /// Applies the requested rectangle size immediately, capturing the current velocity to avoid pops.
     private func applyRectangleSize(_ size: CGSize) {
         let now = Date()
+        
+        // If skipSizeAnimation is true (read→talking), apply size instantly without animation
+        if skipSizeAnimation {
+            rectangleTransition = RectangleTransition(
+                startSize: size,
+                endSize: size,
+                startTime: now.addingTimeInterval(-1), // Set in past so animation is "complete"
+                initialVelocity: .zero
+            )
+            pendingRectangleSize = nil
+            pendingRectangleScheduled = false
+            return
+        }
+        
         let currentSize = rectangleTransition.value(at: now, duration: bubbleConfig.resizeCutoffDuration)
 
         // Calculate current velocity based on the spring animation
@@ -788,6 +810,10 @@ struct BubbleView: View {
             updateCircleTransitions(targetDiameters: newDiameters)
         }
         .onChange(of: bubbleType) { oldType, newType in
+            // Track previous bubble type for conditional animation
+            // Update immediately so tail view can use it to determine animation behavior
+            previousBubbleType = oldType
+            
             // Start thinking→read explosion animation (self-managed)
             if oldType.isThinking && newType.isRead {
                 // Freeze current morphProgress (should be 0 for thinking state)
@@ -806,6 +832,20 @@ struct BubbleView: View {
                     self.internalExplosionStart = nil
                     // Explosion complete - morphProgress is controlled by frozenMorphProgress during explosion
                     // No need to call startModeAnimation - read bubbleType doesn't need animation
+                }
+            } else if oldType.isRead && newType.isTalking {
+                // For read→talking transition, skip morph animation entirely
+                // Set morphProgress directly to talking state (1.0) to avoid showing thinking appearance
+                let now = Date()
+                modeAnimationFrom = 1.0
+                modeAnimationTo = 1.0
+                modeAnimationStart = now.addingTimeInterval(-bubbleConfig.morphDuration) // Set to past so animation is "complete"
+                
+                // Disable size animations for read→talking
+                skipSizeAnimation = true
+                // Re-enable after delay matches bubble appearance (0.4s to be safe)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    self.skipSizeAnimation = false
                 }
             } else {
                 // For all other bubbleType transitions, proceed normally
@@ -827,7 +867,8 @@ struct BubbleView: View {
             
             // When transitioning from thinking to talking, update rectangle transition
             // to use single-line height during morph
-            if (oldType.isThinking || oldType.isRead) && newType.isTalking {
+            // Skip this for read→talking since we're bypassing the morph animation
+            if oldType.isThinking && newType.isTalking {
                 updateRectangleTransition(to: CGSize(width: width, height: height))
             }
         }
@@ -869,6 +910,10 @@ struct BubbleView: View {
 
             ZStack(alignment: tailAlignment) {
                 // Talking bubble tail - only visible in talking mode
+                // Only animate when transitioning from thinking (where tail circle was visible)
+                // Don't animate when transitioning from read (no visible tail to animate from)
+                let shouldAnimateTail = previousBubbleType == .thinking && bubbleType.isTalking
+                
                 Image(.cartouche)
                     .resizable()
                     .frame(width: 15, height: 15)
@@ -877,9 +922,21 @@ struct BubbleView: View {
                     .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
                     .foregroundStyle(color)
                     .opacity(showTail && bubbleType.isTalking ? 1 : 0)
-                    .animation(.spring(duration: 0.3).delay(0.2), value: bubbleType)
+                    .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
                 
                 // Thinking bubble tail
+                // Only animate when NOT transitioning from read (read state has no visible tail)
+                let shouldAnimateCircle = previousBubbleType != .read
+                
+                // Circle should only be visible when in thinking/read state, not when talking
+                // Use layoutType (delayed) if available, otherwise fall back to bubbleType
+                // This prevents the circle from appearing during read→talking transition delay
+                let circleOpacity: CGFloat = {
+                    guard messageType.isInbound else { return 0 }
+                    let effectiveType = layoutType ?? bubbleType
+                    return (effectiveType.isThinking || effectiveType.isRead) ? 1 : 0
+                }()
+                
                 Circle()
                     .fill(color)
                     .frame(width: 8, height: 8)
@@ -890,9 +947,9 @@ struct BubbleView: View {
                     )
                     .offset(x: 0, y: -13)
                     .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
-                    .animation(.easeIn(duration: 0.2), value: bubbleType)
                     .explosionEffect(isActive: isExploding, progress: explosionProgress)
-                    .opacity(messageType.isInbound ? 1 : 0)
+                    .opacity(circleOpacity)
+                    .animation(shouldAnimateCircle ? .easeIn(duration: 0.2) : nil, value: bubbleType)
             }
         }
     }

@@ -31,17 +31,24 @@ private struct ChatBubbleModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
+        // For read→talking transition: use bubbleType for sizing (immediate) to avoid animation
+        // For other transitions: use layoutType for sizing (delayed for proper morphing)
+        // This works because read→talking has displayedType delayed, but we want size immediate
+        let isReadToTalking = layoutType == .read && bubbleType == .talking
+        let sizingType = isReadToTalking ? bubbleType : layoutType
+        
         content
             .padding(.vertical, 10)
             .padding(.horizontal, layoutType == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: layoutType == .thinking ? 80 : measuredWidth,
-                    height: layoutType == .thinking ? measuredHeight + 15 : measuredHeight,
+                    width: sizingType == .thinking ? 80 : measuredWidth,
+                    height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
                     color: backgroundColor,
                     type: bubbleType,
                     showTail: showTail,
-                    messageType: messageType
+                    messageType: messageType,
+                    layoutType: layoutType
                 )
                 .compositingGroup()
                 .opacity(backgroundOpacity)
