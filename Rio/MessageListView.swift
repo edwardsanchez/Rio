@@ -67,6 +67,11 @@ struct MessageListView: View {
             return true
         }
         
+        // Show tail if there's a date header between current and next message
+        if shouldShowDateHeader(at: index + 1) {
+            return true
+        }
+        
         let next = messages[index + 1]
         let isNextSameUser = current.user.id == next.user.id
         

@@ -3,7 +3,6 @@
 ---
 
 ### Bugs
-[ ] Fix bubble losing tail when it's before the date header
 [ ] Fix animation for outbound messages so they come from input field
 [ ] Solve for transition between read and talking (without going through thinking)
 
