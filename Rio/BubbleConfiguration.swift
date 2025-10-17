@@ -54,14 +54,6 @@ class BubbleConfiguration {
         messageType == .inbound ? 0.6 : 1.0
     }
     
-    /// Determine effective bubble mode during explosion states
-    func effectiveMode(bubbleMode: BubbleMode, isExploding: Bool) -> BubbleMode {
-        if isExploding {
-            return .thinking
-        }
-        return bubbleMode
-    }
-    
     /// Calculate parallax offset for cascading jelly effect
     func calculateParallaxOffset(
         scrollVelocity: CGFloat,

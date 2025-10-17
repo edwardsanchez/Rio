@@ -11,9 +11,9 @@ private struct ChatBubbleModifier: ViewModifier {
     let backgroundColor: Color
     let showTail: Bool
     let bubbleMode: BubbleMode
+    let layoutMode: BubbleMode
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
-    let isExploding: Bool
 
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -30,20 +30,14 @@ private struct ChatBubbleModifier: ViewModifier {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
 
-    // During explosion, keep bubble in thinking mode layout
-    // After explosion, allow transition to read mode
-    private var effectiveMode: BubbleMode {
-        bubbleConfig.effectiveMode(bubbleMode: bubbleMode, isExploding: isExploding)
-    }
-
     func body(content: Content) -> some View {
         content
             .padding(.vertical, 10)
-            .padding(.horizontal, effectiveMode == .thinking ? 17 : 13)
+            .padding(.horizontal, layoutMode == .thinking ? 17 : 13)
             .background(alignment: .leading) {
                 BubbleView(
-                    width: effectiveMode == .thinking ? 80 : measuredWidth,
-                    height: effectiveMode == .thinking ? measuredHeight + 15 : measuredHeight,
+                    width: layoutMode == .thinking ? 80 : measuredWidth,
+                    height: layoutMode == .thinking ? measuredHeight + 15 : measuredHeight,
                     color: backgroundColor,
                     mode: bubbleMode,
                     showTail: showTail,
@@ -66,9 +60,9 @@ extension View {
         backgroundColor: Color,
         showTail: Bool,
         bubbleMode: BubbleMode = .talking,
+        layoutMode: BubbleMode? = nil,
         animationWidth: CGFloat? = nil,
-        animationHeight: CGFloat? = nil,
-        isExploding: Bool = false
+        animationHeight: CGFloat? = nil
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -76,9 +70,9 @@ extension View {
                 backgroundColor: backgroundColor,
                 showTail: showTail,
                 bubbleMode: bubbleMode,
+                layoutMode: layoutMode ?? bubbleMode,
                 animationWidth: animationWidth,
-                animationHeight: animationHeight,
-                isExploding: isExploding
+                animationHeight: animationHeight
             )
         )
     }

@@ -66,8 +66,8 @@ struct BubbleView: View {
     @State private var singleLineTextHeight: CGFloat = 0
     /// Start timestamp for the read→thinking animation.
     @State private var readToThinkingStart: Date?
-    /// Start timestamp for the thinking→read explosion animation.
-    @State private var thinkingToReadExplosionStart: Date?
+    /// Start timestamp for the thinking→read explosion animation (self-managed internally).
+    @State private var internalExplosionStart: Date?
     /// Stores the morphProgress value to freeze during explosion.
     @State private var frozenMorphProgress: CGFloat = 0
 
@@ -544,9 +544,9 @@ struct BubbleView: View {
             let baseWidth = max(animatedSize.width, 0)
             let baseHeight = max(animatedSize.height, 0)
 
-            // Check if we're in thinking→read explosion animation
+            // Check if we're in thinking→read explosion animation (computed internally)
+            let isExploding = isInternallyExploding(at: now)
             let explosionProgress = thinkingToReadExplosionProgress(at: now)
-            let isExploding = thinkingToReadExplosionStart != nil && explosionProgress < 1
 
             // During explosion, freeze morphProgress at thinking state (0)
             // After explosion, allow normal mode animation
@@ -788,11 +788,11 @@ struct BubbleView: View {
             updateCircleTransitions(targetDiameters: newDiameters)
         }
         .onChange(of: mode) { oldMode, newMode in
-            // Start thinking→read explosion animation
+            // Start thinking→read explosion animation (self-managed)
             if oldMode.isThinking && newMode.isRead {
                 // Freeze current morphProgress (should be 0 for thinking state)
                 frozenMorphProgress = modeProgress(at: Date())
-                thinkingToReadExplosionStart = Date()
+                internalExplosionStart = Date()
 
                 // CRITICAL: Set the mode animation to stay frozen at current value
                 // This prevents any morphing during the explosion
@@ -803,7 +803,7 @@ struct BubbleView: View {
 
                 // Schedule cleanup after explosion completes
                 DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
-                    self.thinkingToReadExplosionStart = nil
+                    self.internalExplosionStart = nil
                     // Explosion complete - morphProgress is controlled by frozenMorphProgress during explosion
                     // No need to call startModeAnimation - read mode doesn't need animation
                 }
@@ -841,9 +841,8 @@ struct BubbleView: View {
             let readToThinkingAnimProgress = readToThinkingProgress(at: now)
             let tailScale = mode.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
 
-            // Check if we're in explosion animation
-            let explosionProgress = thinkingToReadExplosionProgress(at: now)
-            let isExploding = thinkingToReadExplosionStart != nil && explosionProgress < 1
+            // Check if we're in explosion animation (computed internally)
+            let isExploding = isInternallyExploding(at: now)
 
             // During explosion, keep tail in thinking position
             // Otherwise use normal logic (read and thinking both use thinking tail position)
@@ -938,10 +937,17 @@ struct BubbleView: View {
         return CGFloat(elapsed / bubbleConfig.readToThinkingDuration)
     }
 
+    /// Checks if the bubble is currently in the explosion animation.
+    /// - Returns: true if explosion is active, false otherwise.
+    private func isInternallyExploding(at now: Date) -> Bool {
+        guard let start = internalExplosionStart else { return false }
+        return now.timeIntervalSince(start) < bubbleConfig.explosionDuration
+    }
+    
     /// Returns the progress for the thinking→read explosion animation at a given timestamp.
     /// - Returns: A value from 0 to 1, where 0 is the start and 1 is complete.
     private func thinkingToReadExplosionProgress(at now: Date) -> CGFloat {
-        guard let start = thinkingToReadExplosionStart else { return 1 }
+        guard let start = internalExplosionStart else { return 1 }
         let elapsed = now.timeIntervalSince(start)
         if elapsed <= 0 {
             return 0
@@ -1009,7 +1015,7 @@ struct BubbleView: View {
 //        }
         
         // Fallback (should never be reached with dampingRatio < 1)
-//        return normalizedProgress >= 0.5 ? 1 : 0
+        return 0
     }
 
 }

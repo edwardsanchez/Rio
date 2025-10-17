@@ -48,7 +48,8 @@ struct MessageBubbleView: View {
     @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
     @State private var revealWorkItem: DispatchWorkItem? = nil
     @State private var includeTalkingTextInLayout = false
-    @State private var isExploding = false
+    @State private var displayedBubbleMode: BubbleMode
+    @State private var modeDelayWorkItem: DispatchWorkItem? = nil
     
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
@@ -74,6 +75,8 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        // Initialize displayedBubbleMode to match actual mode
+        self._displayedBubbleMode = State(initialValue: message.bubbleMode)
     }
 
     var body: some View {
@@ -148,8 +151,7 @@ struct MessageBubbleView: View {
         case .inbound:
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
-            // During explosion, keep thinking position
-            return (message.bubbleMode.isRead && !isExploding) ? 0 : 20
+            return displayedBubbleMode.isRead ? 0 : 20
         case .outbound:
             return calculateYOffset()
         }
@@ -180,8 +182,7 @@ struct MessageBubbleView: View {
         guard message.messageType == .inbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
         // For thinking/talking, fade in when new
-        // During explosion, keep thinking opacity
-        if message.bubbleMode.isRead && !isExploding {
+        if displayedBubbleMode.isRead {
             return 1  // Let BubbleView handle opacity
         }
         return isNew ? 0 : 1
@@ -192,8 +193,7 @@ struct MessageBubbleView: View {
         guard isNew else { return 1 }
         // For read state, avatar scales from 0, don't use opacity fade
         // For thinking/talking, use opacity fade
-        // During explosion, keep thinking opacity
-        return (message.bubbleMode.isRead && !isExploding) ? 1 : 0
+        return displayedBubbleMode.isRead ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
@@ -229,23 +229,21 @@ struct MessageBubbleView: View {
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
-                // During explosion, keep avatar at 40pt (thinking size)
-                // After explosion completes, allow shrink to 20pt (read size)
-                let avatarSize: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 20 : 40
-                let avatarFrameHeight: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 0 : 40
-                let avatarOffsetX: CGFloat = (message.bubbleMode.isRead && !isExploding) ? 9 : 0
+                let avatarSize: CGFloat = displayedBubbleMode.isRead ? 20 : 40
+                let avatarFrameHeight: CGFloat = displayedBubbleMode.isRead ? 0 : 40
+                let avatarOffsetX: CGFloat = displayedBubbleMode.isRead ? 9 : 0
 
                 Image(avatar)
                     .resizable()
                     .frame(width: avatarSize, height: avatarSize)
                     .clipShape(.circle)
                     .frame(height: avatarFrameHeight)
-                    .scaleEffect(isNew && message.bubbleMode.isRead ? 0 : 1, anchor: .center)
-                    .opacity(isNew && message.bubbleMode.isRead ? 0 : 1)
+                    .scaleEffect(isNew && displayedBubbleMode.isRead ? 0 : 1, anchor: .center)
+                    .opacity(isNew && displayedBubbleMode.isRead ? 0 : 1)
                     .offset(y: 10)
                     .offset(x: avatarOffsetX)
                     .animation(.bouncy(duration: 0.3), value: isNew)
-                    .animation(.bouncy(duration: 0.3), value: isExploding ? nil : message.bubbleMode)
+                    .animation(.bouncy(duration: 0.3), value: displayedBubbleMode)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -304,9 +302,9 @@ struct MessageBubbleView: View {
             backgroundColor: backgroundColor,
             showTail: showTail,
             bubbleMode: message.bubbleMode,
+            layoutMode: displayedBubbleMode,
             animationWidth: outboundAnimationWidth,
-            animationHeight: outboundAnimationHeight,
-            isExploding: isExploding
+            animationHeight: outboundAnimationHeight
         )
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: showTypingIndicatorContent)
@@ -338,39 +336,46 @@ struct MessageBubbleView: View {
             showTypingIndicatorContent = true
             showTalkingContent = false
             includeTalkingTextInLayout = false
-            isExploding = false
         case .talking:
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = !message.text.isEmpty
             includeTalkingTextInLayout = !message.text.isEmpty
-            isExploding = false
         case .read:
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = false
             includeTalkingTextInLayout = false
-            isExploding = false
         }
     }
 
     private func handleBubbleModeChange(from oldMode: BubbleMode, to newMode: BubbleMode) {
         guard oldMode != newMode else { return }
         cancelPendingContentTransitions()
-        if oldMode == .thinking && newMode == .talking {
-            startTalkingTransition()
-        } else if oldMode == .talking && newMode == .thinking {
-            startThinkingState()
-        } else if oldMode == .read && newMode == .thinking {
-            startReadToThinkingTransition()
-        } else if oldMode == .read && newMode == .talking {
-            startReadToTalkingTransition()
-        } else if oldMode == .thinking && newMode == .read {
+        
+        // Handle displayedBubbleMode delay for thinking→read transition
+        if oldMode == .thinking && newMode == .read {
+            // Keep displayedBubbleMode at .thinking during explosion
+            // It will be updated to .read after explosion completes
             startThinkingToReadTransition()
-        } else if oldMode == .talking && newMode == .read {
-            startTalkingToReadTransition()
+            scheduleDisplayedModeUpdate(to: newMode, delay: bubbleConfig.explosionDuration)
         } else {
-            configureInitialContentState()
+            // For all other transitions, update displayedBubbleMode immediately
+            displayedBubbleMode = newMode
+            
+            if oldMode == .thinking && newMode == .talking {
+                startTalkingTransition()
+            } else if oldMode == .talking && newMode == .thinking {
+                startThinkingState()
+            } else if oldMode == .read && newMode == .thinking {
+                startReadToThinkingTransition()
+            } else if oldMode == .read && newMode == .talking {
+                startReadToTalkingTransition()
+            } else if oldMode == .talking && newMode == .read {
+                startTalkingToReadTransition()
+            } else {
+                configureInitialContentState()
+            }
         }
     }
 
@@ -443,19 +448,11 @@ struct MessageBubbleView: View {
     }
     
     private func startThinkingToReadTransition() {
-        // Keep content locked during explosion (0.5s)
-        // The bubble stays in thinking mode visually while the explosion plays
-
-        // Mark as exploding to prevent avatar size change
-        isExploding = true
-
         // Immediately hide typing indicator (no animation) when mode changes to read
         showTypingIndicatorContent = false
 
-        // Only after explosion completes, clean up remaining state
+        // After explosion completes (managed by displayedBubbleMode delay), clean up remaining state
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
-            // Explosion complete - now allow transition to read state
-            self.isExploding = false
             self.isWidthLocked = false
             self.showTalkingContent = false
             self.includeTalkingTextInLayout = false
@@ -510,11 +507,29 @@ struct MessageBubbleView: View {
         }
     }
 
+    private func scheduleDisplayedModeUpdate(to mode: BubbleMode, delay: TimeInterval) {
+        // Cancel any pending mode updates
+        modeDelayWorkItem?.cancel()
+        
+        let delayItem = DispatchWorkItem {
+            self.displayedBubbleMode = mode
+        }
+        
+        modeDelayWorkItem = delayItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            guard !delayItem.isCancelled else { return }
+            delayItem.perform()
+            self.modeDelayWorkItem = nil
+        }
+    }
+
     private func cancelPendingContentTransitions() {
         widthUnlockWorkItem?.cancel()
         widthUnlockWorkItem = nil
         revealWorkItem?.cancel()
         revealWorkItem = nil
+        modeDelayWorkItem?.cancel()
+        modeDelayWorkItem = nil
     }
 
     private var outboundAnimationWidth: CGFloat? {
