@@ -52,7 +52,7 @@ struct BubbleExplosionTestView: View {
         VStack(spacing: 20) {
             bubbleView(
                 textColor: .white,
-                backgroundColor: .gray
+                backgroundColor: .primary
             )
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
@@ -287,8 +287,8 @@ struct BubbleExplosionTestView: View {
             animationHeight: outboundAnimationHeight
         )
         .overlay(alignment: .leading) {
-            TypingIndicatorView(isVisible: showTypingIndicatorContent)
-                .padding(.leading, 20)
+//            TypingIndicatorView(isVisible: showTypingIndicatorContent)
+//                .padding(.leading, 20)
         }
     }
     
@@ -298,7 +298,7 @@ struct BubbleExplosionTestView: View {
     }
 }
 
-#Preview("Shader Test") {
+#Preview("Bubble Explosion Test") {
     BubbleExplosionTestView(
         message: Message(
             text: "",
