@@ -850,18 +850,18 @@ struct BubbleView: View {
             let isThinking = bubbleType.isThinking || (bubbleType.isRead && !isExploding) || isExploding
             let isInbound = messageType.isInbound
 
-            // Calculate fade-out opacity for thinking→read transition
-            // When exploding (thinking→read), fade out the circle
-            // Otherwise, use full opacity for inbound messages
-            let thinkingCircleOpacity: CGFloat = {
-                if isExploding {
-                    // Fade out during explosion
-                    return 1 - explosionProgress
-                } else {
-                    // Normal opacity based on message type
-                    return messageType.isInbound ? 1 : 0
-                }
-            }()
+//            // Calculate fade-out opacity for thinking→read transition
+//            // When exploding (thinking→read), fade out the circle
+//            // Otherwise, use full opacity for inbound messages
+//            let thinkingCircleOpacity: CGFloat = {
+//                if isExploding {
+//                    // Fade out during explosion
+//                    return 1 - explosionProgress
+//                } else {
+//                    // Normal opacity based on message type
+//                    return messageType.isInbound ? 1 : 0
+//                }
+//            }()
 
             // Additional offsets for talking mode - mirrored for inbound/outbound
             let talkingXOffset: CGFloat = isInbound ? 3 : -3
