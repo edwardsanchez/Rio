@@ -888,7 +888,12 @@ struct BubbleView: View {
 
             // During explosion, keep tail in thinking position
             // Otherwise use normal logic (read and thinking both use thinking tail position)
-            let isThinking = bubbleType.isThinking || (bubbleType.isRead && !isExploding) || isExploding
+            // Detect if we're in read→talking delay period
+            let isReadToTalkingDelay = layoutType == .read && bubbleType == .talking
+            
+            // Use layoutType ONLY during read→talking delay, otherwise use bubbleType for normal animations
+            let effectiveTypeForPosition = isReadToTalkingDelay ? (layoutType ?? bubbleType) : bubbleType
+            let isThinking = effectiveTypeForPosition.isThinking || (effectiveTypeForPosition.isRead && !isExploding) || isExploding
             let isInbound = messageType.isInbound
 
 //            // Calculate fade-out opacity for thinking→read transition
@@ -910,9 +915,8 @@ struct BubbleView: View {
 
             ZStack(alignment: tailAlignment) {
                 // Talking bubble tail - only visible in talking mode
-                // Only animate when transitioning from thinking (where tail circle was visible)
-                // Don't animate when transitioning from read (no visible tail to animate from)
-                let shouldAnimateTail = previousBubbleType == .thinking && bubbleType.isTalking
+                // Animate for all transitions EXCEPT read→talking (where there's no visible tail to animate from)
+                let shouldAnimateTail = previousBubbleType != .read
                 
                 talkingTail(isThinking: isThinking, thinkingXOffset: thinkingXOffset, talkingXOffset: talkingXOffset, shouldAnimateTail: shouldAnimateTail)
                 
@@ -970,14 +974,18 @@ struct BubbleView: View {
         talkingXOffset: CGFloat,
         shouldAnimateTail: Bool
     ) -> some View {
-        Image(.cartouche)
+        // Use layoutType (delayed) if available to control visibility
+        // This keeps tail invisible during read→talking transition delay
+        let effectiveType = layoutType ?? bubbleType
+        
+        return Image(.cartouche)
             .resizable()
             .frame(width: 15, height: 15)
             .rotation3DEffect(tailRotation, axis: (x: 0, y: 1, z: 0))
             .offset(x: tailOffset.x, y: tailOffset.y)
             .offset(x: isThinking ? thinkingXOffset : talkingXOffset, y: isThinking ? -23 : -1)
             .foregroundStyle(color)
-            .opacity(showTail && bubbleType.isTalking ? 1 : 0)
+            .opacity(showTail && effectiveType.isTalking ? 1 : 0)
             .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
     }
 
