@@ -297,7 +297,7 @@ struct ChatInputView: View {
                        let indicatorIndex = messages.firstIndex(where: { $0.id == indicatorId }) {
                         let currentIndicator = messages[indicatorIndex]
                         // Only transition if still in .read state
-                        if currentIndicator.bubbleMode == .read {
+                        if currentIndicator.bubbleMode.isRead {
                             let updatedIndicator = Message(
                                 id: currentIndicator.id,
                                 text: currentIndicator.text,
