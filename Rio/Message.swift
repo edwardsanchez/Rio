@@ -49,6 +49,8 @@ struct MessageBubbleView: View {
     @State private var revealWorkItem: DispatchWorkItem? = nil
     @State private var includeTalkingTextInLayout = false
     @State private var isExploding = false
+    
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     init(
         message: Message,
@@ -196,16 +198,12 @@ struct MessageBubbleView: View {
 
     // Physics-based parallax offset for cascading jelly effect
     private var parallaxOffset: CGFloat {
-        // Don't apply parallax during new message animations
-        guard !isNew else { return 0 }
-
-        // Use shared parallax calculator
-        let calculator = ParallaxCalculator(
+        bubbleConfig.calculateParallaxOffset(
             scrollVelocity: scrollVelocity,
             scrollPhase: scrollPhase,
-            visibleMessageIndex: visibleMessageIndex
+            visibleMessageIndex: visibleMessageIndex,
+            isNewMessage: isNew
         )
-        return calculator.offset
     }
 
     private func calculateYOffset() -> CGFloat {
@@ -417,7 +415,7 @@ struct MessageBubbleView: View {
         includeTalkingTextInLayout = false
         
         // Wait for the bubble animation to complete before showing typing indicator
-        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.readToThinkingDuration / 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration / 3) {
             withAnimation(.smooth(duration: 0.3)) {
                 self.showTypingIndicatorContent = true
             }
@@ -455,7 +453,7 @@ struct MessageBubbleView: View {
         showTypingIndicatorContent = false
 
         // Only after explosion completes, clean up remaining state
-        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.explosionDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
             // Explosion complete - now allow transition to read state
             self.isExploding = false
             self.isWidthLocked = false
@@ -477,20 +475,20 @@ struct MessageBubbleView: View {
 
     private func scheduleTextLayoutInclusion() {
         // Include text in layout after morph phase, so it affects height during resize phase
-        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.morphDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
             includeTalkingTextInLayout = true
         }
     }
 
     private func scheduleWidthUnlock() {
         let unlockItem = DispatchWorkItem {
-            withAnimation(.smooth(duration: BubbleView.resizeCutoffDuration)) {
+            withAnimation(.smooth(duration: bubbleConfig.resizeCutoffDuration)) {
                 isWidthLocked = false
             }
         }
 
         widthUnlockWorkItem = unlockItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.morphDuration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
             guard !unlockItem.isCancelled else { return }
             unlockItem.perform()
             widthUnlockWorkItem = nil
@@ -505,7 +503,7 @@ struct MessageBubbleView: View {
         }
 
         revealWorkItem = revealItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + BubbleView.textRevealDelay) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.textRevealDelay) {
             guard !revealItem.isCancelled else { return }
             revealItem.perform()
             revealWorkItem = nil
@@ -647,10 +645,15 @@ private struct MessageBubblePreviewContainer: View {
 }
 
 #Preview("Inbound Message Bubble Morph") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    
     MessageBubblePreviewContainer()
+        .environment(bubbleConfig)
 }
 
 #Preview("Message States") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    
     VStack(spacing: 20) {
         
         MessageBubbleView(
@@ -700,4 +703,5 @@ private struct MessageBubblePreviewContainer: View {
     }
     .padding(.horizontal, 20)
     .padding(.vertical, 40)
+    .environment(bubbleConfig)
 }

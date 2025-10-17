@@ -309,4 +309,5 @@ struct BubbleExplosionTestView: View {
         showTail: true
     )
     .padding()
+    .environment(BubbleConfiguration())
 }

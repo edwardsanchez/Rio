@@ -13,6 +13,8 @@ struct DateHeaderView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
+    
     init(date: Date, scrollVelocity: CGFloat = 0, scrollPhase: ScrollPhase = .idle, visibleMessageIndex: Int = 0) {
         self.date = date
         self.scrollVelocity = scrollVelocity
@@ -28,11 +30,12 @@ struct DateHeaderView: View {
         return formatter
     }
     
-    private var parallaxCalculator: ParallaxCalculator {
-        ParallaxCalculator(
+    private var parallaxOffset: CGFloat {
+        bubbleConfig.calculateParallaxOffset(
             scrollVelocity: scrollVelocity,
             scrollPhase: scrollPhase,
-            visibleMessageIndex: visibleMessageIndex
+            visibleMessageIndex: visibleMessageIndex,
+            isNewMessage: false
         )
     }
     
@@ -40,7 +43,7 @@ struct DateHeaderView: View {
         Text(dateFormatter.string(from: date))
             .font(.caption)
             .foregroundColor(.secondary)
-            .offset(y: parallaxCalculator.offset)
-            .animation(.interactiveSpring, value: parallaxCalculator.offset)
+            .offset(y: parallaxOffset)
+            .animation(.interactiveSpring, value: parallaxOffset)
     }
 }

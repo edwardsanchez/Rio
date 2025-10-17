@@ -20,6 +20,7 @@ struct ChatInputView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
     @Binding var autoReplyEnabled: Bool
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     // Timer for automated inbound message
     @State private var autoReplyTimer: Timer? = nil
@@ -27,6 +28,7 @@ struct ChatInputView: View {
     // Track inbound response state to prevent multiple simultaneous responses
     @State private var isInboundResponsePending = false
     @State private var currentTypingIndicatorId: UUID? = nil
+    @State private var readToThinkingTimer: Timer? = nil
 
     // Array of random responses
     private let autoReplyMessages = [
@@ -376,6 +378,7 @@ struct ChatInputView: View {
     @Previewable @State var newMessageId: UUID? = nil
     @Previewable @State var shouldFocusInput = false
     @Previewable @State var autoReplyEnabled = true
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
 
     let chatData = ChatData()
     let chat = chatData.chats.first!
@@ -389,5 +392,6 @@ struct ChatInputView: View {
         autoReplyEnabled: $autoReplyEnabled
     )
     .environment(chatData)
+    .environment(bubbleConfig)
     .background(Color.base)
 }

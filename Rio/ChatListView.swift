@@ -66,4 +66,5 @@ struct ChatRowView: View {
         ChatListView()
     }
     .environment(ChatData())
+    .environment(BubbleConfiguration())
 }

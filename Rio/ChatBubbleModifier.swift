@@ -16,9 +16,10 @@ private struct ChatBubbleModifier: ViewModifier {
     let isExploding: Bool
 
     @State private var contentSize: CGSize = .zero
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     private var backgroundOpacity: Double {
-        messageType == .inbound ? 0.6 : 1.0
+        bubbleConfig.backgroundOpacity(for: messageType)
     }
 
     private var measuredWidth: CGFloat {
@@ -29,18 +30,10 @@ private struct ChatBubbleModifier: ViewModifier {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
 
-    let bubbleCornerRadius: CGFloat = 20
-    let bubbleMinDiameter: CGFloat = 13
-    let bubbleMaxDiameter: CGFloat = 23
-    let bubbleBlurRadius: CGFloat = 2
-
     // During explosion, keep bubble in thinking mode layout
     // After explosion, allow transition to read mode
     private var effectiveMode: BubbleMode {
-        if isExploding {
-            return .thinking
-        }
-        return bubbleMode
+        bubbleConfig.effectiveMode(bubbleMode: bubbleMode, isExploding: isExploding)
     }
 
     func body(content: Content) -> some View {
@@ -51,10 +44,6 @@ private struct ChatBubbleModifier: ViewModifier {
                 BubbleView(
                     width: effectiveMode == .thinking ? 80 : measuredWidth,
                     height: effectiveMode == .thinking ? measuredHeight + 15 : measuredHeight,
-                    cornerRadius: bubbleCornerRadius,
-                    minDiameter: bubbleMinDiameter,
-                    maxDiameter: bubbleMaxDiameter,
-                    blurRadius: bubbleBlurRadius,
                     color: backgroundColor,
                     mode: bubbleMode,
                     showTail: showTail,

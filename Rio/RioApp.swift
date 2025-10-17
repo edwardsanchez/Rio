@@ -22,6 +22,8 @@ struct RioApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    @State private var bubbleConfig = BubbleConfiguration()
 
     var body: some Scene {
         WindowGroup {
@@ -29,5 +31,6 @@ struct RioApp: App {
 //            CursiveTestView()
         }
         .modelContainer(sharedModelContainer)
+        .environment(bubbleConfig)
     }
 }
