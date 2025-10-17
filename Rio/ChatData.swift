@@ -10,18 +10,20 @@ import SwiftUI
 @Observable
 class ChatData {
     var chats: [Chat] = []
-    
+    // Track visible thinking bubbles per chat (chatId -> participant IDs)
+    var activeTypingIndicators: [UUID: Set<UUID>] = [:]
+
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
     let liamUser = User(id: UUID(), name: "Liam", avatar: .joaquin)
-    let zoeUser = User(id: UUID(), name: "Zoe", avatar: nil)
-    
+    let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)
+
     init() {
         generateSampleChats()
     }
-    
+
     private func generateSampleChats() {
         // Chat 1: Edward and Maya (2 participants)
         let chat1Messages = [
@@ -56,36 +58,36 @@ class ChatData {
 
         // Chat 3: Edward, Sophia, Liam, and Zoe (4 participants)
         let chat3Messages = [
-            Message(text: "Welcome to the group chat!", user: zoeUser, date: Date().addingTimeInterval(-10800)),
+            Message(text: "Welcome to the group chat!", user: amyUser, date: Date().addingTimeInterval(-10800)),
             Message(text: "Thanks for adding me!", user: edwardUser, date: Date().addingTimeInterval(-10700)),
             Message(text: "Great to have you here Edward", user: sophiaUser, date: Date().addingTimeInterval(-10600)),
             Message(text: "We were just discussing weekend plans", user: liamUser, date: Date().addingTimeInterval(-10500)),
-            Message(text: "I'm thinking of going hiking. Anyone interested?", user: zoeUser, date: Date().addingTimeInterval(-10400)),
+            Message(text: "I'm thinking of going hiking. Anyone interested?", user: amyUser, date: Date().addingTimeInterval(-10400)),
             Message(text: "Count me in! I love hiking", user: edwardUser, date: Date().addingTimeInterval(-10300))
         ]
 
         let chat3 = Chat(
             title: "Adventure Crew",
-            participants: [edwardUser, sophiaUser, liamUser, zoeUser],
+            participants: [edwardUser, sophiaUser, liamUser, amyUser],
             messages: chat3Messages,
             theme: .theme2
         )
-        
+
         chats = [chat1, chat2, chat3]
     }
-    
+
     // Get all participants except Edward for auto-reply
     func getOtherParticipants(in chat: Chat) -> [User] {
         return chat.participants.filter { $0.name != "Edward" }
     }
-    
+
     // Add a message to a specific chat
     func addMessage(_ message: Message, to chatId: UUID) {
         if let chatIndex = chats.firstIndex(where: { $0.id == chatId }) {
             var updatedChat = chats[chatIndex]
             var updatedMessages = updatedChat.messages
             updatedMessages.append(message)
-            
+
             updatedChat = Chat(
                 id: updatedChat.id,
                 title: updatedChat.title,
@@ -93,11 +95,47 @@ class ChatData {
                 messages: updatedMessages,
                 theme: updatedChat.theme
             )
-            
+
             chats[chatIndex] = updatedChat
         }
     }
-    
+
+    func updateMessage(_ message: Message, in chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        var updatedChat = chats[chatIndex]
+        var updatedMessages = updatedChat.messages
+        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == message.id }) {
+            updatedMessages[messageIndex] = message
+            updatedChat = Chat(
+                id: updatedChat.id,
+                title: updatedChat.title,
+                participants: updatedChat.participants,
+                messages: updatedMessages,
+                theme: updatedChat.theme
+            )
+            chats[chatIndex] = updatedChat
+        }
+    }
+
+    func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
+        var indicatorSet = activeTypingIndicators[chatId] ?? []
+        if visible {
+            indicatorSet.insert(userId)
+        } else {
+            indicatorSet.remove(userId)
+        }
+
+        if indicatorSet.isEmpty {
+            activeTypingIndicators.removeValue(forKey: chatId)
+        } else {
+            activeTypingIndicators[chatId] = indicatorSet
+        }
+    }
+
+    func isTypingIndicatorVisible(for userId: UUID, in chatId: UUID) -> Bool {
+        activeTypingIndicators[chatId]?.contains(userId) ?? false
+    }
+
     // Get a random participant for auto-reply (excluding Edward)
     func getRandomParticipantForReply(in chat: Chat) -> User? {
         let otherParticipants = getOtherParticipants(in: chat)

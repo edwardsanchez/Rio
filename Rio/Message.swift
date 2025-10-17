@@ -29,270 +29,6 @@
 import SwiftUI
 import OSLog
 
-// MARK: - Shared Parallax Effect Logic
-
-/// Calculates the cascading jelly parallax offset for scroll-based animations
-struct ParallaxCalculator {
-    let scrollVelocity: CGFloat
-    let scrollPhase: ScrollPhase
-    let visibleMessageIndex: Int
-
-    var offset: CGFloat {
-        // Ensure we have a valid scroll velocity
-        guard scrollVelocity != 0 else { return 0 }
-
-        // Only apply cascading effect during active scrolling phases
-        let shouldApplyCascade = scrollPhase == .tracking || scrollPhase == .decelerating
-
-        if shouldApplyCascade {
-            // Create cascading effect based on visible message position
-            // Messages lower in the visible area get higher multipliers
-            let baseMultiplier: CGFloat = 0.8
-            let cascadeIncrement: CGFloat = 0.2
-            let maxCascadeMessages = 20 // Limit cascade to prevent excessive multipliers
-
-            // Calculate position-based multiplier (clamped to prevent extreme values)
-            let cascadePosition = min(visibleMessageIndex, maxCascadeMessages)
-            let multiplier = baseMultiplier + (CGFloat(cascadePosition) * cascadeIncrement)
-
-            return -scrollVelocity * multiplier
-        } else {
-            // Use consistent multiplier when not actively scrolling
-            let multiplier: CGFloat = 0.2
-            return -scrollVelocity * multiplier
-        }
-    }
-}
-
-struct User: Identifiable {
-    let id: UUID
-    let name: String
-    let avatar: ImageResource?
-}
-
-struct Chat: Identifiable {
-    let id: UUID
-    let title: String
-    let participants: [User] // Always includes the current "outbound" user
-    let messages: [Message]
-    let theme: ChatTheme
-
-    init(
-        id: UUID = UUID(),
-        title: String,
-        participants: [User],
-        messages: [Message] = [],
-        theme: ChatTheme
-    ) {
-        self.id = id
-        self.title = title
-        self.participants = participants
-        self.messages = messages
-        self.theme = theme
-    }
-}
-
-// Component to handle the entire message list with date headers
-struct MessageListView: View {
-    let messages: [Message]
-    @Binding var newMessageId: UUID?
-    let inputFieldFrame: CGRect
-    let scrollViewFrame: CGRect
-    let scrollVelocity: CGFloat
-    let scrollPhase: ScrollPhase
-    let theme: ChatTheme
-
-    var body: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(zip(messages.indices, messages)), id: \.1.id) { index, message in
-                let isNew = message.id == newMessageId
-                var isLastMessageInChat: Bool { messages.last!.id == message.id }
-                let showTail = shouldShowTail(at: index)
-
-                VStack(spacing: 5) {
-                    if shouldShowDateHeader(at: index) {
-                        DateHeaderView(
-                            date: message.date,
-                            scrollVelocity: scrollVelocity,
-                            scrollPhase: scrollPhase,
-                            visibleMessageIndex: index
-                        )
-                        .padding(.vertical, 5)
-                    }
-
-                    MessageBubbleView(
-                        message: message,
-                        showTail: showTail,
-                        isNew: isNew,
-                        inputFieldFrame: inputFieldFrame,
-                        scrollViewFrame: scrollViewFrame,
-                        newMessageId: $newMessageId,
-                        scrollVelocity: scrollVelocity,
-                        scrollPhase: scrollPhase,
-                        visibleMessageIndex: index,
-                        theme: theme
-                    )
-                    .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
-                    .id(message.id) // Essential for ScrollPosition to work
-                }
-            }
-        }
-        .scrollTargetLayout() // Optimizes scrolling performance for iOS 18+
-    }
-
-    private func shouldShowTail(at index: Int) -> Bool { //Move inside Message Bubble
-        let tailContinuationThreshold: TimeInterval = 300
-        let current = messages[index]
-
-        // Check if this is the last message overall
-        let isLastMessage = index == messages.count - 1
-
-        if isLastMessage {
-            // Last message always shows tail
-            return true
-        }
-
-        let next = messages[index + 1]
-        let isNextSameUser = current.user.id == next.user.id
-
-        // For outbound messages (from Edward), only show tail if it's the last in a sequence
-        if current.messageType == .outbound {
-            // Only show tail if the next message is from a different user (end of outbound sequence)
-            return !isNextSameUser
-        }
-
-        // For inbound messages, keep the existing logic with time threshold
-        let timeDifference = next.date.timeIntervalSince(current.date)
-        let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
-
-        // Show tail if next message is from different user OR if time gap is too large
-        return !isNextSameUser || !isWithinThreshold
-    }
-
-    private func shouldShowDateHeader(at index: Int) -> Bool { //keep here
-        guard index > 0 else {
-            // Always show date header for the first message
-            return true
-        }
-
-        // Use 5 seconds for testing, change to 3600 (1 hour) for production
-        let dateHeaderThreshold: TimeInterval = 3600
-
-        let current = messages[index]
-        let previous = messages[index - 1]
-        let timeDifference = current.date.timeIntervalSince(previous.date)
-
-        // Show date header if messages are more than threshold apart
-        return abs(timeDifference) > dateHeaderThreshold
-    }
-}
-
-struct DateHeaderView: View {
-    var date: Date
-    let scrollVelocity: CGFloat
-    let scrollPhase: ScrollPhase
-    let visibleMessageIndex: Int
-
-    init(date: Date, scrollVelocity: CGFloat = 0, scrollPhase: ScrollPhase = .idle, visibleMessageIndex: Int = 0) {
-        self.date = date
-        self.scrollVelocity = scrollVelocity
-        self.scrollPhase = scrollPhase
-        self.visibleMessageIndex = visibleMessageIndex
-    }
-
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        formatter.doesRelativeDateFormatting = true
-        return formatter
-    }
-
-    private var parallaxCalculator: ParallaxCalculator {
-        ParallaxCalculator(
-            scrollVelocity: scrollVelocity,
-            scrollPhase: scrollPhase,
-            visibleMessageIndex: visibleMessageIndex
-        )
-    }
-
-    var body: some View {
-        Text(dateFormatter.string(from: date))
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .offset(y: parallaxCalculator.offset)
-            .animation(.interactiveSpring, value: parallaxCalculator.offset)
-    }
-}
-
-// MARK: - Message Type
-
-enum MessageType {
-    case inbound
-    case outbound
-}
-
-// MARK: - Bubble Tail Type
-
-enum BubbleTailType {
-    case talking
-    case thinking
-}
-
-struct ChatTheme {
-    let backgroundColor: Color
-    let inboundTextColor: Color
-    let inboundBackgroundColor: Color
-    let outboundTextColor: Color
-    let outboundBackgroundColor: Color
-
-    // Predefined themes matching asset catalog
-    static let defaultTheme = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Default.inboundBubble,
-        outboundTextColor: .white,
-        outboundBackgroundColor: .Default.outboundBubble
-    )
-
-    static let theme1 = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Theme1.inboundBubble,
-        outboundTextColor: .white,
-        outboundBackgroundColor: .Theme1.outboundBubble
-    )
-
-    static let theme2 = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Theme2.inboundBubble,
-        outboundTextColor: .white,
-        outboundBackgroundColor: .Theme2.outboundBubble
-    )
-}
-
-struct Message: Identifiable {
-    let id: UUID
-    let text: String
-    let user: User
-    let date: Date
-    let isTypingIndicator: Bool
-
-    var messageType: MessageType {
-        // We'll determine this based on the user - for now, any user that isn't "Edward" is outbound
-        user.name == "Edward" ? .outbound : .inbound
-    }
-
-    init(id: UUID = UUID(), text: String, user: User, date: Date = Date.now, isTypingIndicator: Bool = false) {
-        self.id = id
-        self.text = text
-        self.user = user
-        self.date = date
-        self.isTypingIndicator = isTypingIndicator
-    }
-}
-
 struct MessageBubbleView: View {
     let message: Message
     let showTail: Bool
@@ -304,6 +40,18 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+
+    @State private var showTypingIndicatorContent = false
+    @State private var showTalkingContent = false
+    @State private var thinkingContentWidth: CGFloat = 0
+    @State private var isWidthLocked = false
+    @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
+    @State private var revealWorkItem: DispatchWorkItem? = nil
+    @State private var includeTalkingTextInLayout = false
+    @State private var displayedBubbleMode: BubbleMode
+    @State private var modeDelayWorkItem: DispatchWorkItem? = nil
+    
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     init(
         message: Message,
@@ -327,16 +75,23 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        // Initialize displayedBubbleMode to match actual mode
+        self._displayedBubbleMode = State(initialValue: message.bubbleMode)
     }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
             if message.messageType == .inbound {
-                inboundAvatar
-                bubbleView(
-                    textColor: theme.inboundTextColor,
-                    backgroundColor: theme.inboundBackgroundColor
-                )
+                Group {
+                    inboundAvatar
+                        .opacity(inboundAvatarOpacity)
+                    bubbleView(
+                        textColor: theme.inboundTextColor,
+                        backgroundColor: theme.inboundBackgroundColor
+                    )
+                }
+                .opacity(bubbleOpacity)
+                .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
                 // beyond the available width while still allowing natural sizing
@@ -355,18 +110,28 @@ struct MessageBubbleView: View {
                     textColor: theme.outboundTextColor,
                     backgroundColor: theme.outboundBackgroundColor
                 )
+                .opacity(bubbleOpacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
-        .offset(x: xOffset, y: yOffset + parallaxOffset)
+        .offset(x: xOffset, y: rowYOffset + parallaxOffset)
         .animation(.interactiveSpring, value: parallaxOffset)
-        .opacity(opacity)
+        .animation(.smooth(duration: 0.4), value: rowYOffset)
+        .animation(.smooth(duration: 0.4), value: bubbleOpacity)
+        .animation(.smooth(duration: 0.4), value: inboundAvatarOpacity)
         .onAppear {
             if isNew {
                 withAnimation(.smooth(duration: 0.5)) {
                     newMessageId = nil
                 }
             }
+            configureInitialContentState()
+        }
+        .onChange(of: message.bubbleMode) { oldMode, newMode in
+            handleBubbleModeChange(from: oldMode, to: newMode)
+        }
+        .onDisappear {
+            cancelPendingContentTransitions()
         }
     }
 
@@ -379,14 +144,22 @@ struct MessageBubbleView: View {
         }
     }
 
-    private var yOffset: CGFloat {
+    private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
 
-        if message.messageType == .inbound {
-            return 50
-        } else {
+        switch message.messageType {
+        case .inbound:
+            // Read state should not slide up, only scale avatar
+            // Thinking and Talking states slide up from 20px below
+            return displayedBubbleMode.isRead ? 0 : 20
+        case .outbound:
             return calculateYOffset()
         }
+    }
+
+    private var bubbleYOffset: CGFloat {
+        guard isNew else { return 0 }
+        return 0
     }
 
     private var xOffset: CGFloat {
@@ -405,25 +178,32 @@ struct MessageBubbleView: View {
         return textFieldRelativeToContent
     }
 
-    private var opacity: Double {
-        if message.messageType == .inbound && isNew {
-            return 0
+    private var bubbleOpacity: Double {
+        guard message.messageType == .inbound else { return 1 }
+        // For read state, bubble is always hidden (handled by BubbleView)
+        // For thinking/talking, fade in when new
+        if displayedBubbleMode.isRead {
+            return 1  // Let BubbleView handle opacity
         }
-        return 1
+        return isNew ? 0 : 1
+    }
+
+    private var inboundAvatarOpacity: Double {
+        guard message.messageType == .inbound else { return 1 }
+        guard isNew else { return 1 }
+        // For read state, avatar scales from 0, don't use opacity fade
+        // For thinking/talking, use opacity fade
+        return displayedBubbleMode.isRead ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
     private var parallaxOffset: CGFloat {
-        // Don't apply parallax during new message animations
-        guard !isNew else { return 0 }
-
-        // Use shared parallax calculator
-        let calculator = ParallaxCalculator(
+        bubbleConfig.calculateParallaxOffset(
             scrollVelocity: scrollVelocity,
             scrollPhase: scrollPhase,
-            visibleMessageIndex: visibleMessageIndex
+            visibleMessageIndex: visibleMessageIndex,
+            isNewMessage: isNew
         )
-        return calculator.offset
     }
 
     private func calculateYOffset() -> CGFloat {
@@ -449,11 +229,21 @@ struct MessageBubbleView: View {
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
+                let avatarSize: CGFloat = displayedBubbleMode.isRead ? 20 : 40
+                let avatarFrameHeight: CGFloat = displayedBubbleMode.isRead ? 0 : 40
+                let avatarOffsetX: CGFloat = displayedBubbleMode.isRead ? 9 : 0
+
                 Image(avatar)
                     .resizable()
-                    .frame(width: 40, height: 40)
+                    .frame(width: avatarSize, height: avatarSize)
                     .clipShape(.circle)
+                    .frame(height: avatarFrameHeight)
+                    .scaleEffect(isNew && displayedBubbleMode.isRead ? 0 : 1, anchor: .center)
+                    .opacity(isNew && displayedBubbleMode.isRead ? 0 : 1)
                     .offset(y: 10)
+                    .offset(x: avatarOffsetX)
+                    .animation(.bouncy(duration: 0.3), value: isNew)
+                    .animation(.bouncy(duration: 0.3), value: displayedBubbleMode)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -491,33 +281,442 @@ struct MessageBubbleView: View {
         backgroundColor: Color
     ) -> some View {
 
-        Group {
-            if message.isTypingIndicator {
-                TypingIndicatorView()
-                    .chatBubble(
-                        messageType: message.messageType,
-                        backgroundColor: backgroundColor,
-                        showTail: showTail,
-                        tailType: .thinking,
-                        animationWidth: isNew ? inputFieldFrame.width : nil,
-                        animationHeight: isNew ? inputFieldFrame.height : nil
-                    )
-            } else {
+        let hasText = !message.text.isEmpty
+
+        ZStack(alignment: .leading) {
+            Text("H") //Measure Spacer
+                .opacity(0)
+
+            if hasText && includeTalkingTextInLayout {
                 Text(message.text)
                     .foregroundStyle(textColor)
-                    // Prevent horizontal expansion while allowing vertical growth
-                    // This ensures text wraps properly within the bubble
                     .fixedSize(horizontal: false, vertical: true)
-                    .chatBubble(
-                        messageType: message.messageType,
-                        backgroundColor: backgroundColor,
-                        showTail: showTail,
-                        tailType: .talking,
-                        animationWidth: isNew ? inputFieldFrame.width : nil,
-                        animationHeight: isNew ? inputFieldFrame.height : nil
-                    )
+                    .opacity(showTalkingContent ? 1 : 0)
+            }
+        }
+        .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
+        .animation(.smooth(duration: 0.35), value: showTalkingContent)
+        .frame(width: lockedWidth, alignment: .leading)
+        .chatBubble(
+            messageType: message.messageType,
+            backgroundColor: backgroundColor,
+            showTail: showTail,
+            bubbleMode: message.bubbleMode,
+            layoutMode: displayedBubbleMode,
+            animationWidth: outboundAnimationWidth,
+            animationHeight: outboundAnimationHeight
+        )
+        .overlay(alignment: .leading) {
+            TypingIndicatorView(isVisible: showTypingIndicatorContent)
+                .padding(.leading, 20)
+        }
+    }
+
+    private var lockedWidth: CGFloat? {
+        guard isWidthLocked, thinkingContentWidth > 0 else { return nil }
+        return thinkingContentWidth
+    }
+
+    //DO NOT DELETE
+//    private func updateThinkingWidth(_ width: CGFloat) {
+//        guard width > 0 else { return }
+//        if abs(thinkingContentWidth - width) > 0.5 {
+//            thinkingContentWidth = width
+//        }
+//        if message.bubbleMode == .thinking {
+//            isWidthLocked = true
+//        }
+//    }
+
+    private func configureInitialContentState() {
+        cancelPendingContentTransitions()
+        switch message.bubbleMode {
+        case .thinking:
+            isWidthLocked = true
+            showTypingIndicatorContent = true
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
+        case .talking:
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = !message.text.isEmpty
+            includeTalkingTextInLayout = !message.text.isEmpty
+        case .read:
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
+        }
+    }
+
+    private func handleBubbleModeChange(from oldMode: BubbleMode, to newMode: BubbleMode) {
+        guard oldMode != newMode else { return }
+        cancelPendingContentTransitions()
+        
+        // Handle displayedBubbleMode delay for thinking→read transition
+        if oldMode == .thinking && newMode == .read {
+            // Keep displayedBubbleMode at .thinking during explosion
+            // It will be updated to .read after explosion completes
+            startThinkingToReadTransition()
+            scheduleDisplayedModeUpdate(to: newMode, delay: bubbleConfig.explosionDuration)
+        } else {
+            // For all other transitions, update displayedBubbleMode immediately
+            displayedBubbleMode = newMode
+            
+            if oldMode == .thinking && newMode == .talking {
+                startTalkingTransition()
+            } else if oldMode == .talking && newMode == .thinking {
+                startThinkingState()
+            } else if oldMode == .read && newMode == .thinking {
+                startReadToThinkingTransition()
+            } else if oldMode == .read && newMode == .talking {
+                startReadToTalkingTransition()
+            } else if oldMode == .talking && newMode == .read {
+                startTalkingToReadTransition()
+            } else {
+                configureInitialContentState()
+            }
+        }
+    }
+
+    private func startTalkingTransition() {
+        if message.text.isEmpty {
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
+            return
+        }
+
+        if thinkingContentWidth > 0 {
+            isWidthLocked = true
+        }
+
+        withAnimation(.smooth(duration: 0.2)) {
+            showTypingIndicatorContent = false
+        }
+
+        showTalkingContent = false
+        includeTalkingTextInLayout = false
+
+        scheduleTextLayoutInclusion()
+        scheduleWidthUnlock()
+        scheduleTalkingReveal()
+    }
+
+    private func startThinkingState() {
+        isWidthLocked = true
+        showTalkingContent = false
+        includeTalkingTextInLayout = false
+        withAnimation(.smooth(duration: 0.2)) {
+            showTypingIndicatorContent = true
+        }
+    }
+    
+    private func startReadToThinkingTransition() {
+        // Delay typing indicator until read→thinking animation completes
+        isWidthLocked = true
+        showTalkingContent = false
+        includeTalkingTextInLayout = false
+        
+        // Wait for the bubble animation to complete before showing typing indicator
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration / 3) {
+            withAnimation(.smooth(duration: 0.3)) {
+                self.showTypingIndicatorContent = true
+            }
+        }
+    }
+    
+    private func startReadToTalkingTransition() {
+        // Quick opacity fade when going from read to talking (fast response)
+        if message.text.isEmpty {
+            isWidthLocked = false
+            showTypingIndicatorContent = false
+            showTalkingContent = false
+            includeTalkingTextInLayout = false
+            return
+        }
+        
+        isWidthLocked = false
+        showTypingIndicatorContent = false
+        includeTalkingTextInLayout = true
+        
+        // Quick fade in without offset animation
+        withAnimation(.smooth(duration: 0.3)) {
+            showTalkingContent = true
+        }
+    }
+    
+    private func startThinkingToReadTransition() {
+        // Immediately hide typing indicator (no animation) when mode changes to read
+        showTypingIndicatorContent = false
+
+        // After explosion completes (managed by displayedBubbleMode delay), clean up remaining state
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
+            self.isWidthLocked = false
+            self.showTalkingContent = false
+            self.includeTalkingTextInLayout = false
+        }
+    }
+    
+    //This should only happen if the message is unsent
+    private func startTalkingToReadTransition() {
+        // Fade out talking content and go to read state
+        withAnimation(.smooth(duration: 0.3)) {
+            showTalkingContent = false
+        }
+        isWidthLocked = false
+        showTypingIndicatorContent = false
+        includeTalkingTextInLayout = false
+    }
+
+    private func scheduleTextLayoutInclusion() {
+        // Include text in layout after morph phase, so it affects height during resize phase
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
+            includeTalkingTextInLayout = true
+        }
+    }
+
+    private func scheduleWidthUnlock() {
+        let unlockItem = DispatchWorkItem {
+            withAnimation(.smooth(duration: bubbleConfig.resizeCutoffDuration)) {
+                isWidthLocked = false
             }
         }
 
+        widthUnlockWorkItem = unlockItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
+            guard !unlockItem.isCancelled else { return }
+            unlockItem.perform()
+            widthUnlockWorkItem = nil
+        }
     }
+
+    private func scheduleTalkingReveal() {
+        let revealItem = DispatchWorkItem {
+            withAnimation(.smooth(duration: 0.35)) {
+                showTalkingContent = true
+            }
+        }
+
+        revealWorkItem = revealItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.textRevealDelay) {
+            guard !revealItem.isCancelled else { return }
+            revealItem.perform()
+            revealWorkItem = nil
+        }
+    }
+
+    private func scheduleDisplayedModeUpdate(to mode: BubbleMode, delay: TimeInterval) {
+        // Cancel any pending mode updates
+        modeDelayWorkItem?.cancel()
+        
+        let delayItem = DispatchWorkItem {
+            self.displayedBubbleMode = mode
+        }
+        
+        modeDelayWorkItem = delayItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            guard !delayItem.isCancelled else { return }
+            delayItem.perform()
+            self.modeDelayWorkItem = nil
+        }
+    }
+
+    private func cancelPendingContentTransitions() {
+        widthUnlockWorkItem?.cancel()
+        widthUnlockWorkItem = nil
+        revealWorkItem?.cancel()
+        revealWorkItem = nil
+        modeDelayWorkItem?.cancel()
+        modeDelayWorkItem = nil
+    }
+
+    private var outboundAnimationWidth: CGFloat? {
+        guard message.messageType == .outbound, isNew else { return nil }
+        return inputFieldFrame.width
+    }
+
+    private var outboundAnimationHeight: CGFloat? {
+        guard message.messageType == .outbound, isNew else { return nil }
+        return inputFieldFrame.height
+    }
+}
+
+private struct MessageBubblePreviewContainer: View {
+    @State private var bubbleMode: BubbleMode? = .read
+    @State private var newMessageId: UUID? = nil
+    
+    // Use a stable message ID that persists across state changes
+    private let messageId = UUID()
+    private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
+    
+    private var currentMessage: Message {
+        switch bubbleMode {
+        case .read:
+            Message(
+                id: messageId,
+                text: "",
+                user: sampleUser,
+                isTypingIndicator: true,
+                bubbleMode: .read
+            )
+        case .thinking:
+            Message(
+                id: messageId,
+                text: "",
+                user: sampleUser,
+                isTypingIndicator: true,
+                bubbleMode: .thinking
+            )
+        case .talking:
+            Message(
+                id: messageId,
+                text: "How are you?",
+                user: sampleUser,
+                bubbleMode: .talking
+            )
+        case .none:
+            // Placeholder - won't be shown
+            Message(
+                id: messageId,
+                text: "",
+                user: sampleUser,
+                bubbleMode: .talking
+            )
+        }
+    }
+    
+    private var isNew: Bool {
+        messageId == newMessageId
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
+            if bubbleMode != nil {
+                MessageBubbleView(
+                    message: currentMessage,
+                    showTail: true,
+                    isNew: isNew,
+                    inputFieldFrame: .zero,
+                    scrollViewFrame: .zero,
+                    newMessageId: $newMessageId,
+                    scrollVelocity: 0,
+                    scrollPhase: .idle,
+                    visibleMessageIndex: 0,
+                    theme: .defaultTheme
+                )
+                .frame(height: 100)
+            } else {
+                // Empty space when no message
+                Color.clear
+                    .frame(height: 100)
+            }
+
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Button("None") {
+                        bubbleMode = nil
+                        newMessageId = nil
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == nil ? .blue : .gray)
+                    
+                    Button("Read") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .read
+                        if wasNone {
+                            newMessageId = messageId
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .read ? .blue : .gray)
+                    
+                    Button("Thinking") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .thinking
+                        if wasNone {
+                            newMessageId = messageId
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .thinking ? .blue : .gray)
+                    
+                    Button("Talking") {
+                        let wasNone = bubbleMode == nil
+                        bubbleMode = .talking
+                        if wasNone {
+                            newMessageId = messageId
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(bubbleMode == .talking ? .blue : .gray)
+                }
+            }
+            .padding(.top, 50)
+        }
+        .padding()
+    }
+}
+
+#Preview("Inbound Message Bubble Morph") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    
+    MessageBubblePreviewContainer()
+        .environment(bubbleConfig)
+}
+
+#Preview("Message States") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    
+    VStack(spacing: 20) {
+        
+        MessageBubbleView(
+            message: Message(
+                text: "",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                isTypingIndicator: true,
+                bubbleMode: .read
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+        
+        // 1. Inbound thinking
+        MessageBubbleView(
+            message: Message(
+                text: "",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                isTypingIndicator: true,
+                bubbleMode: .thinking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+
+        // 2. Inbound talking
+        MessageBubbleView(
+            message: Message(
+                text: "Hey! How's it going?",
+                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                bubbleMode: .talking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+
+        // 3. Outbound talking
+        MessageBubbleView(
+            message: Message(
+                text: "Great! Just working on some code.",
+                user: User(id: UUID(), name: "Edward", avatar: .edward),
+                bubbleMode: .talking
+            ),
+            showTail: true,
+            theme: .theme1
+        )
+    }
+    .padding(.horizontal, 20)
+    .padding(.vertical, 40)
+    .environment(bubbleConfig)
 }

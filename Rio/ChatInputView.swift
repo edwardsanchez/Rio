@@ -20,6 +20,7 @@ struct ChatInputView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
     @Binding var autoReplyEnabled: Bool
+    @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     // Timer for automated inbound message
     @State private var autoReplyTimer: Timer? = nil
@@ -27,6 +28,7 @@ struct ChatInputView: View {
     // Track inbound response state to prevent multiple simultaneous responses
     @State private var isInboundResponsePending = false
     @State private var currentTypingIndicatorId: UUID? = nil
+    @State private var readToThinkingTimer: Timer? = nil
 
     // Array of random responses
     private let autoReplyMessages = [
@@ -54,6 +56,8 @@ struct ChatInputView: View {
             .onDisappear {
                 autoReplyTimer?.invalidate()
                 autoReplyTimer = nil
+                readToThinkingTimer?.invalidate()
+                readToThinkingTimer = nil
                 isInboundResponsePending = false
                 currentTypingIndicatorId = nil
             }
@@ -143,6 +147,7 @@ struct ChatInputView: View {
         }
         .buttonBorderShape(.circle)
         .buttonStyle(.borderedProminent)
+        .tint(chat.theme.outboundBackgroundColor)
         .opacity(isEmpty ? 0 : 1)
         .scaleEffect(isEmpty ? 0.9  : 1)
         .animation(.smooth(duration: 0.2), value: isEmpty)
@@ -197,10 +202,12 @@ struct ChatInputView: View {
                 text: typingIndicator.text,
                 user: typingIndicator.user,
                 date: Date.now, // Update timestamp to current time
-                isTypingIndicator: typingIndicator.isTypingIndicator
+                isTypingIndicator: typingIndicator.isTypingIndicator,
+                replacesTypingIndicator: typingIndicator.replacesTypingIndicator
             )
             messages.append(updatedTypingIndicator)
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
+            chatData.setTypingIndicator(true, for: typingIndicator.user.id, in: chat.id)
         }
 
         // Restore focus after a brief delay to ensure text clearing completes
@@ -217,10 +224,13 @@ struct ChatInputView: View {
         // Cancel any existing timer
         autoReplyTimer?.invalidate()
         autoReplyTimer = nil
+        readToThinkingTimer?.invalidate()
+        readToThinkingTimer = nil
 
         // Remove any existing typing indicator
         if let typingIndicatorId = currentTypingIndicatorId,
            let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+            let typingIndicatorUserId = messages[typingIndex].user.id
             messages.remove(at: typingIndex)
 
             // Also remove from chatData
@@ -239,6 +249,8 @@ struct ChatInputView: View {
                     chatData.chats[chatIndex] = updatedChat
                 }
             }
+
+            chatData.setTypingIndicator(false, for: typingIndicatorUserId, in: chat.id)
         }
 
         // Reset state variables
@@ -262,54 +274,86 @@ struct ChatInputView: View {
         // Cancel existing timer if any (but don't remove existing typing indicator)
         autoReplyTimer?.invalidate()
 
-        // Stage 1: Wait 1 second before showing typing indicator
+        // Stage 1: Wait 1 second before showing typing indicator in .read state
         autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
             // Only show typing indicator if no typing indicator is currently displayed
             let hasExistingTypingIndicator = messages.contains { $0.isTypingIndicator }
 
             if !hasExistingTypingIndicator {
-                // Stage 2: Show typing indicator for 10 seconds
+                // Stage 2: Show typing indicator in .read state
                 let typingIndicatorMessage = Message(
                     text: "", // Text is not used for typing indicator
                     user: randomUser,
-                    isTypingIndicator: true
+                    isTypingIndicator: true,
+                    bubbleMode: .read
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
                 messages.append(typingIndicatorMessage)
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
-            }
-
-            // Stage 3: After 10 seconds, replace typing indicator with final message
-            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
-                // Remove any existing typing indicator message
-                if let typingIndicatorId = currentTypingIndicatorId,
-                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    messages.remove(at: typingIndex)
-                    // Also remove from chatData
-                    if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                        var updatedChat = chatData.chats[chatIndex]
-                        var updatedMessages = updatedChat.messages
-                        if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                            updatedMessages.remove(at: messageIndex)
-                            updatedChat = Chat(
-                                id: updatedChat.id,
-                                title: updatedChat.title,
-                                participants: updatedChat.participants,
-                                messages: updatedMessages,
-                                theme: updatedChat.theme
+                chatData.setTypingIndicator(true, for: randomUser.id, in: chat.id)
+                
+                // Schedule transition from .read to .thinking after 3 seconds
+                readToThinkingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+                    if let indicatorId = currentTypingIndicatorId,
+                       let indicatorIndex = messages.firstIndex(where: { $0.id == indicatorId }) {
+                        let currentIndicator = messages[indicatorIndex]
+                        // Only transition if still in .read state
+                        if currentIndicator.bubbleMode.isRead {
+                            let updatedIndicator = Message(
+                                id: currentIndicator.id,
+                                text: currentIndicator.text,
+                                user: currentIndicator.user,
+                                date: currentIndicator.date,
+                                isTypingIndicator: true,
+                                replacesTypingIndicator: false,
+                                bubbleMode: .thinking
                             )
-                            chatData.chats[chatIndex] = updatedChat
+                            messages[indicatorIndex] = updatedIndicator
+                            chatData.updateMessage(updatedIndicator, in: chat.id)
                         }
                     }
+                    readToThinkingTimer = nil
+                }
+            }
+
+            // Stage 3: After 5 more seconds (8 total), replace typing indicator with final message
+            autoReplyTimer = Timer.scheduledTimer(withTimeInterval: 8.0, repeats: false) { _ in
+                let indicatorWasVisible = chatData.isTypingIndicatorVisible(for: randomUser.id, in: chat.id)
+
+                // Cancel read-to-thinking timer since we're going straight to talking
+                readToThinkingTimer?.invalidate()
+                readToThinkingTimer = nil
+                
+                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+
+                if let typingIndicatorId = currentTypingIndicatorId,
+                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                    let updatedMessage = Message(
+                        id: typingIndicatorId,
+                        text: randomResponse,
+                        user: randomUser,
+                        date: Date.now,
+                        isTypingIndicator: false,
+                        replacesTypingIndicator: indicatorWasVisible,
+                        bubbleMode: .talking
+                    )
+                    messages[typingIndex] = updatedMessage
+                    chatData.updateMessage(updatedMessage, in: chat.id)
+                    newMessageId = nil
+                } else {
+                    let fallbackMessage = Message(
+                        text: randomResponse,
+                        user: randomUser,
+                        replacesTypingIndicator: indicatorWasVisible,
+                        bubbleMode: .talking
+                    )
+                    newMessageId = fallbackMessage.id
+                    messages.append(fallbackMessage)
+                    chatData.addMessage(fallbackMessage, to: chat.id)
                 }
 
-                // Pick a random response and add final message
-                let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
-                let finalMessage = Message(text: randomResponse, user: randomUser)
-                newMessageId = finalMessage.id
-                messages.append(finalMessage)
-                chatData.addMessage(finalMessage, to: chat.id)
+                chatData.setTypingIndicator(false, for: randomUser.id, in: chat.id)
 
                 // Clear the pending state and typing indicator ID
                 isInboundResponsePending = false
@@ -334,6 +378,7 @@ struct ChatInputView: View {
     @Previewable @State var newMessageId: UUID? = nil
     @Previewable @State var shouldFocusInput = false
     @Previewable @State var autoReplyEnabled = true
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
 
     let chatData = ChatData()
     let chat = chatData.chats.first!
@@ -347,5 +392,6 @@ struct ChatInputView: View {
         autoReplyEnabled: $autoReplyEnabled
     )
     .environment(chatData)
+    .environment(bubbleConfig)
     .background(Color.base)
 }
