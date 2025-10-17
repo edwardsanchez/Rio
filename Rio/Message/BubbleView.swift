@@ -874,108 +874,34 @@ struct BubbleView: View {
         }
     }
 
-    @ViewBuilder
     /// Decorative bubble tail that switches layouts depending on the current bubbleType.
     private var tailView: some View {
-        TimelineView(.animation) { timeline in
-            let now = timeline.date
-            let readToThinkingAnimProgress = readToThinkingProgress(at: now)
-            let tailScale = bubbleType.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
-
-            // Check if we're in explosion animation (computed internally)
-            let isExploding = isInternallyExploding(at: now)
-            let explosionProgress = thinkingToReadExplosionProgress(at: now)
-
-            // During explosion, keep tail in thinking position
-            // Otherwise use normal logic (read and thinking both use thinking tail position)
-            // Detect if we're in read→talking delay period
-            let isReadToTalkingDelay = layoutType == .read && bubbleType == .talking
+        ZStack(alignment: tailAlignment) {
+            // Talking tail - pure state-based (no TimelineView)
+            talkingTailView
             
-            // Use layoutType ONLY during read→talking delay, otherwise use bubbleType for normal animations
-            let effectiveTypeForPosition = isReadToTalkingDelay ? (layoutType ?? bubbleType) : bubbleType
-            let isThinking = effectiveTypeForPosition.isThinking || (effectiveTypeForPosition.isRead && !isExploding) || isExploding
-            let isInbound = messageType.isInbound
-
-//            // Calculate fade-out opacity for thinking→read transition
-//            // When exploding (thinking→read), fade out the circle
-//            // Otherwise, use full opacity for inbound messages
-//            let thinkingCircleOpacity: CGFloat = {
-//                if isExploding {
-//                    // Fade out during explosion
-//                    return 1 - explosionProgress
-//                } else {
-//                    // Normal opacity based on message type
-//                    return messageType.isInbound ? 1 : 0
-//                }
-//            }()
-
-            // Additional offsets for talking mode - mirrored for inbound/outbound
-            let talkingXOffset: CGFloat = isInbound ? 3 : -3
-            let thinkingXOffset: CGFloat = isInbound ? 15 : -15
-
-            ZStack(alignment: tailAlignment) {
-                // Talking bubble tail - only visible in talking mode
-                // Animate for all transitions EXCEPT read→talking (where there's no visible tail to animate from)
-                let shouldAnimateTail = previousBubbleType != .read
-                
-                talkingTail(isThinking: isThinking, thinkingXOffset: thinkingXOffset, talkingXOffset: talkingXOffset, shouldAnimateTail: shouldAnimateTail)
-                
-                // Thinking bubble tail
-                // Only animate when NOT transitioning from read (read state has no visible tail)
-                let shouldAnimateCircle = previousBubbleType != .read
-                
-                // Circle should only be visible when in thinking/read state, not when talking
-                // Use layoutType (delayed) if available, otherwise fall back to bubbleType
-                // This prevents the circle from appearing during read→talking transition delay
-                let circleOpacity: CGFloat = {
-                    guard messageType.isInbound else { return 0 }
-                    let effectiveType = layoutType ?? bubbleType
-                    return (effectiveType.isThinking || effectiveType.isRead) ? 1 : 0
-                }()
-                
-                thinkingTail(
-                    tailScale: tailScale,
-                    isThinking: isThinking,
-                    isExploding: isExploding,
-                    circleOpacity: circleOpacity,
-                    shouldAnimateCircle: shouldAnimateCircle,
-                    explosionProgress: explosionProgress
-                )
-            }
+            // Thinking tail - time-based (with TimelineView)
+            thinkingTailView
         }
     }
     
-    func thinkingTail(
-        tailScale: CGFloat,
-        isThinking: Bool,
-        isExploding: Bool,
-        circleOpacity: CGFloat,
-        shouldAnimateCircle: Bool,
-        explosionProgress: CGFloat
-    ) -> some View {
-        Circle()
-            .fill(color)
-            .frame(width: 8, height: 8)
-            .scaleEffect(tailScale, anchor: .center)
-            .offset(
-                x: tailAlignment == .bottomLeading ? 4 : -4,
-                y: 21
-            )
-            .offset(x: 0, y: -13)
-            .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
-            .explosionEffect(isActive: isExploding, progress: explosionProgress)
-            .opacity(circleOpacity)
-            .animation(shouldAnimateCircle ? .easeIn(duration: 0.2) : nil, value: bubbleType)
-    }
-    
-    func talkingTail(
-        isThinking: Bool,
-        thinkingXOffset: CGFloat,
-        talkingXOffset: CGFloat,
-        shouldAnimateTail: Bool
-    ) -> some View {
-        // Use layoutType (delayed) if available to control visibility
-        // This keeps tail invisible during read→talking transition delay
+    /// Talking tail view - uses pure SwiftUI state-based animations without TimelineView.
+    private var talkingTailView: some View {
+        // Detect if we're in read→talking delay period
+        let isReadToTalkingDelay = layoutType == .read && bubbleType == .talking
+        
+        // Use layoutType ONLY during read→talking delay, otherwise use bubbleType for normal animations
+        let effectiveTypeForPosition = isReadToTalkingDelay ? (layoutType ?? bubbleType) : bubbleType
+        let isThinking = effectiveTypeForPosition.isThinking || effectiveTypeForPosition.isRead
+        let isInbound = messageType.isInbound
+        
+        // Additional offsets for talking mode - mirrored for inbound/outbound
+        let talkingXOffset: CGFloat = isInbound ? 3 : -3
+        let thinkingXOffset: CGFloat = isInbound ? 15 : -15
+        
+        // Animate for all transitions EXCEPT read→talking (where there's no visible tail to animate from)
+        let shouldAnimateTail = previousBubbleType != .read
+        
         let effectiveType = layoutType ?? bubbleType
         
         return Image(.cartouche)
@@ -987,6 +913,54 @@ struct BubbleView: View {
             .foregroundStyle(color)
             .opacity(showTail && effectiveType.isTalking ? 1 : 0)
             .animation(shouldAnimateTail ? .spring(duration: 0.3).delay(0.2) : nil, value: bubbleType)
+    }
+    
+    /// Thinking tail view - uses TimelineView for time-based animations.
+    private var thinkingTailView: some View {
+        TimelineView(.animation) { timeline in
+            let now = timeline.date
+            let readToThinkingAnimProgress = readToThinkingProgress(at: now)
+            let tailScale = bubbleType.isThinking && readToThinkingStart != nil ? tailCircleScale(progress: readToThinkingAnimProgress) : 1
+            
+            // Check if we're in explosion animation (computed internally)
+            let isExploding = isInternallyExploding(at: now)
+            let explosionProgress = thinkingToReadExplosionProgress(at: now)
+            
+            // During explosion, keep tail in thinking position
+            // Otherwise use normal logic (read and thinking both use thinking tail position)
+            // Detect if we're in read→talking delay period
+            let isReadToTalkingDelay = layoutType == .read && bubbleType == .talking
+            
+            // Use layoutType ONLY during read→talking delay, otherwise use bubbleType for normal animations
+            let effectiveTypeForPosition = isReadToTalkingDelay ? (layoutType ?? bubbleType) : bubbleType
+            let isThinking = effectiveTypeForPosition.isThinking || (effectiveTypeForPosition.isRead && !isExploding) || isExploding
+            
+            // Only animate when NOT transitioning from read (read state has no visible tail)
+            let shouldAnimateCircle = previousBubbleType != .read
+            
+            // Circle should only be visible when in thinking/read state, not when talking
+            // Use layoutType (delayed) if available, otherwise fall back to bubbleType
+            // This prevents the circle from appearing during read→talking transition delay
+            let circleOpacity: CGFloat = {
+                guard messageType.isInbound else { return 0 }
+                let effectiveType = layoutType ?? bubbleType
+                return (effectiveType.isThinking || effectiveType.isRead) ? 1 : 0
+            }()
+            
+            return Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+                .scaleEffect(tailScale, anchor: .center)
+                .offset(
+                    x: tailAlignment == .bottomLeading ? 4 : -4,
+                    y: 21
+                )
+                .offset(x: 0, y: -13)
+                .offset(x: isThinking ? 0 : 5, y: isThinking ? 0 : -13)
+                .explosionEffect(isActive: isExploding, progress: explosionProgress)
+                .opacity(circleOpacity)
+                .animation(shouldAnimateCircle ? .easeIn(duration: 0.2) : nil, value: bubbleType)
+        }
     }
 
     // MARK: - Misc Helpers
