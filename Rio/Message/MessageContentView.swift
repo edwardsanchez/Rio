@@ -71,7 +71,7 @@ struct MessageContentView: View {
                     .foregroundStyle(textColor)
                     .font(.caption.bold())
             case .timeOnly:
-                Label(date.formatted(date: .omitted, time: .shortened), systemImage: "clock")
+                Label(date.formatted(date: .omitted, time: .shortened), systemImage: "clock.fill")
                     .foregroundStyle(textColor)
                     .font(.caption.bold())
             }
@@ -81,11 +81,11 @@ struct MessageContentView: View {
             case .dateAndTime:
                 HStack(spacing: 4) {
                     Image(systemName: "calendar.badge.clock")
-                    HStack(spacing: 4) {
-                        Text(range.start.formatted(date: .abbreviated, time: .shortened))
-                        Image(systemName: "arrow.right")
-                        Text(range.end.formatted(date: .abbreviated, time: .shortened))
-                    }
+                    Text(range.start.formatted(date: .abbreviated, time: .shortened))
+                        .fixedSize(horizontal: true, vertical: true)
+                    Image(systemName: "arrow.right")
+                    Text(range.end.formatted(date: .abbreviated, time: .shortened))
+                        .fixedSize(horizontal: true, vertical: true)
                 }
                 .font(.caption.bold())
                 .foregroundStyle(textColor)
@@ -102,7 +102,7 @@ struct MessageContentView: View {
                 .foregroundStyle(textColor)
             case .timeOnly:
                 HStack(spacing: 8) {
-                    Image(systemName: "clock")
+                    Image(systemName: "clock.fill")
                     HStack(spacing: 4) {
                         Text(range.start.formatted(date: .omitted, time: .shortened))
                         Image(systemName: "arrow.right")
@@ -277,7 +277,7 @@ struct MessageContentView: View {
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
     ScrollView {
-        VStack(alignment: .trailing, spacing: 24) {
+        LazyVStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
@@ -997,7 +997,8 @@ struct MessageContentView: View {
                 )
             }
         }
-        .padding()
+        .padding(20)
     }
+//    .contentMargins(20)
     .environment(bubbleConfig)
 }
