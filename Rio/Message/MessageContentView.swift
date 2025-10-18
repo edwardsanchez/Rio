@@ -50,6 +50,17 @@ struct MessageContentView: View {
                 .scaledToFit()
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
             
+        case .labeledImage(let labeledImage):
+            VStack(spacing: 8) {
+                labeledImage.image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                Text(labeledImage.label)
+                    .font(.callout)
+                    .foregroundStyle(textColor)
+            }
+            
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
@@ -65,15 +76,15 @@ struct MessageContentView: View {
             case .dateAndTime:
                 Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
                     .foregroundStyle(textColor)
-                    .font(.caption.bold())
+                    .font(.callout.bold())
             case .dateOnly:
                 Label(date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
                     .foregroundStyle(textColor)
-                    .font(.caption.bold())
+                    .font(.callout.bold())
             case .timeOnly:
                 Label(date.formatted(date: .omitted, time: .shortened), systemImage: "clock.fill")
                     .foregroundStyle(textColor)
-                    .font(.caption.bold())
+                    .font(.callout.bold())
             }
 
         case .dateRange(let range, let granularity):
@@ -87,7 +98,7 @@ struct MessageContentView: View {
                     Text(range.end.formatted(date: .abbreviated, time: .shortened))
                         .fixedSize(horizontal: true, vertical: true)
                 }
-                .font(.caption.bold())
+                .font(.callout.bold())
                 .foregroundStyle(textColor)
             case .dateOnly:
                 HStack(spacing: 8) {
@@ -98,7 +109,7 @@ struct MessageContentView: View {
                         Text(range.end.formatted(date: .abbreviated, time: .omitted))
                     }
                 }
-                .font(.caption.bold())
+                .font(.callout.bold())
                 .foregroundStyle(textColor)
             case .timeOnly:
                 HStack(spacing: 8) {
@@ -133,17 +144,10 @@ struct MessageContentView: View {
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
             
-        case .singleChoice(let choice):
-            VStack(spacing: 8) {
-                Image(systemName: "checkmark.circle")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 40)
-                    .foregroundStyle(textColor)
-                Text(choice.value.isEmpty ? "Single Choice" : choice.value)
-                    .font(.caption)
-                    .foregroundStyle(textColor)
-            }
+        case .textChoice(let text):
+            Label(text, systemImage: "circle")
+                .foregroundStyle(textColor)
+                .fixedSize(horizontal: false, vertical: true)
             
         case .multiChoice(let choices):
             // Placeholder for multi-choice content
@@ -335,6 +339,20 @@ struct MessageContentView: View {
                 )
             }
             
+            // Text Choice
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Text Choice").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .textChoice("This is a text choice option"),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
             // Color
             VStack(alignment: .leading, spacing: 8) {
                 Text("Color").font(.headline)
@@ -354,6 +372,20 @@ struct MessageContentView: View {
                 MessageBubbleView(
                     message: Message(
                         content: .image(Image(.cat)),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Labeled Image
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Labeled Image").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -504,21 +536,6 @@ struct MessageContentView: View {
                             mapItem.name = "Apple Park"
                             return mapItem
                         }()),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme
-                )
-            }
-            
-            
-            // Single Choice
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Single Choice").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .singleChoice(Choice(value: "Option A")),
                         user: sampleUser,
                         messageType: .outbound
                     ),

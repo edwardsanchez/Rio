@@ -111,7 +111,7 @@ enum DateGranularity {
 }
 
 enum ContentType {
-    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), singleChoice(Choice), multiChoice([Choice]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
+    case text(String), color(RGB), image(Image), labeledImage(LabeledImage), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), textChoice(String), multiChoice([Choice]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
     
     var isEmoji: Bool {
         if case .emoji = self {
@@ -149,6 +149,11 @@ struct Measurement: Comparable, Equatable {
         precondition(lhs.type == rhs.type, "Cannot compare measurements of different types")
         return lhs.value < rhs.value
     }
+}
+
+struct LabeledImage {
+    var label: String
+    var image: Image
 }
 
 enum ValueType: Equatable {

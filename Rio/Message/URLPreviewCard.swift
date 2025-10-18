@@ -59,7 +59,7 @@ struct URLPreviewCard: View {
             openURL()
         } label: {
             Text(url.absoluteString)
-                .font(.caption)
+                .font(.callout)
                 .foregroundStyle(textColor)
                 .lineLimit(2)
                 .truncationMode(.middle)
