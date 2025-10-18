@@ -288,7 +288,7 @@ struct MessageContentView: View {
                 Text("Audio").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .audio(URL(string: "https://upload.wikimedia.org/wikipedia/commons/3/30/Egmont_Overture_%28ISRC_USUAN1200069%29.mp3")!),
+                        content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),
