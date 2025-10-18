@@ -8,6 +8,7 @@
 import SwiftUI
 import MapKit
 import AVKit
+import FlowStack
 
 /// A view that renders different types of message content based on the ContentType enum
 struct MessageContentView: View {
@@ -21,6 +22,11 @@ struct MessageContentView: View {
     let insetCornerRadius: CGFloat = 10
     
     var body: some View {
+        contentView
+    }
+    
+    @ViewBuilder
+    private var contentView: some View {
         switch content {
         case .text(let text):
             Text(text)
@@ -31,10 +37,20 @@ struct MessageContentView: View {
             colorView(rgb)
             
         case .image(let image):
-            imageView(image)
+            FlowLink(
+                value: ImageData(image: image),
+                configuration: .init(cornerRadius: insetCornerRadius)
+            ) {
+                imageView(image)
+            }
             
         case .labeledImage(let labeledImage):
-            labeledImageView(labeledImage)
+            FlowLink(
+                value: ImageData(image: labeledImage.image, label: labeledImage.label),
+                configuration: .init(cornerRadius: insetCornerRadius)
+            ) {
+                labeledImageView(labeledImage)
+            }
             
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
@@ -296,6 +312,7 @@ struct MessageContentView: View {
                 .if(compact) { view in
                     view.frame(maxWidth: 80, maxHeight: 80)
                 }
+                .flowAnimationAnchor()
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
                 .foregroundStyle(textColor)
@@ -326,9 +343,20 @@ struct MessageContentView: View {
         case .color(let rgb):
             colorView(rgb, compact: true)
         case .image(let image):
-            imageView(image, compact: true)
+            FlowLink(
+                value: ImageData(image: image),
+                configuration: .init(cornerRadius: insetCornerRadius)
+            ) {
+                imageView(image, compact: true)
+                    .flowAnimationAnchor()
+            }
         case .labeledImage(let labeledImage):
-            labeledImageView(labeledImage, compact: true)
+            FlowLink(
+                value: ImageData(image: labeledImage.image, label: labeledImage.label),
+                configuration: .init(cornerRadius: insetCornerRadius)
+            ) {
+                labeledImageView(labeledImage, compact: true)
+            }
         case .location(let mapItem):
             locationView(mapItem, compact: true)
         case .textChoice(let text):
@@ -344,8 +372,9 @@ struct MessageContentView: View {
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
-    ScrollView {
-        LazyVStack(alignment: .trailing, spacing: 24) {
+    FlowStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
@@ -1189,11 +1218,14 @@ struct MessageContentView: View {
                     theme: .defaultTheme
                 )
             }
+            }
+            .padding(20)
         }
-        .padding(20)
+        .flowDestination(for: ImageData.self) { imageData in
+            ImageDetailView(imageData: imageData)
+        }
+        .environment(bubbleConfig)
     }
-//    .contentMargins(20)
-    .environment(bubbleConfig)
 }
 
 // MARK: - Int Extension

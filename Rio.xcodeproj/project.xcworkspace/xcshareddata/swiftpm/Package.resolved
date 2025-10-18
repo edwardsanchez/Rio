@@ -1,6 +1,15 @@
 {
-  "originHash" : "c4c7a2380283fc822f4ffd8c4b7333d93253d758e63c61771d11988914397147",
+  "originHash" : "99f5cc9047b1653a1ce733441942173a77811ff4ea50cf5e86f2888b7397d431",
   "pins" : [
+    {
+      "identity" : "flowstack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/velos/FlowStack.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "24ad2436cc5a62832ea70cd9279e9a23cb461fb1"
+      }
+    },
     {
       "identity" : "svgpath",
       "kind" : "remoteSourceControl",
@@ -8,6 +17,15 @@
       "state" : {
         "revision" : "381fd6008f7d7120bdd631e3179f5a2a35e2e14f",
         "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "swiftui-cached-async-image",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/lorenzofiamingo/swiftui-cached-async-image.git",
+      "state" : {
+        "revision" : "467a3d17479887943ab917a379e62bbaff60ac8a",
+        "version" : "2.1.1"
       }
     }
   ],

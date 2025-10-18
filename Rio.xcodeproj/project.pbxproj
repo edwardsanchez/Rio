@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */ = {isa = PBXBuildFile; productRef = 6D3EE8002E7E6D9D00F81D32 /* SVGPath */; };
+		6D0BD6152E851160009A3AEB /* FlowStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6D3EE8032E7E6D9D00F81D34 /* FlowStack */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +49,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */,
+				6D0BD6152E851160009A3AEB /* FlowStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +158,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */,
+				6D3EE8042E7E6D9D00F81D35 /* XCRemoteSwiftPackageReference "FlowStack" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D3EE7F12E7E6D9B00F81D31 /* Products */;
@@ -499,6 +502,14 @@
 				minimumVersion = 1.1.4;
 			};
 		};
+		6D3EE8042E7E6D9D00F81D35 /* XCRemoteSwiftPackageReference "FlowStack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/velos/FlowStack.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -506,6 +517,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */;
 			productName = SVGPath;
+		};
+		6D3EE8032E7E6D9D00F81D34 /* FlowStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6D3EE8042E7E6D9D00F81D35 /* XCRemoteSwiftPackageReference "FlowStack" */;
+			productName = FlowStack;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

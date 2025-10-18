@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FlowStack
 
 struct ChatDetailView: View {
     let chat: Chat
@@ -39,8 +40,9 @@ struct ChatDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Main scroll view for messages
-            ScrollView {
-                MessageListView(
+            FlowStack {
+                ScrollView {
+                    MessageListView(
                     messages: messages,
                     newMessageId: $newMessageId,
                     inputFieldFrame: inputFieldFrame,
@@ -54,10 +56,10 @@ struct ChatDetailView: View {
                 } action: { newValue in
                     scrollViewFrame = newValue
                 }
-            }
-            .scrollClipDisabled()
-            .scrollPosition($scrollPosition)
-            .contentMargins(.horizontal, 20, for: .scrollContent)
+                }
+                .scrollClipDisabled()
+                .scrollPosition($scrollPosition)
+                .contentMargins(.horizontal, 20, for: .scrollContent)
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
             } action: { oldValue, newValue in
@@ -116,6 +118,10 @@ struct ChatDetailView: View {
                     scrollToLatestMessage()
                 }
                 shouldFocusInput = true
+            }
+            }
+            .flowDestination(for: ImageData.self) { imageData in
+                ImageDetailView(imageData: imageData)
             }
 
             ChatInputView(
@@ -235,8 +241,9 @@ private struct OutboundGeometryMatchDebugView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             // Scroll view with messages
-            ScrollView {
-                MessageListView(
+            FlowStack {
+                ScrollView {
+                    MessageListView(
                     messages: messages,
                     newMessageId: $currentNewMessageId,
                     inputFieldFrame: inputFieldFrame,
@@ -250,10 +257,14 @@ private struct OutboundGeometryMatchDebugView: View {
                 } action: { newValue in
                     scrollViewFrame = newValue
                 }
+                }
+                .scrollClipDisabled()
+                .contentMargins(.horizontal, 20, for: .scrollContent)
+                .background(Color.base)
             }
-            .scrollClipDisabled()
-            .contentMargins(.horizontal, 20, for: .scrollContent)
-            .background(Color.base)
+            .flowDestination(for: ImageData.self) { imageData in
+                ImageDetailView(imageData: imageData)
+            }
             
             // Mock input field to show where the message should be aligned
             VStack(spacing: 0) {
