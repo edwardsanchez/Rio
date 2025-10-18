@@ -177,10 +177,10 @@ struct MessageContentView: View {
             
             // URL - Alternative
             VStack(alignment: .leading, spacing: 8) {
-                Text("URL (GitHub)").font(.headline)
+                Text("URL (Unresolved)").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .url(URL(string: "https://github.com/apple/swift")!),
+                        content: .url(URL(string: "https://somefakeURL.com")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),

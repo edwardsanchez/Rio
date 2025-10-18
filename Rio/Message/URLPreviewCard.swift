@@ -55,14 +55,15 @@ struct URLPreviewCard: View {
     
     // Fallback view when metadata fetch fails
     private var fallbackView: some View {
-        Text(url.absoluteString)
-            .font(.caption)
-            .foregroundStyle(textColor)
-            .lineLimit(2)
-            .truncationMode(.middle)
-            .onTapGesture {
-                openURL()
-            }
+        Button {
+            openURL()
+        } label: {
+            Text(url.absoluteString)
+                .font(.caption)
+                .foregroundStyle(textColor)
+                .lineLimit(2)
+                .truncationMode(.middle)
+        }
     }
     
     private func fetchMetadata() {
