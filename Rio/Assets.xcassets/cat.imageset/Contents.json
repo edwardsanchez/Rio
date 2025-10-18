@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "eyes.png",
+      "filename" : "kitten-000017380158_Smaller.jpg",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "template-rendering-intent" : "template"
   }
 }

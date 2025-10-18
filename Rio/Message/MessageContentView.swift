@@ -14,6 +14,8 @@ struct MessageContentView: View {
     
     @State private var contentWidth = CGFloat.zero
     
+    let insetCornerRadius: CGFloat = 10
+    
     var body: some View {
         switch content {
         case .text(let text):
@@ -28,7 +30,7 @@ struct MessageContentView: View {
                 .foregroundStyle(textColor)
                 .padding()
                 .background {
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: insetCornerRadius)
                         .fill(Color(
                             red: Double(rgb.red) / 255.0,
                             green: Double(rgb.green) / 255.0,
@@ -36,7 +38,6 @@ struct MessageContentView: View {
                         ))
                         .stroke(textColor.opacity(0.5), lineWidth: 2)
                 }
-                .padding(.vertical, 3)
             
         case .image(let image):
             // Placeholder for image content
@@ -44,6 +45,7 @@ struct MessageContentView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: 200)
+                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
             
         case .video(let url):
             // Placeholder for video content
@@ -201,10 +203,9 @@ struct MessageContentView: View {
             
             // Image
             VStack(alignment: .leading, spacing: 8) {
-                Text("Image").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .image(Image(systemName: "photo")),
+                        content: .image(Image(.cat)),
                         user: sampleUser,
                         messageType: .outbound
                     ),

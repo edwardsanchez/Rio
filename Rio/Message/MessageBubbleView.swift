@@ -291,7 +291,8 @@ struct MessageBubbleView: View {
                     content: message.content,
                     textColor: textColor
                 )
-                    .opacity(showTalkingContent ? 1 : 0)
+                .padding(.vertical, 4)
+                .opacity(showTalkingContent ? 1 : 0)
             }
         }
         .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
