@@ -28,38 +28,13 @@ struct MessageContentView: View {
                 .fixedSize(horizontal: false, vertical: true)
             
         case .color(let rgb):
-            // Placeholder for color content
-            Text("Color Description")
-                .font(.caption)
-                .foregroundStyle(textColor)
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: insetCornerRadius)
-                        .fill(Color(
-                            red: Double(rgb.red) / 255.0,
-                            green: Double(rgb.green) / 255.0,
-                            blue: Double(rgb.blue) / 255.0
-                        ))
-                        .stroke(textColor.opacity(0.5), lineWidth: 2)
-                }
+            colorView(rgb)
             
         case .image(let image):
-            // Placeholder for image content
-            image
-                .resizable()
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+            imageView(image)
             
         case .labeledImage(let labeledImage):
-            VStack(spacing: 8) {
-                labeledImage.image
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-                Text(labeledImage.label)
-                    .font(.callout)
-                    .foregroundStyle(textColor)
-            }
+            labeledImageView(labeledImage)
             
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
@@ -125,21 +100,7 @@ struct MessageContentView: View {
             }
             
         case .location(let mapItem):
-            // Interactive map view that opens in Apple Maps when tapped
-            Button {
-                mapItem.openInMaps()
-            } label: {
-                Map(initialPosition: .region(MKCoordinateRegion(
-                    center: mapItem.location.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                ))) {
-                    Marker(mapItem.name ?? "Location", coordinate: mapItem.location.coordinate)
-                }
-                .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-                .allowsHitTesting(false)
-            }
-            .buttonStyle(.plain)
+            locationView(mapItem)
             
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
@@ -150,21 +111,28 @@ struct MessageContentView: View {
                 .fixedSize(horizontal: false, vertical: true)
             
         case .multiChoice(let choices):
-            // Placeholder for multi-choice content
-            VStack(spacing: 8) {
-                Image(systemName: "checklist")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 40)
-                    .foregroundStyle(textColor)
-                if let firstChoice = choices.first, !firstChoice.value.isEmpty {
-                    Text(firstChoice.value)
-                        .font(.caption)
-                        .foregroundStyle(textColor)
-                } else {
-                    Text("Multi Choice")
-                        .font(.caption)
-                        .foregroundStyle(textColor)
+            if let first = choices.first {
+                switch first {
+                case .textChoice:
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
+                            choiceItemView(choice)
+                        }
+                    }
+                default:
+                    let columns = choices.count.gridColumns
+                    HStack(spacing: 0) {
+                        LazyVGrid(
+                            columns: Array(repeating: GridItem(.flexible(minimum: 50), spacing: 12), count: columns),
+                            alignment: .leading,
+                            spacing: 12
+                        ) {
+                            ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
+                                choiceItemView(choice)
+                            }
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
                 }
             }
             
@@ -273,6 +241,99 @@ struct MessageContentView: View {
             return String(format: "%.2f", measurement.value)
         }
     }
+    
+    // MARK: - Reusable Content View Helpers
+    
+    @ViewBuilder
+    private func colorView(_ rgb: RGB, compact: Bool = false) -> some View {
+        // Compact chip for multi-choice grids
+        VStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: insetCornerRadius)
+                .fill(Color(
+                    red: Double(rgb.red) / 255.0,
+                    green: Double(rgb.green) / 255.0,
+                    blue: Double(rgb.blue) / 255.0
+                ))
+                .stroke(textColor.opacity(0.5), lineWidth: 2)
+//                .aspectRatio(1, contentMode: .fit)
+                .frame(height: 60)
+                .frame(maxWidth: 100)
+            
+            if let name = rgb.name {
+                Text(name)
+                    .font(.caption)
+                    .foregroundStyle(textColor)
+                    .lineLimit(1)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func imageView(_ image: Image, compact: Bool = false) -> some View {
+        image
+            .resizable()
+            .scaledToFit()
+            .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+            .if(compact) { view in
+                view.frame(maxWidth: 80, maxHeight: 80)
+            }
+    }
+    
+    @ViewBuilder
+    private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false) -> some View {
+        VStack(spacing: compact ? 4 : 8) {
+            labeledImage.image
+                .resizable()
+                .scaledToFit()
+                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                .if(compact) { view in
+                    view.frame(maxWidth: 80, maxHeight: 80)
+                }
+            Text(labeledImage.label)
+                .font(compact ? .caption2 : .callout)
+                .foregroundStyle(textColor)
+                .lineLimit(compact ? 1 : nil)
+        }
+    }
+    
+    @ViewBuilder
+    private func locationView(_ mapItem: MKMapItem, compact: Bool = false) -> some View {
+        Button {
+            mapItem.openInMaps()
+        } label: {
+            Map(initialPosition: .region(MKCoordinateRegion(
+                center: mapItem.location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            ))) {
+                Marker(mapItem.name ?? "Location", coordinate: mapItem.location.coordinate)
+            }
+            .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+            .allowsHitTesting(false)
+            .if(compact) { view in
+                view.frame(maxWidth: 80, maxHeight: 80)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+    
+    @ViewBuilder
+    private func choiceItemView(_ choice: ChoiceValue) -> some View {
+        switch choice {
+        case .color(let rgb):
+            colorView(rgb, compact: true)
+        case .image(let image):
+            imageView(image, compact: true)
+        case .labeledImage(let labeledImage):
+            labeledImageView(labeledImage, compact: true)
+        case .location(let mapItem):
+            locationView(mapItem, compact: true)
+        case .textChoice(let text):
+            Label(text, systemImage: "checkmark.square.fill")
+                .foregroundStyle(textColor)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
 }
 
 #Preview("All Content Types") {
@@ -358,7 +419,7 @@ struct MessageContentView: View {
                 Text("Color").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .color(RGB(red: 255, green: 100, blue: 50)),
+                        content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -544,12 +605,124 @@ struct MessageContentView: View {
                 )
             }
             
-            // Multi-choice
+            // Multi-choice - Text Choices
             VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice").font(.headline)
+                Text("Multi-choice (Text)").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .multiChoice([Choice(value: "Option A"), Choice(value: "Option B")]),
+                        content: .multiChoice([
+                            .textChoice("Option A"),
+                            .textChoice("Option B"),
+                            .textChoice("Option C")
+                        ]),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Multi-choice - Colors (2 columns, even)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice (Colors - 2)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice([
+                            .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
+                            .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
+                        ]),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Multi-choice - Colors (3 columns, divisible by 3)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice (Colors - 3)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice([
+                            .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
+                            .color(RGB(red: 100, green: 200, blue: 255, name: "Sky")),
+                            .color(RGB(red: 50, green: 255, blue: 100, name: "Mint")),
+                            .color(RGB(red: 200, green: 50, blue: 255, name: "Purple")),
+                            .color(RGB(red: 255, green: 255, blue: 100, name: "Yellow")),
+                            .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
+                        ]),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Multi-choice - Images (5 columns, divisible by 5)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice (Images - 4)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice([
+                            .image(Image(.cat)),
+                            .image(Image(.cat)),
+                            .image(Image(.cat)),
+                            .image(Image(.cat))
+                        ]),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Multi-choice - Prime number (1 column)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice (Prime - 7)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice([
+                            .textChoice("Monday"),
+                            .textChoice("Tuesday"),
+                            .textChoice("Wednesday"),
+                            .textChoice("Thursday"),
+                            .textChoice("Friday"),
+                            .textChoice("Saturday"),
+                            .textChoice("Sunday")
+                        ]),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Multi-choice - Locations (2 columns, even)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice (Locations - 2)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice([
+                            .location({
+                                let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
+                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                let mapItem = MKMapItem(location: location, address: nil)
+                                mapItem.name = "Apple Park"
+                                return mapItem
+                            }()),
+                            .location({
+                                let coordinate = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                let mapItem = MKMapItem(location: location, address: nil)
+                                mapItem.name = "San Francisco"
+                                return mapItem
+                            }())
+                        ]),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -1018,4 +1191,41 @@ struct MessageContentView: View {
     }
 //    .contentMargins(20)
     .environment(bubbleConfig)
+}
+
+// MARK: - Int Extension
+
+extension Int {
+    var isPrime: Bool {
+        guard self > 1 else { return false }
+        guard self > 3 else { return true }
+        if self % 2 == 0 || self % 3 == 0 { return false }
+        var i = 5
+        while i * i <= self {
+            if self % i == 0 || self % (i + 2) == 0 { return false }
+            i += 6
+        }
+        return true
+    }
+    
+    var gridColumns: Int {
+        if self.isPrime { return 1 }
+        if self % 5 == 0 { return 5 }
+        if self % 3 == 0 { return 3 }
+        if self % 2 == 0 { return 2 }
+        return 1
+    }
+}
+
+// MARK: - View Extension
+
+extension View {
+    @ViewBuilder
+    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
 }

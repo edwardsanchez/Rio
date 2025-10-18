@@ -111,7 +111,7 @@ enum DateGranularity {
 }
 
 enum ContentType {
-    case text(String), color(RGB), image(Image), labeledImage(LabeledImage), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), textChoice(String), multiChoice([Choice]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
+    case text(String), color(RGB), image(Image), labeledImage(LabeledImage), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), textChoice(String), multiChoice([ChoiceValue]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
     
     var isEmoji: Bool {
         if case .emoji = self {
@@ -182,6 +182,7 @@ struct RGB {
     var red: Int
     var green: Int
     var blue: Int
+    var name: String?
 }
 
 struct DateRange {
@@ -189,8 +190,12 @@ struct DateRange {
     var end: Date
 }
 
-struct Choice {
-    var value: String //Can be text or image?
+enum ChoiceValue {
+    case color(RGB)
+    case image(Image)
+    case labeledImage(LabeledImage)
+    case location(MKMapItem)
+    case textChoice(String)
 }
 
 struct DateFrequency: Codable, Equatable {
