@@ -56,6 +56,10 @@ private struct ChatBubbleModifier: ViewModifier {
                     .opacity(backgroundOpacity)
                 }
             }
+            .animation(.smooth) { content in
+                content
+                    .opacity(contentSize == .zero ? 0 : 1)
+            }
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
