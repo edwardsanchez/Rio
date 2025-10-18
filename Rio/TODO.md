@@ -5,11 +5,11 @@
 ### Bugs
 [ ] Fix animation for outbound messages so they come from input field
 [ ] Fix transition between thinking to talking, as it got kind of clunky
+[ ] Ability to tap on maps and open Apple Maps
 
 ### New Features
 
 #### Content Types
-[ ] Figure out what to do with the Choice / MultiChoice types
 [ ] Ability to view multiple photos - likely a caroussel
 [ ] Ability to tap on photo and view it full screen
 [ ] Ability to share photo when viewed full screen
