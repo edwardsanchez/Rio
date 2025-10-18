@@ -28,6 +28,7 @@ struct RioApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .dynamicTypeSize(.small ... .large) //FIXME: Support more sizes.
 //            CursiveTestView()
         }
         .modelContainer(sharedModelContainer)
