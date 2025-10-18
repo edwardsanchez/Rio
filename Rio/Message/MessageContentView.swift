@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 /// A view that renders different types of message content based on the ContentType enum
 struct MessageContentView: View {
@@ -96,16 +97,22 @@ struct MessageContentView: View {
             .foregroundStyle(textColor)
             .padding()
             
-        case .location:
-            // Placeholder for location content
-            VStack(spacing: 8) {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 30))
-                Text("Location")
-                    .font(.caption)
+        case .location(let mapItem):
+            // Interactive map view that opens in Apple Maps when tapped
+            Button {
+                mapItem.openInMaps()
+            } label: {
+                Map(initialPosition: .region(MKCoordinateRegion(
+                    center: mapItem.location.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                ))) {
+                    Marker(mapItem.name ?? "Location", coordinate: mapItem.location.coordinate)
+                }
+                .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                .allowsHitTesting(false)
             }
-            .foregroundStyle(textColor)
-            .padding()
+            .buttonStyle(.plain)
             
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
@@ -161,6 +168,21 @@ struct MessageContentView: View {
                 )
             }
             
+            
+            // Text (Multi-line)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Text (Multi-line)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
             // URL
             VStack(alignment: .leading, spacing: 8) {
                 Text("URL (with metadata)").font(.headline)
@@ -181,20 +203,6 @@ struct MessageContentView: View {
                 MessageBubbleView(
                     message: Message(
                         content: .url(URL(string: "https://somefakeURL.com")!),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme
-                )
-            }
-            
-            // Text (Multi-line)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Text (Multi-line)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -296,7 +304,13 @@ struct MessageContentView: View {
                 Text("Location").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .location,
+                        content: .location({
+                            let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
+                            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                            let mapItem = MKMapItem(location: location, address: nil)
+                            mapItem.name = "Apple Park"
+                            return mapItem
+                        }()),
                         user: sampleUser,
                         messageType: .outbound
                     ),

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 // MARK: - Bubble Type
 
@@ -104,7 +105,7 @@ struct Message: Identifiable {
 }
 
 enum ContentType {
-    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date), dateRange(DateRange), location, url(URL), multiChoice(MultiChoice), emoji(String), code(String)
+    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date), dateRange(DateRange), location(MKMapItem), url(URL), multiChoice(MultiChoice), emoji(String), code(String)
     
     var isEmoji: Bool {
         if case .emoji = self {
