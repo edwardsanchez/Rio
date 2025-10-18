@@ -4,6 +4,7 @@
 
 ### Bugs
 [ ] Fix animation for outbound messages so they come from input field
+[ ] Fix transition between thinking to talking, as it got kind of clunky
 
 ### New Features
 
