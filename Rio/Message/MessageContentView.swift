@@ -44,7 +44,6 @@ struct MessageContentView: View {
             image
                 .resizable()
                 .scaledToFit()
-                .frame(maxWidth: 200)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
             
         case .video(let url):
@@ -109,17 +108,7 @@ struct MessageContentView: View {
             .padding()
             
         case .url(let url):
-            // Placeholder for URL content
-            VStack(alignment: .leading, spacing: 4) {
-                Image(systemName: "link")
-                    .font(.system(size: 20))
-                Text(url.absoluteString)
-                    .font(.caption)
-                    .lineLimit(2)
-            }
-            .foregroundStyle(textColor)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            URLPreviewCard(url: url, textColor: textColor)
             
         case .multiChoice(let multiChoice):
             // Placeholder for multi-choice content
@@ -127,7 +116,6 @@ struct MessageContentView: View {
                 multiChoice.image
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: 150)
                 Text("Multi-choice")
                     .font(.caption)
                     .foregroundStyle(textColor)
@@ -165,6 +153,34 @@ struct MessageContentView: View {
                 MessageBubbleView(
                     message: Message(
                         content: .text("Hello, World! This is a text message."),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // URL
+            VStack(alignment: .leading, spacing: 8) {
+                Text("URL (with metadata)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .url(URL(string: "https://www.apple.com")!),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // URL - Alternative
+            VStack(alignment: .leading, spacing: 8) {
+                Text("URL (GitHub)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .url(URL(string: "https://github.com/apple/swift")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -281,20 +297,6 @@ struct MessageContentView: View {
                 MessageBubbleView(
                     message: Message(
                         content: .location,
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme
-                )
-            }
-            
-            // URL
-            VStack(alignment: .leading, spacing: 8) {
-                Text("URL").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .url(URL(string: "https://www.apple.com/swift")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),
