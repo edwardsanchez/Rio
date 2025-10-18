@@ -21,6 +21,7 @@
 [ ] ability to see how has read the message
 [ ] Onboarding / signup
 [ ] Ability to reply in threads
+[ ] Scale bubbles with dynamic text / set max accessibility scale in app
 
 ### Long Term
 [ ] Ability to create new bots
