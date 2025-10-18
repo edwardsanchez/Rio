@@ -12,6 +12,8 @@ struct MessageContentView: View {
     let content: ContentType
     let textColor: Color
     
+    @State private var contentWidth = CGFloat.zero
+    
     var body: some View {
         switch content {
         case .text(let text):
@@ -21,18 +23,20 @@ struct MessageContentView: View {
             
         case .color(let rgb):
             // Placeholder for color content
-            VStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(
-                        red: Double(rgb.red) / 255.0,
-                        green: Double(rgb.green) / 255.0,
-                        blue: Double(rgb.blue) / 255.0
-                    ))
-                    .frame(width: 100, height: 100)
-                Text("RGB(\(rgb.red), \(rgb.green), \(rgb.blue))")
-                    .font(.caption)
-                    .foregroundStyle(textColor)
-            }
+            Text("Color Description")
+                .font(.caption)
+                .foregroundStyle(textColor)
+                .padding()
+                .background {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(
+                            red: Double(rgb.red) / 255.0,
+                            green: Double(rgb.green) / 255.0,
+                            blue: Double(rgb.blue) / 255.0
+                        ))
+                        .stroke(textColor.opacity(0.5), lineWidth: 2)
+                }
+                .padding(.vertical, 3)
             
         case .image(let image):
             // Placeholder for image content
@@ -148,54 +152,110 @@ struct MessageContentView: View {
 
 #Preview("All Content Types") {
     ScrollView {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
-                MessageContentView(content: .text("Hello, World! This is a text message."), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .text("Hello, World! This is a text message."), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Text (Multi-line)
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text (Multi-line)").font(.headline)
-                MessageContentView(content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Color
             VStack(alignment: .leading, spacing: 8) {
                 Text("Color").font(.headline)
-                MessageContentView(content: .color(RGB(red: 255, green: 100, blue: 50)), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .color(RGB(red: 255, green: 100, blue: 50)), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Image
             VStack(alignment: .leading, spacing: 8) {
                 Text("Image").font(.headline)
-                MessageContentView(content: .image(Image(systemName: "photo")), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .image(Image(systemName: "photo")), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Video
             VStack(alignment: .leading, spacing: 8) {
                 Text("Video").font(.headline)
-                MessageContentView(content: .video(URL(string: "https://example.com/video.mp4")!), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .video(URL(string: "https://example.com/video.mp4")!), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Audio
             VStack(alignment: .leading, spacing: 8) {
                 Text("Audio").font(.headline)
-                MessageContentView(content: .audio(URL(string: "https://example.com/audio.mp3")!), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .audio(URL(string: "https://example.com/audio.mp3")!), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Date
             VStack(alignment: .leading, spacing: 8) {
                 Text("Date").font(.headline)
-                MessageContentView(content: .date(Date.now), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .date(Date.now), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Date Range
@@ -208,25 +268,48 @@ struct MessageContentView: View {
                             end: Date.now.addingTimeInterval(86400 * 7)
                         )
                     ),
-                    textColor: .primary
+                    textColor: .white
                 )
                 .padding()
+                .chatBubble(
+                    messageType: .outbound,
+                    backgroundColor: .blue,
+                    showTail: true,
+                    bubbleType: .talking,
+                    layoutType: .talking,
+                    animationWidth: nil,
+                    animationHeight: nil
+                )
             }
             
             // Location
             VStack(alignment: .leading, spacing: 8) {
                 Text("Location").font(.headline)
-                MessageContentView(content: .location, textColor: .primary)
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(12)
+                MessageContentView(content: .location, textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // URL
             VStack(alignment: .leading, spacing: 8) {
                 Text("URL").font(.headline)
-                MessageContentView(content: .url(URL(string: "https://www.apple.com/swift")!), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .url(URL(string: "https://www.apple.com/swift")!), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Multi-choice
@@ -234,16 +317,33 @@ struct MessageContentView: View {
                 Text("Multi-choice").font(.headline)
                 MessageContentView(
                     content: .multiChoice(MultiChoice(image: Image(systemName: "questionmark.circle"))),
-                    textColor: .primary
+                    textColor: .white
                 )
                 .padding()
+                .chatBubble(
+                    messageType: .outbound,
+                    backgroundColor: .blue,
+                    showTail: true,
+                    bubbleType: .talking,
+                    layoutType: .talking,
+                    animationWidth: nil,
+                    animationHeight: nil
+                )
             }
             
             // Emoji
             VStack(alignment: .leading, spacing: 8) {
                 Text("Emoji").font(.headline)
-                MessageContentView(content: .emoji("👋🎉🚀"), textColor: .primary)
-                    .padding()
+                MessageContentView(content: .emoji("👋🎉🚀"), textColor: .white)
+                    .chatBubble(
+                        messageType: .outbound,
+                        backgroundColor: .blue,
+                        showTail: true,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        animationWidth: nil,
+                        animationHeight: nil
+                    )
             }
             
             // Code
@@ -251,12 +351,22 @@ struct MessageContentView: View {
                 Text("Code").font(.headline)
                 MessageContentView(
                     content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
-                    textColor: .primary
+                    textColor: .white
                 )
                 .padding()
+                .chatBubble(
+                    messageType: .outbound,
+                    backgroundColor: .blue,
+                    showTail: true,
+                    bubbleType: .talking,
+                    layoutType: .talking,
+                    animationWidth: nil,
+                    animationHeight: nil
+                )
             }
         }
         .padding()
     }
+    .environment(BubbleConfiguration())
 }
 
