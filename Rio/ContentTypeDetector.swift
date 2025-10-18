@@ -17,14 +17,20 @@ struct ContentTypeDetector {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
         
-        // Count emoji characters
-        let emojiCount = trimmed.reduce(0) { count, char in
-            count + (char.isEmoji ? 1 : 0)
+        // Check if each character (grapheme cluster) is emoji
+        // A character is emoji if its first scalar has emoji properties
+        let allEmoji = trimmed.allSatisfy { char in
+            guard let firstScalar = char.unicodeScalars.first else { return false }
+            return firstScalar.properties.isEmoji
         }
         
-        // Check if all characters are emoji and count is 1-3
-        let allEmoji = trimmed.allSatisfy { $0.isEmoji }
-        return allEmoji && emojiCount >= 1 && emojiCount <= 3
+        guard allEmoji else { return false }
+        
+        // Count the number of grapheme clusters (visible emoji)
+        // This correctly counts "👋🏻" as 1 emoji, "👨‍👩‍👧‍👦" as 1 emoji, etc.
+        let emojiCount = trimmed.count
+        
+        return emojiCount >= 1 && emojiCount <= 3
     }
     
     /// Detects URLs in text and splits the text into segments
