@@ -280,7 +280,7 @@ struct MessageBubbleView: View {
         backgroundColor: Color
     ) -> some View {
 
-        let hasContent = !message.text.isEmpty
+        let hasContent = message.content.hasContent
 
         ZStack(alignment: .leading) {
             Text("H") //Measure Spacer
@@ -304,7 +304,8 @@ struct MessageBubbleView: View {
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,
-            animationHeight: outboundAnimationHeight
+            animationHeight: outboundAnimationHeight,
+            isVisible: !message.content.isEmoji
         )
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: showTypingIndicatorContent)
@@ -339,8 +340,8 @@ struct MessageBubbleView: View {
         case .talking:
             isWidthLocked = false
             showTypingIndicatorContent = false
-            showTalkingContent = !message.text.isEmpty
-            includeTalkingTextInLayout = !message.text.isEmpty
+            showTalkingContent = message.content.hasContent
+            includeTalkingTextInLayout = message.content.hasContent
         case .read:
             isWidthLocked = false
             showTypingIndicatorContent = false
@@ -384,7 +385,7 @@ struct MessageBubbleView: View {
     }
 
     private func startTalkingTransition() {
-        if message.text.isEmpty {
+        if !message.content.hasContent {
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = false
@@ -433,7 +434,7 @@ struct MessageBubbleView: View {
     
     private func startReadToTalkingTransition() {
         // Quick opacity fade when going from read to talking (fast response)
-        if message.text.isEmpty {
+        if !message.content.hasContent {
             isWidthLocked = false
             showTypingIndicatorContent = false
             showTalkingContent = false

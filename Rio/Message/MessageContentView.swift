@@ -144,229 +144,208 @@ struct MessageContentView: View {
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(12)
-                .background(Color.gray.opacity(0.15))
-                .cornerRadius(8)
+                .background(Color.primary.opacity(0.15))
+                .cornerRadius(12)
         }
     }
 }
 
 #Preview("All Content Types") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
     ScrollView {
         VStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
-                MessageContentView(content: .text("Hello, World! This is a text message."), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .text("Hello, World! This is a text message."),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Text (Multi-line)
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text (Multi-line)").font(.headline)
-                MessageContentView(content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Color
             VStack(alignment: .leading, spacing: 8) {
                 Text("Color").font(.headline)
-                MessageContentView(content: .color(RGB(red: 255, green: 100, blue: 50)), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .color(RGB(red: 255, green: 100, blue: 50)),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Image
             VStack(alignment: .leading, spacing: 8) {
                 Text("Image").font(.headline)
-                MessageContentView(content: .image(Image(systemName: "photo")), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .image(Image(systemName: "photo")),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Video
             VStack(alignment: .leading, spacing: 8) {
                 Text("Video").font(.headline)
-                MessageContentView(content: .video(URL(string: "https://example.com/video.mp4")!), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .video(URL(string: "https://example.com/video.mp4")!),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Audio
             VStack(alignment: .leading, spacing: 8) {
                 Text("Audio").font(.headline)
-                MessageContentView(content: .audio(URL(string: "https://example.com/audio.mp3")!), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .audio(URL(string: "https://example.com/audio.mp3")!),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Date
             VStack(alignment: .leading, spacing: 8) {
                 Text("Date").font(.headline)
-                MessageContentView(content: .date(Date.now), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .date(Date.now),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Date Range
             VStack(alignment: .leading, spacing: 8) {
                 Text("Date Range").font(.headline)
-                MessageContentView(
-                    content: .dateRange(
-                        DateRange(
-                            start: Date.now,
-                            end: Date.now.addingTimeInterval(86400 * 7)
-                        )
+                MessageBubbleView(
+                    message: Message(
+                        content: .dateRange(
+                            DateRange(
+                                start: Date.now,
+                                end: Date.now.addingTimeInterval(86400 * 7)
+                            )
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
                     ),
-                    textColor: .white
-                )
-                .padding()
-                .chatBubble(
-                    messageType: .outbound,
-                    backgroundColor: .blue,
                     showTail: true,
-                    bubbleType: .talking,
-                    layoutType: .talking,
-                    animationWidth: nil,
-                    animationHeight: nil
+                    theme: .defaultTheme
                 )
             }
             
             // Location
             VStack(alignment: .leading, spacing: 8) {
                 Text("Location").font(.headline)
-                MessageContentView(content: .location, textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .location,
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // URL
             VStack(alignment: .leading, spacing: 8) {
                 Text("URL").font(.headline)
-                MessageContentView(content: .url(URL(string: "https://www.apple.com/swift")!), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .url(URL(string: "https://www.apple.com/swift")!),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Multi-choice
             VStack(alignment: .leading, spacing: 8) {
                 Text("Multi-choice").font(.headline)
-                MessageContentView(
-                    content: .multiChoice(MultiChoice(image: Image(systemName: "questionmark.circle"))),
-                    textColor: .white
-                )
-                .padding()
-                .chatBubble(
-                    messageType: .outbound,
-                    backgroundColor: .blue,
+                MessageBubbleView(
+                    message: Message(
+                        content: .multiChoice(MultiChoice(image: Image(systemName: "questionmark.circle"))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
                     showTail: true,
-                    bubbleType: .talking,
-                    layoutType: .talking,
-                    animationWidth: nil,
-                    animationHeight: nil
+                    theme: .defaultTheme
                 )
             }
             
             // Emoji
             VStack(alignment: .leading, spacing: 8) {
                 Text("Emoji").font(.headline)
-                MessageContentView(content: .emoji("👋🎉🚀"), textColor: .white)
-                    .chatBubble(
-                        messageType: .outbound,
-                        backgroundColor: .blue,
-                        showTail: true,
-                        bubbleType: .talking,
-                        layoutType: .talking,
-                        animationWidth: nil,
-                        animationHeight: nil
-                    )
+                MessageBubbleView(
+                    message: Message(
+                        content: .emoji("👋🎉🚀"),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
             }
             
             // Code
             VStack(alignment: .leading, spacing: 8) {
                 Text("Code").font(.headline)
-                MessageContentView(
-                    content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
-                    textColor: .white
-                )
-                .padding()
-                .chatBubble(
-                    messageType: .outbound,
-                    backgroundColor: .blue,
+                MessageBubbleView(
+                    message: Message(
+                        content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
                     showTail: true,
-                    bubbleType: .talking,
-                    layoutType: .talking,
-                    animationWidth: nil,
-                    animationHeight: nil
+                    theme: .defaultTheme
                 )
             }
         }
         .padding()
     }
-    .environment(BubbleConfiguration())
+    .environment(bubbleConfig)
 }
 

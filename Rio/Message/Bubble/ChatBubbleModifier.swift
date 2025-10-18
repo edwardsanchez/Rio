@@ -14,6 +14,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let layoutType: BubbleType
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
+    let isVisible: Bool
 
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -41,17 +42,19 @@ private struct ChatBubbleModifier: ViewModifier {
             .padding(.vertical, 10)
             .padding(.horizontal, layoutType == .thinking ? 17 : 13)
             .background(alignment: .leading) {
-                BubbleView(
-                    width: sizingType == .thinking ? 80 : measuredWidth,
-                    height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
-                    color: backgroundColor,
-                    type: bubbleType,
-                    showTail: showTail,
-                    messageType: messageType,
-                    layoutType: layoutType
-                )
-                .compositingGroup()
-                .opacity(backgroundOpacity)
+                if isVisible {
+                    BubbleView(
+                        width: sizingType == .thinking ? 80 : measuredWidth,
+                        height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
+                        color: backgroundColor,
+                        type: bubbleType,
+                        showTail: showTail,
+                        messageType: messageType,
+                        layoutType: layoutType
+                    )
+                    .compositingGroup()
+                    .opacity(backgroundOpacity)
+                }
             }
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
@@ -69,7 +72,8 @@ extension View {
         bubbleType: BubbleType = .talking,
         layoutType: BubbleType? = nil,
         animationWidth: CGFloat? = nil,
-        animationHeight: CGFloat? = nil
+        animationHeight: CGFloat? = nil,
+        isVisible: Bool = true
     ) -> some View {
         modifier(
             ChatBubbleModifier(
@@ -79,7 +83,8 @@ extension View {
                 bubbleType: bubbleType,
                 layoutType: layoutType ?? bubbleType,
                 animationWidth: animationWidth,
-                animationHeight: animationHeight
+                animationHeight: animationHeight,
+                isVisible: isVisible
             )
         )
     }

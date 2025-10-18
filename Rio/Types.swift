@@ -165,6 +165,27 @@ struct Message: Identifiable {
 
 enum ContentType {
     case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date), dateRange(DateRange), location, url(URL), multiChoice(MultiChoice), emoji(String), code(String)
+    
+    var isEmoji: Bool {
+        if case .emoji = self {
+            return true
+        }
+        return false
+    }
+    
+    /// Returns true if the content has something to display
+    var hasContent: Bool {
+        switch self {
+        case .text(let string):
+            return !string.isEmpty
+        case .emoji(let string):
+            return !string.isEmpty
+        case .code(let string):
+            return !string.isEmpty
+        default:
+            return true
+        }
+    }
 }
 
 struct RGB {
