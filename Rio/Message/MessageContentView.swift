@@ -71,31 +71,58 @@ struct MessageContentView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             
-        case .date(let date):
-            // Placeholder for date content
-            VStack(spacing: 4) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 30))
-                Text(date.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption)
+        case .date(let date, let granularity):
+            switch granularity {
+            case .dateAndTime:
+                Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                    .foregroundStyle(textColor)
+                    .font(.caption.bold())
+            case .dateOnly:
+                Label(date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                    .foregroundStyle(textColor)
+                    .font(.caption.bold())
+            case .timeOnly:
+                Label(date.formatted(date: .omitted, time: .shortened), systemImage: "clock")
+                    .foregroundStyle(textColor)
+                    .font(.caption.bold())
             }
-            .foregroundStyle(textColor)
-            .padding()
-            
-        case .dateRange(let range):
-            // Placeholder for date range content
-            VStack(spacing: 8) {
-                Image(systemName: "calendar.badge.clock")
-                    .font(.system(size: 30))
-                HStack {
-                    Text(range.start.formatted(date: .abbreviated, time: .omitted))
-                    Image(systemName: "arrow.right")
-                    Text(range.end.formatted(date: .abbreviated, time: .omitted))
+
+        case .dateRange(let range, let granularity):
+            switch granularity {
+            case .dateAndTime:
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar.badge.clock")
+                    HStack(spacing: 4) {
+                        Text(range.start.formatted(date: .abbreviated, time: .shortened))
+                        Image(systemName: "arrow.right")
+                        Text(range.end.formatted(date: .abbreviated, time: .shortened))
+                    }
                 }
-                .font(.caption)
+                .font(.caption.bold())
+                .foregroundStyle(textColor)
+            case .dateOnly:
+                HStack(spacing: 8) {
+                    Image(systemName: "calendar")
+                    HStack(spacing: 4) {
+                        Text(range.start.formatted(date: .abbreviated, time: .omitted))
+                        Image(systemName: "arrow.right")
+                        Text(range.end.formatted(date: .abbreviated, time: .omitted))
+                    }
+                }
+                .font(.caption.bold())
+                .foregroundStyle(textColor)
+            case .timeOnly:
+                HStack(spacing: 8) {
+                    Image(systemName: "clock")
+                    HStack(spacing: 4) {
+                        Text(range.start.formatted(date: .omitted, time: .shortened))
+                        Image(systemName: "arrow.right")
+                        Text(range.end.formatted(date: .omitted, time: .shortened))
+                    }
+                }
+                .font(.caption.bold())
+                .foregroundStyle(textColor)
             }
-            .foregroundStyle(textColor)
-            .padding()
             
         case .location(let mapItem):
             // Interactive map view that opens in Apple Maps when tapped
@@ -266,12 +293,12 @@ struct MessageContentView: View {
                 )
             }
             
-            // Date
+            // Date - Date and Time
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date").font(.headline)
+                Text("Date (Date & Time)").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .date(Date.now),
+                        content: .date(Date.now, granularity: .dateAndTime),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -280,16 +307,85 @@ struct MessageContentView: View {
                 )
             }
             
-            // Date Range
+            // Date - Date Only
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date Range").font(.headline)
+                Text("Date (Date Only)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .date(Date.now, granularity: .dateOnly),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date - Time Only
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date (Time Only)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .date(Date.now, granularity: .timeOnly),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date Range - Date and Time
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Range (Date & Time)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .dateRange(
+                            DateRange(
+                                start: Date.now,
+                                end: Date.now.addingTimeInterval(86400 * 3 + 3600 * 2)
+                            ),
+                            granularity: .dateAndTime
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date Range - Date Only
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Range (Date Only)").font(.headline)
                 MessageBubbleView(
                     message: Message(
                         content: .dateRange(
                             DateRange(
                                 start: Date.now,
                                 end: Date.now.addingTimeInterval(86400 * 7)
-                            )
+                            ),
+                            granularity: .dateOnly
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date Range - Time Only
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Range (Time Only)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .dateRange(
+                            DateRange(
+                                start: Date.now,
+                                end: Date.now.addingTimeInterval(3600 * 2)
+                            ),
+                            granularity: .timeOnly
                         ),
                         user: sampleUser,
                         messageType: .outbound

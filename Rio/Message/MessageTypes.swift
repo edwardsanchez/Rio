@@ -104,8 +104,14 @@ struct Message: Identifiable {
     }
 }
 
+enum DateGranularity {
+    case dateAndTime
+    case dateOnly
+    case timeOnly
+}
+
 enum ContentType {
-    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date), dateRange(DateRange), location(MKMapItem), url(URL), multiChoice(MultiChoice), emoji(String), code(String)
+    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), location(MKMapItem), url(URL), multiChoice(MultiChoice), emoji(String), code(String)
     
     var isEmoji: Bool {
         if case .emoji = self {
