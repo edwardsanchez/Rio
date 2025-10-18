@@ -60,8 +60,6 @@ struct URLPreviewCard: View {
             .foregroundStyle(textColor)
             .lineLimit(2)
             .truncationMode(.middle)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
             .onTapGesture {
                 openURL()
             }
@@ -114,41 +112,15 @@ struct LinkPreviewView: UIViewRepresentable {
     .padding()
 }
 
-#Preview("URL Preview Card - Loading") {
-    VStack(alignment: .leading, spacing: 8) {
-        // Placeholder for image
-        Rectangle()
-            .fill(Color.gray.opacity(0.2))
-            .frame(height: 160)
-            .cornerRadius(8)
-        
-        // Placeholder for title
-        Text("Lorem ipsum dolor sit amet")
-            .font(.headline)
-            .redacted(reason: .placeholder)
-        
-        // Placeholder for description
-        Text("Consectetur adipiscing elit sed do eiusmod tempor incididunt")
-            .font(.subheadline)
-            .lineLimit(2)
-            .redacted(reason: .placeholder)
-    }
-    .frame(maxWidth: 280)
-    .padding(12)
-    .padding()
-}
-
 #Preview("URL Preview Card - Fallback") {
-    Text("https://www.example.com/very/long/url/path/that/should/truncate")
-        .font(.caption)
-        .foregroundStyle(Color.white)
-        .lineLimit(2)
-        .truncationMode(.middle)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+    VStack(spacing: 20) {
+        URLPreviewCard(
+            url: URL(string: "https://www.somefakeURL.com")!,
+            textColor: .white
+        )
         .padding()
         .background(Color.blue)
         .cornerRadius(12)
-        .padding()
+    }
+    .padding()
 }
-
