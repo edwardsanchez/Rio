@@ -54,25 +54,26 @@ struct MessageContentView: View {
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-                .onTapGesture {
-                    showingVideoFullScreen = true
-                }
-                .fullScreenCover(isPresented: $showingVideoFullScreen) {
-                    VideoPlayer(player: AVPlayer(url: url))
-                        .ignoresSafeArea()
-                }
+//                .onTapGesture {
+//                    showingVideoFullScreen = true
+//                }
+//                .fullScreenCover(isPresented: $showingVideoFullScreen) {
+//                    VideoPlayer(player: AVPlayer(url: url))
+//                        .ignoresSafeArea()
+//                }
             
         case .audio(let url):
             VideoPlayer(player: AVPlayer(url: url))
-                .frame(height: 60)
+                .aspectRatio(16/9, contentMode: .fit)
+//                .frame(height: 60)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-                .onTapGesture {
-                    showingAudioFullScreen = true
-                }
-                .fullScreenCover(isPresented: $showingAudioFullScreen) {
-                    VideoPlayer(player: AVPlayer(url: url))
-                        .ignoresSafeArea()
-                }
+//                .onTapGesture {
+//                    showingAudioFullScreen = true
+//                }
+//                .fullScreenCover(isPresented: $showingAudioFullScreen) {
+//                    VideoPlayer(player: AVPlayer(url: url))
+//                        .ignoresSafeArea()
+//                }
             
         case .date(let date, let granularity):
             switch granularity {
