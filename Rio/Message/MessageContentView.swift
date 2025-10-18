@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import AVKit
 
 /// A view that renders different types of message content based on the ContentType enum
 struct MessageContentView: View {
@@ -14,6 +15,8 @@ struct MessageContentView: View {
     let textColor: Color
     
     @State private var contentWidth = CGFloat.zero
+    @State private var showingVideoFullScreen = false
+    @State private var showingAudioFullScreen = false
     
     let insetCornerRadius: CGFloat = 10
     
@@ -48,28 +51,28 @@ struct MessageContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
             
         case .video(let url):
-            // Placeholder for video content
-            VStack(spacing: 4) {
-                Image(systemName: "play.rectangle.fill")
-                    .font(.system(size: 50))
-                    .foregroundStyle(textColor.opacity(0.6))
-                Text("Video: \(url.lastPathComponent)")
-                    .font(.caption)
-                    .foregroundStyle(textColor)
-            }
-            .padding()
+            VideoPlayer(player: AVPlayer(url: url))
+                .aspectRatio(16/9, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                .onTapGesture {
+                    showingVideoFullScreen = true
+                }
+                .fullScreenCover(isPresented: $showingVideoFullScreen) {
+                    VideoPlayer(player: AVPlayer(url: url))
+                        .ignoresSafeArea()
+                }
             
         case .audio(let url):
-            // Placeholder for audio content
-            HStack(spacing: 8) {
-                Image(systemName: "waveform")
-                    .font(.system(size: 24))
-                Text("Audio: \(url.lastPathComponent)")
-                    .font(.caption)
-            }
-            .foregroundStyle(textColor)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            VideoPlayer(player: AVPlayer(url: url))
+                .frame(height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                .onTapGesture {
+                    showingAudioFullScreen = true
+                }
+                .fullScreenCover(isPresented: $showingAudioFullScreen) {
+                    VideoPlayer(player: AVPlayer(url: url))
+                        .ignoresSafeArea()
+                }
             
         case .date(let date, let granularity):
             switch granularity {
@@ -270,7 +273,7 @@ struct MessageContentView: View {
                 Text("Video").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .video(URL(string: "https://example.com/video.mp4")!),
+                        content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -284,7 +287,7 @@ struct MessageContentView: View {
                 Text("Audio").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .audio(URL(string: "https://example.com/audio.mp3")!),
+                        content: .audio(URL(string: "https://upload.wikimedia.org/wikipedia/commons/3/30/Egmont_Overture_%28ISRC_USUAN1200069%29.mp3")!),
                         user: sampleUser,
                         messageType: .outbound
                     ),
