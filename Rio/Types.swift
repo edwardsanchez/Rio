@@ -115,7 +115,7 @@ struct ChatTheme {
 
 struct Message: Identifiable {
     let id: UUID
-    let text: String
+    let content: ContentType
     let user: User
     let date: Date
     let isTypingIndicator: Bool
@@ -125,10 +125,26 @@ struct Message: Identifiable {
     var bubbleType: BubbleType {
         messageType.bubbleType
     }
+    
+    // Computed property to extract text content
+    var text: String {
+        if case .text(let textValue) = content {
+            return textValue
+        }
+        return ""
+    }
+    
+    // Check if content is text type
+    var hasTextContent: Bool {
+        if case .text = content {
+            return true
+        }
+        return false
+    }
 
     init(
         id: UUID = UUID(),
-        text: String,
+        content: ContentType,
         user: User,
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
@@ -136,13 +152,32 @@ struct Message: Identifiable {
         messageType: MessageType
     ) {
         self.id = id
-        self.text = text
         self.user = user
         self.date = date
         self.replacesTypingIndicator = replacesTypingIndicator
         self.messageType = messageType
+        self.content = content
         
         // Update isTypingIndicator based on bubble type
         self.isTypingIndicator = isTypingIndicator || messageType.bubbleType.isThinking
     }
+}
+
+enum ContentType {
+    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date), dateRange(DateRange), location, url(URL), multiChoice(MultiChoice), emoji(String), code(String)
+}
+
+struct RGB {
+    var red: Int
+    var green: Int
+    var blue: Int
+}
+
+struct DateRange {
+    var start: Date
+    var end: Date
+}
+
+struct MultiChoice {
+    var image: Image
 }

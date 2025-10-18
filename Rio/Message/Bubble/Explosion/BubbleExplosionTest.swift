@@ -39,7 +39,7 @@ struct BubbleExplosionTestView: View {
     
     init(message: Message? = nil, showTail: Bool = true) {
         let defaultMessage = Message(
-            text: "",
+            content: .text(""),
             user: User(id: UUID(), name: "Maya", avatar: .scarlet),
             isTypingIndicator: true,
             messageType: .inbound(.thinking)
@@ -262,15 +262,13 @@ struct BubbleExplosionTestView: View {
         backgroundColor: Color
     ) -> some View {
         
-        let hasText = !message.text.isEmpty
+        let hasContent = !message.text.isEmpty
         
         ZStack(alignment: .leading) {
             Circle()
             
-            if hasText && includeTalkingTextInLayout {
-                Text(message.text)
-                    .foregroundStyle(textColor)
-                    .fixedSize(horizontal: false, vertical: true)
+            if hasContent && includeTalkingTextInLayout {
+                MessageContentView(content: message.content, textColor: textColor)
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }
@@ -292,7 +290,7 @@ struct BubbleExplosionTestView: View {
 #Preview("Bubble Explosion Test") {
     BubbleExplosionTestView(
         message: Message(
-            text: "",
+            content: .text(""),
             user: User(id: UUID(), name: "Maya", avatar: .scarlet),
             isTypingIndicator: true,
             messageType: .inbound(.thinking)

@@ -280,16 +280,14 @@ struct MessageBubbleView: View {
         backgroundColor: Color
     ) -> some View {
 
-        let hasText = !message.text.isEmpty
+        let hasContent = !message.text.isEmpty
 
         ZStack(alignment: .leading) {
             Text("H") //Measure Spacer
                 .opacity(0)
 
-            if hasText && includeTalkingTextInLayout {
-                Text(message.text)
-                    .foregroundStyle(textColor)
-                    .fixedSize(horizontal: false, vertical: true)
+            if hasContent && includeTalkingTextInLayout {
+                MessageContentView(content: message.content, textColor: textColor)
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }
@@ -559,7 +557,7 @@ private struct MessageBubblePreviewContainer: View {
         case .read:
             Message(
                 id: messageId,
-                text: "",
+                content: .text(""),
                 user: sampleUser,
                 isTypingIndicator: true,
                 messageType: .inbound(.read)
@@ -567,7 +565,7 @@ private struct MessageBubblePreviewContainer: View {
         case .thinking:
             Message(
                 id: messageId,
-                text: "",
+                content: .text(""),
                 user: sampleUser,
                 isTypingIndicator: true,
                 messageType: .inbound(.thinking)
@@ -575,7 +573,7 @@ private struct MessageBubblePreviewContainer: View {
         case .talking:
             Message(
                 id: messageId,
-                text: "How are you?",
+                content: .text("How are you?"),
                 user: sampleUser,
                 messageType: .inbound(.talking)
             )
@@ -583,7 +581,7 @@ private struct MessageBubblePreviewContainer: View {
             // Placeholder - won't be shown
             Message(
                 id: messageId,
-                text: "",
+                content: .text(""),
                 user: sampleUser,
                 messageType: .inbound(.talking)
             )
@@ -676,7 +674,7 @@ private struct MessageBubblePreviewContainer: View {
         
         MessageBubbleView(
             message: Message(
-                text: "",
+                content: .text(""),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
                 messageType: .inbound(.read)
@@ -688,7 +686,7 @@ private struct MessageBubblePreviewContainer: View {
         // 1. Inbound thinking
         MessageBubbleView(
             message: Message(
-                text: "",
+                content: .text(""),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
                 messageType: .inbound(.thinking)
@@ -700,7 +698,7 @@ private struct MessageBubblePreviewContainer: View {
         // 2. Inbound talking
         MessageBubbleView(
             message: Message(
-                text: "Hey! How's it going?",
+                content: .text("Hey! How's it going?"),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 messageType: .inbound(.talking)
             ),
@@ -711,7 +709,7 @@ private struct MessageBubblePreviewContainer: View {
         // 3. Outbound talking
         MessageBubbleView(
             message: Message(
-                text: "Great! Just working on some code.",
+                content: .text("Great! Just working on some code."),
                 user: User(id: UUID(), name: "Edward", avatar: .edward),
                 messageType: .outbound
             ),

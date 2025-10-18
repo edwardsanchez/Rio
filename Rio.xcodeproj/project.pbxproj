@@ -20,7 +20,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Message/Bubble/Explosion/BubbleExplode.metal,
-				Message/ParticleExplosion.metal,
+				Message/Bubble/Explosion/ParticleExplosion.metal,
 			);
 			target = 6DF314FF2EA2BA2F00A0BD0F /* Shader Test */;
 		};
