@@ -121,10 +121,17 @@ struct MessageContentView: View {
                     }
                 default:
                     let columns = choices.count.gridColumns
+                    let minimum: CGFloat = {
+                        if case .location = first {
+                            return 120
+                        }
+                        return 60
+                    }()
+                    
                     HStack(spacing: 0) {
                         LazyVGrid(
-                            columns: Array(repeating: GridItem(.flexible(minimum: 50), spacing: 12), count: columns),
-                            alignment: .leading,
+                            columns: Array(repeating: GridItem(.flexible(minimum: minimum, maximum: 120), spacing: 12), count: columns),
+                            alignment: .center,
                             spacing: 12
                         ) {
                             ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
@@ -309,10 +316,6 @@ struct MessageContentView: View {
             }
             .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-            .allowsHitTesting(false)
-            .if(compact) { view in
-                view.frame(maxWidth: 80, maxHeight: 80)
-            }
         }
         .buttonStyle(.plain)
     }
@@ -682,7 +685,7 @@ struct MessageContentView: View {
             
             // Multi-choice - Prime number (1 column)
             VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Prime - 7)").font(.headline)
+                Text("Multi-choice (Text - 7)").font(.headline)
                 MessageBubbleView(
                     message: Message(
                         content: .multiChoice([
