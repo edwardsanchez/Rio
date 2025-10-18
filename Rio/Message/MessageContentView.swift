@@ -245,17 +245,28 @@ struct MessageContentView: View {
     
     private func formatMeasurementValue(_ measurement: Measurement) -> String {
         switch measurement.type {
-        case .length(_): return String(format: "%.2f", measurement.value)
-        case .percentage(_): return String(format: "%.1f%%", measurement.value)
-        case .currency(_): return String(format: "$%.2f", measurement.value)
-        case .mass(_): return String(format: "%.2f", measurement.value)
-        case .volume(_): return String(format: "%.2f", measurement.value)
-        case .temperature(_): return String(format: "%.1f°", measurement.value)
-        case .duration(_): return String(format: "%.0f", measurement.value)
-        case .speed(_): return String(format: "%.1f", measurement.value)
-        case .area(_): return String(format: "%.2f", measurement.value)
-        case .energy(_): return String(format: "%.2f", measurement.value)
-        case .number(_): return String(format: "%.2f", measurement.value)
+        case .length(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .percentage(_):
+            return String(format: "%.1f%%", measurement.value)
+        case .currency(_):
+            return String(format: "$%.2f", measurement.value)
+        case .mass(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .volume(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .temperature(let unit):
+            return String(format: "%.1f%@", measurement.value, unit.symbol)
+        case .duration(let unit):
+            return String(format: "%.0f%@", measurement.value, unit.symbol)
+        case .speed(let unit):
+            return String(format: "%.1f%@", measurement.value, unit.symbol)
+        case .area(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .energy(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .number(_):
+            return String(format: "%.2f", measurement.value)
         }
     }
 }
