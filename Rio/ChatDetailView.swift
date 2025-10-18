@@ -173,7 +173,7 @@ struct ChatDetailView: View {
     }
 }
 
-#Preview {
+#Preview("Chat Detail") {
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
@@ -198,4 +198,95 @@ struct ChatDetailView: View {
     ChatDetailView(chat: sampleChat)
         .environment(ChatData())
         .environment(BubbleConfiguration())
+}
+
+#Preview("Outbound Geometry Match Debug") {
+    let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
+    
+    // Create a message that was just sent with a stable ID
+    let newMessageId = UUID()
+    let newMessage = Message(
+        id: newMessageId,
+        text: "This is a test message!",
+        user: edwardUser,
+        messageType: .outbound
+    )
+    
+    let previousMessages = [
+        Message(text: "Hi Rio!\nHow are you doing today?", user: mayaUser, date: Date().addingTimeInterval(-7200), messageType: .inbound(.talking)),
+        Message(text: "Hey! I'm doing well, thanks!", user: edwardUser, date: Date().addingTimeInterval(-7000), messageType: .outbound)
+    ]
+    
+    let allMessages = previousMessages + [newMessage]
+    
+    OutboundGeometryMatchDebugView(messages: allMessages, newMessageId: newMessageId)
+        .environment(BubbleConfiguration())
+}
+
+private struct OutboundGeometryMatchDebugView: View {
+    let messages: [Message]
+    let newMessageId: UUID
+    
+    @State private var inputFieldFrame: CGRect = .zero
+    @State private var scrollViewFrame: CGRect = .zero
+    @State private var currentNewMessageId: UUID?
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // Scroll view with messages
+            ScrollView {
+                MessageListView(
+                    messages: messages,
+                    newMessageId: $currentNewMessageId,
+                    inputFieldFrame: inputFieldFrame,
+                    scrollViewFrame: scrollViewFrame,
+                    scrollVelocity: 0,
+                    scrollPhase: .idle,
+                    theme: .defaultTheme
+                )
+                .onGeometryChange(for: CGRect.self) { geometryProxy in
+                    geometryProxy.frame(in: .global)
+                } action: { newValue in
+                    scrollViewFrame = newValue
+                }
+            }
+            .scrollClipDisabled()
+            .contentMargins(.horizontal, 20, for: .scrollContent)
+            .background(Color.base)
+            
+            // Mock input field to show where the message should be aligned
+            VStack(spacing: 0) {
+                Text("Mock Input Field (for reference)")
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.bottom, 4)
+                
+                HStack(alignment: .bottom) {
+                    Text("This is a test message!")
+                        .padding([.vertical, .leading], 15)
+                        .padding(.trailing, 40)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .background(Color.white.opacity(0.2))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 25)
+                        .stroke(Color.red, lineWidth: 2)
+                }
+                .cornerRadius(25)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { newValue in
+                    inputFieldFrame = newValue
+                    inputFieldFrame.origin.x -= 15
+                }
+                .padding(.horizontal, 30)
+            }
+            .padding(.bottom, 20)
+        }
+        .onAppear {
+            // Set the message as "new" when the view appears
+            currentNewMessageId = newMessageId
+        }
+    }
 }
