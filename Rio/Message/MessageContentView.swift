@@ -131,8 +131,8 @@ struct MessageContentView: View {
                 switch first {
                 case .textChoice:
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
-                            choiceItemView(choice)
+                        ForEach(Array(choices.enumerated()), id: \.offset) { index, choice in
+                            choiceItemView(choice, index: index)
                         }
                     }
                 default:
@@ -150,8 +150,8 @@ struct MessageContentView: View {
                             alignment: .center,
                             spacing: 12
                         ) {
-                            ForEach(Array(choices.enumerated()), id: \.offset) { _, choice in
-                                choiceItemView(choice)
+                            ForEach(Array(choices.enumerated()), id: \.offset) { index, choice in
+                                choiceItemView(choice, index: index)
                             }
                         }
                         .fixedSize(horizontal: true, vertical: false)
@@ -338,22 +338,30 @@ struct MessageContentView: View {
     }
     
     @ViewBuilder
-    private func choiceItemView(_ choice: ChoiceValue) -> some View {
+    private func choiceItemView(_ choice: ChoiceValue, index: Int) -> some View {
         switch choice {
         case .color(let rgb):
             colorView(rgb, compact: true)
         case .image(let image):
             FlowLink(
                 value: ImageData(image: image),
-                configuration: .init(cornerRadius: insetCornerRadius)
+                configuration: .init(
+                    animateFromAnchor: false,
+                    transitionFromSnapshot: false,
+                    cornerRadius: insetCornerRadius
+                )
             ) {
                 imageView(image, compact: true)
-                    .flowAnimationAnchor()
             }
+            .contentShape(Rectangle())
         case .labeledImage(let labeledImage):
             FlowLink(
                 value: ImageData(image: labeledImage.image, label: labeledImage.label),
-                configuration: .init(cornerRadius: insetCornerRadius)
+                configuration: .init(
+                    animateFromAnchor: false,
+                    transitionFromSnapshot: false,
+                    cornerRadius: insetCornerRadius
+                )
             ) {
                 labeledImageView(labeledImage, compact: true)
             }
