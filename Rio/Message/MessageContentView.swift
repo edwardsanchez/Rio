@@ -54,26 +54,11 @@ struct MessageContentView: View {
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-//                .onTapGesture {
-//                    showingVideoFullScreen = true
-//                }
-//                .fullScreenCover(isPresented: $showingVideoFullScreen) {
-//                    VideoPlayer(player: AVPlayer(url: url))
-//                        .ignoresSafeArea()
-//                }
             
         case .audio(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
-//                .frame(height: 60)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-//                .onTapGesture {
-//                    showingAudioFullScreen = true
-//                }
-//                .fullScreenCover(isPresented: $showingAudioFullScreen) {
-//                    VideoPlayer(player: AVPlayer(url: url))
-//                        .ignoresSafeArea()
-//                }
             
         case .date(let date, let granularity):
             switch granularity {
@@ -148,13 +133,16 @@ struct MessageContentView: View {
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
             
-        case .multiChoice(let multiChoice):
+        case .multiChoice(let choices):
             // Placeholder for multi-choice content
             VStack(spacing: 8) {
-                multiChoice.image
-                    .resizable()
-                    .scaledToFit()
-                Text("Multi-choice")
+                if let firstChoice = choices.first {
+                    firstChoice.image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 60)
+                }
+                Text("Multi Choice")
                     .font(.caption)
                     .foregroundStyle(textColor)
             }
@@ -174,6 +162,60 @@ struct MessageContentView: View {
                 .padding(12)
                 .background(Color.primary.opacity(0.15))
                 .cornerRadius(12)
+            
+        case .bool(let value):
+            Label(value ? "YES" : "NO", systemImage: value ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
+                .foregroundStyle(textColor)
+                .font(.caption.bold())
+            
+        case .rating(let rating):
+            HStack(spacing: 2) {
+                ForEach(0..<(rating.rawValue + 1), id: \.self) { _ in
+                    Image(systemName: "star.fill")
+                        .foregroundStyle(.yellow)
+                }
+            }
+            .font(.title3)
+            
+        case .value(let number):
+            Label(String(format: "%.2f", number), systemImage: "number")
+                .foregroundStyle(textColor)
+                .font(.title3.bold())
+            
+        case .valueRange(let range):
+            HStack(spacing: 8) {
+                Image(systemName: "number")
+                HStack(spacing: 4) {
+                    Text(String(format: "%.2f", range.lowerBound))
+                    Image(systemName: "arrow.right")
+                    Text(String(format: "%.2f", range.upperBound))
+                }
+            }
+            .font(.caption.bold())
+            .foregroundStyle(textColor)
+            
+        case .file(let url):
+            Label(url.lastPathComponent, systemImage: "doc.fill")
+                .foregroundStyle(textColor)
+                .font(.caption.bold())
+            
+        case .dateFrequency(let frequency):
+            let dayName = Calendar.current.weekdaySymbols[frequency.dayOfWeek.rawValue]
+            let prefix = frequency.interval == 1 ? "Every" : "Every \(frequency.interval)"
+            Label("\(prefix) \(dayName)", systemImage: "calendar")
+                .foregroundStyle(textColor)
+                .font(.caption.bold())
+            
+        case .singleChoice(let choice):
+            VStack(spacing: 8) {
+                choice.image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 60)
+                Text("Single Choice")
+                    .font(.caption)
+                    .foregroundStyle(textColor)
+            }
         }
     }
 }
@@ -424,7 +466,7 @@ struct MessageContentView: View {
                 Text("Multi-choice").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .multiChoice(MultiChoice(image: Image(systemName: "questionmark.circle"))),
+                        content: .multiChoice([Choice(image: Image(systemName: "star.fill"))]),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -453,6 +495,146 @@ struct MessageContentView: View {
                 MessageBubbleView(
                     message: Message(
                         content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Boolean - True
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Boolean (True)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .bool(true),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Boolean - False
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Boolean (False)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .bool(false),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Rating - Five Stars
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rating (5 Stars)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .rating(.five),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Rating - Three Stars
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rating (3 Stars)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .rating(.three),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(42.5),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(10.0...50.0),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // File
+            VStack(alignment: .leading, spacing: 8) {
+                Text("File").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date Frequency - Every Friday
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Frequency (Every Friday)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Date Frequency - Every Other Friday
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Frequency (Every Other Friday)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Single Choice
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Single Choice").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .singleChoice(Choice(image: Image(systemName: "star.fill"))),
                         user: sampleUser,
                         messageType: .outbound
                     ),

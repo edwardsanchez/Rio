@@ -111,7 +111,7 @@ enum DateGranularity {
 }
 
 enum ContentType {
-    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), location(MKMapItem), url(URL), multiChoice(MultiChoice), emoji(String), code(String)
+    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), singleChoice(Choice), multiChoice([Choice]), bool(Bool), value(CGFloat), valueRange(ClosedRange<CGFloat>), rating(Rating), emoji(String), code(String), file(URL)
     
     var isEmoji: Bool {
         if case .emoji = self {
@@ -146,6 +146,19 @@ struct DateRange {
     var end: Date
 }
 
-struct MultiChoice {
+struct Choice {
     var image: Image
+}
+
+struct DateFrequency: Codable, Equatable {
+    var dayOfWeek: DaysOfWeek
+    var interval: Int
+}
+
+enum DaysOfWeek: Int, Codable, CaseIterable {
+    case sunday, monday, tuesday, wednesday, thursday, friday, saturday
+}
+
+enum Rating: Int, Codable, CaseIterable {
+    case one, two, three, four, five
 }
