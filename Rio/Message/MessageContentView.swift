@@ -146,23 +146,117 @@ struct MessageContentView: View {
     }
 }
 
-#Preview("Content Types") {
-    VStack(spacing: 20) {
-        // Text
-        MessageContentView(content: .text("Hello, World!"), textColor: .primary)
-        
-        // Color
-        MessageContentView(content: .color(RGB(red: 255, green: 100, blue: 50)), textColor: .primary)
-        
-        // Date
-        MessageContentView(content: .date(Date.now), textColor: .primary)
-        
-        // Emoji
-        MessageContentView(content: .emoji("👋🎉"), textColor: .primary)
-        
-        // Code
-        MessageContentView(content: .code("func hello() {\n    print(\"Hello\")\n}"), textColor: .primary)
+#Preview("All Content Types") {
+    ScrollView {
+        VStack(alignment: .leading, spacing: 24) {
+            // Text
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Text").font(.headline)
+                MessageContentView(content: .text("Hello, World! This is a text message."), textColor: .primary)
+                    .padding()
+            }
+            
+            // Text (Multi-line)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Text (Multi-line)").font(.headline)
+                MessageContentView(content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."), textColor: .primary)
+                    .padding()
+            }
+            
+            // Color
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Color").font(.headline)
+                MessageContentView(content: .color(RGB(red: 255, green: 100, blue: 50)), textColor: .primary)
+                    .padding()
+            }
+            
+            // Image
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Image").font(.headline)
+                MessageContentView(content: .image(Image(systemName: "photo")), textColor: .primary)
+                    .padding()
+            }
+            
+            // Video
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Video").font(.headline)
+                MessageContentView(content: .video(URL(string: "https://example.com/video.mp4")!), textColor: .primary)
+                    .padding()
+            }
+            
+            // Audio
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Audio").font(.headline)
+                MessageContentView(content: .audio(URL(string: "https://example.com/audio.mp3")!), textColor: .primary)
+                    .padding()
+            }
+            
+            // Date
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date").font(.headline)
+                MessageContentView(content: .date(Date.now), textColor: .primary)
+                    .padding()
+            }
+            
+            // Date Range
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date Range").font(.headline)
+                MessageContentView(
+                    content: .dateRange(
+                        DateRange(
+                            start: Date.now,
+                            end: Date.now.addingTimeInterval(86400 * 7)
+                        )
+                    ),
+                    textColor: .primary
+                )
+                .padding()
+            }
+            
+            // Location
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Location").font(.headline)
+                MessageContentView(content: .location, textColor: .primary)
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+            }
+            
+            // URL
+            VStack(alignment: .leading, spacing: 8) {
+                Text("URL").font(.headline)
+                MessageContentView(content: .url(URL(string: "https://www.apple.com/swift")!), textColor: .primary)
+                    .padding()
+            }
+            
+            // Multi-choice
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Multi-choice").font(.headline)
+                MessageContentView(
+                    content: .multiChoice(MultiChoice(image: Image(systemName: "questionmark.circle"))),
+                    textColor: .primary
+                )
+                .padding()
+            }
+            
+            // Emoji
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Emoji").font(.headline)
+                MessageContentView(content: .emoji("👋🎉🚀"), textColor: .primary)
+                    .padding()
+            }
+            
+            // Code
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Code").font(.headline)
+                MessageContentView(
+                    content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
+                    textColor: .primary
+                )
+                .padding()
+            }
+        }
+        .padding()
     }
-    .padding()
 }
 

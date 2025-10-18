@@ -287,7 +287,10 @@ struct MessageBubbleView: View {
                 .opacity(0)
 
             if hasContent && includeTalkingTextInLayout {
-                MessageContentView(content: message.content, textColor: textColor)
+                MessageContentView(
+                    content: message.content,
+                    textColor: textColor
+                )
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }
