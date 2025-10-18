@@ -18,7 +18,7 @@ struct MessageListView: View {
     let theme: ChatTheme
     
     var body: some View {
-        VStack(spacing: 0) {
+        LazyVStack(spacing: 0) {
             ForEach(Array(zip(messages.indices, messages)), id: \.1.id) { index, message in
                 let isNew = message.id == newMessageId
                 var isLastMessageInChat: Bool { messages.last!.id == message.id }
