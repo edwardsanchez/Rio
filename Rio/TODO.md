@@ -19,6 +19,8 @@
 [ ] Ability to edit message
 [ ] Ability to see time stamp on message
 [ ] ability to see how has read the message
+[ ] Onboarding / signup
+[ ] Ability to reply in threads
 
 ### Long Term
 [ ] Ability to create new bots
