@@ -111,7 +111,7 @@ enum DateGranularity {
 }
 
 enum ContentType {
-    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), singleChoice(Choice), multiChoice([Choice]), bool(Bool), value(CGFloat), valueRange(ClosedRange<CGFloat>), rating(Rating), emoji(String), code(String), file(URL)
+    case text(String), color(RGB), image(Image), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), singleChoice(Choice), multiChoice([Choice]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
     
     var isEmoji: Bool {
         if case .emoji = self {
@@ -135,6 +135,44 @@ enum ContentType {
     }
 }
 
+struct Measurement: Comparable, Equatable {
+    var value: CGFloat
+    var type: ValueType
+    
+    // Equatable (required for Comparable)
+    static func == (lhs: Measurement, rhs: Measurement) -> Bool {
+        return lhs.value == rhs.value && lhs.type == rhs.type
+    }
+    
+    // Comparable
+    static func < (lhs: Measurement, rhs: Measurement) -> Bool {
+        precondition(lhs.type == rhs.type, "Cannot compare measurements of different types")
+        return lhs.value < rhs.value
+    }
+}
+
+enum ValueType: Equatable {
+    case length(UnitLength), percentage(CFloat), currency(CGFloat), mass(UnitMass), volume(UnitVolume), temperature(UnitTemperature), duration(UnitDuration), speed(UnitSpeed), area(UnitArea), energy(UnitEnergy), number(CGFloat)
+    
+    // Custom equality that only compares the case type, not associated values
+    static func == (lhs: ValueType, rhs: ValueType) -> Bool {
+        switch (lhs, rhs) {
+        case (.length(_), .length(_)): return true
+        case (.percentage(_), .percentage(_)): return true
+        case (.currency(_), .currency(_)): return true
+        case (.mass(_), .mass(_)): return true
+        case (.volume(_), .volume(_)): return true
+        case (.temperature(_), .temperature(_)): return true
+        case (.duration(_), .duration(_)): return true
+        case (.speed(_), .speed(_)): return true
+        case (.area(_), .area(_)): return true
+        case (.energy(_), .energy(_)): return true
+        case (.number(_), .number(_)): return true
+        default: return false
+        }
+    }
+}
+
 struct RGB {
     var red: Int
     var green: Int
@@ -147,7 +185,7 @@ struct DateRange {
 }
 
 struct Choice {
-    var image: Image
+    var value: String //Can be text or image?
 }
 
 struct DateFrequency: Codable, Equatable {

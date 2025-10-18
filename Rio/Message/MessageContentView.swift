@@ -133,18 +133,35 @@ struct MessageContentView: View {
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
             
+        case .singleChoice(let choice):
+            VStack(spacing: 8) {
+                Image(systemName: "checkmark.circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 40)
+                    .foregroundStyle(textColor)
+                Text(choice.value.isEmpty ? "Single Choice" : choice.value)
+                    .font(.caption)
+                    .foregroundStyle(textColor)
+            }
+            
         case .multiChoice(let choices):
             // Placeholder for multi-choice content
             VStack(spacing: 8) {
-                if let firstChoice = choices.first {
-                    firstChoice.image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 60)
-                }
-                Text("Multi Choice")
-                    .font(.caption)
+                Image(systemName: "checklist")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 40)
                     .foregroundStyle(textColor)
+                if let firstChoice = choices.first, !firstChoice.value.isEmpty {
+                    Text(firstChoice.value)
+                        .font(.caption)
+                        .foregroundStyle(textColor)
+                } else {
+                    Text("Multi Choice")
+                        .font(.caption)
+                        .foregroundStyle(textColor)
+                }
             }
             
         case .emoji(let emoji):
@@ -177,18 +194,18 @@ struct MessageContentView: View {
             }
             .font(.title3)
             
-        case .value(let number):
-            Label(String(format: "%.2f", number), systemImage: "number")
+        case .value(let measurement):
+            Label(formatMeasurementValue(measurement), systemImage: measurementSymbol(for: measurement.type))
                 .foregroundStyle(textColor)
                 .font(.title3.bold())
             
         case .valueRange(let range):
             HStack(spacing: 8) {
-                Image(systemName: "number")
+                Image(systemName: measurementSymbol(for: range.lowerBound.type))
                 HStack(spacing: 4) {
-                    Text(String(format: "%.2f", range.lowerBound))
+                    Text(formatMeasurementValue(range.lowerBound))
                     Image(systemName: "arrow.right")
-                    Text(String(format: "%.2f", range.upperBound))
+                    Text(formatMeasurementValue(range.upperBound))
                 }
             }
             .font(.caption.bold())
@@ -205,17 +222,40 @@ struct MessageContentView: View {
             Label("\(prefix) \(dayName)", systemImage: "calendar")
                 .foregroundStyle(textColor)
                 .font(.caption.bold())
-            
-        case .singleChoice(let choice):
-            VStack(spacing: 8) {
-                choice.image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 60)
-                Text("Single Choice")
-                    .font(.caption)
-                    .foregroundStyle(textColor)
-            }
+        }
+    }
+    
+    // MARK: - Helper Functions
+    
+    private func measurementSymbol(for type: ValueType) -> String {
+        switch type {
+        case .length(_): return "ruler.fill"
+        case .percentage(_): return "percent"
+        case .currency(_): return "dollarsign.circle.fill"
+        case .mass(_): return "scalemass.fill"
+        case .volume(_): return "flask.fill"
+        case .temperature(_): return "thermometer.medium"
+        case .duration(_): return "clock.fill"
+        case .speed(_): return "speedometer.fill"
+        case .area(_): return "square.fill"
+        case .energy(_): return "bolt.fill"
+        case .number(_): return "number"
+        }
+    }
+    
+    private func formatMeasurementValue(_ measurement: Measurement) -> String {
+        switch measurement.type {
+        case .length(_): return String(format: "%.2f", measurement.value)
+        case .percentage(_): return String(format: "%.1f%%", measurement.value)
+        case .currency(_): return String(format: "$%.2f", measurement.value)
+        case .mass(_): return String(format: "%.2f", measurement.value)
+        case .volume(_): return String(format: "%.2f", measurement.value)
+        case .temperature(_): return String(format: "%.1f°", measurement.value)
+        case .duration(_): return String(format: "%.0f", measurement.value)
+        case .speed(_): return String(format: "%.1f", measurement.value)
+        case .area(_): return String(format: "%.2f", measurement.value)
+        case .energy(_): return String(format: "%.2f", measurement.value)
+        case .number(_): return String(format: "%.2f", measurement.value)
         }
     }
 }
@@ -461,12 +501,27 @@ struct MessageContentView: View {
                 )
             }
             
+            
+            // Single Choice
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Single Choice").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .singleChoice(Choice(value: "Option A")),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
             // Multi-choice
             VStack(alignment: .leading, spacing: 8) {
                 Text("Multi-choice").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .multiChoice([Choice(image: Image(systemName: "star.fill"))]),
+                        content: .multiChoice([Choice(value: "Option A"), Choice(value: "Option B")]),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -559,12 +614,12 @@ struct MessageContentView: View {
                 )
             }
             
-            // Value
+            // Value - Length
             VStack(alignment: .leading, spacing: 8) {
-                Text("Value").font(.headline)
+                Text("Value (Length)").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .value(42.5),
+                        content: .value(Measurement(value: 42.5, type: .length(.meters))),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -573,12 +628,314 @@ struct MessageContentView: View {
                 )
             }
             
-            // Value Range
+            // Value - Percentage
             VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range").font(.headline)
+                Text("Value (Percentage)").font(.headline)
                 MessageBubbleView(
                     message: Message(
-                        content: .valueRange(10.0...50.0),
+                        content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Currency
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Currency)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 99.99, type: .currency(99.99))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Mass
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Mass)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Volume
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Volume)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Temperature
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Temperature)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Duration
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Duration)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 60, type: .duration(.minutes))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Speed
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Speed)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Area
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Area)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Energy
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Energy)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value - Number
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value (Number)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .value(Measurement(value: 42.0, type: .number(42.0))),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Length
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Length)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Percentage
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Percentage)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Currency
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Currency)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Mass
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Mass)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Volume
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Volume)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Temperature
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Temperature)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Duration
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Duration)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Speed
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Speed)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Area
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Area)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Energy
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Energy)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
+                        ),
+                        user: sampleUser,
+                        messageType: .outbound
+                    ),
+                    showTail: true,
+                    theme: .defaultTheme
+                )
+            }
+            
+            // Value Range - Number
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Value Range (Number)").font(.headline)
+                MessageBubbleView(
+                    message: Message(
+                        content: .valueRange(
+                            Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
+                        ),
                         user: sampleUser,
                         messageType: .outbound
                     ),
@@ -628,23 +985,8 @@ struct MessageContentView: View {
                     theme: .defaultTheme
                 )
             }
-            
-            // Single Choice
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Single Choice").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .singleChoice(Choice(image: Image(systemName: "star.fill"))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme
-                )
-            }
         }
         .padding()
     }
     .environment(bubbleConfig)
 }
-
