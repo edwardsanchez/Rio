@@ -30,7 +30,9 @@ class ChatData {
             Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-3600), messageType: .inbound(.talking)),
             Message(content: .text("Are you good?"), user: mayaUser, date: Date().addingTimeInterval(-3500), messageType: .inbound(.talking)),
             Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), user: edwardUser, date: Date().addingTimeInterval(-3400), messageType: .outbound),
-            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), user: mayaUser, date: Date().addingTimeInterval(-3300), messageType: .inbound(.talking))
+            Message(content: .emoji("👋"), user: edwardUser, date: Date().addingTimeInterval(-3350), messageType: .outbound),
+            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), user: mayaUser, date: Date().addingTimeInterval(-3300), messageType: .inbound(.talking)),
+            Message(content: .emoji("😊🎉"), user: mayaUser, date: Date().addingTimeInterval(-3200), messageType: .inbound(.talking))
         ]
 
         let chat1 = Chat(

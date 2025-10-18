@@ -39,7 +39,11 @@ struct ChatInputView: View {
         "Erm, sure!",
         "You think?",
         "Never!",
-        "That's cool!"
+        "That's cool!",
+        "👍",
+        "😊",
+        "🤔💭",
+        "🎉🎊🥳"
     ]
     
     var body: some View {
@@ -189,11 +193,43 @@ struct ChatInputView: View {
             }
         }
 
-        // Create and send the message
-        let newMessage = Message(content: .text(messageText), user: chatData.edwardUser, messageType: .outbound)
-        newMessageId = newMessage.id
-        messages.append(newMessage)
-        chatData.addMessage(newMessage, to: chat.id)
+        // Parse message content and create message(s)
+        let segments = ContentTypeDetector.detectURLs(in: messageText)
+        var createdMessages: [Message] = []
+        
+        for segment in segments {
+            let content: ContentType
+            if segment.isURL {
+                // Create URL content type
+                if let url = URL(string: segment.content) {
+                    content = .url(url)
+                } else {
+                    // Fallback to text if URL creation fails
+                    content = .text(segment.content)
+                }
+            } else {
+                // Use content type detector to check for emoji-only (1-3 emoji)
+                content = ContentTypeDetector.contentType(for: segment.content)
+            }
+            
+            let newMessage = Message(
+                content: content,
+                user: chatData.edwardUser,
+                messageType: .outbound
+            )
+            createdMessages.append(newMessage)
+        }
+        
+        // Set newMessageId to the first message for animation
+        if let firstMessage = createdMessages.first {
+            newMessageId = firstMessage.id
+        }
+        
+        // Add all created messages
+        for msg in createdMessages {
+            messages.append(msg)
+            chatData.addMessage(msg, to: chat.id)
+        }
 
         // Re-add the typing indicator with a new timestamp to make it the last message
         if let typingIndicator = typingIndicatorToMove {
@@ -327,12 +363,15 @@ struct ChatInputView: View {
                 readToThinkingTimer = nil
                 
                 let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
+                
+                // Detect content type for auto-reply (emoji detection)
+                let contentType = ContentTypeDetector.contentType(for: randomResponse)
 
                 if let typingIndicatorId = currentTypingIndicatorId,
                    let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
                     let updatedMessage = Message(
                         id: typingIndicatorId,
-                        content: .text(randomResponse),
+                        content: contentType,
                         user: randomUser,
                         date: Date.now,
                         isTypingIndicator: false,
@@ -344,7 +383,7 @@ struct ChatInputView: View {
                     newMessageId = nil
                 } else {
                     let fallbackMessage = Message(
-                        content: .text(randomResponse),
+                        content: contentType,
                         user: randomUser,
                         replacesTypingIndicator: indicatorWasVisible,
                         messageType: .inbound(.talking)
