@@ -758,11 +758,16 @@ private struct MessageBubblePreviewContainer: View {
                 namespace: imageNamespace,
                 isPresented: Binding(
                     get: { selectedImageData != nil },
-                    set: { if !$0 { selectedImageData = nil } }
+                    set: { newValue in
+                        if !newValue {
+                            withAnimation(.smooth(duration: 0.4)) {
+                                selectedImageData = nil
+                            }
+                        }
+                    }
                 )
             )
             .zIndex(1)
-            .transition(.identity)
         }
     }
 }

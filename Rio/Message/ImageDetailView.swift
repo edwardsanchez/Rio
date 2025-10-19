@@ -37,17 +37,19 @@ struct ImageDetailView: View {
                 .ignoresSafeArea()
             
             // Centered zoomable image
-            imageData.image
-                .resizable()
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .matchedGeometryEffect(id: imageData.id, in: namespace)
-                .scaleEffect(currentZoom * totalZoom)
-                .offset(x: panOffset.width + currentPanOffset.width, y: panOffset.height + currentPanOffset.height + (isZoomedOut ? dragOffset.height : 0))
-                .gesture(isZoomedOut ? nil : panGesture)
-                .gesture(zoomGesture)
-                .onTapGesture(count: 2, perform: handleDoubleTap)
-                .simultaneousGesture(isZoomedOut ? dismissGesture : nil)
+            Group {
+                imageData.image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .matchedGeometryEffect(id: imageData.id, in: namespace)
+            .scaleEffect(currentZoom * totalZoom)
+            .offset(x: panOffset.width + currentPanOffset.width, y: panOffset.height + currentPanOffset.height + (isZoomedOut ? dragOffset.height : 0))
+            .gesture(isZoomedOut ? nil : panGesture)
+            .gesture(zoomGesture)
+            .onTapGesture(count: 2, perform: handleDoubleTap)
+            .simultaneousGesture(isZoomedOut ? dismissGesture : nil)
             
             // Overlay with buttons and label
             VStack(spacing: 0) {
@@ -65,9 +67,7 @@ struct ImageDetailView: View {
                     
                     // Close button (top right)
                     Button(action: {
-                        withAnimation(.smooth(duration: 0.4)) {
-                            isPresented = false
-                        }
+                        isPresented = false
                     }, label: {
                         Image(systemName: "xmark")
                             .padding(10)
@@ -108,9 +108,7 @@ struct ImageDetailView: View {
         .onTapGesture {
             // Tap background to dismiss
             if isZoomedOut {
-                withAnimation(.smooth(duration: 0.4)) {
-                    isPresented = false
-                }
+                isPresented = false
             }
         }
         .task {
@@ -137,9 +135,7 @@ struct ImageDetailView: View {
             }
             .onEnded { value in
                 if value.translation.height > 200 {
-                    withAnimation(.smooth(duration: 0.4)) {
-                        isPresented = false
-                    }
+                    isPresented = false
                 } else {
                     // Snap back
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {

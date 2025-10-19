@@ -41,11 +41,11 @@ struct ChatDetailView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
+            NavigationStack {
                 VStack(spacing: 0) {
-                // Main scroll view for messages
-                ScrollView {
+                    // Main scroll view for messages
+                    ScrollView {
                     MessageListView(
                     messages: messages,
                     newMessageId: $newMessageId,
@@ -157,22 +157,27 @@ struct ChatDetailView: View {
                         .foregroundColor(autoReplyEnabled ? chat.theme.outboundBackgroundColor : .primary.opacity(0.3))
                 }
             }
-        }
-        .coordinateSpace(name: "field")
-                
-                // Image detail overlay
-                if let imageData = selectedImageData {
-                    ImageDetailView(
-                        imageData: imageData,
-                        namespace: imageNamespace,
-                        isPresented: Binding(
-                            get: { selectedImageData != nil },
-                            set: { if !$0 { selectedImageData = nil } }
-                        )
-                    )
-                    .zIndex(1)
-                    .transition(.identity)
                 }
+                .coordinateSpace(name: "field")
+            }
+            
+            // Image detail overlay
+            if let imageData = selectedImageData {
+                ImageDetailView(
+                    imageData: imageData,
+                    namespace: imageNamespace,
+                    isPresented: Binding(
+                        get: { selectedImageData != nil },
+                        set: { newValue in
+                            if !newValue {
+                                withAnimation(.smooth(duration: 0.4)) {
+                                    selectedImageData = nil
+                                }
+                            }
+                        }
+                    )
+                )
+                .zIndex(1)
             }
         }
     }
