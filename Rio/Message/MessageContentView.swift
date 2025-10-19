@@ -382,7 +382,119 @@ struct MessageContentView: View {
     }
 }
 
-#Preview("All Content Types") {
+// MARK: - Preview 1: Text & Choices
+
+#Preview("Text & Choices") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Text
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Text").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .text("Hello, World! This is a text message."),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Text (Multi-line)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Text (Multi-line)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Text Choice
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Text Choice").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .textChoice("This is a text choice option"),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Multi-choice - Text Choices
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Multi-choice (Text - 3)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .multiChoice([
+                                .textChoice("Option A"),
+                                .textChoice("Option B"),
+                                .textChoice("Option C")
+                            ]),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Multi-choice - Prime number (7 days)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Multi-choice (Text - 7)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .multiChoice([
+                                .textChoice("Monday"),
+                                .textChoice("Tuesday"),
+                                .textChoice("Wednesday"),
+                                .textChoice("Thursday"),
+                                .textChoice("Friday"),
+                                .textChoice("Saturday"),
+                                .textChoice("Sunday")
+                            ]),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 2: Images
+
+#Preview("Images") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
     @Previewable @Namespace var imageNamespace
@@ -392,962 +504,63 @@ struct MessageContentView: View {
     ZStack {
         NavigationStack {
             ScrollView {
-            LazyVStack(alignment: .trailing, spacing: 24) {
-            // Text
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Text").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .text("Hello, World! This is a text message."),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            
-            // Text (Multi-line)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Text (Multi-line)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // URL
-            VStack(alignment: .leading, spacing: 8) {
-                Text("URL (with metadata)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .url(URL(string: "https://www.apple.com")!),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // URL - Alternative
-            VStack(alignment: .leading, spacing: 8) {
-                Text("URL (Unresolved)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .url(URL(string: "https://somefakeURL.com")!),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Text Choice
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Text Choice").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .textChoice("This is a text choice option"),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Color
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Color").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Image
-            VStack(alignment: .leading, spacing: 8) {
-                MessageBubbleView(
-                    message: Message(
-                        content: .image(Image(.cat)),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Labeled Image
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Labeled Image").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Video
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Video").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Audio
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Audio").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date - Date and Time
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date (Date & Time)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .date(Date.now, granularity: .dateAndTime),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date - Date Only
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date (Date Only)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .date(Date.now, granularity: .dateOnly),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date - Time Only
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date (Time Only)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .date(Date.now, granularity: .timeOnly),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date Range - Date and Time
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date Range (Date & Time)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .dateRange(
-                            DateRange(
-                                start: Date.now,
-                                end: Date.now.addingTimeInterval(86400 * 3 + 3600 * 2)
+                LazyVStack(alignment: .trailing, spacing: 24) {
+                    // Image
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Image").font(.headline)
+                        MessageBubbleView(
+                            message: Message(
+                                content: .image(Image(.cat)),
+                                user: sampleUser,
+                                messageType: .outbound
                             ),
-                            granularity: .dateAndTime
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date Range - Date Only
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date Range (Date Only)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .dateRange(
-                            DateRange(
-                                start: Date.now,
-                                end: Date.now.addingTimeInterval(86400 * 7)
+                            showTail: true,
+                            theme: .defaultTheme,
+                            selectedImageData: $selectedImageData,
+                            namespace: imageNamespace
+                        )
+                    }
+                    
+                    // Labeled Image
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Labeled Image").font(.headline)
+                        MessageBubbleView(
+                            message: Message(
+                                content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
+                                user: sampleUser,
+                                messageType: .outbound
                             ),
-                            granularity: .dateOnly
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date Range - Time Only
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date Range (Time Only)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .dateRange(
-                            DateRange(
-                                start: Date.now,
-                                end: Date.now.addingTimeInterval(3600 * 2)
+                            showTail: true,
+                            theme: .defaultTheme,
+                            selectedImageData: $selectedImageData,
+                            namespace: imageNamespace
+                        )
+                    }
+                    
+                    // Multi-choice - Images
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Multi-choice (Images - 4)").font(.headline)
+                        MessageBubbleView(
+                            message: Message(
+                                content: .multiChoice([
+                                    .image(Image(.cat)),
+                                    .image(Image(.cat)),
+                                    .image(Image(.cat)),
+                                    .image(Image(.cat))
+                                ]),
+                                user: sampleUser,
+                                messageType: .outbound
                             ),
-                            granularity: .timeOnly
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
+                            showTail: true,
+                            theme: .defaultTheme,
+                            selectedImageData: $selectedImageData,
+                            namespace: imageNamespace
+                        )
+                    }
+                }
+                .padding(20)
             }
-            
-            // Location
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Location").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .location({
-                            let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
-                            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                            let mapItem = MKMapItem(location: location, address: nil)
-                            mapItem.name = "Apple Park"
-                            return mapItem
-                        }()),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Text Choices
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Text)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .textChoice("Option A"),
-                            .textChoice("Option B"),
-                            .textChoice("Option C")
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Colors (2 columns, even)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Colors - 2)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
-                            .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Colors (3 columns, divisible by 3)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Colors - 3)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
-                            .color(RGB(red: 100, green: 200, blue: 255, name: "Sky")),
-                            .color(RGB(red: 50, green: 255, blue: 100, name: "Mint")),
-                            .color(RGB(red: 200, green: 50, blue: 255, name: "Purple")),
-                            .color(RGB(red: 255, green: 255, blue: 100, name: "Yellow")),
-                            .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Images (5 columns, divisible by 5)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Images - 4)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .image(Image(.cat)),
-                            .image(Image(.cat)),
-                            .image(Image(.cat)),
-                            .image(Image(.cat))
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Prime number (1 column)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Text - 7)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .textChoice("Monday"),
-                            .textChoice("Tuesday"),
-                            .textChoice("Wednesday"),
-                            .textChoice("Thursday"),
-                            .textChoice("Friday"),
-                            .textChoice("Saturday"),
-                            .textChoice("Sunday")
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Multi-choice - Locations (2 columns, even)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Multi-choice (Locations - 2)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .multiChoice([
-                            .location({
-                                let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
-                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                                let mapItem = MKMapItem(location: location, address: nil)
-                                mapItem.name = "Apple Park"
-                                return mapItem
-                            }()),
-                            .location({
-                                let coordinate = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                                let mapItem = MKMapItem(location: location, address: nil)
-                                mapItem.name = "San Francisco"
-                                return mapItem
-                            }())
-                        ]),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Emoji
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Emoji").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .emoji("👋🎉🚀"),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Code
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Code").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Boolean - True
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Boolean (True)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .bool(true),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Boolean - False
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Boolean (False)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .bool(false),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Rating - Five Stars
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Rating (5 Stars)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .rating(.five),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Rating - Three Stars
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Rating (3 Stars)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .rating(.three),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Length
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Length)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 42.5, type: .length(.meters))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Percentage
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Percentage)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Currency
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Currency)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 99.99, type: .currency(99.99))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Mass
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Mass)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Volume
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Volume)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Temperature
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Temperature)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Duration
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Duration)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 60, type: .duration(.minutes))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Speed
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Speed)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Area
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Area)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Energy
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Energy)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value - Number
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value (Number)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .value(Measurement(value: 42.0, type: .number(42.0))),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Length
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Length)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Percentage
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Percentage)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Currency
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Currency)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Mass
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Mass)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Volume
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Volume)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Temperature
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Temperature)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Duration
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Duration)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Speed
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Speed)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Area
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Area)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Energy
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Energy)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Value Range - Number
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Value Range (Number)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .valueRange(
-                            Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
-                        ),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // File
-            VStack(alignment: .leading, spacing: 8) {
-                Text("File").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date Frequency - Every Friday
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date Frequency (Every Friday)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-            
-            // Date Frequency - Every Other Friday
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date Frequency (Every Other Friday)").font(.headline)
-                MessageBubbleView(
-                    message: Message(
-                        content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
-                        user: sampleUser,
-                        messageType: .outbound
-                    ),
-                    showTail: true,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
-                )
-            }
-        }
-        .padding(20)
-        }
-        .environment(bubbleConfig)
+            .environment(bubbleConfig)
         }
         
         // Image detail overlay
@@ -1368,6 +581,921 @@ struct MessageContentView: View {
             )
             .zIndex(1)
         }
+    }
+}
+
+// MARK: - Preview 3: Audio & Video
+
+#Preview("Audio & Video") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Video
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Video").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Audio
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Audio").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 4: Colors & Locations
+
+#Preview("Colors & Locations") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Color
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Color").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Location
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Location").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .location({
+                                let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
+                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                let mapItem = MKMapItem(location: location, address: nil)
+                                mapItem.name = "Apple Park"
+                                return mapItem
+                            }()),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Multi-choice - Colors (2)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Multi-choice (Colors - 2)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .multiChoice([
+                                .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
+                                .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
+                            ]),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Multi-choice - Colors (3)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Multi-choice (Colors - 3)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .multiChoice([
+                                .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
+                                .color(RGB(red: 100, green: 200, blue: 255, name: "Sky")),
+                                .color(RGB(red: 50, green: 255, blue: 100, name: "Mint")),
+                                .color(RGB(red: 200, green: 50, blue: 255, name: "Purple")),
+                                .color(RGB(red: 255, green: 255, blue: 100, name: "Yellow")),
+                                .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
+                            ]),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Multi-choice - Locations
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Multi-choice (Locations - 2)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .multiChoice([
+                                .location({
+                                    let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
+                                    let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                    let mapItem = MKMapItem(location: location, address: nil)
+                                    mapItem.name = "Apple Park"
+                                    return mapItem
+                                }()),
+                                .location({
+                                    let coordinate = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
+                                    let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                    let mapItem = MKMapItem(location: location, address: nil)
+                                    mapItem.name = "San Francisco"
+                                    return mapItem
+                                }())
+                            ]),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 5: Values
+
+#Preview("Values") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Value - Length
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Length)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 42.5, type: .length(.meters))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Percentage
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Percentage)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Currency
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Currency)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 99.99, type: .currency(99.99))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Mass
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Mass)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Volume
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Volume)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Temperature
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Temperature)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Duration
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Duration)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 60, type: .duration(.minutes))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Speed
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Speed)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Area
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Area)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Energy
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Energy)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value - Number
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value (Number)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .value(Measurement(value: 42.0, type: .number(42.0))),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 6: Value Ranges
+
+#Preview("Value Ranges") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Value Range - Length
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Length)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Percentage
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Percentage)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Currency
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Currency)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Mass
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Mass)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Volume
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Volume)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Temperature
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Temperature)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Duration
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Duration)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Speed
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Speed)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Area
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Area)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Energy
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Energy)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Value Range - Number
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Value Range (Number)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .valueRange(
+                                Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 7: Dates
+
+#Preview("Dates") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // Date - Date and Time
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date (Date & Time)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .date(Date.now, granularity: .dateAndTime),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date - Date Only
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date (Date Only)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .date(Date.now, granularity: .dateOnly),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date - Time Only
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date (Time Only)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .date(Date.now, granularity: .timeOnly),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date Range - Date and Time
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date Range (Date & Time)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .dateRange(
+                                DateRange(
+                                    start: Date.now,
+                                    end: Date.now.addingTimeInterval(86400 * 3 + 3600 * 2)
+                                ),
+                                granularity: .dateAndTime
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date Range - Date Only
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date Range (Date Only)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .dateRange(
+                                DateRange(
+                                    start: Date.now,
+                                    end: Date.now.addingTimeInterval(86400 * 7)
+                                ),
+                                granularity: .dateOnly
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date Range - Time Only
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date Range (Time Only)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .dateRange(
+                                DateRange(
+                                    start: Date.now,
+                                    end: Date.now.addingTimeInterval(3600 * 2)
+                                ),
+                                granularity: .timeOnly
+                            ),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date Frequency - Every Friday
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date Frequency (Every Friday)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Date Frequency - Every Other Friday
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Date Frequency (Every Other Friday)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
+    }
+}
+
+// MARK: - Preview 8: Miscellaneous
+
+#Preview("Miscellaneous") {
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
+    
+    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    
+    NavigationStack {
+        ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
+                // URL
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("URL (with metadata)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .url(URL(string: "https://www.apple.com")!),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // URL - Alternative
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("URL (Unresolved)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .url(URL(string: "https://somefakeURL.com")!),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Emoji
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Emoji").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .emoji("👋🎉🚀"),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Code
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Code").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Boolean - True
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Boolean (True)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .bool(true),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Boolean - False
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Boolean (False)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .bool(false),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Rating - Five Stars
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Rating (5 Stars)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .rating(.five),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // Rating - Three Stars
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Rating (3 Stars)").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .rating(.three),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+                
+                // File
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("File").font(.headline)
+                    MessageBubbleView(
+                        message: Message(
+                            content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
+                            user: sampleUser,
+                            messageType: .outbound
+                        ),
+                        showTail: true,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData,
+                        namespace: imageNamespace
+                    )
+                }
+            }
+            .padding(20)
+        }
+        .environment(bubbleConfig)
     }
 }
 
