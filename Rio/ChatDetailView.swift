@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import FlowStack
 
 struct ChatDetailView: View {
     let chat: Chat
@@ -38,9 +37,9 @@ struct ChatDetailView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Main scroll view for messages
-            FlowStack {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // Main scroll view for messages
                 ScrollView {
                     MessageListView(
                     messages: messages,
@@ -56,10 +55,10 @@ struct ChatDetailView: View {
                 } action: { newValue in
                     scrollViewFrame = newValue
                 }
-                }
-                .scrollClipDisabled()
-                .scrollPosition($scrollPosition)
-                .contentMargins(.horizontal, 20, for: .scrollContent)
+            }
+            .scrollClipDisabled()
+            .scrollPosition($scrollPosition)
+            .contentMargins(.horizontal, 20, for: .scrollContent)
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
             } action: { oldValue, newValue in
@@ -119,10 +118,6 @@ struct ChatDetailView: View {
                 }
                 shouldFocusInput = true
             }
-            }
-            .flowDestination(for: ImageData.self) { imageData in
-                ImageDetailView(imageData: imageData)
-            }
 
             ChatInputView(
                 inputFieldFrame: $inputFieldFrame,
@@ -157,6 +152,7 @@ struct ChatDetailView: View {
             }
         }
         .coordinateSpace(name: "field")
+        }
     }
 
 
@@ -239,9 +235,9 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var currentNewMessageId: UUID?
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Scroll view with messages
-            FlowStack {
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                // Scroll view with messages
                 ScrollView {
                     MessageListView(
                     messages: messages,
@@ -257,14 +253,10 @@ private struct OutboundGeometryMatchDebugView: View {
                 } action: { newValue in
                     scrollViewFrame = newValue
                 }
-                }
-                .scrollClipDisabled()
-                .contentMargins(.horizontal, 20, for: .scrollContent)
-                .background(Color.base)
             }
-            .flowDestination(for: ImageData.self) { imageData in
-                ImageDetailView(imageData: imageData)
-            }
+            .scrollClipDisabled()
+            .contentMargins(.horizontal, 20, for: .scrollContent)
+            .background(Color.base)
             
             // Mock input field to show where the message should be aligned
             VStack(spacing: 0) {
@@ -298,6 +290,7 @@ private struct OutboundGeometryMatchDebugView: View {
         .onAppear {
             // Set the message as "new" when the view appears
             currentNewMessageId = newMessageId
+        }
         }
     }
 }

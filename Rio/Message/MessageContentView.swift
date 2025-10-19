@@ -8,7 +8,6 @@
 import SwiftUI
 import MapKit
 import AVKit
-import FlowStack
 
 /// A view that renders different types of message content based on the ContentType enum
 struct MessageContentView: View {
@@ -22,6 +21,7 @@ struct MessageContentView: View {
     
     let insetCornerRadius: CGFloat = 10
     
+    @Namespace private var imageNamespace
     @State private var fallbackID = UUID().uuidString
     
     private var uniquePrefix: String {
@@ -44,19 +44,22 @@ struct MessageContentView: View {
             colorView(rgb)
             
         case .image(let image):
-            FlowLink(
-                value: ImageData(id: "\(uniquePrefix)-standalone-image", image: image),
-                configuration: .init(cornerRadius: insetCornerRadius)
-            ) {
+            let imageID = "\(uniquePrefix)-standalone-image"
+            NavigationLink {
+                ImageDetailView(imageData: ImageData(id: imageID, image: image))
+                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
+            } label: {
                 imageView(image)
+                    .matchedTransitionSource(id: imageID, in: imageNamespace)
             }
             
         case .labeledImage(let labeledImage):
-            FlowLink(
-                value: ImageData(id: "\(uniquePrefix)-standalone-labeled", image: labeledImage.image, label: labeledImage.label),
-                configuration: .init(cornerRadius: insetCornerRadius)
-            ) {
-                labeledImageView(labeledImage)
+            let imageID = "\(uniquePrefix)-standalone-labeled"
+            NavigationLink {
+                ImageDetailView(imageData: ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label))
+                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
+            } label: {
+                labeledImageView(labeledImage, imageID: imageID)
             }
             
         case .video(let url):
@@ -310,7 +313,7 @@ struct MessageContentView: View {
     }
     
     @ViewBuilder
-    private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false) -> some View {
+    private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false, imageID: String? = nil) -> some View {
         VStack(spacing: compact ? 4 : 8) {
             labeledImage.image
                 .resizable()
@@ -319,7 +322,9 @@ struct MessageContentView: View {
                 .if(compact) { view in
                     view.frame(maxWidth: 80, maxHeight: 80)
                 }
-                .flowAnimationAnchor()
+                .if(imageID != nil) { view in
+                    view.matchedTransitionSource(id: imageID!, in: imageNamespace)
+                }
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
                 .foregroundStyle(textColor)
@@ -350,28 +355,21 @@ struct MessageContentView: View {
         case .color(let rgb):
             colorView(rgb, compact: true)
         case .image(let image):
-            FlowLink(
-                value: ImageData(id: "\(uniquePrefix)-grid-image-\(index)", image: image),
-                configuration: .init(
-                    animateFromAnchor: true,
-                    transitionFromSnapshot: false,
-                    cornerRadius: insetCornerRadius
-                )
-            ) {
+            let imageID = "\(uniquePrefix)-grid-image-\(index)"
+            NavigationLink {
+                ImageDetailView(imageData: ImageData(id: imageID, image: image))
+                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
+            } label: {
                 imageView(image, compact: true)
-                    .flowAnimationAnchor()
+                    .matchedTransitionSource(id: imageID, in: imageNamespace)
             }
-            .contentShape(Rectangle())
         case .labeledImage(let labeledImage):
-            FlowLink(
-                value: ImageData(id: "\(uniquePrefix)-grid-labeled-\(index)", image: labeledImage.image, label: labeledImage.label),
-                configuration: .init(
-                    animateFromAnchor: true,
-                    transitionFromSnapshot: false,
-                    cornerRadius: insetCornerRadius
-                )
-            ) {
-                labeledImageView(labeledImage, compact: true)
+            let imageID = "\(uniquePrefix)-grid-labeled-\(index)"
+            NavigationLink {
+                ImageDetailView(imageData: ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label))
+                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
+            } label: {
+                labeledImageView(labeledImage, compact: true, imageID: imageID)
             }
         case .location(let mapItem):
             locationView(mapItem, compact: true)
@@ -388,9 +386,9 @@ struct MessageContentView: View {
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
-    FlowStack {
+    NavigationStack {
         ScrollView {
-            LazyVStack(alignment: .trailing, spacing: 24) {
+        LazyVStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
@@ -1234,11 +1232,8 @@ struct MessageContentView: View {
                     theme: .defaultTheme
                 )
             }
-            }
-            .padding(20)
         }
-        .flowDestination(for: ImageData.self) { imageData in
-            ImageDetailView(imageData: imageData)
+        .padding(20)
         }
         .environment(bubbleConfig)
     }

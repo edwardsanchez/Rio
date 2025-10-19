@@ -6,23 +6,46 @@
 //
 
 import SwiftUI
-import FlowStack
 
 /// A full-screen image detail view with zoom, pan, and interactive dismiss gestures
 struct ImageDetailView: View {
-    @Environment(\.flowDismiss) var flowDismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var opacity: CGFloat = 0
     @State private var safeAreaInsets: EdgeInsets = EdgeInsets()
     
+    // Pull-to-dismiss gesture state
+    @GestureState private var dragOffset: CGSize = .zero
+    @State private var backgroundOpacity: CGFloat = 1
+    
+    // Zoom and pan state
+    @State private var currentZoom: CGFloat = 1.0
+    @State private var totalZoom: CGFloat = 1.0
+    @State private var panOffset: CGSize = .zero
+    @State private var currentPanOffset: CGSize = .zero
+    
     let imageData: ImageData
+    
+    private var isZoomedOut: Bool {
+        totalZoom <= 1.0
+    }
     
     var body: some View {
         ZStack {
-            // Centered image
+            Color.black
+                .opacity(backgroundOpacity)
+                .ignoresSafeArea()
+            
+            // Centered zoomable image
             imageData.image
                 .resizable()
                 .scaledToFit()
+                .scaleEffect(currentZoom * totalZoom)
+                .offset(x: panOffset.width + currentPanOffset.width, y: panOffset.height + currentPanOffset.height + (isZoomedOut ? dragOffset.height : 0))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .gesture(isZoomedOut ? nil : panGesture)
+                .gesture(zoomGesture)
+                .onTapGesture(count: 2, perform: handleDoubleTap)
+                .simultaneousGesture(isZoomedOut ? dismissGesture : nil)
             
             // Overlay with buttons and label
             VStack(spacing: 0) {
@@ -38,9 +61,9 @@ struct ImageDetailView: View {
                     
                     Spacer()
                     
-                    // Close button
+                    // Close button (top right)
                     Button(action: {
-                        flowDismiss()
+                        dismiss()
                     }, label: {
                         Image(systemName: "xmark")
                             .padding(10)
@@ -49,7 +72,7 @@ struct ImageDetailView: View {
                     .buttonBorderShape(.circle)
                     .buttonStyle(.glass)
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 20)
                 .padding(.top, safeAreaInsets.top + 12)
                 
                 Spacer()
@@ -63,28 +86,101 @@ struct ImageDetailView: View {
                     }, label: {
                         Image(systemName: "square.and.arrow.up")
                             .padding(10)
-                            
                     })
                     .opacity(opacity)
                     .buttonBorderShape(.circle)
                     .buttonStyle(.glass)
-                    
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 20)
                 .padding(.bottom, safeAreaInsets.bottom)
             }
         }
         .ignoresSafeArea()
-        .background(Color.black)
         .onGeometryChange(for: EdgeInsets.self) { proxy in
             proxy.safeAreaInsets
         } action: { newValue in
             safeAreaInsets = newValue
         }
-        .withFlowAnimation {
-            opacity = 1
-        } onDismiss: {
-            opacity = 0
+        .toolbar(.hidden, for: .navigationBar)
+        .task {
+            // Delay button fade until after zoom animation completes
+            try? await Task.sleep(for: .seconds(0.5))
+            withAnimation(.easeIn(duration: 0.2)) {
+                opacity = 1
+            }
+        }
+    }
+    
+    // Pull-to-dismiss gesture (only when zoomed out)
+    private var dismissGesture: some Gesture {
+        DragGesture()
+            .updating($dragOffset) { value, state, _ in
+                guard value.translation.height > 0 else { return }
+                state = value.translation
+            }
+            .onChanged { value in
+                guard value.translation.height > 0 else { return }
+                let dragDistance = value.translation.height
+                let progress = min(dragDistance / 200, 1)
+                backgroundOpacity = 1 - progress
+            }
+            .onEnded { value in
+                if value.translation.height > 200 {
+                    dismiss()
+                } else {
+                    // Snap back
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        backgroundOpacity = 1
+                    }
+                }
+            }
+    }
+    
+    // Zoom gesture
+    private var zoomGesture: some Gesture {
+        MagnificationGesture()
+            .onChanged { value in
+                currentZoom = value
+            }
+            .onEnded { value in
+                totalZoom *= value
+                currentZoom = 1.0
+                // Clamp between 1.0 and 3.0
+                totalZoom = min(max(totalZoom, 1.0), 3.0)
+                
+                // Reset pan offset when zooming out to 1.0
+                if totalZoom == 1.0 {
+                    withAnimation(.spring()) {
+                        panOffset = .zero
+                        currentPanOffset = .zero
+                    }
+                }
+            }
+    }
+    
+    // Pan gesture (only when zoomed in)
+    private var panGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                currentPanOffset = value.translation
+            }
+            .onEnded { value in
+                panOffset.width += value.translation.width
+                panOffset.height += value.translation.height
+                currentPanOffset = .zero
+            }
+    }
+    
+    // Double-tap to zoom
+    private func handleDoubleTap() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            if totalZoom > 1.0 {
+                totalZoom = 1.0
+                panOffset = .zero
+                currentPanOffset = .zero
+            } else {
+                totalZoom = 2.0
+            }
         }
     }
 }

@@ -5,6 +5,7 @@
 ### Bugs
 [ ] Fix animation for outbound messages so they come from input field
 [ ] Fix transition between thinking to talking, as it got kind of clunky
+[ ] Fix how bubbles seem to bounce and animate, likely due to their size being set by geometry reader
 
 ### New Features
 
