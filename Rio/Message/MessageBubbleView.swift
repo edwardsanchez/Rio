@@ -289,7 +289,8 @@ struct MessageBubbleView: View {
             if hasContent && includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
-                    textColor: textColor
+                    textColor: textColor,
+                    messageID: message.id
                 )
                 .padding(.vertical, 4)
                 .opacity(showTalkingContent ? 1 : 0)

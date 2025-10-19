@@ -268,7 +268,7 @@ struct BubbleExplosionTestView: View {
             Circle()
             
             if hasContent && includeTalkingTextInLayout {
-                MessageContentView(content: message.content, textColor: textColor)
+                MessageContentView(content: message.content, textColor: textColor, messageID: message.id)
                     .opacity(showTalkingContent ? 1 : 0)
             }
         }

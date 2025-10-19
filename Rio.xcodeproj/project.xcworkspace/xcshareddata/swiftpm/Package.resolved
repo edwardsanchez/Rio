@@ -1,15 +1,6 @@
 {
-  "originHash" : "99f5cc9047b1653a1ce733441942173a77811ff4ea50cf5e86f2888b7397d431",
+  "originHash" : "b8f27ea49509662e363e9684fe537cd312bcbe74b8fa8692fd220b419d8330ee",
   "pins" : [
-    {
-      "identity" : "flowstack",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/velos/FlowStack.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "24ad2436cc5a62832ea70cd9279e9a23cb461fb1"
-      }
-    },
     {
       "identity" : "svgpath",
       "kind" : "remoteSourceControl",

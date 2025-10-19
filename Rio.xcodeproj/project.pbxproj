@@ -502,15 +502,14 @@
 				minimumVersion = 1.1.4;
 			};
 		};
-		6D3EE8042E7E6D9D00F81D35 /* XCRemoteSwiftPackageReference "FlowStack" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/velos/FlowStack.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCLocalSwiftPackageReference section */
+	6D3EE8042E7E6D9D00F81D35 /* XCLocalSwiftPackageReference "FlowStack" */ = {
+		isa = XCLocalSwiftPackageReference;
+		relativePath = Packages/FlowStack;
+	};
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		6D3EE8002E7E6D9D00F81D32 /* SVGPath */ = {

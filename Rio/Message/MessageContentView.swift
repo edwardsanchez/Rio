@@ -14,12 +14,19 @@ import FlowStack
 struct MessageContentView: View {
     let content: ContentType
     let textColor: Color
+    var messageID: UUID? = nil  // Optional message ID for creating unique image identifiers
     
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
     @State private var showingAudioFullScreen = false
     
     let insetCornerRadius: CGFloat = 10
+    
+    @State private var fallbackID = UUID().uuidString
+    
+    private var uniquePrefix: String {
+        messageID?.uuidString ?? fallbackID
+    }
     
     var body: some View {
         contentView
@@ -38,7 +45,7 @@ struct MessageContentView: View {
             
         case .image(let image):
             FlowLink(
-                value: ImageData(image: image),
+                value: ImageData(id: "\(uniquePrefix)-standalone-image", image: image),
                 configuration: .init(cornerRadius: insetCornerRadius)
             ) {
                 imageView(image)
@@ -46,7 +53,7 @@ struct MessageContentView: View {
             
         case .labeledImage(let labeledImage):
             FlowLink(
-                value: ImageData(image: labeledImage.image, label: labeledImage.label),
+                value: ImageData(id: "\(uniquePrefix)-standalone-labeled", image: labeledImage.image, label: labeledImage.label),
                 configuration: .init(cornerRadius: insetCornerRadius)
             ) {
                 labeledImageView(labeledImage)
@@ -231,7 +238,7 @@ struct MessageContentView: View {
         case .volume(_): return "flask.fill"
         case .temperature(_): return "thermometer.medium"
         case .duration(_): return "clock.fill"
-        case .speed(_): return "speedometer.fill"
+        case .speed(_): return "speedometer"
         case .area(_): return "square.fill"
         case .energy(_): return "bolt.fill"
         case .number(_): return "number"
@@ -344,21 +351,22 @@ struct MessageContentView: View {
             colorView(rgb, compact: true)
         case .image(let image):
             FlowLink(
-                value: ImageData(image: image),
+                value: ImageData(id: "\(uniquePrefix)-grid-image-\(index)", image: image),
                 configuration: .init(
-                    animateFromAnchor: false,
+                    animateFromAnchor: true,
                     transitionFromSnapshot: false,
                     cornerRadius: insetCornerRadius
                 )
             ) {
                 imageView(image, compact: true)
+                    .flowAnimationAnchor()
             }
             .contentShape(Rectangle())
         case .labeledImage(let labeledImage):
             FlowLink(
-                value: ImageData(image: labeledImage.image, label: labeledImage.label),
+                value: ImageData(id: "\(uniquePrefix)-grid-labeled-\(index)", image: labeledImage.image, label: labeledImage.label),
                 configuration: .init(
-                    animateFromAnchor: false,
+                    animateFromAnchor: true,
                     transitionFromSnapshot: false,
                     cornerRadius: insetCornerRadius
                 )
