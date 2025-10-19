@@ -28,6 +28,8 @@ struct BubbleExplosionTestView: View {
     @State private var edgeVelocityBoost: CGFloat = 0.8  // 0.0 = uniform velocity, 1.0 = strong edge boost
     @State private var forceSquarePixels: Bool = false
     @State private var fadeStart: CGFloat = 0.3  // When particles start fading (0-1)
+    @State private var selectedImageData: ImageData? = nil
+    @Namespace private var imageNamespace
     @State private var fadeVariance: CGFloat = 0.85  // Variance in fade timing (0-1)
     
     private let outboundAnimationWidth: CGFloat? = nil
@@ -268,8 +270,14 @@ struct BubbleExplosionTestView: View {
             Circle()
             
             if hasContent && includeTalkingTextInLayout {
-                MessageContentView(content: message.content, textColor: textColor, messageID: message.id)
-                    .opacity(showTalkingContent ? 1 : 0)
+                MessageContentView(
+                    content: message.content,
+                    textColor: textColor,
+                    messageID: message.id,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
+                )
+                .opacity(showTalkingContent ? 1 : 0)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: showTypingIndicatorContent)

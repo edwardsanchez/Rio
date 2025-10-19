@@ -14,6 +14,8 @@ struct MessageContentView: View {
     let content: ContentType
     let textColor: Color
     var messageID: UUID? = nil  // Optional message ID for creating unique image identifiers
+    @Binding var selectedImageData: ImageData?
+    let namespace: Namespace.ID
     
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
@@ -21,7 +23,6 @@ struct MessageContentView: View {
     
     let insetCornerRadius: CGFloat = 10
     
-    @Namespace private var imageNamespace
     @State private var fallbackID = UUID().uuidString
     
     private var uniquePrefix: String {
@@ -45,22 +46,22 @@ struct MessageContentView: View {
             
         case .image(let image):
             let imageID = "\(uniquePrefix)-standalone-image"
-            NavigationLink {
-                ImageDetailView(imageData: ImageData(id: imageID, image: image))
-                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
-            } label: {
-                imageView(image)
-                    .matchedTransitionSource(id: imageID, in: imageNamespace)
-            }
+            imageView(image)
+                .matchedGeometryEffect(id: imageID, in: namespace)
+                .onTapGesture {
+                    withAnimation(.smooth(duration: 0.4)) {
+                        selectedImageData = ImageData(id: imageID, image: image)
+                    }
+                }
             
         case .labeledImage(let labeledImage):
             let imageID = "\(uniquePrefix)-standalone-labeled"
-            NavigationLink {
-                ImageDetailView(imageData: ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label))
-                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
-            } label: {
-                labeledImageView(labeledImage, imageID: imageID)
-            }
+            labeledImageView(labeledImage, imageID: imageID)
+                .onTapGesture {
+                    withAnimation(.smooth(duration: 0.4)) {
+                        selectedImageData = ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label)
+                    }
+                }
             
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
@@ -323,7 +324,7 @@ struct MessageContentView: View {
                     view.frame(maxWidth: 80, maxHeight: 80)
                 }
                 .if(imageID != nil) { view in
-                    view.matchedTransitionSource(id: imageID!, in: imageNamespace)
+                    view.matchedGeometryEffect(id: imageID!, in: namespace)
                 }
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
@@ -356,21 +357,21 @@ struct MessageContentView: View {
             colorView(rgb, compact: true)
         case .image(let image):
             let imageID = "\(uniquePrefix)-grid-image-\(index)"
-            NavigationLink {
-                ImageDetailView(imageData: ImageData(id: imageID, image: image))
-                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
-            } label: {
-                imageView(image, compact: true)
-                    .matchedTransitionSource(id: imageID, in: imageNamespace)
-            }
+            imageView(image, compact: true)
+                .matchedGeometryEffect(id: imageID, in: namespace)
+                .onTapGesture {
+                    withAnimation(.smooth(duration: 0.4)) {
+                        selectedImageData = ImageData(id: imageID, image: image)
+                    }
+                }
         case .labeledImage(let labeledImage):
             let imageID = "\(uniquePrefix)-grid-labeled-\(index)"
-            NavigationLink {
-                ImageDetailView(imageData: ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label))
-                    .navigationTransition(.zoom(sourceID: imageID, in: imageNamespace))
-            } label: {
-                labeledImageView(labeledImage, compact: true, imageID: imageID)
-            }
+            labeledImageView(labeledImage, compact: true, imageID: imageID)
+                .onTapGesture {
+                    withAnimation(.smooth(duration: 0.4)) {
+                        selectedImageData = ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label)
+                    }
+                }
         case .location(let mapItem):
             locationView(mapItem, compact: true)
         case .textChoice(let text):
@@ -383,12 +384,15 @@ struct MessageContentView: View {
 
 #Preview("All Content Types") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
-    NavigationStack {
-        ScrollView {
-        LazyVStack(alignment: .trailing, spacing: 24) {
+    ZStack {
+        NavigationStack {
+            ScrollView {
+            LazyVStack(alignment: .trailing, spacing: 24) {
             // Text
             VStack(alignment: .leading, spacing: 8) {
                 Text("Text").font(.headline)
@@ -399,7 +403,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -414,7 +420,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -428,7 +436,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -442,7 +452,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -456,7 +468,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -470,7 +484,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -483,7 +499,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -497,7 +515,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -511,7 +531,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -525,7 +547,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -539,7 +563,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -553,7 +579,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -567,7 +595,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -587,7 +617,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -607,7 +639,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -627,7 +661,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -647,7 +683,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -665,7 +703,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -682,7 +722,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -703,7 +745,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -722,7 +766,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -744,7 +790,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -773,7 +821,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -787,7 +837,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -801,7 +853,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -815,7 +869,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -829,7 +885,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -843,7 +901,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -857,7 +917,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -871,7 +933,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -885,7 +949,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -899,7 +965,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -913,7 +981,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -927,7 +997,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -941,7 +1013,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -955,7 +1029,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -969,7 +1045,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -983,7 +1061,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -997,7 +1077,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1011,7 +1093,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1027,7 +1111,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1043,7 +1129,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1059,7 +1147,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1075,7 +1165,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1091,7 +1183,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1107,7 +1201,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1123,7 +1219,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1139,7 +1237,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1155,7 +1255,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1171,7 +1273,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1187,7 +1291,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1201,7 +1307,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1215,7 +1323,9 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
             
@@ -1229,13 +1339,30 @@ struct MessageContentView: View {
                         messageType: .outbound
                     ),
                     showTail: true,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
             }
         }
         .padding(20)
         }
         .environment(bubbleConfig)
+        }
+        
+        // Image detail overlay
+        if let imageData = selectedImageData {
+            ImageDetailView(
+                imageData: imageData,
+                namespace: imageNamespace,
+                isPresented: Binding(
+                    get: { selectedImageData != nil },
+                    set: { if !$0 { selectedImageData = nil } }
+                )
+            )
+            .zIndex(1)
+            .transition(.identity)
+        }
     }
 }
 

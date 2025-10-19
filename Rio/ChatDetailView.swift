@@ -30,6 +30,10 @@ struct ChatDetailView: View {
     @State private var scrollVelocity: CGFloat = 0
     @State private var previousScrollY: CGFloat = 0
     @State private var scrollPhase: ScrollPhase = .idle
+    
+    // Image zoom transition
+    @State private var selectedImageData: ImageData? = nil
+    @Namespace private var imageNamespace
 
     init(chat: Chat) {
         self.chat = chat
@@ -38,7 +42,8 @@ struct ChatDetailView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack {
+                VStack(spacing: 0) {
                 // Main scroll view for messages
                 ScrollView {
                     MessageListView(
@@ -48,7 +53,9 @@ struct ChatDetailView: View {
                     scrollViewFrame: scrollViewFrame,
                     scrollVelocity: scrollVelocity,
                     scrollPhase: scrollPhase,
-                    theme: chat.theme
+                    theme: chat.theme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -152,6 +159,21 @@ struct ChatDetailView: View {
             }
         }
         .coordinateSpace(name: "field")
+                
+                // Image detail overlay
+                if let imageData = selectedImageData {
+                    ImageDetailView(
+                        imageData: imageData,
+                        namespace: imageNamespace,
+                        isPresented: Binding(
+                            get: { selectedImageData != nil },
+                            set: { if !$0 { selectedImageData = nil } }
+                        )
+                    )
+                    .zIndex(1)
+                    .transition(.identity)
+                }
+            }
         }
     }
 
@@ -233,6 +255,8 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
+    @State private var selectedImageData: ImageData? = nil
+    @Namespace private var imageNamespace
     
     var body: some View {
         NavigationStack {
@@ -246,7 +270,9 @@ private struct OutboundGeometryMatchDebugView: View {
                     scrollViewFrame: scrollViewFrame,
                     scrollVelocity: 0,
                     scrollPhase: .idle,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)

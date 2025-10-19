@@ -51,6 +51,9 @@ struct MessageBubbleView: View {
     @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem? = nil
     
+    @Binding var selectedImageData: ImageData?
+    let namespace: Namespace.ID
+    
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     init(
@@ -63,7 +66,9 @@ struct MessageBubbleView: View {
         scrollVelocity: CGFloat = 0,
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
-        theme: ChatTheme = .defaultTheme
+        theme: ChatTheme = .defaultTheme,
+        selectedImageData: Binding<ImageData?>,
+        namespace: Namespace.ID
     ) {
         self.message = message
         self.showTail = showTail
@@ -75,6 +80,8 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self._selectedImageData = selectedImageData
+        self.namespace = namespace
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
     }
@@ -290,7 +297,9 @@ struct MessageBubbleView: View {
                 MessageContentView(
                     content: message.content,
                     textColor: textColor,
-                    messageID: message.id
+                    messageID: message.id,
+                    selectedImageData: $selectedImageData,
+                    namespace: namespace
                 )
                 .padding(.vertical, 4)
                 .opacity(showTalkingContent ? 1 : 0)
@@ -553,6 +562,8 @@ struct MessageBubbleView: View {
 private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID? = nil
+    @State private var selectedImageData: ImageData? = nil
+    @Namespace private var imageNamespace
     
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
@@ -611,7 +622,9 @@ private struct MessageBubblePreviewContainer: View {
                     scrollVelocity: 0,
                     scrollPhase: .idle,
                     visibleMessageIndex: 0,
-                    theme: .defaultTheme
+                    theme: .defaultTheme,
+                    selectedImageData: $selectedImageData,
+                    namespace: imageNamespace
                 )
                 .frame(height: 100)
             } else {
@@ -675,8 +688,11 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @Namespace var imageNamespace
     
-    VStack(spacing: 20) {
+    ZStack {
+        VStack(spacing: 20) {
         
         MessageBubbleView(
             message: Message(
@@ -686,7 +702,9 @@ private struct MessageBubblePreviewContainer: View {
                 messageType: .inbound(.read)
             ),
             showTail: true,
-            theme: .theme1
+            theme: .theme1,
+            selectedImageData: $selectedImageData,
+            namespace: imageNamespace
         )
         
         // 1. Inbound thinking
@@ -698,7 +716,9 @@ private struct MessageBubblePreviewContainer: View {
                 messageType: .inbound(.thinking)
             ),
             showTail: true,
-            theme: .theme1
+            theme: .theme1,
+            selectedImageData: $selectedImageData,
+            namespace: imageNamespace
         )
 
         // 2. Inbound talking
@@ -709,7 +729,9 @@ private struct MessageBubblePreviewContainer: View {
                 messageType: .inbound(.talking)
             ),
             showTail: true,
-            theme: .theme1
+            theme: .theme1,
+            selectedImageData: $selectedImageData,
+            namespace: imageNamespace
         )
 
         // 3. Outbound talking
@@ -720,10 +742,27 @@ private struct MessageBubblePreviewContainer: View {
                 messageType: .outbound
             ),
             showTail: true,
-            theme: .theme1
+            theme: .theme1,
+            selectedImageData: $selectedImageData,
+            namespace: imageNamespace
         )
     }
     .padding(.horizontal, 20)
     .padding(.vertical, 40)
     .environment(bubbleConfig)
+        
+        // Image detail overlay
+        if let imageData = selectedImageData {
+            ImageDetailView(
+                imageData: imageData,
+                namespace: imageNamespace,
+                isPresented: Binding(
+                    get: { selectedImageData != nil },
+                    set: { if !$0 { selectedImageData = nil } }
+                )
+            )
+            .zIndex(1)
+            .transition(.identity)
+        }
+    }
 }

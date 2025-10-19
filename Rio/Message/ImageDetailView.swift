@@ -9,7 +9,10 @@ import SwiftUI
 
 /// A full-screen image detail view with zoom, pan, and interactive dismiss gestures
 struct ImageDetailView: View {
-    @Environment(\.dismiss) private var dismiss
+    let imageData: ImageData
+    let namespace: Namespace.ID
+    @Binding var isPresented: Bool
+    
     @State private var opacity: CGFloat = 0
     @State private var safeAreaInsets: EdgeInsets = EdgeInsets()
     
@@ -22,8 +25,6 @@ struct ImageDetailView: View {
     @State private var totalZoom: CGFloat = 1.0
     @State private var panOffset: CGSize = .zero
     @State private var currentPanOffset: CGSize = .zero
-    
-    let imageData: ImageData
     
     private var isZoomedOut: Bool {
         totalZoom <= 1.0
@@ -39,9 +40,10 @@ struct ImageDetailView: View {
             imageData.image
                 .resizable()
                 .scaledToFit()
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .matchedGeometryEffect(id: imageData.id, in: namespace)
                 .scaleEffect(currentZoom * totalZoom)
                 .offset(x: panOffset.width + currentPanOffset.width, y: panOffset.height + currentPanOffset.height + (isZoomedOut ? dragOffset.height : 0))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .gesture(isZoomedOut ? nil : panGesture)
                 .gesture(zoomGesture)
                 .onTapGesture(count: 2, perform: handleDoubleTap)
@@ -63,7 +65,9 @@ struct ImageDetailView: View {
                     
                     // Close button (top right)
                     Button(action: {
-                        dismiss()
+                        withAnimation(.smooth(duration: 0.4)) {
+                            isPresented = false
+                        }
                     }, label: {
                         Image(systemName: "xmark")
                             .padding(10)
@@ -101,7 +105,14 @@ struct ImageDetailView: View {
         } action: { newValue in
             safeAreaInsets = newValue
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .onTapGesture {
+            // Tap background to dismiss
+            if isZoomedOut {
+                withAnimation(.smooth(duration: 0.4)) {
+                    isPresented = false
+                }
+            }
+        }
         .task {
             // Delay button fade until after zoom animation completes
             try? await Task.sleep(for: .seconds(0.5))
@@ -126,7 +137,9 @@ struct ImageDetailView: View {
             }
             .onEnded { value in
                 if value.translation.height > 200 {
-                    dismiss()
+                    withAnimation(.smooth(duration: 0.4)) {
+                        isPresented = false
+                    }
                 } else {
                     // Snap back
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -186,11 +199,15 @@ struct ImageDetailView: View {
 }
 
 #Preview {
+    @Previewable @Namespace var ns
+    @Previewable @State var isPresented = true
     ImageDetailView(
         imageData: ImageData(
             image: Image(.cat),
             label: "A cute cat"
-        )
+        ),
+        namespace: ns,
+        isPresented: $isPresented
     )
 }
 

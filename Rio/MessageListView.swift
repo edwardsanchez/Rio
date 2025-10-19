@@ -16,6 +16,8 @@ struct MessageListView: View {
     let scrollVelocity: CGFloat
     let scrollPhase: ScrollPhase
     let theme: ChatTheme
+    @Binding var selectedImageData: ImageData?
+    let namespace: Namespace.ID
     
     var body: some View {
         LazyVStack(spacing: 0) {
@@ -45,7 +47,9 @@ struct MessageListView: View {
                         scrollVelocity: scrollVelocity,
                         scrollPhase: scrollPhase,
                         visibleMessageIndex: index,
-                        theme: theme
+                        theme: theme,
+                        selectedImageData: $selectedImageData,
+                        namespace: namespace
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
