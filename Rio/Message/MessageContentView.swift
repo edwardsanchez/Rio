@@ -132,7 +132,7 @@ struct MessageContentView: View {
             URLPreviewCard(url: url, textColor: textColor)
             
         case .textChoice(let text):
-            Label(text, systemImage: "circle")
+            Label(text, systemImage: "checkmark.circle.fill")
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
             
