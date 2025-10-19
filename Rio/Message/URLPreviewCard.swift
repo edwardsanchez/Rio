@@ -97,6 +97,19 @@ struct LinkPreviewView: UIViewRepresentable {
     
     func updateUIView(_ uiView: LPLinkView, context: Context) {
         uiView.metadata = metadata
+        uiView.sizeToFit()
+    }
+    
+    // iOS 16+ only - Properly size the link view based on SwiftUI's proposed size
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: LPLinkView, context: Context) -> CGSize? {
+        // Use the proposed width (or fallback to its intrinsic content width)
+        let width = proposal.width ?? uiView.intrinsicContentSize.width
+        // Ask the link view how tall it needs to be for that width
+        let bestFit = uiView.sizeThatFits(
+            CGSize(width: width, height: .greatestFiniteMagnitude)
+        )
+        // Return the constrained size
+        return CGSize(width: width, height: bestFit.height)
     }
 }
 
