@@ -33,7 +33,7 @@ struct ChatDetailView: View {
     
     // Image zoom transition
     @State private var selectedImageData: ImageData? = nil
-    @Namespace private var imageNamespace
+    @State private var geometryTracker = ImageGeometryTracker()
 
     init(chat: Chat) {
         self.chat = chat
@@ -54,9 +54,9 @@ struct ChatDetailView: View {
                     scrollVelocity: scrollVelocity,
                     scrollPhase: scrollPhase,
                     theme: chat.theme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
+                    selectedImageData: $selectedImageData
                 )
+                .environment(geometryTracker)
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
                 } action: { newValue in
@@ -165,7 +165,6 @@ struct ChatDetailView: View {
             if let imageData = selectedImageData {
                 ImageDetailView(
                     imageData: imageData,
-                    namespace: imageNamespace,
                     isPresented: Binding(
                         get: { selectedImageData != nil },
                         set: { newValue in
@@ -177,6 +176,7 @@ struct ChatDetailView: View {
                         }
                     )
                 )
+                .environment(geometryTracker)
                 .zIndex(1)
             }
         }
@@ -261,7 +261,7 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData? = nil
-    @Namespace private var imageNamespace
+    @State private var geometryTracker = ImageGeometryTracker()
     
     var body: some View {
         NavigationStack {
@@ -276,9 +276,9 @@ private struct OutboundGeometryMatchDebugView: View {
                     scrollVelocity: 0,
                     scrollPhase: .idle,
                     theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
+                    selectedImageData: $selectedImageData
                 )
+                .environment(geometryTracker)
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
                 } action: { newValue in

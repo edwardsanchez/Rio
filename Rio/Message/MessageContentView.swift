@@ -15,7 +15,8 @@ struct MessageContentView: View {
     let textColor: Color
     var messageID: UUID? = nil  // Optional message ID for creating unique image identifiers
     @Binding var selectedImageData: ImageData?
-    let namespace: Namespace.ID
+    
+    @Environment(ImageGeometryTracker.self) private var geometryTracker
     
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
@@ -47,7 +48,11 @@ struct MessageContentView: View {
         case .image(let image):
             let imageID = "\(uniquePrefix)-standalone-image"
             imageView(image)
-                .matchedGeometryEffect(id: imageID, in: namespace)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { rect in
+                    geometryTracker.updateGeometry(for: imageID, rect: rect)
+                }
                 .onTapGesture {
                     withAnimation(.smooth(duration: 0.4)) {
                         selectedImageData = ImageData(id: imageID, image: image)
@@ -316,16 +321,22 @@ struct MessageContentView: View {
     @ViewBuilder
     private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false, imageID: String? = nil) -> some View {
         VStack(spacing: compact ? 4 : 8) {
-            labeledImage.image
-                .resizable()
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-                .if(compact) { view in
-                    view.frame(maxWidth: 80, maxHeight: 80)
+            Group {
+                labeledImage.image
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
+                    .if(compact) { view in
+                        view.frame(maxWidth: 80, maxHeight: 80)
+                    }
+            }
+            .if(imageID != nil) { view in
+                view.onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { rect in
+                    geometryTracker.updateGeometry(for: imageID!, rect: rect)
                 }
-                .if(imageID != nil) { view in
-                    view.matchedGeometryEffect(id: imageID!, in: namespace)
-                }
+            }
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
                 .foregroundStyle(textColor)
@@ -358,7 +369,11 @@ struct MessageContentView: View {
         case .image(let image):
             let imageID = "\(uniquePrefix)-grid-image-\(index)"
             imageView(image, compact: true)
-                .matchedGeometryEffect(id: imageID, in: namespace)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { rect in
+                    geometryTracker.updateGeometry(for: imageID, rect: rect)
+                }
                 .onTapGesture {
                     withAnimation(.smooth(duration: 0.4)) {
                         selectedImageData = ImageData(id: imageID, image: image)
@@ -387,7 +402,7 @@ struct MessageContentView: View {
 #Preview("Text & Choices") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -406,7 +421,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -422,7 +436,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -438,7 +451,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -458,7 +470,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -482,13 +493,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -497,7 +508,7 @@ struct MessageContentView: View {
 #Preview("Images") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -516,8 +527,7 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            selectedImageData: $selectedImageData,
-                            namespace: imageNamespace
+                            selectedImageData: $selectedImageData
                         )
                     }
                     
@@ -532,8 +542,7 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            selectedImageData: $selectedImageData,
-                            namespace: imageNamespace
+                            selectedImageData: $selectedImageData
                         )
                     }
                     
@@ -553,8 +562,7 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            selectedImageData: $selectedImageData,
-                            namespace: imageNamespace
+                            selectedImageData: $selectedImageData
                         )
                     }
                 }
@@ -567,7 +575,6 @@ struct MessageContentView: View {
         if let imageData = selectedImageData {
             ImageDetailView(
                 imageData: imageData,
-                namespace: imageNamespace,
                 isPresented: Binding(
                     get: { selectedImageData != nil },
                     set: { newValue in
@@ -582,6 +589,7 @@ struct MessageContentView: View {
             .zIndex(1)
         }
     }
+    .environment(geometryTracker)
 }
 
 // MARK: - Preview 3: Audio & Video
@@ -589,7 +597,7 @@ struct MessageContentView: View {
 #Preview("Audio & Video") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -608,7 +616,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -624,13 +631,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -639,7 +646,7 @@ struct MessageContentView: View {
 #Preview("Colors & Locations") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -658,7 +665,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -680,7 +686,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -699,7 +704,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -722,7 +726,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -753,13 +756,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -768,7 +771,7 @@ struct MessageContentView: View {
 #Preview("Values") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -787,7 +790,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -803,7 +805,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -819,7 +820,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -835,7 +835,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -851,7 +850,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -867,7 +865,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -883,7 +880,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -899,7 +895,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -915,7 +910,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -931,7 +925,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -947,13 +940,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -962,7 +955,7 @@ struct MessageContentView: View {
 #Preview("Value Ranges") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -983,7 +976,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1001,7 +993,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1019,7 +1010,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1037,7 +1027,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1055,7 +1044,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1073,7 +1061,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1091,7 +1078,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1109,7 +1095,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1127,7 +1112,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1145,7 +1129,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1163,13 +1146,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -1178,7 +1161,7 @@ struct MessageContentView: View {
 #Preview("Dates") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1197,7 +1180,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1213,7 +1195,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1229,7 +1210,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1251,7 +1231,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1273,7 +1252,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1295,7 +1273,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1311,7 +1288,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1327,13 +1303,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 
@@ -1342,7 +1318,7 @@ struct MessageContentView: View {
 #Preview("Miscellaneous") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1361,7 +1337,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1377,7 +1352,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1393,7 +1367,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1409,7 +1382,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1425,7 +1397,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1441,7 +1412,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1457,7 +1427,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1473,7 +1442,6 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
                 
@@ -1489,13 +1457,13 @@ struct MessageContentView: View {
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        namespace: imageNamespace
                     )
                 }
             }
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(geometryTracker)
     }
 }
 

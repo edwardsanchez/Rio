@@ -43,14 +43,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-	6D3EE7ED2E7E6D9B00F81D31 /* Frameworks */ = {
-		isa = PBXFrameworksBuildPhase;
-		buildActionMask = 2147483647;
-		files = (
-			6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */,
-		);
-		runOnlyForDeploymentPostprocessing = 0;
-	};
+		6D3EE7ED2E7E6D9B00F81D31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6DF314FD2EA2BA2F00A0BD0F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -502,11 +502,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-	6D3EE8002E7E6D9D00F81D32 /* SVGPath */ = {
-		isa = XCSwiftPackageProductDependency;
-		package = 6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */;
-		productName = SVGPath;
-	};
+		6D3EE8002E7E6D9D00F81D32 /* SVGPath */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */;
+			productName = SVGPath;
+		};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6D3EE7E82E7E6D9B00F81D31 /* Project object */;

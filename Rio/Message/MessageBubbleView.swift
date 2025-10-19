@@ -52,7 +52,6 @@ struct MessageBubbleView: View {
     @State private var modeDelayWorkItem: DispatchWorkItem? = nil
     
     @Binding var selectedImageData: ImageData?
-    let namespace: Namespace.ID
     
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
@@ -67,8 +66,7 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
-        selectedImageData: Binding<ImageData?>,
-        namespace: Namespace.ID
+        selectedImageData: Binding<ImageData?>
     ) {
         self.message = message
         self.showTail = showTail
@@ -81,7 +79,6 @@ struct MessageBubbleView: View {
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
         self._selectedImageData = selectedImageData
-        self.namespace = namespace
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
     }
@@ -298,8 +295,7 @@ struct MessageBubbleView: View {
                     content: message.content,
                     textColor: textColor,
                     messageID: message.id,
-                    selectedImageData: $selectedImageData,
-                    namespace: namespace
+                    selectedImageData: $selectedImageData
                 )
                 .padding(.vertical, 4)
                 .opacity(showTalkingContent ? 1 : 0)
@@ -563,7 +559,7 @@ private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID? = nil
     @State private var selectedImageData: ImageData? = nil
-    @Namespace private var imageNamespace
+    @State private var geometryTracker = ImageGeometryTracker()
     
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
@@ -623,8 +619,7 @@ private struct MessageBubblePreviewContainer: View {
                     scrollPhase: .idle,
                     visibleMessageIndex: 0,
                     theme: .defaultTheme,
-                    selectedImageData: $selectedImageData,
-                    namespace: imageNamespace
+                    selectedImageData: $selectedImageData
                 )
                 .frame(height: 100)
             } else {
@@ -681,15 +676,17 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Inbound Message Bubble Morph") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
+        .environment(geometryTracker)
 }
 
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @Namespace var imageNamespace
+    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     ZStack {
         VStack(spacing: 20) {
@@ -703,8 +700,7 @@ private struct MessageBubblePreviewContainer: View {
             ),
             showTail: true,
             theme: .theme1,
-            selectedImageData: $selectedImageData,
-            namespace: imageNamespace
+            selectedImageData: $selectedImageData
         )
         
         // 1. Inbound thinking
@@ -717,8 +713,7 @@ private struct MessageBubblePreviewContainer: View {
             ),
             showTail: true,
             theme: .theme1,
-            selectedImageData: $selectedImageData,
-            namespace: imageNamespace
+            selectedImageData: $selectedImageData
         )
 
         // 2. Inbound talking
@@ -730,8 +725,7 @@ private struct MessageBubblePreviewContainer: View {
             ),
             showTail: true,
             theme: .theme1,
-            selectedImageData: $selectedImageData,
-            namespace: imageNamespace
+            selectedImageData: $selectedImageData
         )
 
         // 3. Outbound talking
@@ -743,8 +737,7 @@ private struct MessageBubblePreviewContainer: View {
             ),
             showTail: true,
             theme: .theme1,
-            selectedImageData: $selectedImageData,
-            namespace: imageNamespace
+            selectedImageData: $selectedImageData
         )
     }
     .padding(.horizontal, 20)
@@ -755,7 +748,6 @@ private struct MessageBubblePreviewContainer: View {
         if let imageData = selectedImageData {
             ImageDetailView(
                 imageData: imageData,
-                namespace: imageNamespace,
                 isPresented: Binding(
                     get: { selectedImageData != nil },
                     set: { newValue in
@@ -770,4 +762,5 @@ private struct MessageBubblePreviewContainer: View {
             .zIndex(1)
         }
     }
+    .environment(geometryTracker)
 }
