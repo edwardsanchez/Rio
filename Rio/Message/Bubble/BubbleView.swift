@@ -358,7 +358,7 @@ struct BubbleView: View {
                 ctx.fill(rectPath, with: .color(color))
                 
                 // Draw circles around the path
-                for (index, _) in morphedDiameters.enumerated() {
+                for index in morphedDiameters.indices {
                     if let circleSymbol = ctx.resolveSymbol(id: index) {
                         let position = CGPoint(
                             x: morphedPositions[index].x + trackOrigin.x,
