@@ -120,6 +120,10 @@ struct BubbleView: View {
     private var targetDiameters: [CGFloat] { packingResult.diameters }
     private var isValid: Bool { packingResult.isValid }
     
+    
+    var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
+    var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
+    
     var body: some View {
         Group {
             if transitionCoordinator.canUseNative {
@@ -143,7 +147,7 @@ struct BubbleView: View {
             )
         }
         .compositingGroup()
-        .opacity((bubbleType.isRead) ? 0 : (messageType.isOutbound ? 1 : 0.25))
+        .opacity(shouldHideBubble ? 0 : (messageType.isOutbound ? 1 : 0.25))
         .background {
             // Hidden text to measure single-line height
             Text("X")
