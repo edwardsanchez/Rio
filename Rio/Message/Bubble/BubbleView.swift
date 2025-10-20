@@ -123,8 +123,36 @@ struct BubbleView: View {
     // MARK: - View Body
     
     var body: some View {
-        TimelineView(.animation) { timeline in
-            return makeContent(at: timeline.date)
+        Group {
+            TimelineView(.animation) { timeline in
+                return makeAnimatedBubble(at: timeline.date)
+            }
+        }
+        .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
+            TalkingTailView(
+                color: color,
+                showTail: showTail,
+                bubbleType: bubbleType,
+                layoutType: layoutType,
+                messageType: messageType,
+                tailPositionOffset: tailPositionOffset,
+                previousBubbleType: previousBubbleType
+            )
+        }
+        .compositingGroup()
+        .opacity((bubbleType.isRead) ? 0 : (messageType.isOutbound ? 1 : 0.25))
+        .background {
+            // Hidden text to measure single-line height
+            Text("X")
+                .font(.body)
+                .padding(.vertical, 10)
+                .fixedSize()
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { newHeight in
+                    sizeManager.singleLineTextHeight = newHeight
+                }
+                .hidden()
         }
         .onAppear {
             startTime = Date()
@@ -148,7 +176,7 @@ struct BubbleView: View {
     
     // MARK: - Content Builder
     
-    private func makeContent(at now: Date) -> some View {
+    private func makeAnimatedBubble(at now: Date) -> some View {
         let elapsed = now.timeIntervalSince(startTime)
         
         let animatedSize = sizeManager.currentSize(at: now)
@@ -344,33 +372,17 @@ struct BubbleView: View {
         .frame(width: canvasWidth, height: canvasHeight)
         .explosionEffect(isActive: isExploding, progress: explosionProgress)
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
-            TailViewContainer(
+            ThinkingTailView(
                 color: color,
                 showTail: showTail,
                 bubbleType: bubbleType,
-                layoutType: transitionCoordinator.displayedType,
+                layoutType: layoutType,
                 messageType: messageType,
                 scalingProgress: scalingProgress,
                 isExploding: isExploding,
                 explosionProgress: explosionProgress,
-                tailPositionOffset: tailPositionOffset,
                 previousBubbleType: previousBubbleType
             )
-        }
-        .compositingGroup()
-        .opacity((bubbleType.isRead && !isExploding) ? 0 : (messageType.isOutbound ? 1 : 0.25))
-        .background {
-            // Hidden text to measure single-line height
-            Text("X")
-                .font(.body)
-                .padding(.vertical, 10)
-                .fixedSize()
-                .onGeometryChange(for: CGFloat.self) { proxy in
-                    proxy.size.height
-                } action: { newHeight in
-                    sizeManager.singleLineTextHeight = newHeight
-                }
-                .hidden()
         }
     }
     

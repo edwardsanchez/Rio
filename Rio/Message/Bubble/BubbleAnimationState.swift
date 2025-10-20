@@ -42,22 +42,6 @@ enum BubbleAnimationState: Equatable {
         }
     }
     
-    /// The source bubble type this state transitioned from
-    var sourceType: BubbleType? {
-        switch self {
-        case .idle:
-            return nil
-        case .morphing(let from, _, _):
-            return from
-        case .exploding:
-            return .thinking
-        case .scaling:
-            return .read
-        case .quickAppearing:
-            return .read
-        }
-    }
-    
     /// Whether this state represents an active animation
     var isAnimating: Bool {
         switch self {
