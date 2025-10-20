@@ -178,8 +178,6 @@ struct ChatDetailView: View {
         }
     }
 
-
-
     // MARK: - Scrolling
     
     private func scrollToLatestMessage() {
@@ -264,58 +262,58 @@ private struct OutboundGeometryMatchDebugView: View {
                 // Scroll view with messages
                 ScrollView {
                     MessageListView(
-                    messages: messages,
-                    newMessageId: $currentNewMessageId,
-                    inputFieldFrame: inputFieldFrame,
-                    scrollViewFrame: scrollViewFrame,
-                    scrollVelocity: 0,
-                    scrollPhase: .idle,
-                    theme: .defaultTheme,
-                    selectedImageData: $selectedImageData
-                )
-                .onGeometryChange(for: CGRect.self) { geometryProxy in
-                    geometryProxy.frame(in: .global)
-                } action: { newValue in
-                    scrollViewFrame = newValue
+                        messages: messages,
+                        newMessageId: $currentNewMessageId,
+                        inputFieldFrame: inputFieldFrame,
+                        scrollViewFrame: scrollViewFrame,
+                        scrollVelocity: 0,
+                        scrollPhase: .idle,
+                        theme: .defaultTheme,
+                        selectedImageData: $selectedImageData
+                    )
+                    .onGeometryChange(for: CGRect.self) { geometryProxy in
+                        geometryProxy.frame(in: .global)
+                    } action: { newValue in
+                        scrollViewFrame = newValue
+                    }
                 }
-            }
-            .scrollClipDisabled()
-            .contentMargins(.horizontal, 20, for: .scrollContent)
-            .background(Color.base)
-            
-            // Mock input field to show where the message should be aligned
-            VStack(spacing: 0) {
-                Text("Mock Input Field (for reference)")
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.bottom, 4)
+                .scrollClipDisabled()
+                .contentMargins(.horizontal, 20, for: .scrollContent)
+                .background(Color.base)
                 
-                HStack(alignment: .bottom) {
-                    Text("This is a test message!")
-                        .padding([.vertical, .leading], 15)
-                        .padding(.trailing, 40)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                // Mock input field to show where the message should be aligned
+                VStack(spacing: 0) {
+                    Text("Mock Input Field (for reference)")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.bottom, 4)
+                    
+                    HStack(alignment: .bottom) {
+                        Text("This is a test message!")
+                            .padding([.vertical, .leading], 15)
+                            .padding(.trailing, 40)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .background(Color.white.opacity(0.2))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 25)
+                            .stroke(Color.red, lineWidth: 2)
+                    }
+                    .cornerRadius(25)
+                    .onGeometryChange(for: CGRect.self) { proxy in
+                        proxy.frame(in: .global)
+                    } action: { newValue in
+                        inputFieldFrame = newValue
+                        inputFieldFrame.origin.x -= 15
+                    }
+                    .padding(.horizontal, 30)
                 }
-                .background(Color.white.opacity(0.2))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.red, lineWidth: 2)
-                }
-                .cornerRadius(25)
-                .onGeometryChange(for: CGRect.self) { proxy in
-                    proxy.frame(in: .global)
-                } action: { newValue in
-                    inputFieldFrame = newValue
-                    inputFieldFrame.origin.x -= 15
-                }
-                .padding(.horizontal, 30)
+                .padding(.bottom, 20)
             }
-            .padding(.bottom, 20)
-        }
-        .onAppear {
-            // Set the message as "new" when the view appears
-            currentNewMessageId = newMessageId
-        }
+            .onAppear {
+                // Set the message as "new" when the view appears
+                currentNewMessageId = newMessageId
+            }
         }
     }
 }
