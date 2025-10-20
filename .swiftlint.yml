@@ -1,0 +1,57 @@
+disabled_rules: # rule identifiers to exclude from running
+  - trailing_whitespace
+  - line_length
+  - file_length
+  - type_body_length
+  - function_body_length
+  - cyclomatic_complexity
+  - large_tuple
+  - function_parameter_count
+
+opt_in_rules: # some rules are turned off by default, so you need to opt-in
+  - empty_count
+
+included: # paths to include during linting. `--path` is ignored if present.
+  - Rio
+  - RioTests
+
+excluded: # paths to ignore during linting. Takes precedence over `included`.
+  - Packages
+  - build
+  - Assets.xcassets
+  - "*.generated.swift"
+
+# configurable rules can be customized from this configuration file
+# binary rules can set their severity level
+force_cast: warning
+force_try:
+  severity: warning
+
+# More lenient identifier naming for existing codebase
+identifier_name:
+  min_length: 1 # allow single character variables like 'L', 'dt', etc.
+  excluded: # excluded via string array
+    - id
+    - url
+    - URL
+    - dt
+    - dx
+    - dy
+    - p0
+    - p1
+    - p2
+    - now
+    - x
+    - y
+    - L
+    - A
+    - B
+    - GlobalAPIKey
+
+type_name:
+  min_length: 3
+  max_length:
+    warning: 60
+    error: 80
+
+reporter: "xcode"
