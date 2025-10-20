@@ -106,5 +106,3 @@ extension Character {
                 unicodeScalars.count > 1)
     }
 }
-
-

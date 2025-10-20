@@ -387,7 +387,6 @@ struct PathXAnalyzer {
         return CGPoint(x: x, y: y)
     }
 
-
     // MARK: - Public Analysis Methods
 
     /**
@@ -622,4 +621,3 @@ struct PathXAnalyzer {
         return 0
     }
 }
-

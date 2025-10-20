@@ -23,12 +23,12 @@ struct ChatInputView: View {
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     // Timer for automated inbound message
-    @State private var autoReplyTimer: Timer? = nil
+    @State private var autoReplyTimer: Timer?
 
     // Track inbound response state to prevent multiple simultaneous responses
     @State private var isInboundResponsePending = false
-    @State private var currentTypingIndicatorId: UUID? = nil
-    @State private var readToThinkingTimer: Timer? = nil
+    @State private var currentTypingIndicatorId: UUID?
+    @State private var readToThinkingTimer: Timer?
 
     // Array of random responses
     private let autoReplyMessages = [
@@ -141,7 +141,7 @@ struct ChatInputView: View {
         message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
-    var sendButton: some View { //TODO: Toby: Reduce button size
+    var sendButton: some View { // TODO: Toby: Reduce button size
         Button {
             sendMessage()
         } label: {
@@ -168,7 +168,7 @@ struct ChatInputView: View {
         message = ""
 
         // Check if there's an existing typing indicator that needs to be moved to the end
-        var typingIndicatorToMove: Message? = nil
+        var typingIndicatorToMove: Message?
         if let typingIndicatorId = currentTypingIndicatorId,
            let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
             // Store the typing indicator and remove it temporarily
@@ -415,7 +415,7 @@ struct ChatInputView: View {
     @Previewable @State var inputFieldFrame: CGRect = .zero
     @Previewable @State var inputFieldHeight: CGFloat = 50
     @Previewable @State var messages: [Message] = []
-    @Previewable @State var newMessageId: UUID? = nil
+    @Previewable @State var newMessageId: UUID?
     @Previewable @State var shouldFocusInput = false
     @Previewable @State var autoReplyEnabled = true
     @Previewable @State var bubbleConfig = BubbleConfiguration()

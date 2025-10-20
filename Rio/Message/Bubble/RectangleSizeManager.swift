@@ -206,4 +206,3 @@ struct RectangleTransition {
         return result * delta
     }
 }
-

@@ -12,7 +12,7 @@ struct ChatDetailView: View {
     @Environment(ChatData.self) private var chatData
 
     @State private var messages: [Message] = []
-    @State private var newMessageId: UUID? = nil
+    @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
     @State private var scrollPosition = ScrollPosition()
@@ -32,9 +32,8 @@ struct ChatDetailView: View {
     @State private var scrollPhase: ScrollPhase = .idle
     
     // Image zoom transition
-    @State private var selectedImageData: ImageData? = nil
+    @State private var selectedImageData: ImageData?
     
-
     init(chat: Chat) {
         self.chat = chat
         _messages = State(initialValue: chat.messages)
@@ -67,7 +66,7 @@ struct ChatDetailView: View {
             .contentMargins(.horizontal, 20, for: .scrollContent)
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
-            } action: { oldValue, newValue in
+            } action: { _, newValue in
                 let currentY = newValue
 
                 // Initialize previousScrollY on first call to prevent bad initial positioning
@@ -85,7 +84,7 @@ struct ChatDetailView: View {
 
                 previousScrollY = currentY
             }
-            .onScrollPhaseChange { oldPhase, newPhase in
+            .onScrollPhaseChange { _, newPhase in
                 // Track scroll phase for cascading jelly effect
                 scrollPhase = newPhase
 
@@ -254,7 +253,7 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
-    @State private var selectedImageData: ImageData? = nil
+    @State private var selectedImageData: ImageData?
     
     var body: some View {
         NavigationStack {

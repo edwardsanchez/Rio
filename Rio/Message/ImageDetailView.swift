@@ -181,4 +181,3 @@ struct ImageDetailView: View {
         isPresented: $isPresented
     )
 }
-

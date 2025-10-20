@@ -161,4 +161,3 @@ struct CircleTransition: Identifiable {
         return startValue + (endValue - startValue) * eased
     }
 }
-

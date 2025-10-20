@@ -55,4 +55,3 @@ struct TalkingTailView: View {
             .animation(shouldAnimate ? .spring(duration: 0.3).delay(0.2) : nil, value: tailPositionOffset)
     }
 }
-

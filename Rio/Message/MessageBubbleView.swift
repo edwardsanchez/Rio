@@ -45,13 +45,13 @@ struct MessageBubbleView: View {
     @State private var showTalkingContent = false
     @State private var thinkingContentWidth: CGFloat = 0
     @State private var isWidthLocked = false
-    @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
-    @State private var revealWorkItem: DispatchWorkItem? = nil
+    @State private var widthUnlockWorkItem: DispatchWorkItem?
+    @State private var revealWorkItem: DispatchWorkItem?
     @State private var bubbleFadeOpacity: Double = 1
-    @State private var bubbleFadeWorkItem: DispatchWorkItem? = nil
+    @State private var bubbleFadeWorkItem: DispatchWorkItem?
     @State private var includeTalkingTextInLayout = false
     @State private var displayedBubbleType: BubbleType
-    @State private var modeDelayWorkItem: DispatchWorkItem? = nil
+    @State private var modeDelayWorkItem: DispatchWorkItem?
     
     @Binding var selectedImageData: ImageData?
     
@@ -279,7 +279,6 @@ struct MessageBubbleView: View {
         return width > 0 ? width : nil
     }
 
-
     @ViewBuilder
     private func bubbleView(
         textColor: Color,
@@ -289,7 +288,7 @@ struct MessageBubbleView: View {
         let hasContent = message.content.hasContent
 
         ZStack(alignment: .leading) {
-            Text("H") //Measure Spacer
+            Text("H") // Measure Spacer
                 .opacity(0)
 
             if hasContent && includeTalkingTextInLayout {
@@ -326,7 +325,7 @@ struct MessageBubbleView: View {
         return thinkingContentWidth
     }
 
-    //DO NOT DELETE
+    // DO NOT DELETE
 //    private func updateThinkingWidth(_ width: CGFloat) {
 //        guard width > 0 else { return }
 //        if abs(thinkingContentWidth - width) > 0.5 {
@@ -489,7 +488,7 @@ struct MessageBubbleView: View {
         }
     }
     
-    //This should only happen if the message is unsent
+    // This should only happen if the message is unsent
     private func startTalkingToReadTransition() {
         // Fade out talking content and go to read state
         withAnimation(.smooth(duration: 0.3)) {
@@ -578,8 +577,8 @@ struct MessageBubbleView: View {
 
 private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
-    @State private var newMessageId: UUID? = nil
-    @State private var selectedImageData: ImageData? = nil
+    @State private var newMessageId: UUID?
+    @State private var selectedImageData: ImageData?
     
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
@@ -703,7 +702,7 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
+    @Previewable @State var selectedImageData: ImageData?
     
     ZStack {
         VStack(spacing: 20) {

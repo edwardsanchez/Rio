@@ -30,4 +30,3 @@ struct ImageData: Hashable, Equatable {
         lhs.id == rhs.id && lhs.label == rhs.label
     }
 }
-

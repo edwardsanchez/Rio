@@ -175,4 +175,3 @@ enum BubbleAnimationState: Equatable {
         return CGFloat(0.5 - 0.5 * cos(Double(clamped) * .pi))
     }
 }
-

@@ -13,9 +13,8 @@ import AVKit
 struct MessageContentView: View {
     let content: ContentType
     let textColor: Color
-    var messageID: UUID? = nil  // Optional message ID for creating unique image identifiers
+    var messageID: UUID?  // Optional message ID for creating unique image identifiers
     @Binding var selectedImageData: ImageData?
-    
     
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
@@ -228,17 +227,17 @@ struct MessageContentView: View {
     
     private func measurementSymbol(for type: ValueType) -> String {
         switch type {
-        case .length(_): return "ruler.fill"
-        case .percentage(_): return "percent"
-        case .currency(_): return "dollarsign.circle.fill"
-        case .mass(_): return "scalemass.fill"
-        case .volume(_): return "flask.fill"
-        case .temperature(_): return "thermometer.medium"
-        case .duration(_): return "clock.fill"
-        case .speed(_): return "speedometer"
-        case .area(_): return "square.fill"
-        case .energy(_): return "bolt.fill"
-        case .number(_): return "number"
+        case .length: return "ruler.fill"
+        case .percentage: return "percent"
+        case .currency: return "dollarsign.circle.fill"
+        case .mass: return "scalemass.fill"
+        case .volume: return "flask.fill"
+        case .temperature: return "thermometer.medium"
+        case .duration: return "clock.fill"
+        case .speed: return "speedometer"
+        case .area: return "square.fill"
+        case .energy: return "bolt.fill"
+        case .number: return "number"
         }
     }
     
@@ -246,9 +245,9 @@ struct MessageContentView: View {
         switch measurement.type {
         case .length(let unit):
             return String(format: "%.2f%@", measurement.value, unit.symbol)
-        case .percentage(_):
+        case .percentage:
             return String(format: "%.1f%%", measurement.value)
-        case .currency(_):
+        case .currency:
             return String(format: "$%.2f", measurement.value)
         case .mass(let unit):
             return String(format: "%.2f%@", measurement.value, unit.symbol)
@@ -264,7 +263,7 @@ struct MessageContentView: View {
             return String(format: "%.2f%@", measurement.value, unit.symbol)
         case .energy(let unit):
             return String(format: "%.2f%@", measurement.value, unit.symbol)
-        case .number(_):
+        case .number:
             return String(format: "%.2f", measurement.value)
         }
     }
@@ -371,8 +370,7 @@ struct MessageContentView: View {
 
 #Preview("Text & Choices") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -476,8 +474,7 @@ struct MessageContentView: View {
 
 #Preview("Images") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -563,8 +560,7 @@ struct MessageContentView: View {
 
 #Preview("Audio & Video") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -611,8 +607,7 @@ struct MessageContentView: View {
 
 #Preview("Colors & Locations") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -735,8 +730,7 @@ struct MessageContentView: View {
 
 #Preview("Values") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -918,8 +912,7 @@ struct MessageContentView: View {
 
 #Preview("Value Ranges") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1123,8 +1116,7 @@ struct MessageContentView: View {
 
 #Preview("Dates") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1279,8 +1271,7 @@ struct MessageContentView: View {
 
 #Preview("Miscellaneous") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var selectedImageData: ImageData? = nil
-    
+    @Previewable @State var selectedImageData: ImageData?
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     

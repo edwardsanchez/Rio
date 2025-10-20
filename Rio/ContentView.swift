@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            ChatListView() //Do not touch this
+            ChatListView() // Do not touch this
         }
         .environment(chatData)
     }

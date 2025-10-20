@@ -12,7 +12,7 @@ import SwiftData
 struct RioApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Item.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -28,7 +28,7 @@ struct RioApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .dynamicTypeSize(.small ... .large) //FIXME: Support more sizes.
+                .dynamicTypeSize(.small ... .large) // FIXME: Support more sizes.
 //            CursiveTestView()
         }
         .modelContainer(sharedModelContainer)

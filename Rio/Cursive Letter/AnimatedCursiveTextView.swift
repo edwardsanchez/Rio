@@ -160,8 +160,6 @@ struct AnimatedCursiveTextView: View {
         String(format: "%.3f", value)
     }
 
-
-
     /// Updates the cached container width while preventing unnecessary state churn.
     private func updateContainerWidth(_ width: CGFloat) {
         let clampedWidth = max(0, width)
@@ -666,7 +664,6 @@ struct AnimatedCursiveTextView: View {
         }
     }
 
-
     private func emitGeometryLogIfNeeded(reason: String, force: Bool = false) {
         guard loggingEnabled else { return }
 
@@ -836,7 +833,6 @@ struct AnimatedCursiveTextView: View {
         isInCleanupPhase = false
         resetGeometryLoggerState()
 
-
         // Initialize path analyzer for mathematical calculations
         // This provides the foundation for all position and window calculations
         let shape = CursiveWordShape(text: currentText, fontSize: fontSizeValue)
@@ -846,7 +842,7 @@ struct AnimatedCursiveTextView: View {
 
         // Start the main animation timer running at 60fps for smooth updates
         let startTime = Date()
-        var cleanupPhaseStartTime: Date? = nil
+        var cleanupPhaseStartTime: Date?
 
         emitGeometryLogIfNeeded(reason: "restart", force: true)
 

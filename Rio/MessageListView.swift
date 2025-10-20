@@ -57,7 +57,7 @@ struct MessageListView: View {
         .scrollTargetLayout() // Optimizes scrolling performance for iOS 18+
     }
     
-    private func shouldShowTail(at index: Int) -> Bool { //Move inside Message Bubble
+    private func shouldShowTail(at index: Int) -> Bool { // Move inside Message Bubble
         let tailContinuationThreshold: TimeInterval = 300
         let current = messages[index]
         
@@ -91,7 +91,7 @@ struct MessageListView: View {
         return !isNextSameUser || !isWithinThreshold
     }
     
-    private func shouldShowDateHeader(at index: Int) -> Bool { //keep here
+    private func shouldShowDateHeader(at index: Int) -> Bool { // keep here
         guard index > 0 else {
             // Always show date header for the first message
             return true

@@ -19,4 +19,3 @@ extension Logger {
     
     static let message = Logger(subsystem: subsystem, category: "Message")
 }
-

@@ -120,7 +120,6 @@ struct BubbleView: View {
     private var targetDiameters: [CGFloat] { packingResult.diameters }
     private var isValid: Bool { packingResult.isValid }
     
-    
     var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
     
@@ -343,7 +342,7 @@ struct BubbleView: View {
         }
         
         // Canvas with metaball effect
-        return Canvas { context, size in
+        return Canvas { context, _ in
             if alphaThresholdMin > 0.001 {
                 context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
             }

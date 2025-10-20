@@ -441,7 +441,7 @@ struct PackingResult {
 }
 
 /// Deterministic RNG so the bubble animation remains stable for a given seed
-fileprivate struct SeededRandomGenerator: RandomNumberGenerator {
+private struct SeededRandomGenerator: RandomNumberGenerator {
     private var state: UInt64
     init(seed: UInt64) { self.state = seed &* 0x9E3779B97F4A7C15 }
     mutating func next() -> UInt64 {
