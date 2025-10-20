@@ -47,6 +47,8 @@ struct MessageBubbleView: View {
     @State private var isWidthLocked = false
     @State private var widthUnlockWorkItem: DispatchWorkItem? = nil
     @State private var revealWorkItem: DispatchWorkItem? = nil
+    @State private var bubbleFadeOpacity: Double = 1
+    @State private var bubbleFadeWorkItem: DispatchWorkItem? = nil
     @State private var includeTalkingTextInLayout = false
     @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem? = nil
@@ -93,8 +95,8 @@ struct MessageBubbleView: View {
                         textColor: theme.inboundTextColor,
                         backgroundColor: theme.inboundBackgroundColor
                     )
+                    .opacity(bubbleFadeOpacity)
                 }
-                .opacity(bubbleOpacity)
                 .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
@@ -302,7 +304,6 @@ struct MessageBubbleView: View {
             }
         }
         .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
-        .animation(.smooth(duration: 0.35), value: showTalkingContent)
         .frame(width: lockedWidth, alignment: .leading)
         .chatBubble(
             messageType: message.messageType,
@@ -457,6 +458,23 @@ struct MessageBubbleView: View {
         withAnimation(.smooth(duration: 0.3)) {
             showTalkingContent = true
         }
+        
+        bubbleFadeWorkItem?.cancel()
+        bubbleFadeOpacity = 0
+        
+        let work = DispatchWorkItem {
+            withAnimation(.smooth(duration: 0.4)) {
+                bubbleFadeOpacity = 1
+            }
+        }
+        
+        bubbleFadeWorkItem = work
+        // Displayed type switches after ~0.02s; start bubble fade after avatar growth (~0.3s)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02 + 0.3) {
+            guard !work.isCancelled else { return }
+            work.perform()
+            bubbleFadeWorkItem = nil
+        }
     }
     
     private func startThinkingToReadTransition() {
@@ -542,6 +560,9 @@ struct MessageBubbleView: View {
         revealWorkItem = nil
         modeDelayWorkItem?.cancel()
         modeDelayWorkItem = nil
+        bubbleFadeWorkItem?.cancel()
+        bubbleFadeWorkItem = nil
+        bubbleFadeOpacity = 1
     }
 
     private var outboundAnimationWidth: CGFloat? {
