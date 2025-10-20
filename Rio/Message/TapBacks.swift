@@ -11,10 +11,19 @@ import SwiftUI
 struct RadialLayout: Layout {
     var radius: CGFloat
     var menuIsShowing: Bool
+    var spacerPercentage: CGFloat
+    var spacerCenterPercent: CGFloat
 
-    init(radius: CGFloat = 100, menuIsShowing: Bool = false) {
+    init(
+        radius: CGFloat = 100,
+        menuIsShowing: Bool = false,
+        spacerPercentage: CGFloat = 0,
+        spacerCenterPercent: CGFloat = 0.5
+    ) {
         self.radius = radius
         self.menuIsShowing = menuIsShowing
+        self.spacerPercentage = max(0, min(1, spacerPercentage)) // Clamp between 0 and 1
+        self.spacerCenterPercent = spacerCenterPercent
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -28,9 +37,23 @@ struct RadialLayout: Layout {
 
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
 
+        // Calculate available arc (360 degrees minus the spacer)
+        let availableArc = 360.0 * (1.0 - spacerPercentage)
+        
+        // Calculate the angle increment between items
+        let angleIncrement = availableArc / CGFloat(count)
+        
+        // Calculate starting angle
+        // Convert spacerCenterPercent to degrees (0% = top = -90°, going clockwise)
+        let spacerCenterAngle = (spacerCenterPercent * 360.0) - 90.0
+        let spacerArc = 360.0 * spacerPercentage
+        // Start at the end of the spacer, plus half an increment to center the first item
+        let arcStartAngle = spacerCenterAngle + (spacerArc / 2.0)
+        let startAngle = arcStartAngle + (angleIncrement / 2.0)
+
         for (index, subview) in subviews.enumerated() {
-            // Calculate angle for this item (starting from top, going clockwise)
-            let angle = (CGFloat(index) / CGFloat(count)) * 360.0 - 90.0 // -90 to start from top
+            // Calculate angle for this item within the available arc
+            let angle = startAngle + (CGFloat(index) * angleIncrement)
             let radians = angle * .pi / 180.0
 
             // Calculate position using polar coordinates
@@ -45,52 +68,91 @@ struct RadialLayout: Layout {
     }
 }
 
-struct TapBacks: View {
+struct TapBacksModifier: ViewModifier {
     @State private var menuIsShowing = false
-    var radius: CGFloat = 100
+    var messageID: UUID
+    var radius: CGFloat
+    var spacerPercentage: CGFloat
+    var spacerCenterPercent: CGFloat
+    var reactions: [String]
+    var onReactionSelected: (String) -> Void
 
-    let reactions = ["❤️", "👍", "😂", "😮", "😢", "🔥"]
-
-    var body: some View {
-        ZStack {
-            // Radial menu with emoji reactions
-            RadialLayout(radius: radius, menuIsShowing: menuIsShowing) {
-                GlassEffectContainer {
-                    ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
-                        Button {
-                            print(emoji)
-                        } label: {
-                            Circle()
-                                .fill(.clear)
-                                .frame(width: 44, height: 44)
-                                .overlay(
-                                    Text(emoji)
-                                        .font(.system(size: 24))
-                                )
-                                .opacity(menuIsShowing ? 1 : 0)
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RadialLayout(
+                    radius: radius,
+                    menuIsShowing: menuIsShowing,
+                    spacerPercentage: spacerPercentage,
+                    spacerCenterPercent: spacerCenterPercent
+                ) {
+                    GlassEffectContainer {
+                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
+                            Button {
+                                onReactionSelected(emoji)
+                                menuIsShowing = false
+                            } label: {
+                                Circle()
+                                    .fill(.clear)
+                                    .frame(width: 44, height: 44)
+                                    .overlay(
+                                        Text(emoji)
+                                            .font(.system(size: 24))
+                                    )
+                                    .opacity(menuIsShowing ? 1 : 0)
+                            }
+                            .glassEffect(.regular, in: .circle)
+                            .animation(
+                                .spring(duration: 0.4, bounce: 0.5)
+                                .delay(Double(index) * 0.05),
+                                value: menuIsShowing
+                            )
                         }
-                        .glassEffect(.regular, in: .circle)
-                        .animation(
-                            .spring(duration: 0.4, bounce: 0.5)
-                            .delay(Double(index) * 0.05),
-                            value: menuIsShowing
-                        )
                     }
                 }
+                .animation(.spring(duration: 0.4, bounce: 0.5), value: menuIsShowing)
+            )
+            .onTapGesture {
+                menuIsShowing.toggle()
             }
-            .animation(.spring(duration: 0.4, bounce: 0.5), value: menuIsShowing)
+    }
+}
 
-            // Main trigger circle
-            Circle()
-                .fill(.blue)
-                .frame(width: 100, height: 100)
-                .onTapGesture {
-                    menuIsShowing.toggle()
-                }
+extension View {
+    func tapBacks(
+        messageID: UUID,
+        radius: CGFloat = 100,
+        spacerPercentage: CGFloat = 0.25,
+        spacerCenterPercent: CGFloat = 0.5,
+        reactions: [String] = ["❤️", "👍", "😂", "😮", "😢", "🔥"],
+        onReactionSelected: @escaping (String) -> Void = { reaction in
+            print("Selected reaction: \(reaction)")
         }
+    ) -> some View {
+        modifier(
+            TapBacksModifier(
+                messageID: messageID,
+                radius: radius,
+                spacerPercentage: spacerPercentage,
+                spacerCenterPercent: spacerCenterPercent,
+                reactions: reactions,
+                onReactionSelected: onReactionSelected
+            )
+        )
+    }
+}
+
+struct TapBackTestView: View {
+    var body: some View {
+        Circle()
+            .fill(.blue)
+            .frame(width: 100, height: 100)
+            .tapBacks(messageID: UUID()) { reaction in
+                print("Tapped: \(reaction)")
+            }
     }
 }
 
 #Preview {
-    TapBacks()
+    TapBackTestView()
 }
