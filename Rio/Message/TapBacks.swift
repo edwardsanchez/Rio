@@ -98,10 +98,11 @@ struct TapBacksModifier: ViewModifier {
                                     .overlay(
                                         Text(emoji)
                                             .font(.system(size: 24))
+                                            .opacity(menuIsShowing ? 1 : 0)
                                     )
-                                    .opacity(menuIsShowing ? 1 : 0)
+
                             }
-                            .glassEffect(.regular, in: .circle)
+                            .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                             .animation(
                                 .spring(duration: 0.4, bounce: 0.5)
                                 .delay(Double(index) * 0.05),
@@ -123,7 +124,7 @@ extension View {
         messageID: UUID,
         radius: CGFloat = 100,
         spacerPercentage: CGFloat = 0.25,
-        spacerCenterPercent: CGFloat = 0.5,
+        spacerCenterPercent: CGFloat = 0.65,
         reactions: [String] = ["❤️", "👍", "😂", "😮", "😢", "🔥"],
         onReactionSelected: @escaping (String) -> Void = { reaction in
             print("Selected reaction: \(reaction)")
@@ -144,9 +145,13 @@ extension View {
 
 struct TapBackTestView: View {
     var body: some View {
-        Circle()
+        RoundedRectangle(cornerRadius: 10)
             .fill(.blue)
-            .frame(width: 100, height: 100)
+            .frame(width: 200, height: 40)
+            .containerShape(.rect)
+            .glassEffect(.regular.interactive(), in: .rect)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
             .tapBacks(messageID: UUID()) { reaction in
                 print("Tapped: \(reaction)")
             }
