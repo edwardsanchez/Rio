@@ -213,11 +213,6 @@ struct BubbleExplosionTestView: View {
         let steps: CGFloat = 1000
         let quantized = round(sliderValue * steps) / steps
 
-        // Debug logging
-        if abs(sliderValue - quantized) > 0.0001 {
-            print("Quantizing: \(sliderValue) -> \(quantized)")
-        }
-
         return quantized
     }
 
