@@ -15,23 +15,23 @@ struct MessageContentView: View {
     let textColor: Color
     var messageID: UUID?  // Optional message ID for creating unique image identifiers
     @Binding var selectedImageData: ImageData?
-    
+
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
     @State private var showingAudioFullScreen = false
-    
+
     let insetCornerRadius: CGFloat = 10
-    
+
     @State private var fallbackID = UUID().uuidString
-    
+
     private var uniquePrefix: String {
         messageID?.uuidString ?? fallbackID
     }
-    
+
     var body: some View {
         contentView
     }
-    
+
     @ViewBuilder
     private var contentView: some View {
         switch content {
@@ -39,32 +39,32 @@ struct MessageContentView: View {
             Text(text)
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
-            
+
         case .color(let rgb):
             colorView(rgb)
-            
+
         case .image(let image):
             imageView(image)
                 .onTapGesture {
                     selectedImageData = ImageData(image: image)
                 }
-            
+
         case .labeledImage(let labeledImage):
             labeledImageView(labeledImage)
                 .onTapGesture {
                     selectedImageData = ImageData(image: labeledImage.image, label: labeledImage.label)
                 }
-            
+
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-            
+
         case .audio(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .aspectRatio(16/9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
-            
+
         case .date(let date, let granularity):
             switch granularity {
             case .dateAndTime:
@@ -117,18 +117,18 @@ struct MessageContentView: View {
                 .font(.caption.bold())
                 .foregroundStyle(textColor)
             }
-            
+
         case .location(let mapItem):
             locationView(mapItem)
-            
+
         case .url(let url):
             URLPreviewCard(url: url, textColor: textColor)
-            
+
         case .textChoice(let text):
             Label(text, systemImage: "checkmark.circle.fill")
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
-            
+
         case .multiChoice(let choices):
             if let first = choices.first {
                 switch first {
@@ -146,7 +146,7 @@ struct MessageContentView: View {
                         }
                         return 60
                     }()
-                    
+
                     HStack(spacing: 0) {
                         LazyVGrid(
                             columns: Array(repeating: GridItem(.flexible(minimum: minimum, maximum: 120), spacing: 12), count: columns),
@@ -161,13 +161,13 @@ struct MessageContentView: View {
                     }
                 }
             }
-            
+
         case .emoji(let emoji):
             // Emoji content - larger text
             Text(emoji)
                 .font(.system(size: 60))
                 .padding()
-            
+
         case .code(let code):
             // Placeholder for code content
             Text(code)
@@ -177,12 +177,12 @@ struct MessageContentView: View {
                 .padding(12)
                 .background(Color.primary.opacity(0.15))
                 .cornerRadius(12)
-            
+
         case .bool(let value):
             Label(value ? "YES" : "NO", systemImage: value ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                 .foregroundStyle(textColor)
                 .font(.caption.bold())
-            
+
         case .rating(let rating):
             HStack(spacing: 2) {
                 ForEach(0..<(rating.rawValue + 1), id: \.self) { _ in
@@ -191,12 +191,12 @@ struct MessageContentView: View {
                 }
             }
             .font(.title3)
-            
+
         case .value(let measurement):
             Label(formatMeasurementValue(measurement), systemImage: measurementSymbol(for: measurement.type))
                 .foregroundStyle(textColor)
                 .font(.title3.bold())
-            
+
         case .valueRange(let range):
             HStack(spacing: 8) {
                 Image(systemName: measurementSymbol(for: range.lowerBound.type))
@@ -208,12 +208,12 @@ struct MessageContentView: View {
             }
             .font(.caption.bold())
             .foregroundStyle(textColor)
-            
+
         case .file(let url):
             Label(url.lastPathComponent, systemImage: "doc.fill")
                 .foregroundStyle(textColor)
                 .font(.caption.bold())
-            
+
         case .dateFrequency(let frequency):
             let dayName = Calendar.current.weekdaySymbols[frequency.dayOfWeek.rawValue]
             let prefix = frequency.interval == 1 ? "Every" : "Every \(frequency.interval)"
@@ -222,9 +222,9 @@ struct MessageContentView: View {
                 .font(.caption.bold())
         }
     }
-    
+
     // MARK: - Helper Functions
-    
+
     private func measurementSymbol(for type: ValueType) -> String {
         switch type {
         case .length: return "ruler.fill"
@@ -240,7 +240,7 @@ struct MessageContentView: View {
         case .number: return "number"
         }
     }
-    
+
     private func formatMeasurementValue(_ measurement: Measurement) -> String {
         switch measurement.type {
         case .length(let unit):
@@ -267,9 +267,9 @@ struct MessageContentView: View {
             return String(format: "%.2f", measurement.value)
         }
     }
-    
+
     // MARK: - Reusable Content View Helpers
-    
+
     @ViewBuilder
     private func colorView(_ rgb: RGB, compact: Bool = false) -> some View {
         // Compact chip for multi-choice grids
@@ -284,7 +284,7 @@ struct MessageContentView: View {
 //                .aspectRatio(1, contentMode: .fit)
                 .frame(height: 60)
                 .frame(maxWidth: 100)
-            
+
             if let name = rgb.name {
                 Text(name)
                     .font(.caption)
@@ -293,7 +293,7 @@ struct MessageContentView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private func imageView(_ image: Image, compact: Bool = false) -> some View {
         image
@@ -304,7 +304,7 @@ struct MessageContentView: View {
                 view.frame(maxWidth: 80, maxHeight: 80)
             }
     }
-    
+
     @ViewBuilder
     private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false) -> some View {
         VStack(spacing: compact ? 4 : 8) {
@@ -323,7 +323,7 @@ struct MessageContentView: View {
                 .lineLimit(compact ? 1 : nil)
         }
     }
-    
+
     @ViewBuilder
     private func locationView(_ mapItem: MKMapItem, compact: Bool = false) -> some View {
         Button {
@@ -340,7 +340,7 @@ struct MessageContentView: View {
         }
         .buttonStyle(.plain)
     }
-    
+
     @ViewBuilder
     private func choiceItemView(_ choice: ChoiceValue, index: Int) -> some View {
         switch choice {
@@ -371,9 +371,9 @@ struct MessageContentView: View {
 #Preview("Text & Choices") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -391,7 +391,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Text (Multi-line)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Text (Multi-line)").font(.headline)
@@ -406,7 +406,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Text Choice
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Text Choice").font(.headline)
@@ -421,7 +421,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Multi-choice - Text Choices
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Multi-choice (Text - 3)").font(.headline)
@@ -440,7 +440,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Multi-choice - Prime number (7 days)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Multi-choice (Text - 7)").font(.headline)
@@ -475,9 +475,9 @@ struct MessageContentView: View {
 #Preview("Images") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     ZStack {
         NavigationStack {
             ScrollView {
@@ -496,7 +496,7 @@ struct MessageContentView: View {
                             selectedImageData: $selectedImageData
                         )
                     }
-                    
+
                     // Labeled Image
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Labeled Image").font(.headline)
@@ -511,7 +511,7 @@ struct MessageContentView: View {
                             selectedImageData: $selectedImageData
                         )
                     }
-                    
+
                     // Multi-choice - Images
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Multi-choice (Images - 4)").font(.headline)
@@ -536,7 +536,7 @@ struct MessageContentView: View {
             }
             .environment(bubbleConfig)
         }
-        
+
         // Image detail overlay
         if let imageData = selectedImageData {
             ImageDetailView(
@@ -553,7 +553,7 @@ struct MessageContentView: View {
             .zIndex(1)
         }
     }
-    
+
 }
 
 // MARK: - Preview 3: Audio & Video
@@ -561,9 +561,9 @@ struct MessageContentView: View {
 #Preview("Audio & Video") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -581,7 +581,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Audio
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Audio").font(.headline)
@@ -608,9 +608,9 @@ struct MessageContentView: View {
 #Preview("Colors & Locations") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -628,7 +628,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Location
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Location").font(.headline)
@@ -649,7 +649,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Multi-choice - Colors (2)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Multi-choice (Colors - 2)").font(.headline)
@@ -667,7 +667,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Multi-choice - Colors (3)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Multi-choice (Colors - 3)").font(.headline)
@@ -689,7 +689,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Multi-choice - Locations
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Multi-choice (Locations - 2)").font(.headline)
@@ -731,9 +731,9 @@ struct MessageContentView: View {
 #Preview("Values") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -751,7 +751,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Percentage
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Percentage)").font(.headline)
@@ -766,7 +766,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Currency
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Currency)").font(.headline)
@@ -781,7 +781,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Mass
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Mass)").font(.headline)
@@ -796,7 +796,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Volume
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Volume)").font(.headline)
@@ -811,7 +811,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Temperature
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Temperature)").font(.headline)
@@ -826,7 +826,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Duration
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Duration)").font(.headline)
@@ -841,7 +841,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Speed
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Speed)").font(.headline)
@@ -856,7 +856,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Area
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Area)").font(.headline)
@@ -871,7 +871,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Energy
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Energy)").font(.headline)
@@ -886,7 +886,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value - Number
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value (Number)").font(.headline)
@@ -913,9 +913,9 @@ struct MessageContentView: View {
 #Preview("Value Ranges") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -935,7 +935,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Percentage
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Percentage)").font(.headline)
@@ -952,7 +952,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Currency
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Currency)").font(.headline)
@@ -969,7 +969,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Mass
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Mass)").font(.headline)
@@ -986,7 +986,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Volume
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Volume)").font(.headline)
@@ -1003,7 +1003,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Temperature
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Temperature)").font(.headline)
@@ -1020,7 +1020,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Duration
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Duration)").font(.headline)
@@ -1037,7 +1037,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Speed
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Speed)").font(.headline)
@@ -1054,7 +1054,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Area
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Area)").font(.headline)
@@ -1071,7 +1071,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Energy
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Energy)").font(.headline)
@@ -1088,7 +1088,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Value Range - Number
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Value Range (Number)").font(.headline)
@@ -1117,9 +1117,9 @@ struct MessageContentView: View {
 #Preview("Dates") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -1137,7 +1137,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date - Date Only
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date (Date Only)").font(.headline)
@@ -1152,7 +1152,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date - Time Only
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date (Time Only)").font(.headline)
@@ -1167,7 +1167,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date Range - Date and Time
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date Range (Date & Time)").font(.headline)
@@ -1188,7 +1188,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date Range - Date Only
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date Range (Date Only)").font(.headline)
@@ -1209,7 +1209,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date Range - Time Only
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date Range (Time Only)").font(.headline)
@@ -1230,7 +1230,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date Frequency - Every Friday
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date Frequency (Every Friday)").font(.headline)
@@ -1245,7 +1245,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Date Frequency - Every Other Friday
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Date Frequency (Every Other Friday)").font(.headline)
@@ -1272,9 +1272,9 @@ struct MessageContentView: View {
 #Preview("Miscellaneous") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    
+
     NavigationStack {
         ScrollView {
             LazyVStack(alignment: .trailing, spacing: 24) {
@@ -1292,7 +1292,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // URL - Alternative
                 VStack(alignment: .leading, spacing: 8) {
                     Text("URL (Unresolved)").font(.headline)
@@ -1307,7 +1307,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Emoji
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Emoji").font(.headline)
@@ -1322,7 +1322,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Code
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Code").font(.headline)
@@ -1337,7 +1337,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Boolean - True
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Boolean (True)").font(.headline)
@@ -1352,7 +1352,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Boolean - False
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Boolean (False)").font(.headline)
@@ -1367,7 +1367,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Rating - Five Stars
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Rating (5 Stars)").font(.headline)
@@ -1382,7 +1382,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // Rating - Three Stars
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Rating (3 Stars)").font(.headline)
@@ -1397,7 +1397,7 @@ struct MessageContentView: View {
                         selectedImageData: $selectedImageData,
                     )
                 }
-                
+
                 // File
                 VStack(alignment: .leading, spacing: 8) {
                     Text("File").font(.headline)
@@ -1433,7 +1433,7 @@ extension Int {
         }
         return true
     }
-    
+
     var gridColumns: Int {
         if self.isPrime { return 1 }
         if self % 5 == 0 { return 5 }

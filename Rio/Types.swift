@@ -40,7 +40,7 @@ struct ChatTheme {
     let inboundBackgroundColor: Color
     let outboundTextColor: Color
     let outboundBackgroundColor: Color
-    
+
     // Predefined themes matching asset catalog
     static let defaultTheme = ChatTheme(
         backgroundColor: .base,
@@ -49,7 +49,7 @@ struct ChatTheme {
         outboundTextColor: .white,
         outboundBackgroundColor: .Default.outboundBubble
     )
-    
+
     static let theme1 = ChatTheme(
         backgroundColor: .base,
         inboundTextColor: .primary,
@@ -57,7 +57,7 @@ struct ChatTheme {
         outboundTextColor: .white,
         outboundBackgroundColor: .Theme1.outboundBubble
     )
-    
+
     static let theme2 = ChatTheme(
         backgroundColor: .base,
         inboundTextColor: .primary,

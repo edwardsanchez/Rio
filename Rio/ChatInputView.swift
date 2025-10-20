@@ -45,7 +45,7 @@ struct ChatInputView: View {
         "🤔💭",
         "🎉🎊🥳"
     ]
-    
+
     var body: some View {
         inputField
             .onChange(of: shouldFocusInput) { _, newValue in
@@ -66,12 +66,12 @@ struct ChatInputView: View {
                 currentTypingIndicatorId = nil
             }
     }
-    
+
     var inputField: some View {
         GlassEffectContainer {
             HStack(spacing: 2) {
                 Button {
-                    
+
                 } label: {
                     Image(systemName: "plus")
                         .imageScale(.large)
@@ -136,11 +136,11 @@ struct ChatInputView: View {
                 .offset(y: 30)
         }
     }
-    
+
     var isEmpty: Bool {
         message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-    
+
     var sendButton: some View {
         Button {
             sendMessage()
@@ -196,7 +196,7 @@ struct ChatInputView: View {
         // Parse message content and create message(s)
         let segments = ContentTypeDetector.detectURLs(in: messageText)
         var createdMessages: [Message] = []
-        
+
         for segment in segments {
             let content: ContentType
             if segment.isURL {
@@ -211,7 +211,7 @@ struct ChatInputView: View {
                 // Use content type detector to check for emoji-only (1-3 emoji)
                 content = ContentTypeDetector.contentType(for: segment.content)
             }
-            
+
             let newMessage = Message(
                 content: content,
                 user: chatData.edwardUser,
@@ -219,12 +219,12 @@ struct ChatInputView: View {
             )
             createdMessages.append(newMessage)
         }
-        
+
         // Set newMessageId to the first message for animation
         if let firstMessage = createdMessages.first {
             newMessageId = firstMessage.id
         }
-        
+
         // Add all created messages
         for msg in createdMessages {
             messages.append(msg)
@@ -329,7 +329,7 @@ struct ChatInputView: View {
                 messages.append(typingIndicatorMessage)
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
                 chatData.setTypingIndicator(true, for: randomUser.id, in: chat.id)
-                
+
                 // Schedule transition from .read to .thinking after 3 seconds
                 readToThinkingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
                     if let indicatorId = currentTypingIndicatorId,
@@ -361,9 +361,9 @@ struct ChatInputView: View {
                 // Cancel read-to-thinking timer since we're going straight to talking
                 readToThinkingTimer?.invalidate()
                 readToThinkingTimer = nil
-                
+
                 let randomResponse = autoReplyMessages.randomElement() ?? "Hello!"
-                
+
                 // Detect content type for auto-reply (emoji detection)
                 let contentType = ContentTypeDetector.contentType(for: randomResponse)
 

@@ -23,10 +23,10 @@ struct ExplosionConfiguration {
     let fadeStart: CGFloat
     let fadeVariance: CGFloat
     let pinchDuration: CGFloat
-    
+
     /// Default explosion configuration
     static let `default` = ExplosionConfiguration()
-    
+
     init(
         pixelSize: CGFloat = 2.0,
         explosionCenter: CGPoint = CGPoint(x: 0.5, y: 0.5),
@@ -79,7 +79,7 @@ private struct ExplosionEffectModifier: ViewModifier {
     let isActive: Bool
     let progress: CGFloat
     let configuration: ExplosionConfiguration
-    
+
     @State private var canvasSize: CGSize = .zero
 
     func body(content: Content) -> some View {

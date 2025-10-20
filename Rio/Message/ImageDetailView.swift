@@ -11,28 +11,28 @@ import SwiftUI
 struct ImageDetailView: View {
     let imageData: ImageData
     @Binding var isPresented: Bool
-    
+
     @State private var opacity: CGFloat = 1
     @State private var safeAreaInsets: EdgeInsets = EdgeInsets()
-    
+
     // Zoom and pan state
     @State private var currentZoom: CGFloat = 1.0
     @State private var totalZoom: CGFloat = 1.0
     @State private var panOffset: CGSize = .zero
     @State private var currentPanOffset: CGSize = .zero
-    
+
     private var isZoomedOut: Bool {
         totalZoom <= 1.0
     }
-    
+
     private let cornerRadius: CGFloat = 10
-    
+
     var body: some View {
         ZStack {
             Color.black
                 .opacity(1)
                 .ignoresSafeArea()
-            
+
             // Centered zoomable image with manual transforms
             imageData.image
                 .resizable()
@@ -49,7 +49,7 @@ struct ImageDetailView: View {
                 .gesture(isZoomedOut ? nil : panGesture)
                 .gesture(zoomGesture)
                 .onTapGesture(count: 2, perform: handleDoubleTap)
-            
+
             // Overlay with buttons and label
             VStack(spacing: 0) {
                 // Top bar with label and close button
@@ -61,9 +61,9 @@ struct ImageDetailView: View {
                             .foregroundStyle(.white)
                             .opacity(opacity)
                     }
-                    
+
                     Spacer()
-                    
+
                     // Close button (top right)
                     Button(action: {
                         dismiss()
@@ -77,13 +77,13 @@ struct ImageDetailView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, safeAreaInsets.top + 12)
-                
+
                 Spacer()
-                
+
                 // Share button at bottom right
                 HStack {
                     Spacer()
-                    
+
                     Button(action: {
                         print("share")
                     }, label: {
@@ -111,7 +111,7 @@ struct ImageDetailView: View {
             }
         }
     }
-    
+
     // Zoom gesture
     private var zoomGesture: some Gesture {
         MagnificationGesture()
@@ -123,7 +123,7 @@ struct ImageDetailView: View {
                 currentZoom = 1.0
                 // Clamp between 1.0 and 3.0
                 totalZoom = min(max(totalZoom, 1.0), 3.0)
-                
+
                 // Reset pan offset when zooming out to 1.0
                 if totalZoom == 1.0 {
                     withAnimation(.spring()) {
@@ -133,7 +133,7 @@ struct ImageDetailView: View {
                 }
             }
     }
-    
+
     // Pan gesture (only when zoomed in)
     private var panGesture: some Gesture {
         DragGesture()
@@ -146,7 +146,7 @@ struct ImageDetailView: View {
                 currentPanOffset = .zero
             }
     }
-    
+
     // Double-tap to zoom
     private func handleDoubleTap() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -159,7 +159,7 @@ struct ImageDetailView: View {
             }
         }
     }
-    
+
     // Helper function to dismiss with animation
     private func dismiss() {
         // Reset zoom/pan state and dismiss without animation
@@ -172,7 +172,7 @@ struct ImageDetailView: View {
 
 #Preview {
     @Previewable @State var isPresented = true
-    
+
     ImageDetailView(
         imageData: ImageData(
             image: Image(.cat),

@@ -14,15 +14,15 @@ enum BubbleType {
     case thinking
     case talking
     case read
-    
+
     var isRead: Bool {
         self == .read
     }
-    
+
     var isThinking: Bool {
         self == .thinking
     }
-    
+
     var isTalking: Bool {
         self == .talking
     }
@@ -33,17 +33,17 @@ enum BubbleType {
 enum MessageType {
     case inbound(BubbleType)
     case outbound
-    
+
     var isInbound: Bool {
         if case .inbound = self { return true }
         return false
     }
-    
+
     var isOutbound: Bool {
         if case .outbound = self { return true }
         return false
     }
-    
+
     var bubbleType: BubbleType {
         switch self {
         case .inbound(let type):
@@ -66,7 +66,7 @@ struct Message: Identifiable {
     var bubbleType: BubbleType {
         messageType.bubbleType
     }
-    
+
     // Computed property to extract text content
     var text: String {
         if case .text(let textValue) = content {
@@ -74,7 +74,7 @@ struct Message: Identifiable {
         }
         return ""
     }
-    
+
     // Check if content is text type
     var hasTextContent: Bool {
         if case .text = content {
@@ -98,7 +98,7 @@ struct Message: Identifiable {
         self.replacesTypingIndicator = replacesTypingIndicator
         self.messageType = messageType
         self.content = content
-        
+
         // Update isTypingIndicator based on bubble type
         self.isTypingIndicator = isTypingIndicator || messageType.bubbleType.isThinking
     }
@@ -112,14 +112,14 @@ enum DateGranularity {
 
 enum ContentType {
     case text(String), color(RGB), image(Image), labeledImage(LabeledImage), video(URL), audio(URL), date(Date, granularity: DateGranularity = .dateAndTime), dateRange(DateRange, granularity: DateGranularity = .dateAndTime), dateFrequency(DateFrequency), location(MKMapItem), url(URL), textChoice(String), multiChoice([ChoiceValue]), bool(Bool), value(Measurement), valueRange(ClosedRange<Measurement>), rating(Rating), emoji(String), code(String), file(URL)
-    
+
     var isEmoji: Bool {
         if case .emoji = self {
             return true
         }
         return false
     }
-    
+
     /// Returns true if the content has something to display
     var hasContent: Bool {
         switch self {
@@ -138,12 +138,12 @@ enum ContentType {
 struct Measurement: Comparable, Equatable {
     var value: CGFloat
     var type: ValueType
-    
+
     // Equatable (required for Comparable)
     static func == (lhs: Measurement, rhs: Measurement) -> Bool {
         return lhs.value == rhs.value && lhs.type == rhs.type
     }
-    
+
     // Comparable
     static func < (lhs: Measurement, rhs: Measurement) -> Bool {
         precondition(lhs.type == rhs.type, "Cannot compare measurements of different types")
@@ -158,7 +158,7 @@ struct LabeledImage {
 
 enum ValueType: Equatable {
     case length(UnitLength), percentage(CFloat), currency(CGFloat), mass(UnitMass), volume(UnitVolume), temperature(UnitTemperature), duration(UnitDuration), speed(UnitSpeed), area(UnitArea), energy(UnitEnergy), number(CGFloat)
-    
+
     // Custom equality that only compares the case type, not associated values
     static func == (lhs: ValueType, rhs: ValueType) -> Bool {
         switch (lhs, rhs) {

@@ -38,7 +38,7 @@ struct CursiveTestView: View {
 
     // Computed properties
     private var fontSizeValue: CGFloat { CGFloat(size) }
-    
+
     private var measuredWordSize: CGSize {
         CursiveWordShape.preferredSize(for: displayText, fontSize: fontSizeValue)
             ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
@@ -94,7 +94,7 @@ struct CursiveTestView: View {
             isInputFocused = true
         }
     }
-    
+
     var typingIndicatorView: some View {
         Group {
             if staticMode {
@@ -134,7 +134,7 @@ struct CursiveTestView: View {
 
         // Convert to lowercase for cursive rendering
         displayText = inputText
-        
+
         // Clear input field
         inputText = ""
 

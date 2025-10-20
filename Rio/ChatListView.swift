@@ -22,31 +22,31 @@ struct ChatListView: View {
 
 struct ChatRowView: View {
     let chat: Chat
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(chat.title)
                     .font(.headline)
                     .foregroundColor(.primary)
-                
+
                 Spacer()
-                
+
                 if let lastMessage = chat.messages.last {
                     Text(lastMessage.date, style: .time)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-            
+
             HStack {
                 // Show participant count
                 Text("\(chat.participants.count) participants")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Spacer()
-                
+
                 // Show last message preview
                 if let lastMessage = chat.messages.last {
                     Text(lastMessage.isTypingIndicator ? "typing..." : lastMessage.text)

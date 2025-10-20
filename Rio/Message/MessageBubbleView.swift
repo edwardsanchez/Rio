@@ -52,9 +52,9 @@ struct MessageBubbleView: View {
     @State private var includeTalkingTextInLayout = false
     @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem?
-    
+
     @Binding var selectedImageData: ImageData?
-    
+
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
     init(
@@ -360,7 +360,7 @@ struct MessageBubbleView: View {
     private func handleBubbleTypeChange(from oldType: BubbleType, to newType: BubbleType) {
         guard oldType != newType else { return }
         cancelPendingContentTransitions()
-        
+
         // Handle displayedBubbleType delay for thinking→read transition
         if oldType == .thinking && newType == .read {
             // Keep displayedBubbleType at .thinking during explosion
@@ -376,7 +376,7 @@ struct MessageBubbleView: View {
         } else {
             // For all other transitions, update displayedBubbleType immediately
             displayedBubbleType = newType
-            
+
             if oldType == .thinking && newType == .talking {
                 startTalkingTransition()
             } else if oldType == .talking && newType == .thinking {
@@ -424,13 +424,13 @@ struct MessageBubbleView: View {
             showTypingIndicatorContent = true
         }
     }
-    
+
     private func startReadToThinkingTransition() {
         // Delay typing indicator until read→thinking animation completes
         isWidthLocked = true
         showTalkingContent = false
         includeTalkingTextInLayout = false
-        
+
         // Wait for the bubble animation to complete before showing typing indicator
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration / 3) {
             withAnimation(.smooth(duration: 0.3)) {
@@ -438,7 +438,7 @@ struct MessageBubbleView: View {
             }
         }
     }
-    
+
     private func startReadToTalkingTransition() {
         // Quick opacity fade when going from read to talking (fast response)
         if !message.content.hasContent {
@@ -448,25 +448,25 @@ struct MessageBubbleView: View {
             includeTalkingTextInLayout = false
             return
         }
-        
+
         isWidthLocked = false
         showTypingIndicatorContent = false
         includeTalkingTextInLayout = true
-        
+
         // Quick fade in without offset animation
         withAnimation(.smooth(duration: 0.3)) {
             showTalkingContent = true
         }
-        
+
         bubbleFadeWorkItem?.cancel()
         bubbleFadeOpacity = 0
-        
+
         let work = DispatchWorkItem {
             withAnimation(.smooth(duration: 0.4)) {
                 bubbleFadeOpacity = 1
             }
         }
-        
+
         bubbleFadeWorkItem = work
         // Displayed type switches after ~0.02s; start bubble fade after avatar growth (~0.3s)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.02 + 0.3) {
@@ -475,7 +475,7 @@ struct MessageBubbleView: View {
             bubbleFadeWorkItem = nil
         }
     }
-    
+
     private func startThinkingToReadTransition() {
         // Immediately hide typing indicator (no animation) when bubbleType changes to read
         showTypingIndicatorContent = false
@@ -487,7 +487,7 @@ struct MessageBubbleView: View {
             self.includeTalkingTextInLayout = false
         }
     }
-    
+
     // This should only happen if the message is unsent
     private func startTalkingToReadTransition() {
         // Fade out talking content and go to read state
@@ -539,11 +539,11 @@ struct MessageBubbleView: View {
     private func scheduleDisplayedTypeUpdate(to type: BubbleType, delay: TimeInterval) {
         // Cancel any pending bubbleType updates
         modeDelayWorkItem?.cancel()
-        
+
         let delayItem = DispatchWorkItem {
             self.displayedBubbleType = type
         }
-        
+
         modeDelayWorkItem = delayItem
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             guard !delayItem.isCancelled else { return }
@@ -579,11 +579,11 @@ private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID?
     @State private var selectedImageData: ImageData?
-    
+
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
     private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
-    
+
     private var currentMessage: Message {
         switch bubbleType {
         case .read:
@@ -619,7 +619,7 @@ private struct MessageBubblePreviewContainer: View {
             )
         }
     }
-    
+
     private var isNew: Bool {
         messageId == newMessageId
     }
@@ -655,7 +655,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == nil ? .blue : .gray)
-                    
+
                     Button("Read") {
                         let wasNone = bubbleType == nil
                         bubbleType = .read
@@ -665,7 +665,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == .read ? .blue : .gray)
-                    
+
                     Button("Thinking") {
                         let wasNone = bubbleType == nil
                         bubbleType = .thinking
@@ -675,7 +675,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == .thinking ? .blue : .gray)
-                    
+
                     Button("Talking") {
                         let wasNone = bubbleType == nil
                         bubbleType = .talking
@@ -695,7 +695,7 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Inbound Message Bubble Morph") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    
+
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
 }
@@ -703,10 +703,10 @@ private struct MessageBubblePreviewContainer: View {
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-    
+
     ZStack {
         VStack(spacing: 20) {
-        
+
         MessageBubbleView(
             message: Message(
                 content: .text(""),
@@ -718,7 +718,7 @@ private struct MessageBubblePreviewContainer: View {
             theme: .theme1,
             selectedImageData: $selectedImageData
         )
-        
+
         // 1. Inbound thinking
         MessageBubbleView(
             message: Message(
@@ -759,7 +759,7 @@ private struct MessageBubblePreviewContainer: View {
     .padding(.horizontal, 20)
     .padding(.vertical, 40)
     .environment(bubbleConfig)
-        
+
         // Image detail overlay
         if let imageData = selectedImageData {
             ImageDetailView(
@@ -778,5 +778,5 @@ private struct MessageBubblePreviewContainer: View {
             .zIndex(1)
         }
     }
-    
+
 }

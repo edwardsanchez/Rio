@@ -11,9 +11,9 @@ import SwiftUI
 /// the rendered result identical to the original metaball implementation.
 struct BubbleView: View {
     @Environment(BubbleConfiguration.self) private var bubbleConfig
-    
+
     // MARK: - Configuration
-    
+
     /// Width of the inner rectangle that the metaballs orbit.
     let width: CGFloat
     /// Height of the inner rectangle that the metaballs orbit.
@@ -30,15 +30,15 @@ struct BubbleView: View {
     let messageType: MessageType
     /// Layout type for visual display (may be delayed relative to bubbleType)
     let layoutType: BubbleType?
-    
+
     // MARK: - Animation Managers (replaces 21 @State variables)
-    
+
     @State private var circleManager: CircleAnimationManager
     @State private var transitionCoordinator: TransitionCoordinator
     @State private var sizeManager: RectangleSizeManager
-    
+
     // MARK: - Additional State
-    
+
     /// Seed that keeps randomised animations stable across refreshes.
     @State private var animationSeed: UInt64
     /// Start time driving the deterministic animation timeline.
@@ -49,9 +49,9 @@ struct BubbleView: View {
     @State private var tailPositionOffset: CGPoint = CGPoint(x: 15, y: -23)
     /// Work item for cancelling delayed tail position updates
     @State private var tailPositionWorkItem: DispatchWorkItem?
-    
+
     // MARK: - Initialization
-    
+
     /// Creates a bubble with the provided geometry and visual configuration.
     init(
         width: CGFloat,
@@ -71,18 +71,18 @@ struct BubbleView: View {
         self.showTail = showTail
         self.messageType = messageType
         self.layoutType = layoutType
-        
+
         let now = Date()
         let config = BubbleConfiguration()
-        
+
         _animationSeed = State(initialValue: UInt64.random(in: 0...UInt64.max))
         _startTime = State(initialValue: now)
-        
+
         // Initialize managers
         _circleManager = State(initialValue: CircleAnimationManager(config: config))
         _transitionCoordinator = State(initialValue: TransitionCoordinator(initialType: type, config: config))
         _sizeManager = State(initialValue: RectangleSizeManager(initialSize: CGSize(width: width, height: height), config: config))
-        
+
         // Initialize tail position based on initial bubble type
         let initialTailPosition: CGPoint
         if type.isTalking {
@@ -92,37 +92,37 @@ struct BubbleView: View {
         }
         _tailPositionOffset = State(initialValue: initialTailPosition)
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var actualCornerRadius: CGFloat {
         cornerRadius ?? min(min(height, width) / 2, bubbleConfig.bubbleCornerRadius)
     }
-    
+
     private var minDiameter: CGFloat { bubbleConfig.bubbleMinDiameter }
     private var maxDiameter: CGFloat { bubbleConfig.bubbleMaxDiameter }
     private var blurRadius: CGFloat { bubbleConfig.bubbleBlurRadius }
-    
+
     private func basePadding(config: BubbleConfiguration) -> CGFloat {
         (config.bubbleMaxDiameter / 2 + config.bubbleBlurRadius) * 1
     }
-    
+
     private var basePadding: CGFloat { self.basePadding(config: bubbleConfig) }
-    
+
     private var targetPerimeter: CGFloat {
         bubbleConfig.calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: actualCornerRadius)
     }
-    
+
     private var packingResult: PackingResult {
         bubbleConfig.computeDiameters(length: targetPerimeter, min: minDiameter, max: maxDiameter, seed: animationSeed)
     }
-    
+
     private var targetDiameters: [CGFloat] { packingResult.diameters }
     private var isValid: Bool { packingResult.isValid }
-    
+
     var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
-    
+
     var body: some View {
         Group {
             if transitionCoordinator.canUseNative {
@@ -179,24 +179,24 @@ struct BubbleView: View {
             handleBubbleTypeChange(oldType: oldType, newType: newType)
         }
     }
-    
+
     // MARK: - Content Builder
-    
+
     private func makeAnimatedBubble(at now: Date) -> some View {
         let elapsed = now.timeIntervalSince(startTime)
-        
+
         let animatedSize = sizeManager.currentSize(at: now)
-        
+
         let baseWidth = max(animatedSize.width, 0)
         let baseHeight = max(animatedSize.height, 0)
-        
+
         // Get state-specific information
         let isExploding = transitionCoordinator.isExploding(at: now)
         let explosionProgress = transitionCoordinator.explosionProgress(at: now)
         let isScaling = transitionCoordinator.isScaling(at: now)
         let scalingProgress = transitionCoordinator.scalingProgress(at: now)
         let morphProgress = transitionCoordinator.morphProgress(at: now)
-        
+
         let layout = BubbleMorphLayout(
             baseSize: CGSize(width: baseWidth, height: baseHeight),
             baseCornerRadius: actualCornerRadius,
@@ -204,21 +204,21 @@ struct BubbleView: View {
             blurRadius: blurRadius,
             morphProgress: morphProgress
         )
-        
+
         // During read→thinking, force blur and alpha to full strength for metaball effect
         let currentBlurRadius = isScaling ? blurRadius : layout.blurRadius
         let circleTrackWidth = layout.circleTrackWidth
         let circleTrackHeight = layout.circleTrackHeight
         let circleTrackCornerRadius = layout.circleTrackCornerRadius
         let outwardProgress = layout.outwardProgress
-        
+
         // Handle decorative circles progress for read→thinking
         let decorativeProgress = isScaling ? decorativeCirclesProgress(progress: scalingProgress) : 1.0
-        
+
         let displayWidth: CGFloat
         let displayHeight: CGFloat
         let displayCornerRadius: CGFloat
-        
+
         if isScaling {
             // Scale rectangle with decorative circles animation
             displayWidth = layout.displaySize.width * decorativeProgress
@@ -229,23 +229,23 @@ struct BubbleView: View {
             displayHeight = layout.displaySize.height
             displayCornerRadius = layout.displayCornerRadius
         }
-        
+
         let canvasWidth = layout.canvasSize.width
         let canvasHeight = layout.canvasSize.height
-        
+
         // During read→thinking, force alpha threshold to full strength
         let alphaThresholdMin = isScaling ? 0.2 : layout.alphaThreshold
-        
+
         // Size oscillation progress (3 second cycle)
         let sizeProgress = CGFloat(elapsed / 3.0).truncatingRemainder(dividingBy: 1.0)
-        
+
         let baseDiameters = circleManager.currentBaseDiameters(at: now)
         let currentPerimeter = bubbleConfig.calculateRoundedRectPerimeter(
             width: circleTrackWidth,
             height: circleTrackHeight,
             cornerRadius: circleTrackCornerRadius
         )
-        
+
         let circleState = circleTargetState(
             perimeter: currentPerimeter,
             outwardProgress: outwardProgress,
@@ -255,7 +255,7 @@ struct BubbleView: View {
         )
         let desiredTargets = circleState.targets
         let existingTargets = circleManager.currentTargetDiameters()
-        
+
         if !circleManager.almostEqual(existingTargets, desiredTargets) {
             DispatchQueue.main.async {
                 let refreshedTargets = circleManager.currentTargetDiameters()
@@ -264,17 +264,17 @@ struct BubbleView: View {
                 }
             }
         }
-        
+
         let effectiveMin = circleState.minimum
         let effectiveMax = circleState.maximum
-        
+
         let animationData = bubbleConfig.computeAnimationData(
             baseDiameters: baseDiameters,
             min: effectiveMin,
             max: effectiveMax,
             seed: animationSeed
         )
-        
+
         let animatedDiameters = bubbleConfig.calculateAnimatedDiameters(
             animationData: animationData,
             progress: sizeProgress,
@@ -282,23 +282,23 @@ struct BubbleView: View {
             min: effectiveMin,
             max: effectiveMax
         )
-        
+
         // Movement progress - circles complete one full loop every 10 seconds
         let baseMovementProgress = CGFloat(elapsed / 10.0).truncatingRemainder(dividingBy: 1.0)
-        
+
         // During read→thinking, add damped velocity offset for clockwise motion
         let movementProgress: CGFloat
         if isScaling {
             let velocityMultiplier: CGFloat = 1.0
             let decayRate: CGFloat = 3.0
             let velocityOffset = velocityMultiplier * (1 - scalingProgress) * exp(-decayRate * scalingProgress)
-            
+
             let adjustedProgress = (baseMovementProgress - velocityOffset).truncatingRemainder(dividingBy: 1.0)
             movementProgress = adjustedProgress >= 0 ? adjustedProgress : adjustedProgress + 1.0
         } else {
             movementProgress = baseMovementProgress
         }
-        
+
         // Calculate positions for each circle along the rounded rectangle path
         let positions = bubbleConfig.calculatePositions(
             diameters: animatedDiameters,
@@ -308,17 +308,17 @@ struct BubbleView: View {
             height: circleTrackHeight,
             cornerRadius: circleTrackCornerRadius
         )
-        
+
         let centerPoint = CGPoint(
             x: circleTrackWidth / 2,
             y: circleTrackHeight / 2
         )
-        
+
         // For read→thinking: scale positions uniformly from center
         // For thinking→talking morph: interpolate from positions to center
         let morphedPositions: [CGPoint]
         let morphedDiameters: [CGFloat]
-        
+
         if isScaling {
             // During read→thinking, scale entire coordinate system from center
             morphedPositions = positions.map { point in
@@ -326,7 +326,7 @@ struct BubbleView: View {
                 let scaledOffset = CGPoint(x: offset.x * decorativeProgress, y: offset.y * decorativeProgress)
                 return CGPoint(x: centerPoint.x + scaledOffset.x, y: centerPoint.y + scaledOffset.y)
             }
-            
+
             morphedDiameters = animatedDiameters.map { diameter in
                 max(0, diameter * decorativeProgress)
             }
@@ -335,12 +335,12 @@ struct BubbleView: View {
             morphedPositions = positions.map { point in
                 interpolate(centerPoint, to: point, progress: outwardProgress)
             }
-            
+
             morphedDiameters = animatedDiameters.map { diameter in
                 max(0, diameter * outwardProgress)
             }
         }
-        
+
         // Canvas with metaball effect
         return Canvas { context, _ in
             if alphaThresholdMin > 0.001 {
@@ -349,14 +349,14 @@ struct BubbleView: View {
             if currentBlurRadius > 0.05 {
                 context.addFilter(.blur(radius: currentBlurRadius))
             }
-            
+
             context.drawLayer { ctx in
                 let rectOrigin = layout.rectangleOrigin(for: CGSize(width: displayWidth, height: displayHeight))
                 let trackOrigin = layout.rectangleOrigin(for: layout.circleTrackSize)
                 let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
                     .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
                 ctx.fill(rectPath, with: .color(color))
-                
+
                 // Draw circles around the path
                 for index in morphedDiameters.indices {
                     if let circleSymbol = ctx.resolveSymbol(id: index) {
@@ -391,9 +391,9 @@ struct BubbleView: View {
             )
         }
     }
-    
+
     // MARK: - Helpers
-    
+
     /// Updates the rectangle size through the size manager
     private func updateSize() {
         let animationState = transitionCoordinator.animationState
@@ -404,33 +404,33 @@ struct BubbleView: View {
             skipAnimation: skipAnimation
         )
     }
-    
+
     /// Handles bubble type changes and coordinates transitions
     private func handleBubbleTypeChange(oldType: BubbleType, newType: BubbleType) {
         guard oldType != newType else { return }
-        
+
         // Track previous bubble type
         previousBubbleType = oldType
-        
+
         // Cancel any pending tail position updates
         tailPositionWorkItem?.cancel()
         tailPositionWorkItem = nil
-        
+
         // Start transition
         transitionCoordinator.startTransition(from: oldType, to: newType)
-        
+
         // Manage tail position
         manageTailPosition(from: oldType, to: newType)
-        
+
         // Update size
         updateSize()
     }
-    
+
     /// Manages tail position transitions
     private func manageTailPosition(from oldType: BubbleType, to newType: BubbleType) {
         let thinkingPosition = CGPoint(x: 15, y: -23)
         let talkingPosition = CGPoint(x: 3, y: -1)
-        
+
         if newType.isThinking || newType.isRead {
             tailPositionOffset = thinkingPosition
         } else if newType.isTalking {
@@ -440,7 +440,7 @@ struct BubbleView: View {
             } else if oldType.isThinking {
                 // Thinking→Talking: Start at thinking, animate to talking after delay
                 tailPositionOffset = thinkingPosition
-                
+
                 let workItem = DispatchWorkItem {
                     self.tailPositionOffset = talkingPosition
                 }
@@ -451,7 +451,7 @@ struct BubbleView: View {
             }
         }
     }
-    
+
     /// Calculates circle target state
     private func circleTargetState(
         perimeter: CGFloat,
@@ -467,14 +467,14 @@ struct BubbleView: View {
         ), perimeter > 0.001 else {
             return CircleTargetState(targets: [], minimum: minDiameter, maximum: maxDiameter)
         }
-        
+
         var targets = bubbleConfig.computeDiameters(
             length: perimeter,
             min: bounds.min,
             max: bounds.max,
             seed: seed
         ).diameters
-        
+
         let sum = targets.reduce(0, +)
         if sum > 0 {
             let scale = perimeter / sum
@@ -482,10 +482,10 @@ struct BubbleView: View {
                 targets = targets.map { max(0, $0 * scale) }
             }
         }
-        
+
         return CircleTargetState(targets: targets, minimum: bounds.min, maximum: bounds.max)
     }
-    
+
     /// Calculates effective diameter bounds based on morph progress
     private func effectiveDiameterBounds(
         outwardProgress: CGFloat,
@@ -498,7 +498,7 @@ struct BubbleView: View {
         let maxBound = max(maxDiameter * clamped, minBound)
         return (min: minBound, max: maxBound)
     }
-    
+
     /// Linearly interpolates between two points
     private func interpolate(_ start: CGPoint, to end: CGPoint, progress: CGFloat) -> CGPoint {
         CGPoint(
@@ -506,31 +506,31 @@ struct BubbleView: View {
             y: start.y + (end.y - start.y) * progress
         )
     }
-    
+
     /// Returns the decorative circles scale/position progress with bouncy spring easing
     private func decorativeCirclesProgress(progress: CGFloat) -> CGFloat {
         let decorativeCirclesDelay: TimeInterval = 0.1
         let decorativeCirclesDuration: TimeInterval = 0.3
-        
+
         let startPoint = decorativeCirclesDelay / bubbleConfig.readToThinkingDuration
         if progress < startPoint {
             return 0
         }
         let normalizedProgress = (progress - startPoint) / (1 - startPoint)
         let elapsed = normalizedProgress * decorativeCirclesDuration
-        
+
         // Spring physics parameters
         let dampingRatio: CGFloat = 0.6
         let response: CGFloat = decorativeCirclesDuration
-        
+
         let omega0 = 2 * .pi / response
         let omegaD = omega0 * sqrt(1 - dampingRatio * dampingRatio)
-        
+
         let envelope = exp(-dampingRatio * omega0 * elapsed)
         let A: CGFloat = 1
         let B = (dampingRatio * omega0 * A) / omegaD
         let oscillation = A * cos(omegaD * elapsed) + B * sin(omegaD * elapsed)
-        
+
         return min(max(1 - envelope * oscillation, 0), 1)
     }
 }
@@ -557,7 +557,7 @@ fileprivate struct BubbleMorphLayout {
     let canvasSize: CGSize
     let alphaThreshold: CGFloat
     let circleTrackInset: CGFloat
-    
+
     init(
         baseSize: CGSize,
         baseCornerRadius: CGFloat,
@@ -569,11 +569,11 @@ fileprivate struct BubbleMorphLayout {
         let outwardProgress = 1 - clampedProgress
         let canvasPadding = basePadding * outwardProgress
         let inset = basePadding * outwardProgress
-        
+
         let trackWidth = max(0, baseSize.width - inset * 2)
         let trackHeight = max(0, baseSize.height - inset * 2)
         let trackCornerRadius = min(baseCornerRadius, min(trackWidth, trackHeight) / 2)
-        
+
         self.morphProgress = clampedProgress
         self.outwardProgress = outwardProgress
         self.canvasPadding = canvasPadding
@@ -589,10 +589,10 @@ fileprivate struct BubbleMorphLayout {
         )
         self.alphaThreshold = max(0.001, 0.2 * outwardProgress)
     }
-    
+
     var circleTrackWidth: CGFloat { circleTrackSize.width }
     var circleTrackHeight: CGFloat { circleTrackSize.height }
-    
+
     func rectangleOrigin(for displaySize: CGSize) -> CGPoint {
         CGPoint(
             x: canvasPadding + (circleTrackSize.width - displaySize.width) / 2,
@@ -605,7 +605,7 @@ fileprivate struct BubbleMorphLayout {
 
 #Preview("Bubble View"){
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    
+
     VStack(alignment: .leading, spacing: 16) {
         BubbleView(
             width: 68,
@@ -623,7 +623,7 @@ fileprivate struct BubbleMorphLayout {
     @Previewable @State var isTalking = true
     @Previewable @State var width: CGFloat = 220
     @Previewable @State var height: CGFloat = 120
-    
+
     VStack(spacing: 24) {
         BubbleView(
             width: width,
@@ -634,7 +634,7 @@ fileprivate struct BubbleMorphLayout {
             showTail: true
         )
         .frame(width: width + 120, height: height + 120)
-        
+
         Button(isTalking ? "Switch to Thinking" : "Switch to Talking") {
             isTalking.toggle()
         }

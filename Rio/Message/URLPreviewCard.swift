@@ -12,11 +12,11 @@ import LinkPresentation
 struct URLPreviewCard: View {
     let url: URL
     let textColor: Color
-    
+
     @State private var metadata: LPLinkMetadata?
     @State private var isLoading = true
     @State private var hasFailed = false
-    
+
     var body: some View {
         Group {
             if isLoading {
@@ -31,7 +31,7 @@ struct URLPreviewCard: View {
             fetchMetadata()
         }
     }
-    
+
     // Loading placeholder with redacted content
     private var loadingPlaceholder: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -39,12 +39,12 @@ struct URLPreviewCard: View {
             Rectangle()
                 .fill(Color.primary.opacity(0.5))
                 .cornerRadius(8)
-            
+
             // Placeholder for title
             Text("Lorem ipsum dolor sit amet")
                 .font(.headline)
                 .redacted(reason: .placeholder)
-            
+
             // Placeholder for description
             Text("Consectetur adipiscing elit sed do eiusmod tempor incididunt")
                 .font(.subheadline)
@@ -52,7 +52,7 @@ struct URLPreviewCard: View {
                 .redacted(reason: .placeholder)
         }
     }
-    
+
     // Fallback view when metadata fetch fails
     private var fallbackView: some View {
         Button {
@@ -65,7 +65,7 @@ struct URLPreviewCard: View {
                 .truncationMode(.middle)
         }
     }
-    
+
     private func fetchMetadata() {
         let provider = LPMetadataProvider()
         provider.startFetchingMetadata(for: url) { fetchedMetadata, error in
@@ -80,7 +80,7 @@ struct URLPreviewCard: View {
             }
         }
     }
-    
+
     private func openURL() {
         UIApplication.shared.open(url)
     }
@@ -89,17 +89,17 @@ struct URLPreviewCard: View {
 /// UIViewRepresentable wrapper for LPLinkView
 struct LinkPreviewView: UIViewRepresentable {
     let metadata: LPLinkMetadata
-    
+
     func makeUIView(context: Context) -> LPLinkView {
         let linkView = LPLinkView(metadata: metadata)
         return linkView
     }
-    
+
     func updateUIView(_ uiView: LPLinkView, context: Context) {
         uiView.metadata = metadata
         uiView.sizeToFit()
     }
-    
+
     // iOS 16+ only - Properly size the link view based on SwiftUI's proposed size
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: LPLinkView, context: Context) -> CGSize? {
         // Use the proposed width (or fallback to its intrinsic content width)

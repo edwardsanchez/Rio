@@ -9,30 +9,30 @@ import Foundation
 
 /// Utility for detecting content types in text messages
 struct ContentTypeDetector {
-    
+
     /// Checks if a string contains only emoji characters (1-3 emoji)
     /// - Parameter text: The text to check
     /// - Returns: True if the text contains only 1-3 emoji characters
     static func isEmojiOnly(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
-        
+
         // Check if each character (grapheme cluster) is emoji
         // A character is emoji if its first scalar has emoji properties
         let allEmoji = trimmed.allSatisfy { char in
             guard let firstScalar = char.unicodeScalars.first else { return false }
             return firstScalar.properties.isEmoji
         }
-        
+
         guard allEmoji else { return false }
-        
+
         // Count the number of grapheme clusters (visible emoji)
         // This correctly counts "👋🏻" as 1 emoji, "👨‍👩‍👧‍👦" as 1 emoji, etc.
         let emojiCount = trimmed.count
-        
+
         return emojiCount >= 1 && emojiCount <= 3
     }
-    
+
     /// Detects URLs in text and splits the text into segments
     /// - Parameter text: The text to parse
     /// - Returns: Array of tuples containing (content, isURL)
@@ -40,20 +40,20 @@ struct ContentTypeDetector {
         guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
             return [(content: text, isURL: false)]
         }
-        
+
         let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
-        
+
         // If no URLs found, return the original text
         guard !matches.isEmpty else {
             return [(content: text, isURL: false)]
         }
-        
+
         var segments: [(content: String, isURL: Bool)] = []
         var currentIndex = text.startIndex
-        
+
         for match in matches {
             guard let range = Range(match.range, in: text) else { continue }
-            
+
             // Add text before URL (if any)
             if currentIndex < range.lowerBound {
                 let textBeforeURL = String(text[currentIndex..<range.lowerBound])
@@ -61,14 +61,14 @@ struct ContentTypeDetector {
                     segments.append((content: textBeforeURL, isURL: false))
                 }
             }
-            
+
             // Add URL
             let urlString = String(text[range])
             segments.append((content: urlString, isURL: true))
-            
+
             currentIndex = range.upperBound
         }
-        
+
         // Add remaining text after last URL (if any)
         if currentIndex < text.endIndex {
             let remainingText = String(text[currentIndex...])
@@ -76,10 +76,10 @@ struct ContentTypeDetector {
                 segments.append((content: remainingText, isURL: false))
             }
         }
-        
+
         return segments
     }
-    
+
     /// Creates appropriate ContentType based on text content
     /// - Parameter text: The text to analyze
     /// - Returns: Appropriate ContentType (.emoji for emoji-only 1-3, .text otherwise)
@@ -99,10 +99,10 @@ extension Character {
     var isEmoji: Bool {
         // Check if the character contains emoji
         guard let firstScalar = unicodeScalars.first else { return false }
-        
+
         // Emoji ranges and properties
-        return firstScalar.properties.isEmoji && 
-               (firstScalar.properties.isEmojiPresentation || 
+        return firstScalar.properties.isEmoji &&
+               (firstScalar.properties.isEmojiPresentation ||
                 unicodeScalars.count > 1)
     }
 }

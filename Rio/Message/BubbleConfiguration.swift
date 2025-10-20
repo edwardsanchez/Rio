@@ -10,50 +10,50 @@ import SwiftUI
 /// Centralized configuration and utilities for bubble animations and layout
 @Observable
 class BubbleConfiguration {
-    
+
     // MARK: - Configuration Constants
-    
+
     /// Corner radius for bubble shapes
     let bubbleCornerRadius: CGFloat = 20
-    
+
     /// Minimum diameter for metaball circles
     let bubbleMinDiameter: CGFloat = 13
-    
+
     /// Maximum diameter for metaball circles
     let bubbleMaxDiameter: CGFloat = 23
-    
+
     /// Blur radius for metaball effect
     let bubbleBlurRadius: CGFloat = 2
-    
+
     // MARK: - Animation Timing
-    
+
     /// Duration used for circle size interpolation in BubbleView
     let circleTransitionDuration: TimeInterval = 0.3
-    
+
     /// Duration for the thinking/talking morph animation
     let morphDuration: TimeInterval = 0.2
-    
+
     /// Maximum duration for the spring-based resize animation before it's cut off
     let resizeCutoffDuration: TimeInterval = 1
-    
+
     /// Total duration for the read→thinking animation
     let readToThinkingDuration: TimeInterval = 0.8
-    
+
     /// Duration for the explosion animation when transitioning from thinking to read
     let explosionDuration: TimeInterval = 0.5
-    
+
     /// External callers coordinate text reveals with this delay to match the morph
     var textRevealDelay: TimeInterval {
         (morphDuration + resizeCutoffDuration) * 0.25
     }
-    
+
     // MARK: - Helper Functions
-    
+
     /// Calculate background opacity based on message type
     func backgroundOpacity(for messageType: MessageType) -> Double {
         messageType.isInbound ? 0.6 : 1.0
     }
-    
+
     /// Calculate parallax offset for cascading jelly effect
     func calculateParallaxOffset(
         scrollVelocity: CGFloat,
@@ -63,24 +63,24 @@ class BubbleConfiguration {
     ) -> CGFloat {
         // Don't apply parallax during new message animations
         guard !isNewMessage else { return 0 }
-        
+
         // Ensure we have a valid scroll velocity
         guard scrollVelocity != 0 else { return 0 }
-        
+
         // Only apply cascading effect during active scrolling phases
         let shouldApplyCascade = scrollPhase == .tracking || scrollPhase == .decelerating
-        
+
         if shouldApplyCascade {
             // Create cascading effect based on visible message position
             // Messages lower in the visible area get higher multipliers
             let baseMultiplier: CGFloat = 0.8
             let cascadeIncrement: CGFloat = 0.2
             let maxCascadeMessages = 20 // Limit cascade to prevent excessive multipliers
-            
+
             // Calculate position-based multiplier (clamped to prevent extreme values)
             let cascadePosition = min(visibleMessageIndex, maxCascadeMessages)
             let multiplier = baseMultiplier + (CGFloat(cascadePosition) * cascadeIncrement)
-            
+
             return -scrollVelocity * multiplier
         } else {
             // Use consistent multiplier when not actively scrolling
@@ -88,18 +88,18 @@ class BubbleConfiguration {
             return -scrollVelocity * multiplier
         }
     }
-    
+
     // MARK: - Geometry Calculations
-    
+
     /// Calculates the perimeter of a rounded rectangle (used for circle packing & animation)
     func calculateRoundedRectPerimeter(width: CGFloat, height: CGFloat, cornerRadius: CGFloat) -> CGFloat {
         let straightWidth = width - 2 * cornerRadius
         let straightHeight = height - 2 * cornerRadius
         let arcLength = 2 * .pi * cornerRadius // Full circle circumference
-        
+
         return 2 * straightWidth + 2 * straightHeight + arcLength
     }
-    
+
     /// Packs the given perimeter with circles that stay between `min` and `max` diameters
     func computeDiameters(length L: CGFloat, min a: CGFloat, max b: CGFloat, seed: UInt64) -> PackingResult {
         let avg = (a + b) / 2
@@ -169,7 +169,7 @@ class BubbleConfiguration {
 
         return PackingResult(diameters: sizes, isValid: isValid)
     }
-    
+
     /// Prepares the per-circle oscillation data so the total length remains stable during animation
     func computeAnimationData(baseDiameters: [CGFloat], min: CGFloat, max: CGFloat, seed: UInt64) -> [CircleAnimationData] {
         var rng = SeededRandomGenerator(seed: seed)
@@ -209,7 +209,7 @@ class BubbleConfiguration {
 
         return animationData
     }
-    
+
     /// Applies the oscillation data while ensuring the combined length equals the perimeter
     func calculateAnimatedDiameters(
         animationData: [CircleAnimationData],
@@ -297,7 +297,7 @@ class BubbleConfiguration {
 
         return diameters
     }
-    
+
     /// Converts circle diameters and travel progress into centre points along a rounded rectangle path
     func calculatePositions(
         diameters: [CGFloat],
@@ -336,7 +336,7 @@ class BubbleConfiguration {
 
         return positions
     }
-    
+
     /// Maps a distance along the rounded rectangle perimeter to a concrete coordinate
     func pointOnRoundedRectPath(
         distance: CGFloat,

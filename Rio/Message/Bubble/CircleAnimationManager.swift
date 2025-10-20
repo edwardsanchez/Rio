@@ -14,13 +14,13 @@ class CircleAnimationManager {
     private var circleTransitions: [CircleTransition] = []
     private var nextCircleID: Int = 0
     private let config: BubbleConfiguration
-    
+
     init(config: BubbleConfiguration) {
         self.config = config
     }
-    
+
     // MARK: - Configuration
-    
+
     /// Sets up initial circle transitions without animation
     func configureInitial(targetDiameters: [CGFloat]) {
         let now = Date()
@@ -36,17 +36,17 @@ class CircleAnimationManager {
         }
         nextCircleID = targetDiameters.count
     }
-    
+
     // MARK: - Updates
-    
+
     /// Updates circle transitions to animate to new target diameters
     func updateTransitions(targetDiameters: [CGFloat]) {
         let now = Date()
         var updated: [CircleTransition] = []
         let existing = sortedTransitions()
-        
+
         let sharedCount = min(existing.count, targetDiameters.count)
-        
+
         // Update existing circles to new targets
         for i in 0..<sharedCount {
             var transition = existing[i]
@@ -58,7 +58,7 @@ class CircleAnimationManager {
             transition.isDisappearing = false
             updated.append(transition)
         }
-        
+
         // Mark excess circles for removal
         if existing.count > targetDiameters.count {
             for i in targetDiameters.count..<existing.count {
@@ -73,7 +73,7 @@ class CircleAnimationManager {
                 scheduleRemoval(of: transition.id)
             }
         }
-        
+
         // Add new circles
         if targetDiameters.count > existing.count {
             for i in existing.count..<targetDiameters.count {
@@ -90,13 +90,13 @@ class CircleAnimationManager {
                 updated.append(transition)
             }
         }
-        
+
         updated.sort { $0.index < $1.index }
         circleTransitions = updated
     }
-    
+
     // MARK: - Queries
-    
+
     /// Returns current interpolated diameters of all visible circles
     func currentBaseDiameters(at date: Date) -> [CGFloat] {
         sortedTransitions()
@@ -108,7 +108,7 @@ class CircleAnimationManager {
                 return max(0, value)
             }
     }
-    
+
     /// Returns target diameters for comparison
     func currentTargetDiameters(tolerance: CGFloat = 0.001) -> [CGFloat] {
         sortedTransitions()
@@ -117,7 +117,7 @@ class CircleAnimationManager {
                 return value > tolerance ? value : nil
             }
     }
-    
+
     /// Checks if two diameter arrays are almost identical
     func almostEqual(_ lhs: [CGFloat], _ rhs: [CGFloat], tolerance: CGFloat = 0.1) -> Bool {
         guard lhs.count == rhs.count else { return false }
@@ -126,13 +126,13 @@ class CircleAnimationManager {
         }
         return true
     }
-    
+
     // MARK: - Private Helpers
-    
+
     private func sortedTransitions() -> [CircleTransition] {
         circleTransitions.sorted { $0.index < $1.index }
     }
-    
+
     private func scheduleRemoval(of id: Int) {
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(config.circleTransitionDuration))
@@ -151,7 +151,7 @@ struct CircleTransition: Identifiable {
     var endValue: CGFloat
     var startTime: Date
     var isDisappearing: Bool
-    
+
     func value(at date: Date, duration: TimeInterval) -> CGFloat {
         guard duration > 0 else { return endValue }
         let elapsed = date.timeIntervalSince(startTime)

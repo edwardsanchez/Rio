@@ -16,34 +16,34 @@ struct TalkingTailView: View {
     let messageType: MessageType
     let tailPositionOffset: CGPoint
     let previousBubbleType: BubbleType?
-    
+
     private var tailAlignment: Alignment {
         messageType.isInbound ? .bottomLeading : .bottomTrailing
     }
-    
+
     private var tailOffset: CGPoint {
         messageType.isInbound ? CGPoint(x: 5.5, y: 10.5) : CGPoint(x: -5.5, y: 10.5)
     }
-    
+
     private var tailRotation: Angle {
         messageType.isInbound ? Angle(degrees: 180) : .zero
     }
-    
+
     var body: some View {
         let effectiveType = layoutType ?? bubbleType
         let isInbound = messageType.isInbound
-        
+
         // Apply direction-specific offset based on message type
         let directionAdjustedOffset = CGPoint(
             x: isInbound ? tailPositionOffset.x : -tailPositionOffset.x,
             y: tailPositionOffset.y
         )
-        
+
         // Determine if we should animate (not from read state)
         let shouldAnimate = previousBubbleType != .read
-        
+
         let targetOpacity: CGFloat = showTail && effectiveType.isTalking ? 1 : 0
-        
+
         return Image(.cartouche)
             .resizable()
             .frame(width: 15, height: 15)

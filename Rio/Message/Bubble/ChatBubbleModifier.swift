@@ -37,7 +37,7 @@ private struct ChatBubbleModifier: ViewModifier {
         // This works because read→talking has displayedType delayed, but we want size immediate
         let isReadToTalking = layoutType == .read && bubbleType == .talking
         let sizingType = isReadToTalking ? bubbleType : layoutType
-        
+
         content
             .padding(.vertical, 10)
             .padding(.horizontal, layoutType == .thinking ? 17 : 13)

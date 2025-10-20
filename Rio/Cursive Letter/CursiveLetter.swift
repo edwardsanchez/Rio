@@ -102,7 +102,7 @@ struct CursiveLetter {
         Logger.cursiveLetter.info("Total letters loaded: \(letters.count)")
         return letters
     }()
-    
+
     /**
      * Loads a single cursive letter from an SVG file in the app bundle.
      *
@@ -264,7 +264,7 @@ struct CursiveLetter {
 
         return nil
     }
-    
+
     /**
      * Extracts the vector path data from an SVG string using multiple regex patterns.
      *

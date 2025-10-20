@@ -30,15 +30,15 @@ struct ChatDetailView: View {
     @State private var scrollVelocity: CGFloat = 0
     @State private var previousScrollY: CGFloat = 0
     @State private var scrollPhase: ScrollPhase = .idle
-    
+
     // Image zoom transition
     @State private var selectedImageData: ImageData?
-    
+
     init(chat: Chat) {
         self.chat = chat
         _messages = State(initialValue: chat.messages)
     }
-    
+
     var body: some View {
         ZStack {
             NavigationStack {
@@ -158,7 +158,7 @@ struct ChatDetailView: View {
                 }
                 .coordinateSpace(name: "field")
             }
-            
+
             // Image detail overlay
             if let imageData = selectedImageData {
                 ImageDetailView(
@@ -178,7 +178,7 @@ struct ChatDetailView: View {
     }
 
     // MARK: - Scrolling
-    
+
     private func scrollToLatestMessage() {
         guard let lastMessage = messages.last else { return }
 
@@ -186,7 +186,7 @@ struct ChatDetailView: View {
             scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
         }
     }
-    
+
     private func scrollToLatestMessageInstant() {
         guard let lastMessage = messages.last else { return }
 
@@ -199,7 +199,7 @@ struct ChatDetailView: View {
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
-    
+
     let sampleMessages = [
         Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-7200), messageType: .inbound(.talking)),
         Message(content: .text("Are you good?"), user: mayaUser, date: Date().addingTimeInterval(-7100), messageType: .inbound(.talking)),
@@ -209,14 +209,14 @@ struct ChatDetailView: View {
         Message(content: .text("Thanks! 😊"), user: sophiaUser, date: Date().addingTimeInterval(-100), messageType: .inbound(.talking)),
         Message(content: .text("You're welcome!"), user: edwardUser, date: Date().addingTimeInterval(-50), messageType: .outbound)
     ]
-    
+
     let sampleChat = Chat(
         title: "Maya & Sophia",
         participants: [edwardUser, mayaUser, sophiaUser],
         messages: sampleMessages,
         theme: .defaultTheme
     )
-    
+
     ChatDetailView(chat: sampleChat)
         .environment(ChatData())
         .environment(BubbleConfiguration())
@@ -225,7 +225,7 @@ struct ChatDetailView: View {
 #Preview("Outbound Geometry Match Debug") {
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
-    
+
     // Create a message that was just sent with a stable ID
     let newMessageId = UUID()
     let newMessage = Message(
@@ -234,14 +234,14 @@ struct ChatDetailView: View {
         user: edwardUser,
         messageType: .outbound
     )
-    
+
     let previousMessages = [
         Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-7200), messageType: .inbound(.talking)),
         Message(content: .text("Hey! I'm doing well, thanks!"), user: edwardUser, date: Date().addingTimeInterval(-7000), messageType: .outbound)
     ]
-    
+
     let allMessages = previousMessages + [newMessage]
-    
+
     OutboundGeometryMatchDebugView(messages: allMessages, newMessageId: newMessageId)
         .environment(BubbleConfiguration())
 }
@@ -249,12 +249,12 @@ struct ChatDetailView: View {
 private struct OutboundGeometryMatchDebugView: View {
     let messages: [Message]
     let newMessageId: UUID
-    
+
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData?
-    
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
@@ -279,14 +279,14 @@ private struct OutboundGeometryMatchDebugView: View {
                 .scrollClipDisabled()
                 .contentMargins(.horizontal, 20, for: .scrollContent)
                 .background(Color.base)
-                
+
                 // Mock input field to show where the message should be aligned
                 VStack(spacing: 0) {
                     Text("Mock Input Field (for reference)")
                         .font(.caption)
                         .foregroundColor(.red)
                         .padding(.bottom, 4)
-                    
+
                     HStack(alignment: .bottom) {
                         Text("This is a test message!")
                             .padding([.vertical, .leading], 15)
