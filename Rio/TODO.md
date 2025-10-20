@@ -12,7 +12,7 @@
 
 #### Content Types
 [ ] Ability to view multiple photos - likely a caroussel
-[ ] Ability to tap on photo and view it full screen
+[ ] Ability to tap on photo and view it full screen <<<
 [ ] Ability to share photo when viewed full screen
 [ ] Ability to tap on maps and open Apple Maps
 
@@ -20,10 +20,11 @@
     [ ] Ability to unsend messages
     [ ] Ability to copy message content
     [ ] Ability to edit message
+    [ ] Ability to reply to message
     [ ] Ability to save/share content like Image and files
+    [ ] Ability to tap to add reactions
+        [ ] Ability to see who in a group chat reacted to the message
 
-[ ] Ability to tap to add reactions
-    [ ] Ability to see who in a group chat reacted to the message
 [ ] Show person's avatar at and group avatar at the top
 [ ] Style List view of messages
 [ ] Ability to start a new chat or group chat
