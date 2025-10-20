@@ -10,9 +10,11 @@ import SwiftUI
 /// Custom layout that positions items in a circular arrangement around a center point
 struct RadialLayout: Layout {
     var radius: CGFloat
+    var menuIsShowing: Bool
 
-    init(radius: CGFloat = 100) {
+    init(radius: CGFloat = 100, menuIsShowing: Bool = false) {
         self.radius = radius
+        self.menuIsShowing = menuIsShowing
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -32,8 +34,10 @@ struct RadialLayout: Layout {
             let radians = angle * .pi / 180.0
 
             // Calculate position using polar coordinates
-            let x = center.x + radius * cos(radians)
-            let y = center.y + radius * sin(radians)
+            // When menu is hidden, all items are at center; when shown, they move to their positions
+            let currentRadius = menuIsShowing ? radius : 0
+            let x = center.x + currentRadius * cos(radians)
+            let y = center.y + currentRadius * sin(radians)
 
             // Place the subview at the calculated position
             subview.place(at: CGPoint(x: x, y: y), anchor: .center, proposal: .unspecified)
@@ -43,35 +47,45 @@ struct RadialLayout: Layout {
 
 struct TapBacks: View {
     @State private var menuIsShowing = false
+    var radius: CGFloat = 100
 
     let reactions = ["❤️", "👍", "😂", "😮", "😢", "🔥"]
 
     var body: some View {
         ZStack {
             // Radial menu with emoji reactions
-            RadialLayout(radius: menuIsShowing ? 100 : 0) {
-                ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
-                    Circle()
-                        .fill(.white)
-                        .frame(width: 44, height: 44)
-                        .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        .overlay(
-                            Text(emoji)
-                                .font(.system(size: 24))
+            RadialLayout(radius: radius, menuIsShowing: menuIsShowing) {
+                GlassEffectContainer {
+                    ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
+                        Button {
+                            print(emoji)
+                        } label: {
+                            Circle()
+                                .fill(.clear)
+                                .frame(width: 44, height: 44)
+                                .overlay(
+                                    Text(emoji)
+                                        .font(.system(size: 24))
+                                )
+                                .opacity(menuIsShowing ? 1 : 0)
+                        }
+                        .glassEffect(.regular, in: .circle)
+                        .animation(
+                            .spring(duration: 0.4, bounce: 0.5)
+                            .delay(Double(index) * 0.05),
+                            value: menuIsShowing
                         )
-                        .transition(.scale.combined(with: .opacity))
-                        .animation(.spring(duration: 0.4, bounce: 0.5).delay(Double(index) * 0.05), value: menuIsShowing)
+                    }
                 }
             }
+            .animation(.spring(duration: 0.4, bounce: 0.5), value: menuIsShowing)
 
             // Main trigger circle
             Circle()
                 .fill(.blue)
                 .frame(width: 100, height: 100)
                 .onTapGesture {
-                    withAnimation(.spring(duration: 0.3, bounce: 0.4)) {
-                        menuIsShowing.toggle()
-                    }
+                    menuIsShowing.toggle()
                 }
         }
     }
