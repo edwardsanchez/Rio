@@ -146,9 +146,9 @@ struct TapBacksModifier: ViewModifier {
             return CGSize(width: offsetX, height: offsetY)
             
         case .largeTopArc:
-            // Center horizontally at tap location
+            // Left-align with the parent view horizontally
             // Position circle so top arc appears just above the view
-            let offsetX = tapLocation.x - viewSize.width / 2
+            let offsetX: CGFloat = 0
             // Circle center should be positioned so items at -radius are just above view top
             // View top is at -viewSize.height/2, we want items about 30-40px above that
             let offsetY = radius - viewSize.height / 2 - 80
