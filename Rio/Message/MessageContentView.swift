@@ -16,7 +16,6 @@ struct MessageContentView: View {
     var messageID: UUID? = nil  // Optional message ID for creating unique image identifiers
     @Binding var selectedImageData: ImageData?
     
-    @Environment(ImageGeometryTracker.self) private var geometryTracker
     
     @State private var contentWidth = CGFloat.zero
     @State private var showingVideoFullScreen = false
@@ -46,26 +45,15 @@ struct MessageContentView: View {
             colorView(rgb)
             
         case .image(let image):
-            let imageID = "\(uniquePrefix)-standalone-image"
             imageView(image)
-                .onGeometryChange(for: CGRect.self) { proxy in
-                    proxy.frame(in: .global)
-                } action: { rect in
-                    geometryTracker.updateGeometry(for: imageID, rect: rect)
-                }
                 .onTapGesture {
-                    withAnimation(.smooth(duration: 0.4)) {
-                        selectedImageData = ImageData(id: imageID, image: image)
-                    }
+                    selectedImageData = ImageData(image: image)
                 }
             
         case .labeledImage(let labeledImage):
-            let imageID = "\(uniquePrefix)-standalone-labeled"
-            labeledImageView(labeledImage, imageID: imageID)
+            labeledImageView(labeledImage)
                 .onTapGesture {
-                    withAnimation(.smooth(duration: 0.4)) {
-                        selectedImageData = ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label)
-                    }
+                    selectedImageData = ImageData(image: labeledImage.image, label: labeledImage.label)
                 }
             
         case .video(let url):
@@ -319,7 +307,7 @@ struct MessageContentView: View {
     }
     
     @ViewBuilder
-    private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false, imageID: String? = nil) -> some View {
+    private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false) -> some View {
         VStack(spacing: compact ? 4 : 8) {
             Group {
                 labeledImage.image
@@ -329,13 +317,6 @@ struct MessageContentView: View {
                     .if(compact) { view in
                         view.frame(maxWidth: 80, maxHeight: 80)
                     }
-            }
-            .if(imageID != nil) { view in
-                view.onGeometryChange(for: CGRect.self) { proxy in
-                    proxy.frame(in: .global)
-                } action: { rect in
-                    geometryTracker.updateGeometry(for: imageID!, rect: rect)
-                }
             }
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
@@ -367,25 +348,14 @@ struct MessageContentView: View {
         case .color(let rgb):
             colorView(rgb, compact: true)
         case .image(let image):
-            let imageID = "\(uniquePrefix)-grid-image-\(index)"
             imageView(image, compact: true)
-                .onGeometryChange(for: CGRect.self) { proxy in
-                    proxy.frame(in: .global)
-                } action: { rect in
-                    geometryTracker.updateGeometry(for: imageID, rect: rect)
-                }
                 .onTapGesture {
-                    withAnimation(.smooth(duration: 0.4)) {
-                        selectedImageData = ImageData(id: imageID, image: image)
-                    }
+                    selectedImageData = ImageData(image: image)
                 }
         case .labeledImage(let labeledImage):
-            let imageID = "\(uniquePrefix)-grid-labeled-\(index)"
-            labeledImageView(labeledImage, compact: true, imageID: imageID)
+            labeledImageView(labeledImage, compact: true)
                 .onTapGesture {
-                    withAnimation(.smooth(duration: 0.4)) {
-                        selectedImageData = ImageData(id: imageID, image: labeledImage.image, label: labeledImage.label)
-                    }
+                    selectedImageData = ImageData(image: labeledImage.image, label: labeledImage.label)
                 }
         case .location(let mapItem):
             locationView(mapItem, compact: true)
@@ -402,7 +372,7 @@ struct MessageContentView: View {
 #Preview("Text & Choices") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -499,7 +469,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -508,7 +477,7 @@ struct MessageContentView: View {
 #Preview("Images") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -579,9 +548,7 @@ struct MessageContentView: View {
                     get: { selectedImageData != nil },
                     set: { newValue in
                         if !newValue {
-                            withAnimation(.smooth(duration: 0.4)) {
-                                selectedImageData = nil
-                            }
+                            selectedImageData = nil
                         }
                     }
                 )
@@ -589,7 +556,7 @@ struct MessageContentView: View {
             .zIndex(1)
         }
     }
-    .environment(geometryTracker)
+    
 }
 
 // MARK: - Preview 3: Audio & Video
@@ -597,7 +564,7 @@ struct MessageContentView: View {
 #Preview("Audio & Video") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -637,7 +604,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -646,7 +612,7 @@ struct MessageContentView: View {
 #Preview("Colors & Locations") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -762,7 +728,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -771,7 +736,7 @@ struct MessageContentView: View {
 #Preview("Values") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -946,7 +911,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -955,7 +919,7 @@ struct MessageContentView: View {
 #Preview("Value Ranges") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1152,7 +1116,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -1161,7 +1124,7 @@ struct MessageContentView: View {
 #Preview("Dates") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1309,7 +1272,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 
@@ -1318,7 +1280,7 @@ struct MessageContentView: View {
 #Preview("Miscellaneous") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
+    
     
     let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
     
@@ -1463,7 +1425,6 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
-        .environment(geometryTracker)
     }
 }
 

@@ -33,7 +33,7 @@ struct ChatDetailView: View {
     
     // Image zoom transition
     @State private var selectedImageData: ImageData? = nil
-    @State private var geometryTracker = ImageGeometryTracker()
+    
 
     init(chat: Chat) {
         self.chat = chat
@@ -56,7 +56,6 @@ struct ChatDetailView: View {
                     theme: chat.theme,
                     selectedImageData: $selectedImageData
                 )
-                .environment(geometryTracker)
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
                 } action: { newValue in
@@ -169,14 +168,11 @@ struct ChatDetailView: View {
                         get: { selectedImageData != nil },
                         set: { newValue in
                             if !newValue {
-                                withAnimation(.smooth(duration: 0.4)) {
-                                    selectedImageData = nil
-                                }
+                                selectedImageData = nil
                             }
                         }
                     )
                 )
-                .environment(geometryTracker)
                 .zIndex(1)
             }
         }
@@ -261,7 +257,6 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData? = nil
-    @State private var geometryTracker = ImageGeometryTracker()
     
     var body: some View {
         NavigationStack {
@@ -278,7 +273,6 @@ private struct OutboundGeometryMatchDebugView: View {
                     theme: .defaultTheme,
                     selectedImageData: $selectedImageData
                 )
-                .environment(geometryTracker)
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
                 } action: { newValue in

@@ -29,7 +29,6 @@ struct BubbleExplosionTestView: View {
     @State private var forceSquarePixels: Bool = false
     @State private var fadeStart: CGFloat = 0.3  // When particles start fading (0-1)
     @State private var selectedImageData: ImageData? = nil
-    @State private var geometryTracker = ImageGeometryTracker()
     @State private var fadeVariance: CGFloat = 0.85  // Variance in fade timing (0-1)
     
     private let outboundAnimationWidth: CGFloat? = nil
@@ -276,7 +275,6 @@ struct BubbleExplosionTestView: View {
                     messageID: message.id,
                     selectedImageData: $selectedImageData
                 )
-                .environment(geometryTracker)
                 .opacity(showTalkingContent ? 1 : 0)
             }
         }
@@ -296,8 +294,6 @@ struct BubbleExplosionTestView: View {
 }
 
 #Preview("Bubble Explosion Test") {
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
-    
     BubbleExplosionTestView(
         message: Message(
             content: .text(""),
@@ -309,5 +305,4 @@ struct BubbleExplosionTestView: View {
     )
     .padding()
     .environment(BubbleConfiguration())
-    .environment(geometryTracker)
 }

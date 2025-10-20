@@ -559,7 +559,6 @@ private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID? = nil
     @State private var selectedImageData: ImageData? = nil
-    @State private var geometryTracker = ImageGeometryTracker()
     
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
@@ -676,17 +675,14 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Inbound Message Bubble Morph") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
-        .environment(geometryTracker)
 }
 
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData? = nil
-    @Previewable @State var geometryTracker = ImageGeometryTracker()
     
     ZStack {
         VStack(spacing: 20) {
@@ -762,5 +758,5 @@ private struct MessageBubblePreviewContainer: View {
             .zIndex(1)
         }
     }
-    .environment(geometryTracker)
+    
 }
