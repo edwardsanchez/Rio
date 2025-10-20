@@ -4,15 +4,13 @@
 
 ### Bugs
 [ ] Fix animation for outbound messages so they come from input field
-[ ] Fix transition between thinking to talking, as it got kind of clunky
-[ ] Fix how bubbles seem to bounce and animate, likely due to their size being set by geometry reader
-[ ] Fix image zoom transition issues
+[ ] Make preview of URL the same size as the final URL rendering.
+[ ] Add transition effect when clicking on image
 
 ### New Features
 
 #### Content Types
 [ ] Ability to view multiple photos - likely a caroussel
-[ ] Ability to tap on photo and view it full screen <<<
 [ ] Ability to share photo when viewed full screen
 [ ] Ability to tap on maps and open Apple Maps
 
@@ -37,4 +35,3 @@
 ### Long Term
 [ ] Ability to create new bots
 [ ] Ability to browse existing bot catalog
-
