@@ -122,10 +122,42 @@ struct BubbleView: View {
     
     // MARK: - View Body
     
+    @State private var useNative: Bool = true
+    
+    @State private var nativeSwapWorkItem: DispatchWorkItem?
+    
+    private func updateCanUseNative(for state: BubbleAnimationState, previous old: BubbleAnimationState? = nil) {
+        switch state {
+        case .quickAppearing:
+            useNative = true
+        case .idle(let t):
+            if t.isTalking {
+                if let old, case .morphing = old {
+                    nativeSwapWorkItem?.cancel()
+                    let work = DispatchWorkItem { self.useNative = true }
+                    nativeSwapWorkItem = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: work) // small grace
+                } else {
+                    useNative = true
+                }
+            } else {
+                useNative = false
+            }
+        case .morphing, .scaling, .exploding:
+            nativeSwapWorkItem?.cancel()
+            useNative = false
+        }
+    }
+    
     var body: some View {
         Group {
-            TimelineView(.animation) { timeline in
-                return makeAnimatedBubble(at: timeline.date)
+            if useNative {
+                RoundedRectangle(cornerRadius: bubbleConfig.bubbleCornerRadius)
+                    .fill(color)
+            } else {
+                TimelineView(.animation) { timeline in
+                    return makeAnimatedBubble(at: timeline.date)
+                }
             }
         }
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
@@ -162,6 +194,7 @@ struct BubbleView: View {
                 circleManager.updateTransitions(targetDiameters: targetDiameters)
             }
             updateSize()
+            updateCanUseNative(for: transitionCoordinator.animationState)
         }
         .onChange(of: CGSize(width: width, height: height)) { _, _ in
             updateSize()
@@ -171,6 +204,9 @@ struct BubbleView: View {
         }
         .onChange(of: bubbleType) { oldType, newType in
             handleBubbleTypeChange(oldType: oldType, newType: newType)
+        }
+        .onChange(of: transitionCoordinator.animationState) { oldState, newState in
+            updateCanUseNative(for: newState, previous: oldState)
         }
     }
     
