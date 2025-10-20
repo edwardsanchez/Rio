@@ -17,16 +17,23 @@ class TransitionCoordinator {
     /// The bubble type to display (may lag behind actual bubbleType for delayed transitions)
     private(set) var displayedType: BubbleType
     
+    /// Whether the view should render using the native SwiftUI branch
+    private(set) var canUseNative: Bool
+    
     /// Task for auto-transitioning to idle state when animation completes
     private var autoTransitionTask: Task<Void, Never>?
     
     /// Task for delayed type updates
     private var delayedTypeTask: Task<Void, Never>?
     
+    /// Task for slightly delayed native swap after morph completes
+    private var nativeSwapTask: Task<Void, Never>?
+    
     init(initialType: BubbleType, config: BubbleConfiguration) {
         self.animationState = .idle(initialType)
         self.displayedType = initialType
         self.config = config
+        self.canUseNative = initialType.isTalking
     }
     
     // MARK: - Transition Management
@@ -36,6 +43,7 @@ class TransitionCoordinator {
         // Cancel any pending transitions
         autoTransitionTask?.cancel()
         delayedTypeTask?.cancel()
+        nativeSwapTask?.cancel()
         
         let now = Date()
         animationState = BubbleAnimationState.transition(from: oldType, to: newType, at: now)
@@ -50,6 +58,35 @@ class TransitionCoordinator {
         } else {
             // Update immediately for other transitions
             displayedType = newType
+        }
+        
+        // Determine native rendering eligibility and schedule swap if needed
+        switch animationState {
+        case .morphing(let from, let to, _):
+            // During morphing, stay on Canvas. If Thinking→Talking, arm a tiny post-morph grace.
+            canUseNative = false
+            if from.isThinking && to.isTalking {
+                let grace: TimeInterval = 0.8
+                let delay = config.morphDuration + grace
+                nativeSwapTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(delay))
+                    guard !Task.isCancelled else { return }
+                    // Only flip if still targeting talking (no conflicting transition)
+                    if case .idle(let t) = self.animationState, t.isTalking {
+                        self.canUseNative = true
+                    } else if case .morphing(_, let toType, _) = self.animationState, toType.isTalking {
+                        self.canUseNative = true
+                    } else if self.displayedType.isTalking {
+                        self.canUseNative = true
+                    }
+                }
+            }
+        case .quickAppearing:
+            canUseNative = true
+        case .exploding, .scaling:
+            canUseNative = false
+        case .idle(let t):
+            canUseNative = t.isTalking
         }
         
         // Schedule automatic transition to idle state when animation completes
