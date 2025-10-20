@@ -14,6 +14,8 @@ struct RadialLayout: Layout {
     var itemCount: Int
     var itemSpacing: CGFloat
     var spacerCenterPercent: CGFloat
+    var parentSize: CGSize
+    var distributeCollapsedX: Bool
     
     /// Calculated spacer percentage based on item count and spacing
     private var spacerPercentage: CGFloat {
@@ -28,13 +30,17 @@ struct RadialLayout: Layout {
         menuIsShowing: Bool = false,
         itemCount: Int = 6,
         itemSpacing: CGFloat = 100,
-        spacerCenterPercent: CGFloat = 0.5
+        spacerCenterPercent: CGFloat = 0.5,
+        parentSize: CGSize = .zero,
+        distributeCollapsedX: Bool = false
     ) {
         self.radius = radius
         self.menuIsShowing = menuIsShowing
         self.itemCount = itemCount
         self.itemSpacing = itemSpacing
         self.spacerCenterPercent = spacerCenterPercent
+        self.parentSize = parentSize
+        self.distributeCollapsedX = distributeCollapsedX
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -47,6 +53,17 @@ struct RadialLayout: Layout {
         guard count > 0 else { return }
 
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
+        let parentWidth = parentSize.width
+        let collapsedPadding: CGFloat = 10
+        let itemWidth = subviews.first?.sizeThatFits(.unspecified).width ?? 0
+        let margin = itemWidth / 2 + collapsedPadding
+        let canDistributeCollapsedX = distributeCollapsedX &&
+            !menuIsShowing &&
+            parentWidth > margin * 2 &&
+            parentWidth > 0 &&
+            itemWidth > 0
+        let parentOriginX = center.x - parentWidth / 2
+        let collapsedDenominator = max(count - 1, 1)
 
         // Calculate available arc (360 degrees minus the spacer)
         let availableArc = 360.0 * (1.0 - spacerPercentage)
@@ -66,12 +83,19 @@ struct RadialLayout: Layout {
             // Calculate angle for this item within the available arc
             let angle = startAngle + (CGFloat(index) * angleIncrement)
             let radians = angle * .pi / 180.0
+            let currentRadius = menuIsShowing ? radius : 0
+            let leftEdge = margin
+            let rightEdge = parentWidth - margin
+            let progress = count > 1 ? CGFloat(index) / CGFloat(collapsedDenominator) : 0.5
+            let relativeX = leftEdge + (rightEdge - leftEdge) * progress
+            let distributedX = parentOriginX + relativeX
 
             // Calculate position using polar coordinates
             // When menu is hidden, all items are at center; when shown, they move to their positions
-            let currentRadius = menuIsShowing ? radius : 0
-            let x = center.x + currentRadius * cos(radians)
             let y = center.y + currentRadius * sin(radians)
+            let defaultX = center.x + radius * cos(radians)
+            let collapsedX = canDistributeCollapsedX ? distributedX : center.x
+            let x = menuIsShowing ? defaultX : collapsedX
 
             // Place the subview at the calculated position
             subview.place(at: CGPoint(x: x, y: y), anchor: .center, proposal: .unspecified)
@@ -138,12 +162,14 @@ struct TapBacksModifier: ViewModifier {
     private var calculatedOffset: CGSize {
         let radius = calculatedRadius
         
+        let offset: CGSize
+        
         switch layoutMode {
         case .smallSide:
             // Position to the right of the view
             let offsetX = viewSize.width / 2// + radius
             let offsetY: CGFloat = 0
-            return CGSize(width: offsetX, height: offsetY)
+            offset = CGSize(width: offsetX, height: offsetY)
             
         case .largeTopArc:
             // Left-align with the parent view horizontally
@@ -152,14 +178,21 @@ struct TapBacksModifier: ViewModifier {
             // Circle center should be positioned so items at -radius are just above view top
             // View top is at -viewSize.height/2, we want items about 30-40px above that
             let offsetY = radius - viewSize.height / 2 - 80
-            return CGSize(width: offsetX, height: offsetY)
+            offset = CGSize(width: offsetX, height: offsetY)
             
         case .tallSideArc:
             // Position to the right of the view
             let offsetX = viewSize.width / 2 + radius * 0.7
             let offsetY: CGFloat = 0
-            return CGSize(width: offsetX, height: offsetY)
+            offset = CGSize(width: offsetX, height: offsetY)
         }
+        
+        if !menuIsShowing && layoutMode == .largeTopArc {
+            // Allow the reactions to collapse back to the parent center
+            return .zero
+        }
+        
+        return offset
     }
 
     func body(content: Content) -> some View {
@@ -185,7 +218,9 @@ struct TapBacksModifier: ViewModifier {
                     menuIsShowing: menuIsShowing,
                     itemCount: reactions.count,
                     itemSpacing: 50,
-                    spacerCenterPercent: calculatedSpacerCenterPercent
+                    spacerCenterPercent: calculatedSpacerCenterPercent,
+                    parentSize: viewSize,
+                    distributeCollapsedX: layoutMode == .largeTopArc
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
@@ -301,7 +336,7 @@ struct TapBackTestView: View {
 //            .padding(.horizontal)
         }
         .frame(maxHeight: .infinity)
-        .scaleEffect(0.2)
+//        .scaleEffect(0.2)
     }
 }
 
