@@ -141,7 +141,7 @@ struct ChatInputView: View {
         message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
-    var sendButton: some View { // TODO: Toby: Reduce button size
+    var sendButton: some View {
         Button {
             sendMessage()
         } label: {
