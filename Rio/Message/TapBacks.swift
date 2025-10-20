@@ -146,9 +146,12 @@ struct TapBacksModifier: ViewModifier {
             return CGSize(width: offsetX, height: offsetY)
             
         case .largeTopArc:
-            // Center horizontally at tap location, position above view
+            // Center horizontally at tap location
+            // Position circle so top arc appears just above the view
             let offsetX = tapLocation.x - viewSize.width / 2
-            let offsetY = -(viewSize.height / 2 + radius)
+            // Circle center should be positioned so items at -radius are just above view top
+            // View top is at -viewSize.height/2, we want items about 30-40px above that
+            let offsetY = radius - viewSize.height / 2 - 80
             return CGSize(width: offsetX, height: offsetY)
             
         case .tallSideArc:
@@ -244,22 +247,22 @@ struct TapBackTestView: View {
     var body: some View {
         VStack(spacing: 60) {
             // Small rectangle - should show compact side menu
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Small View (50×40)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.blue)
-                    .frame(width: 50, height: 40)
-                    .containerShape(.rect)
-                    .glassEffect(.regular.interactive(), in: .rect)
-                    .tapBacks(messageID: UUID()) { reaction in
-                        print("Small tapped: \(reaction)")
-                    }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+//            VStack(alignment: .leading, spacing: 8) {
+//                Text("Small View (50×40)")
+//                    .font(.caption)
+//                    .foregroundStyle(.secondary)
+//                
+//                RoundedRectangle(cornerRadius: 10)
+//                    .fill(.blue)
+//                    .frame(width: 50, height: 40)
+//                    .containerShape(.rect)
+//                    .glassEffect(.regular.interactive(), in: .rect)
+//                    .tapBacks(messageID: UUID()) { reaction in
+//                        print("Small tapped: \(reaction)")
+//                    }
+//            }
+//            .frame(maxWidth: .infinity, alignment: .leading)
+//            .padding(.horizontal)
             
             // Wide rectangle - should show top arc with large radius
             VStack(alignment: .leading, spacing: 8) {
@@ -279,23 +282,23 @@ struct TapBackTestView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
             
-            // Tall rectangle - should show vertical side arc
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Tall View (150×400)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.orange)
-                    .frame(width: 50, height: 200)
-                    .containerShape(.rect)
-                    .glassEffect(.regular.interactive(), in: .rect)
-                    .tapBacks(messageID: UUID()) { reaction in
-                        print("Tall tapped: \(reaction)")
-                    }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+//            // Tall rectangle - should show vertical side arc
+//            VStack(alignment: .leading, spacing: 8) {
+//                Text("Tall View (150×400)")
+//                    .font(.caption)
+//                    .foregroundStyle(.secondary)
+//                
+//                RoundedRectangle(cornerRadius: 10)
+//                    .fill(.orange)
+//                    .frame(width: 50, height: 200)
+//                    .containerShape(.rect)
+//                    .glassEffect(.regular.interactive(), in: .rect)
+//                    .tapBacks(messageID: UUID()) { reaction in
+//                        print("Tall tapped: \(reaction)")
+//                    }
+//            }
+//            .frame(maxWidth: .infinity, alignment: .leading)
+//            .padding(.horizontal)
         }
         .frame(maxHeight: .infinity)
         .scaleEffect(0.2)
