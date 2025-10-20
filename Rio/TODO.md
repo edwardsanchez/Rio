@@ -24,6 +24,7 @@
         [ ] Ability to see who in a group chat reacted to the message
 
 [ ] Show person's avatar at and group avatar at the top
+[ ] Ability to choose primary bubble color for a chat (with contrast checker)
 [ ] Style List view of messages
 [ ] Ability to start a new chat or group chat
 [ ] Ability to see time stamp on message
