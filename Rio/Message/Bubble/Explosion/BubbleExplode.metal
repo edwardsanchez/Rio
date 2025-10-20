@@ -61,14 +61,8 @@ float2 turbulence2D(float2 p, float time) {
     // Calculate all derived values in the shader to ensure consistency
     float animationProgress = rawAnimationProgress;
     
-    // Calculate pixel size based on animation progress
+    // Particleization is gated by explosion start; pixelSize is provided by the caller
     const float circleFormationEnd = 0.05;
-    if (animationProgress <= circleFormationEnd) {
-        float progress = animationProgress / circleFormationEnd;
-        pixelSize = 0.1 + (progress * 1.9);
-    } else {
-        pixelSize = 2.0;
-    }
     
     // Calculate explosion amount based on animation progress
     float explosionSpacing;
@@ -95,6 +89,11 @@ float2 turbulence2D(float2 p, float time) {
         // Scale position toward the explosion center
         float2 offsetFromExplosionCenter = position - layerCenter;
         pinchPosition = layerCenter + offsetFromExplosionCenter * currentPinch;
+    }
+    
+    // If explosion hasn't started yet, return original sample at pinched position (no particles yet)
+    if (explosionSpacing <= 0.001) {
+        return layer.sample(pinchPosition);
     }
     
     float2 offsetFromCenter = pinchPosition - layerCenter;
@@ -130,7 +129,10 @@ float2 turbulence2D(float2 p, float time) {
                 // Sample the same static turbulence field used during the forward pass
                 float turbulenceTime = 0.0;
                 float2 turbulenceDir = turbulence2D(guessBlockCenter, turbulenceTime);
-                float turbulenceAmount = turbulence * explosionSpacing * 30.0 * guessEdgeFactor;
+                // Start turbulence at a stronger baseline (~30% of full spread)
+                float baselineFraction = 0.30;
+                float effectiveExplosionForTurbulence = (maxExplosionSpread > 0.001) ? max(explosionSpacing, baselineFraction * maxExplosionSpread) : explosionSpacing;
+                float turbulenceAmount = turbulence * effectiveExplosionForTurbulence * 30.0 * guessEdgeFactor;
                 guessTurbulenceOffset = turbulenceDir * turbulenceAmount;
             }
             
@@ -190,7 +192,9 @@ float2 turbulence2D(float2 p, float time) {
                     // Sample a static turbulence field so particles drift consistently between frames
                     float turbulenceTime = 0.0;
                     float2 turbulenceOffset = turbulence2D(candidateCenter, turbulenceTime);
-                    float turbulenceAmount = turbulence * explosionSpacing * 30.0 * candidateEdgeFactor;
+                float baselineFraction = 0.30;
+                float effectiveExplosionForTurbulence = (maxExplosionSpread > 0.001) ? max(explosionSpacing, baselineFraction * maxExplosionSpread) : explosionSpacing;
+                float turbulenceAmount = turbulence * effectiveExplosionForTurbulence * 30.0 * candidateEdgeFactor;
                     candidateExplodedCenter += turbulenceOffset * turbulenceAmount;
                 }
                 
