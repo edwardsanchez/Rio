@@ -11,18 +11,29 @@ import SwiftUI
 struct RadialLayout: Layout {
     var radius: CGFloat
     var menuIsShowing: Bool
-    var spacerPercentage: CGFloat
+    var itemCount: Int
+    var itemSpacing: CGFloat
     var spacerCenterPercent: CGFloat
+    
+    /// Calculated spacer percentage based on item count and spacing
+    private var spacerPercentage: CGFloat {
+        let circumference = 2 * .pi * radius
+        let totalItemSpacing = CGFloat(itemCount) * itemSpacing
+        let spacerArc = max(0, circumference - totalItemSpacing)
+        return min(0.9, max(0, spacerArc / circumference)) // Clamp between 0 and 0.9
+    }
 
     init(
         radius: CGFloat = 100,
         menuIsShowing: Bool = false,
-        spacerPercentage: CGFloat = 0,
+        itemCount: Int = 6,
+        itemSpacing: CGFloat = 100,
         spacerCenterPercent: CGFloat = 0.5
     ) {
         self.radius = radius
         self.menuIsShowing = menuIsShowing
-        self.spacerPercentage = max(0, min(1, spacerPercentage)) // Clamp between 0 and 1
+        self.itemCount = itemCount
+        self.itemSpacing = itemSpacing
         self.spacerCenterPercent = spacerCenterPercent
     }
 
@@ -69,22 +80,109 @@ struct RadialLayout: Layout {
 }
 
 struct TapBacksModifier: ViewModifier {
-    @State private var menuIsShowing = false
+    @State private var menuIsShowing = true
+    @State private var viewSize: CGSize = .zero
+    @State private var viewFrame: CGRect = .zero
+    @State private var tapLocation: CGPoint = .zero
+    @State private var screenWidth: CGFloat = 0
+    
     var messageID: UUID
-    var radius: CGFloat
-    var spacerPercentage: CGFloat
-    var spacerCenterPercent: CGFloat
     var reactions: [String]
     var onReactionSelected: (String) -> Void
+    
+    // MARK: - Layout Decision Logic
+    
+    private enum LayoutMode {
+        case smallSide    // Small view, compact menu to the side
+        case largeTopArc  // Wide/medium view, shallow arc above
+        case tallSideArc  // Tall skinny view, vertical arc on side
+    }
+    
+    private var layoutMode: LayoutMode {
+        // Small enough for side placement
+        if viewSize.height < 100 && viewSize.width < 100 {
+            return .smallSide
+        }
+        
+        // Very tall and skinny -> side arc
+        if viewSize.height > 200 && viewSize.width < 200 {
+            return .tallSideArc
+        }
+        
+        // Default to top arc for medium/wide views
+        return .largeTopArc
+    }
+    
+    private var calculatedRadius: CGFloat {
+        switch layoutMode {
+        case .smallSide:
+            return 90
+        case .largeTopArc:
+            return max(400, viewSize.height * 1.5)
+        case .tallSideArc:
+            return max(300, viewSize.height * 0.8)
+        }
+    }
+    
+    private var calculatedSpacerCenterPercent: CGFloat {
+        switch layoutMode {
+        case .smallSide:
+            return 0.75  // Spacer on left, items on right side
+        case .largeTopArc:
+            return 0.5   // Spacer on bottom, items arc above
+        case .tallSideArc:
+            return 0.75  // Spacer on left, items arc vertically on right side
+        }
+    }
+    
+    private var calculatedOffset: CGSize {
+        let radius = calculatedRadius
+        
+        switch layoutMode {
+        case .smallSide:
+            // Position to the right of the view
+            let offsetX = viewSize.width / 2// + radius
+            let offsetY: CGFloat = 0
+            return CGSize(width: offsetX, height: offsetY)
+            
+        case .largeTopArc:
+            // Center horizontally at tap location, position above view
+            let offsetX = tapLocation.x - viewSize.width / 2
+            let offsetY = -(viewSize.height / 2 + radius)
+            return CGSize(width: offsetX, height: offsetY)
+            
+        case .tallSideArc:
+            // Position to the right of the view
+            let offsetX = viewSize.width / 2 + radius * 0.7
+            let offsetY: CGFloat = 0
+            return CGSize(width: offsetX, height: offsetY)
+        }
+    }
 
     func body(content: Content) -> some View {
         content
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newSize in
+                viewSize = newSize
+            }
+            .onGeometryChange(for: CGRect.self) { proxy in
+                proxy.frame(in: .global)
+            } action: { newFrame in
+                viewFrame = newFrame
+            }
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { width in
+                screenWidth = width
+            }
             .background(
                 RadialLayout(
-                    radius: radius,
+                    radius: calculatedRadius,
                     menuIsShowing: menuIsShowing,
-                    spacerPercentage: spacerPercentage,
-                    spacerCenterPercent: spacerCenterPercent
+                    itemCount: reactions.count,
+                    itemSpacing: 50,
+                    spacerCenterPercent: calculatedSpacerCenterPercent
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
@@ -111,20 +209,22 @@ struct TapBacksModifier: ViewModifier {
                         }
                     }
                 }
+                .offset(calculatedOffset)
                 .animation(.spring(duration: 0.4, bounce: 0.5), value: menuIsShowing)
             )
-            .onTapGesture {
-                menuIsShowing.toggle()
-            }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        tapLocation = value.location
+                        menuIsShowing.toggle()
+                    }
+            )
     }
 }
 
 extension View {
     func tapBacks(
         messageID: UUID,
-        radius: CGFloat = 100,
-        spacerPercentage: CGFloat = 0.25,
-        spacerCenterPercent: CGFloat = 0.65,
         reactions: [String] = ["❤️", "👍", "😂", "😮", "😢", "🔥"],
         onReactionSelected: @escaping (String) -> Void = { reaction in
             print("Selected reaction: \(reaction)")
@@ -133,9 +233,6 @@ extension View {
         modifier(
             TapBacksModifier(
                 messageID: messageID,
-                radius: radius,
-                spacerPercentage: spacerPercentage,
-                spacerCenterPercent: spacerCenterPercent,
                 reactions: reactions,
                 onReactionSelected: onReactionSelected
             )
@@ -145,16 +242,63 @@ extension View {
 
 struct TapBackTestView: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: 10)
-            .fill(.blue)
-            .frame(width: 200, height: 40)
-            .containerShape(.rect)
-            .glassEffect(.regular.interactive(), in: .rect)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .tapBacks(messageID: UUID()) { reaction in
-                print("Tapped: \(reaction)")
+        VStack(spacing: 60) {
+            // Small rectangle - should show compact side menu
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Small View (50×40)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.blue)
+                    .frame(width: 50, height: 40)
+                    .containerShape(.rect)
+                    .glassEffect(.regular.interactive(), in: .rect)
+                    .tapBacks(messageID: UUID()) { reaction in
+                        print("Small tapped: \(reaction)")
+                    }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            
+            // Wide rectangle - should show top arc with large radius
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Wide View (300×150)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.green)
+                    .frame(width: 300, height: 50)
+                    .containerShape(.rect)
+                    .glassEffect(.regular.interactive(), in: .rect)
+                    .tapBacks(messageID: UUID()) { reaction in
+                        print("Wide tapped: \(reaction)")
+                    }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            
+            // Tall rectangle - should show vertical side arc
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Tall View (150×400)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.orange)
+                    .frame(width: 50, height: 200)
+                    .containerShape(.rect)
+                    .glassEffect(.regular.interactive(), in: .rect)
+                    .tapBacks(messageID: UUID()) { reaction in
+                        print("Tall tapped: \(reaction)")
+                    }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+        }
+        .frame(maxHeight: .infinity)
+        .scaleEffect(0.2)
     }
 }
 
