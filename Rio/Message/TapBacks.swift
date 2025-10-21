@@ -168,11 +168,7 @@ struct TapBacksModifier: ViewModifier {
         return clamp(interpolator.interpolateFrom(input: viewSize.width))
     }
     
-    private var narrowProgress: CGFloat {
-        1 - widthProgress
-    }
-    
-    private var tallProgress: CGFloat {
+    private var heightProgress: CGFloat {
         guard tallHeightMaximum > tallHeightMinimum else { return 0 }
         let interpolator = ValueInterpolator(
             inputMin: tallHeightMinimum,
@@ -180,18 +176,34 @@ struct TapBacksModifier: ViewModifier {
             outputMin: 0,
             outputMax: 1
         )
-        let heightFactor = clamp(interpolator.interpolateFrom(input: viewSize.height))
-        return clamp(heightFactor * narrowProgress)
+        return clamp(interpolator.interpolateFrom(input: viewSize.height))
+    }
+    
+    private var smallWidthFactor: CGFloat {
+        let threshold: CGFloat = 0.45
+        return clamp((threshold - widthProgress) / threshold)
+    }
+    
+    private var tallSideWeight: CGFloat {
+        clamp(smallWidthFactor * heightProgress)
+    }
+    
+    private var wideWeight: CGFloat {
+        let start: CGFloat = 0.6
+        let range = max(0.0001, 1 - start)
+        return clamp((widthProgress - start) / range)
     }
     
     private var calculatedRadius: CGFloat {
-        let wideRadius = max(400, viewSize.height * 1.5)
-        var widthRadius = lerp(from: sideRadius, to: wideRadius, progress: widthProgress)
-        let shrinkFactor: CGFloat = 1
-        widthRadius -= (widthRadius - sideRadius) * cornerRadiusWeight * shrinkFactor
-        widthRadius = max(widthRadius, sideRadius)
-        let tallRadius = max(300, viewSize.height * 0.8)
-        return lerp(from: widthRadius, to: tallRadius, progress: tallProgress)
+        let minDimension = max(40, min(viewSize.width, viewSize.height))
+        let hugRadius = max(80, minDimension * 0.75 + 30)
+        let tallSideRadius = max(hugRadius, viewSize.height * 0.85)
+        let wideTopRadius = max(300, max(viewSize.width, viewSize.height) * 1.2)
+        
+        var radius = hugRadius
+        radius = lerp(from: radius, to: tallSideRadius, progress: tallSideWeight)
+        radius = lerp(from: radius, to: wideTopRadius, progress: wideWeight)
+        return max(radius, 60)
     }
     
     private var calculatedSpacerCenterPercent: CGFloat {
@@ -240,11 +252,6 @@ struct TapBacksModifier: ViewModifier {
     
     private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
         start + (end - start) * progress
-    }
-    
-    private var cornerRadiusWeight: CGFloat {
-        let peak = 1 - abs(widthProgress - 0.5) * 1
-        return clamp(peak) * (1 - tallProgress)
     }
     
     private func reactionAngles() -> [CGFloat] {
