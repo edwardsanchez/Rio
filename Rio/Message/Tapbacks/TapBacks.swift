@@ -16,8 +16,8 @@ struct TapBacksModifier: ViewModifier {
     @State private var lastLoggedSize: CGSize = .zero
     
     var messageID: UUID
-    var reactions: [String]
-    var onReactionSelected: (String) -> Void
+    var reactions: [AnyView]
+    var onReactionSelected: (Int) -> Void
     
     // MARK: - Layout Cases
 
@@ -31,7 +31,6 @@ struct TapBacksModifier: ViewModifier {
         var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
             switch self {
             case .narrowShort:
-                return (0, 80, 0, 80)
                 return (0, 95, 0, 80)
             case .narrowTall:
                 return (0, 95, 80, .infinity)
@@ -91,6 +90,17 @@ struct TapBacksModifier: ViewModifier {
         var offsetY: CGFloat
         var horizontalAnchor: HorizontalAnchor
         var verticalAnchor: VerticalAnchor
+    }
+
+    static var defaultReactions: [AnyView] {
+        [
+            AnyView(Text("❤️").font(.system(size: 24))),
+            AnyView(Text("👍").font(.system(size: 24))),
+            AnyView(Text("👎").font(.system(size: 24))),
+            AnyView(Text("😂").font(.system(size: 24))),
+            AnyView(Text("😢").font(.system(size: 24))),
+            AnyView(Image(systemName: "face.smiling").font(.system(size: 20, weight: .medium)))
+        ]
     }
 
     enum HorizontalAnchor {
@@ -308,17 +318,16 @@ struct TapBacksModifier: ViewModifier {
                     parentSize: viewSize
                 ) {
                     GlassEffectContainer {
-                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
+                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, reactionView in
                             Button {
-                                onReactionSelected(emoji)
+                                onReactionSelected(index)
                                 menuIsShowing = false
                             } label: {
                                 Circle()
                                     .fill(.clear)
                                     .frame(width: 44, height: 44)
                                     .overlay(
-                                        Text(emoji)
-                                            .font(.system(size: 24))
+                                        reactionView
                                             .opacity(menuIsShowing ? 1 : 0)
                                     )
 
@@ -348,9 +357,9 @@ struct TapBacksModifier: ViewModifier {
 extension View {
     func tapBacks(
         messageID: UUID,
-        reactions: [String] = ["❤️", "👍", "😂", "😮", "😢", "🔥"],
-        onReactionSelected: @escaping (String) -> Void = { reaction in
-            print("Selected reaction: \(reaction)")
+        reactions: [AnyView] = TapBacksModifier.defaultReactions,
+        onReactionSelected: @escaping (Int) -> Void = { index in
+            print("Selected reaction index: \(index)")
         }
     ) -> some View {
         modifier(
@@ -386,8 +395,8 @@ struct TapBackTestView: View {
                     .frame(width: demoWidth, height: demoHeight)
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
-                    .tapBacks(messageID: UUID()) { reaction in
-                        print("Tapped: \(reaction)")
+                    .tapBacks(messageID: UUID()) { index in
+                        print("Tapped reaction index: \(index)")
                     }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
