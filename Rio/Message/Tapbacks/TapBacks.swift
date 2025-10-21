@@ -26,6 +26,7 @@ struct TapBacksModifier: ViewModifier {
         case narrowTall = "Narrow + Tall"
         case mediumCorner = "Medium (Corner)"
         case wideTop = "Wide (Top)"
+        // I think we'll need another case for when it's short and medium eventually.
 
         var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
             switch self {
