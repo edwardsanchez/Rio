@@ -139,16 +139,68 @@ struct TapBacksModifier: ViewModifier {
     var reactions: [String]
     var onReactionSelected: (String) -> Void
     
-    // MARK: - Continuous Layout Parameters
-    
-    private let widthMinimum: CGFloat = 30
-    private let widthMaximum: CGFloat = 300
-    private let tallHeightMinimum: CGFloat = 160
-    private let tallHeightMaximum: CGFloat = 320
-    private let sideSpacer: CGFloat = 0.75
-    private let topSpacer: CGFloat = 0.5
-    private let sideRadius: CGFloat = 100
-    private let edgePadding: CGFloat = 80
+    // MARK: - Layout Cases
+
+    enum LayoutCase: String, CaseIterable {
+        case narrowShort = "Narrow + Short"
+        case narrowTall = "Narrow + Tall"
+        case mediumCorner = "Medium (Corner)"
+        case wideTop = "Wide (Top)"
+
+        var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
+            switch self {
+            case .narrowShort:
+                return (0, 80, 0, 120)
+            case .narrowTall:
+                return (0, 80, 120, .infinity)
+            case .mediumCorner:
+                return (80, 220, 0, .infinity)
+            case .wideTop:
+                return (220, .infinity, 0, .infinity)
+            }
+        }
+
+        var config: LayoutConfig {
+            switch self {
+            case .narrowShort:
+                return LayoutConfig(
+                    radius: 80,
+                    spacerCenterPercent: 0.75, // 270° - right side
+                    offsetX: 0,
+                    offsetY: 0
+                )
+            case .narrowTall:
+                return LayoutConfig(
+                    radius: 300,
+                    spacerCenterPercent: 0.75, // 270° - right side
+                    offsetX: -200,
+                    offsetY: 0
+                )
+            case .mediumCorner:
+                return LayoutConfig(
+                    radius: 100,
+                    spacerCenterPercent: 0.625, // 135° - top-right corner
+                    offsetX: 35,
+                    offsetY: -35
+                )
+            case .wideTop:
+                return LayoutConfig(
+                    radius: 300,
+                    spacerCenterPercent: 0.5, // 180° - top
+                    offsetX: 0,
+                    offsetY: 120
+                )
+            }
+        }
+    }
+
+    struct LayoutConfig {
+        var radius: CGFloat
+        var spacerCenterPercent: CGFloat
+        var offsetX: CGFloat
+        var offsetY: CGFloat
+    }
+
     private let reactionSpacing: CGFloat = 44
     private let logInterval: CGFloat = 5
     
@@ -159,123 +211,44 @@ struct TapBacksModifier: ViewModifier {
         var maxY: CGFloat
     }
     
-    private var widthProgress: CGFloat {
-        guard widthMaximum > widthMinimum else { return 0 }
-        let interpolator = ValueInterpolator(
-            inputMin: widthMinimum,
-            inputMax: widthMaximum,
-            outputMin: 0,
-            outputMax: 1
-        )
-        return clamp(interpolator.interpolateFrom(input: viewSize.width))
-    }
-    
-    private var narrowProgress: CGFloat {
-        1 - widthProgress
-    }
-    
-    private var tallProgress: CGFloat {
-        guard tallHeightMaximum > tallHeightMinimum else { return 0 }
-        let interpolator = ValueInterpolator(
-            inputMin: tallHeightMinimum,
-            inputMax: tallHeightMaximum,
-            outputMin: 0,
-            outputMax: 1
-        )
-        let heightFactor = clamp(interpolator.interpolateFrom(input: viewSize.height))
-        return clamp(heightFactor * narrowProgress)
-    }
-    
-    private var calculatedRadius: CGFloat {
+    // MARK: - Layout Detection
+
+    private func detectLayoutCase() -> LayoutCase {
         let w = viewSize.width
         let h = viewSize.height
 
-        // Define target radii for specific scenarios
-        let smallHugRadius: CGFloat = sideRadius  // For narrow-short and corner
-        let wideSideRadius = max(300, h * 0.8)    // For narrow-tall (side layout)
-        let wideTopRadius = max(400, h * 1.5)      // For wide (top layout)
-
-        // Base interpolation from side to wide based on width
-        var radius = lerp(from: smallHugRadius, to: wideTopRadius, progress: widthProgress)
-
-        // SHRINK at medium widths (corner placement) - this is the key fix
-        // We want radius to dip down at widthProgress ≈ 0.5
-        let isInCornerZone = widthProgress > 0.3 && widthProgress < 0.7  // Medium width range
-        let cornerShrinkAmount: CGFloat = {
-            if !isInCornerZone { return 0 }
-            // Peak shrink at exactly widthProgress = 0.5
-            let distanceFromCenter = abs(widthProgress - 0.5)
-            let shrinkWeight = 1.0 - (distanceFromCenter / 0.2)  // Peaks at 1.0
-            return clamp(shrinkWeight) * (1 - tallProgress)  // No shrink when tall
-        }()
-
-        if cornerShrinkAmount > 0 {
-            // Shrink toward smallHugRadius
-            let amountToRemove = (radius - smallHugRadius) * cornerShrinkAmount
-            radius -= amountToRemove
+        // Check each case in priority order
+        for layoutCase in LayoutCase.allCases {
+            let thresholds = layoutCase.thresholds
+            if w >= thresholds.widthMin && w < thresholds.widthMax &&
+               h >= thresholds.heightMin && h < thresholds.heightMax {
+                return layoutCase
+            }
         }
 
-        // GROW for narrow-tall scenarios (tallProgress increases radius)
-        if tallProgress > 0 {
-            radius = lerp(from: radius, to: wideSideRadius, progress: tallProgress)
-        }
-
-        return max(radius, smallHugRadius)
+        // Default to wideTop if no match
+        return .wideTop
     }
-    
+
+    private var currentConfig: LayoutConfig {
+        detectLayoutCase().config
+    }
+
+    private var calculatedRadius: CGFloat {
+        currentConfig.radius
+    }
+
     private var calculatedSpacerCenterPercent: CGFloat {
-        lerp(from: sideSpacer, to: topSpacer, progress: widthProgress)
+        currentConfig.spacerCenterPercent
     }
-    
+
     private var calculatedOffset: CGSize {
         guard menuIsShowing else {
             return .zero
         }
-        
-        guard let bounds = reactionBounds() else {
-            return .zero
-        }
-        
-        let targetRight = viewSize.width / 2 + edgePadding
-        let targetTop = -viewSize.height / 2 - edgePadding
-        
-        let sideDifference = targetRight - bounds.maxX
-        let topDifference = targetTop - bounds.minY
-        
-        let sideWeight = sideAlignmentWeight(for: widthProgress)
-        let topWeight = topAlignmentWeight(for: widthProgress)
-        
-        var offset = CGSize(
-            width: sideDifference * sideWeight,
-            height: topDifference * topWeight
-        )
-        
-        let rightmostAfterOffset = bounds.maxX + offset.width
-        if rightmostAfterOffset > targetRight {
-            offset.width += targetRight - rightmostAfterOffset
-        }
-        
-        let topmostAfterOffset = bounds.minY + offset.height
-        if topmostAfterOffset < targetTop {
-            offset.height += targetTop - topmostAfterOffset
-        }
-        
-        return offset
+        return CGSize(width: currentConfig.offsetX, height: currentConfig.offsetY)
     }
     
-    private func clamp(_ value: CGFloat) -> CGFloat {
-        min(max(value, 0), 1)
-    }
-    
-    private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
-        start + (end - start) * progress
-    }
-    
-    private var cornerRadiusWeight: CGFloat {
-        let peak = 1 - abs(widthProgress - 0.5) * 1
-        return clamp(peak) * (1 - tallProgress)
-    }
-
     // MARK: - Debug Logging
 
     private func shouldLog(for size: CGSize) -> Bool {
@@ -288,31 +261,15 @@ struct TapBacksModifier: ViewModifier {
     private func logGeometry(for size: CGSize) {
         let w = size.width
         let h = size.height
-        let r = calculatedRadius
-        let offset = calculatedOffset
-        let spacer = calculatedSpacerCenterPercent
-
-        // Calculate intermediate values for debugging
-        let smallHugRadius: CGFloat = sideRadius
-        let wideSideRadius = max(300, h * 0.8)
-        let wideTopRadius = max(400, h * 1.5)
-        let baseRadius = lerp(from: smallHugRadius, to: wideTopRadius, progress: widthProgress)
-
-        let isInCornerZone = widthProgress > 0.3 && widthProgress < 0.7
-        let distanceFromCenter = abs(widthProgress - 0.5)
-        let shrinkWeight = isInCornerZone ? (1.0 - (distanceFromCenter / 0.2)) : 0
-        let cornerShrinkAmount = clamp(shrinkWeight) * (1 - tallProgress)
+        let layoutCase = detectLayoutCase()
+        let config = layoutCase.config
 
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("Size: \(Int(w))×\(Int(h))")
-        print("widthProgress: \(String(format: "%.2f", widthProgress)) | narrowProgress: \(String(format: "%.2f", narrowProgress)) | tallProgress: \(String(format: "%.2f", tallProgress))")
-        print("Radius: \(String(format: "%.1f", r))")
-        print("Offset: (\(String(format: "%.1f", offset.width)), \(String(format: "%.1f", offset.height)))")
-        print("Spacer: \(String(format: "%.2f", spacer)) (\(String(format: "%.0f", spacer * 360 - 90))°)")
-
-        print("  Target radii: small=\(String(format: "%.1f", smallHugRadius)) wideSide=\(String(format: "%.1f", wideSideRadius)) wideTop=\(String(format: "%.1f", wideTopRadius))")
-        print("  baseRadius (before shrink): \(String(format: "%.1f", baseRadius))")
-        print("  cornerShrinkAmount: \(String(format: "%.2f", cornerShrinkAmount)) (isCornerZone: \(isInCornerZone))")
+        print("Layout Case: \(layoutCase.rawValue)")
+        print("Radius: \(String(format: "%.1f", config.radius))")
+        print("Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
+        print("Spacer: \(String(format: "%.2f", config.spacerCenterPercent)) (\(String(format: "%.0f", config.spacerCenterPercent * 360 - 90))°)")
     }
     
     private func reactionAngles() -> [CGFloat] {
@@ -356,22 +313,6 @@ struct TapBacksModifier: ViewModifier {
         }
         
         return ReactionBounds(minX: minX, maxX: maxX, minY: minY, maxY: maxY)
-    }
-    
-    private func sideAlignmentWeight(for progress: CGFloat) -> CGFloat {
-        if progress <= 0.5 {
-            return 1
-        }
-        let normalized = (1 - progress) / 0.5
-        return clamp(normalized)
-    }
-    
-    private func topAlignmentWeight(for progress: CGFloat) -> CGFloat {
-        if progress >= 0.5 {
-            let normalized = (progress - 0.5) / 0.5
-            return clamp(normalized)
-        }
-        return 0
     }
 
     func body(content: Content) -> some View {
@@ -465,8 +406,15 @@ extension View {
 }
 
 struct TapBackTestView: View {
-    @State private var demoWidth: Double = 220
-    @State private var demoHeight: Double = 120
+    @State private var demoWidth: Double = 250
+    @State private var demoHeight: Double = 200
+
+    private let testCases: [(String, CGFloat, CGFloat)] = [
+        ("Narrow + Short", 60, 80),
+        ("Narrow + Tall", 60, 200),
+        ("Medium (Corner)", 150, 150),
+        ("Wide (Top)", 250, 80)
+    ]
 
     var body: some View {
         VStack(spacing: 32) {
@@ -474,7 +422,7 @@ struct TapBackTestView: View {
                 Text("Demo Message")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                
+
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.green)
                     .frame(width: CGFloat(demoWidth), height: CGFloat(demoHeight))
@@ -486,15 +434,45 @@ struct TapBackTestView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
-            
+
             VStack(spacing: 16) {
+                Text("Test Cases")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    ForEach(testCases, id: \.0) { testCase in
+                        Button {
+                            demoWidth = testCase.1
+                            demoHeight = testCase.2
+                        } label: {
+                            VStack(spacing: 4) {
+                                Text(testCase.0)
+                                    .font(.caption)
+                                Text("\(Int(testCase.1))×\(Int(testCase.2))")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.accentColor.opacity(0.2))
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Divider()
+                    .padding(.vertical, 8)
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Width: \(Int(demoWidth))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Slider(value: $demoWidth, in: 30...300)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Height: \(Int(demoHeight))")
                         .font(.caption)
