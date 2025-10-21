@@ -338,6 +338,15 @@ struct TapBacksModifier: ViewModifier {
             } action: { width in
                 screenWidth = width
             }
+            .overlay(alignment: .topTrailing) {
+                tapBackOptions(reactionView: Text(
+                    "❤️"
+                )) {
+
+                }
+                .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+                .offset(x: 40, y: -30)
+            }
             .background(
                 RadialLayout(
                     radius: calculatedRadius,
@@ -349,18 +358,9 @@ struct TapBacksModifier: ViewModifier {
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, reactionView in
-                            Button {
+                            tapBackOptions(reactionView: reactionView) {
                                 onReactionSelected(index)
                                 menuIsShowing = false
-                            } label: {
-                                Circle()
-                                    .fill(.clear)
-                                    .frame(width: 44, height: 44)
-                                    .overlay(
-                                        reactionView
-                                            .opacity(menuIsShowing ? 1 : 0)
-                                    )
-
                             }
                             .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                             .animation(
@@ -381,6 +381,21 @@ struct TapBacksModifier: ViewModifier {
                         menuIsShowing.toggle()
                     }
             )
+    }
+
+    @ViewBuilder
+    func tapBackOptions(reactionView: some View, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            Circle()
+                .fill(.clear)
+                .frame(width: 44, height: 44)
+                .overlay(
+                    reactionView
+                        .opacity(menuIsShowing ? 1 : 0)
+                )
+        }
     }
 }
 
