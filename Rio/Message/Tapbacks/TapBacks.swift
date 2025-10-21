@@ -99,7 +99,10 @@ struct TapBacksModifier: ViewModifier {
             AnyView(Text("👎").font(.system(size: 24))),
             AnyView(Text("😂").font(.system(size: 24))),
             AnyView(Text("😢").font(.system(size: 24))),
-            AnyView(Image(systemName: "face.smiling").font(.system(size: 20, weight: .medium)))
+            AnyView(Image(systemName: "face.dashed")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(.secondary)
+            )
         ]
     }
 
@@ -182,7 +185,7 @@ struct TapBacksModifier: ViewModifier {
         guard menuIsShowing else {
             return .zero
         }
-        
+
         let horizontalAdjustment = currentConfig.horizontalAnchor.xOffset(for: viewSize)
         let verticalAdjustment = currentConfig.verticalAnchor.yOffset(for: viewSize)
         return CGSize(
