@@ -150,6 +150,13 @@ struct TapBacksModifier: ViewModifier {
     private let edgePadding: CGFloat = 80
     private let reactionSpacing: CGFloat = 44
     
+    private struct ReactionBounds {
+        var minX: CGFloat
+        var maxX: CGFloat
+        var minY: CGFloat
+        var maxY: CGFloat
+    }
+    
     private var widthProgress: CGFloat {
         guard widthMaximum > widthMinimum else { return 0 }
         let interpolator = ValueInterpolator(
@@ -189,20 +196,39 @@ struct TapBacksModifier: ViewModifier {
     }
     
     private var calculatedOffset: CGSize {
-        let radius = calculatedRadius
-        let topOffsetY = radius - viewSize.height / 2 - edgePadding
-        let smallSideOffsetX = viewSize.width / 2
-        let tallSideOffsetX = sideAlignedOffsetX()
-        let blendedSideOffsetX = lerp(from: smallSideOffsetX, to: tallSideOffsetX, progress: tallProgress)
-        
-        let offsetX = lerp(from: blendedSideOffsetX, to: 0, progress: widthProgress)
-        let offsetY = lerp(from: 0, to: topOffsetY, progress: widthProgress)
-        
         guard menuIsShowing else {
             return .zero
         }
         
-        return CGSize(width: offsetX, height: offsetY)
+        guard let bounds = reactionBounds() else {
+            return .zero
+        }
+        
+        let targetRight = viewSize.width / 2 + edgePadding
+        let targetTop = -viewSize.height / 2 - edgePadding
+        
+        let sideDifference = targetRight - bounds.maxX
+        let topDifference = targetTop - bounds.minY
+        
+        let sideWeight = sideAlignmentWeight(for: widthProgress)
+        let topWeight = topAlignmentWeight(for: widthProgress)
+        
+        var offset = CGSize(
+            width: sideDifference * sideWeight,
+            height: topDifference * topWeight
+        )
+        
+        let rightmostAfterOffset = bounds.maxX + offset.width
+        if rightmostAfterOffset > targetRight {
+            offset.width += targetRight - rightmostAfterOffset
+        }
+        
+        let topmostAfterOffset = bounds.minY + offset.height
+        if topmostAfterOffset < targetTop {
+            offset.height += targetTop - topmostAfterOffset
+        }
+        
+        return offset
     }
     
     private func clamp(_ value: CGFloat) -> CGFloat {
@@ -211,18 +237,6 @@ struct TapBacksModifier: ViewModifier {
     
     private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
         start + (end - start) * progress
-    }
-    
-    private func sideAlignedOffsetX() -> CGFloat {
-        guard menuIsShowing else { return 0 }
-        guard let rightmostX = reactionAngles()
-            .map({ calculatedRadius * cos($0 * .pi / 180) })
-            .max() else {
-            return 0
-        }
-        
-        let targetX = viewSize.width / 2 + edgePadding
-        return targetX - rightmostX
     }
     
     private func reactionAngles() -> [CGFloat] {
@@ -244,6 +258,44 @@ struct TapBacksModifier: ViewModifier {
         return (0..<count).map { index in
             startAngle + (CGFloat(index) * angleIncrement)
         }
+    }
+    
+    private func reactionBounds() -> ReactionBounds? {
+        let angles = reactionAngles()
+        guard angles.isEmpty == false else { return nil }
+        
+        var minX = CGFloat.greatestFiniteMagnitude
+        var maxX = -CGFloat.greatestFiniteMagnitude
+        var minY = CGFloat.greatestFiniteMagnitude
+        var maxY = -CGFloat.greatestFiniteMagnitude
+        
+        for angle in angles {
+            let radians = angle * .pi / 180.0
+            let x = calculatedRadius * cos(radians)
+            let y = calculatedRadius * sin(radians)
+            minX = min(minX, x)
+            maxX = max(maxX, x)
+            minY = min(minY, y)
+            maxY = max(maxY, y)
+        }
+        
+        return ReactionBounds(minX: minX, maxX: maxX, minY: minY, maxY: maxY)
+    }
+    
+    private func sideAlignmentWeight(for progress: CGFloat) -> CGFloat {
+        if progress <= 0.5 {
+            return 1
+        }
+        let normalized = (1 - progress) / 0.5
+        return clamp(normalized)
+    }
+    
+    private func topAlignmentWeight(for progress: CGFloat) -> CGFloat {
+        if progress >= 0.5 {
+            let normalized = (progress - 0.5) / 0.5
+            return clamp(normalized)
+        }
+        return 0
     }
 
     func body(content: Content) -> some View {
