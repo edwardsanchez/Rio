@@ -47,16 +47,16 @@ struct TapBacksModifier: ViewModifier {
                 return LayoutConfig(
                     radius: 80,
                     spacerCenterPercent: 0.75, // 270° - right side
-                    offsetX: 0,
+                    offsetX: -25,
                     offsetY: 0,
-                    horizontalAnchor: .center,
+                    horizontalAnchor: .trailing,
                     verticalAnchor: .center
                 )
             case .narrowTall:
                 return LayoutConfig(
-                    radius: 300,
+                    radius: 500,
                     spacerCenterPercent: 0.75, // 270° - right side
-                    offsetX: -230,
+                    offsetX: -435,
                     offsetY: 0,
                     horizontalAnchor: .trailing,
                     verticalAnchor: .center
@@ -65,18 +65,18 @@ struct TapBacksModifier: ViewModifier {
                 return LayoutConfig(
                     radius: 100,
                     spacerCenterPercent: 0.625, // 135° - top-right corner
-                    offsetX: -40,
-                    offsetY: 40,
+                    offsetX: -30,
+                    offsetY: 30,
                     horizontalAnchor: .trailing,
                     verticalAnchor: .top
                 )
             case .wideTop:
                 return LayoutConfig(
-                    radius: 300,
-                    spacerCenterPercent: 0.5, // 180° - top
-                    offsetX: 0,
-                    offsetY: 230,
-                    horizontalAnchor: .center,
+                    radius: 600,
+                    spacerCenterPercent: 0.51, // 180° - top
+                    offsetX: 140,
+                    offsetY: 540,
+                    horizontalAnchor: .leading,
                     verticalAnchor: .top
                 )
             }
