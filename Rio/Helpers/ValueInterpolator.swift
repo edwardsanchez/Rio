@@ -7,7 +7,7 @@
 
 import Foundation
 
-//Round number to 3 decimal places so there's higher chance of it matching dictionary key
+// Round number to 3 decimal places so there's higher chance of it matching dictionary key
 func rd(_ i: CGFloat) -> CGFloat {
     return round(10000*(i))/10000
 }
@@ -28,23 +28,23 @@ public class Curve {
     
     public var curveType = CurveType.easingCurve
     
-    let type:     Curves
-    let power:    CGFloat
+    let type: Curves
+    let power: CGFloat
     let fraction: CGFloat
     
-    //Dictionary to hold coordinates of the bezier curve
-    let coordinates: [CGFloat : CGFloat]
+    // Dictionary to hold coordinates of the bezier curve
+    let coordinates: [CGFloat: CGFloat]
     
     var holder = CGFloat.zero
     
-    private init(type:     Curves              = .linear,
-                 power:    CGFloat             = 0,
+    private init(type: Curves              = .linear,
+                 power: CGFloat             = 0,
                  fraction: CGFloat             = 0,
-                 p1x:      CGFloat             = 0,
-                 p1y:      CGFloat             = 0,
-                 p2x:      CGFloat             = 0,
-                 p2y:      CGFloat             = 0,
-                 bezier:   [CGFloat : CGFloat] = [0 : 0]) {
+                 p1x: CGFloat             = 0,
+                 p1y: CGFloat             = 0,
+                 p2x: CGFloat             = 0,
+                 p2y: CGFloat             = 0,
+                 bezier: [CGFloat: CGFloat] = [0: 0]) {
         self.type        = type
         self.power       = power
         self.fraction    = fraction
@@ -76,7 +76,7 @@ public class Curve {
     
     public static func bezier(_ p1x: CGFloat = 0.5, _ p1y: CGFloat = 0, _ p2x: CGFloat = 0.4, _ p2y: CGFloat = 0.9) -> Curve {
         
-        //Bezier Curve function
+        // Bezier Curve function
         func bezierPointOverTime(_ time: CGFloat) -> CGPoint {
             
             let p0  = CGPoint(x: 0, y: 1)
@@ -98,7 +98,7 @@ public class Curve {
         var time = CGFloat.zero
         var coordinates = [CGFloat.zero: CGFloat.zero]
         
-        //Populate dictionary with 50000 coordinates
+        // Populate dictionary with 50000 coordinates
         while time < 1 {
             coordinates[rd(bezierPointOverTime(time).x)] = rd(bezierPointOverTime(time).y)
             time += 1.0/50000
@@ -143,15 +143,15 @@ public struct ValueInterpolator {
         self.curve = curve
         self.log = log
         
-        //Check if input range is reversed
+        // Check if input range is reversed
         inputStart  = min(inputMin, inputMax)
         inputEnd    = max(inputMin, inputMax)
         
-        //Check if output range is reversed
+        // Check if output range is reversed
         outputStart = min(outputMin, outputMax)
         outputEnd   = max(outputMin, outputMax)
         
-        //Input and output ranges
+        // Input and output ranges
         inputRange  = inputEnd  - inputStart
         outputRange = outputEnd - outputStart
         
@@ -159,19 +159,19 @@ public struct ValueInterpolator {
     }
     
     public func interpolateFrom(input: CGFloat) -> CGFloat {
-        //Prevent input range from being 0, which would crash the app
+        // Prevent input range from being 0, which would crash the app
         if inputRange == 0 {
             return outputStart
         }
         
-        //Current input / Capped if extendRange is off
+        // Current input / Capped if extendRange is off
         let currentInput = extendRange ? input : max(inputStart, min(input, inputEnd))
         
-        //Fraction complete with easing curve
+        // Fraction complete with easing curve
         let curvedFractionComplete: CGFloat = {
             var fractionComplete = 1 - ((inputEnd - currentInput) / inputRange)
             
-            //Reverse fraction complete if outputs and inputs are not both reversed
+            // Reverse fraction complete if outputs and inputs are not both reversed
             if (outputMax != outputEnd) == (inputMax == inputEnd) {
                 fractionComplete = 1 - fractionComplete
             }
@@ -201,12 +201,12 @@ public struct ValueInterpolator {
                     }()
                 case .bezier:
                     return {
-                        //Map actual fraction complete to coordinate
+                        // Map actual fraction complete to coordinate
                         if let BX = curve.coordinates[rd(fractionComplete)] {
                             curve.holder = BX
                             return BX
                         } else {
-                            //Set easingCurve to the previous value in case there's no match (rare)
+                            // Set easingCurve to the previous value in case there's no match (rare)
                             return curve.holder
                         }
                     }()
@@ -216,14 +216,14 @@ public struct ValueInterpolator {
                 }
             }()
             
-            //Cap value between 0 and 1
+            // Cap value between 0 and 1
             return 0 ... 1 ~= fractionComplete ? curvedResult : fractionComplete
         }()
         
-        //Result
+        // Result
         let result = (inputRange * curvedFractionComplete * ratio) + outputStart
         
-        //Logs values for debugging
+        // Logs values for debugging
         if log {
             print("------------------------------")
             print("input       ", input)
