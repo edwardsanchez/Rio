@@ -27,12 +27,12 @@ struct RadialLayout: Layout {
     }
 
     init(
-        radius: CGFloat = 100,
+        radius: CGFloat,
         menuIsShowing: Bool = false,
-        itemCount: Int = 6,
-        itemSpacing: CGFloat = 100,
-        spacerCenterPercent: CGFloat = 0.5,
-        parentSize: CGSize = .zero,
+        itemCount: Int,
+        itemSpacing: CGFloat,
+        spacerCenterPercent: CGFloat,
+        parentSize: CGSize,
         distributeCollapsedX: Bool = false,
         distributeCollapsedY: Bool = false
     ) {
@@ -157,11 +157,11 @@ struct TapBacksModifier: ViewModifier {
     private var calculatedRadius: CGFloat {
         switch layoutMode {
         case .smallSide:
-            return 90
+            return 40
         case .largeTopArc:
-            return max(400, viewSize.height * 1.5)
+            return 700
         case .tallSideArc:
-            return max(300, viewSize.height * 0.8)
+            return 700
         }
     }
     
@@ -236,7 +236,7 @@ struct TapBacksModifier: ViewModifier {
                     radius: calculatedRadius,
                     menuIsShowing: menuIsShowing,
                     itemCount: reactions.count,
-                    itemSpacing: 50,
+                    itemSpacing: 20,
                     spacerCenterPercent: calculatedSpacerCenterPercent,
                     parentSize: viewSize,
                     distributeCollapsedX: layoutMode == .largeTopArc,
@@ -299,6 +299,8 @@ extension View {
 }
 
 struct TapBackTestView: View {
+    @State private var size = CGSize(width: 400, height: 50)
+
     var body: some View {
         VStack(spacing: 60) {
             // Small rectangle - should show compact side menu
@@ -323,7 +325,7 @@ struct TapBackTestView: View {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.green)
-                    .frame(width: 50, height: 300)
+                    .frame(width: size.width, height: size.height)
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect)
                     .tapBacks(messageID: UUID()) { reaction in
@@ -332,27 +334,11 @@ struct TapBackTestView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
-            
-//            // Tall rectangle - should show vertical side arc
-//            VStack(alignment: .leading, spacing: 8) {
-//                Text("Tall View (150×400)")
-//                    .font(.caption)
-//                    .foregroundStyle(.secondary)
-//                
-//                RoundedRectangle(cornerRadius: 10)
-//                    .fill(.orange)
-//                    .frame(width: 50, height: 200)
-//                    .containerShape(.rect)
-//                    .glassEffect(.regular.interactive(), in: .rect)
-//                    .tapBacks(messageID: UUID()) { reaction in
-//                        print("Tall tapped: \(reaction)")
-//                    }
-//            }
-//            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding(.horizontal)
+            // TODO: Set a max width for views that are too long, so it animates max from like 300 y distribution.
+            // TODO: Make it so the views change position dynamically and continuously rather than having 3 sizes.
         }
         .frame(maxHeight: .infinity)
-        .scaleEffect(0.2)
+        .scaleEffect(0.5)
     }
 }
 

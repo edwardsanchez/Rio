@@ -127,20 +127,20 @@ extension CGFloat {
 extension CGPoint {
     public var size: CGSize { CGSize(width: x, height: y) }
     public var average: CGFloat { sqrt(x * x + y * y) }
-    public var transposed: CGPoint { CGPoint(y, x) }
-    
+    public var transposed: CGPoint { CGPoint(x: y, y: x) }
+
     public func clamp(min: CGPoint, max: CGPoint) -> CGPoint {
         let clampedX = x.clamp(min: min.x, max: max.x)
         let clampedY = y.clamp(min: min.y, max: max.y)
-        return CGPoint(clampedX, clampedY)
+        return CGPoint(x: clampedX, y: clampedY)
     }
 }
 
 // MARK: - CGSize Extension
 
 extension CGSize {
-    public var transposed: CGSize { CGSize(height, width) }
-    public var point: CGPoint { CGPoint(width, height) }
+    public var transposed: CGSize { CGSize(width: height, height: width) }
+    public var point: CGPoint { CGPoint(x: width, y: height) }
 
 }
 
@@ -154,7 +154,7 @@ extension CGRect {
     public func containsFromCenter(_ position: CGPoint) -> Bool {
         let xCenter = position.x + (width / 2)
         let yCenter = position.y + (height / 2)
-        return self.contains(CGPoint(xCenter, yCenter))
+        return self.contains(CGPoint(x: xCenter, y: yCenter))
     }
 }
 
