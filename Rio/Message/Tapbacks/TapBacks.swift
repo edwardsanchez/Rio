@@ -15,150 +15,32 @@ struct TapBacksModifier: ViewModifier {
     @State private var screenWidth: CGFloat = 0
     @State private var lastLoggedSize: CGSize = .zero
 
-    @State private var selectedEmoji: String?
+    @Namespace private var reactionNamespace
+    @State private var selectedReactionID: Reaction.ID?
 
     var messageID: UUID
-    var reactions: [AnyView]
+    var reactions: [Reaction]
     var onReactionSelected: (Int) -> Void
-    
-    // MARK: - Layout Cases
 
-    enum LayoutCase: String, CaseIterable {
-        case narrowShort = "Narrow + Short"
-        case narrowTall = "Narrow + Tall"
-        case mediumCorner = "Medium (Corner)"
-        case wideTop = "Wide (Top)"
-        // I think we'll need another case for when it's short and medium eventually.
-
-        var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
-            switch self {
-            case .narrowShort:
-                return (0, 95, 0, 80)
-            case .narrowTall:
-                return (0, 95, 80, .infinity)
-            case .mediumCorner:
-                return (95, 250, 0, .infinity)
-            case .wideTop:
-                return (250, .infinity, 0, .infinity)
-            }
-        }
-
-        var config: LayoutConfig {
-            switch self {
-            case .narrowShort:
-                return LayoutConfig(
-                    radius: 80,
-                    spacerCenterPercent: 0.75, // 270° - right side
-                    horizontalAnchor: .trailing,
-                    verticalAnchor: .center
-                ) { size in
-                    let baseX: CGFloat = size.width > 65 ? -25 : 10
-                    return CGSize(width: baseX, height: 0)
-                }
-            case .narrowTall:
-                return LayoutConfig(
-                    radius: 500,
-                    spacerCenterPercent: 0.75, // 270° - right side
-                    horizontalAnchor: .trailing,
-                    verticalAnchor: .center
-                ) { _ in
-                    CGSize(width: -435, height: 0)
-                }
-            case .mediumCorner:
-                return LayoutConfig(
-                    radius: 100,
-                    spacerCenterPercent: 0.625, // 135° - top-right corner
-                    horizontalAnchor: .trailing,
-                    verticalAnchor: .top
-                ) { _ in
-                    CGSize(width: -30, height: 30)
-                }
-            case .wideTop:
-                return LayoutConfig(
-                    radius: 600,
-                    spacerCenterPercent: 0.51, // 180° - top
-                    horizontalAnchor: .leading,
-                    verticalAnchor: .top
-                ) { _ in
-                    CGSize(width: 140, height: 540)
-                }
-            }
-        }
+    private var selectedReaction: Reaction? {
+        guard let selectedReactionID else { return nil }
+        return reactions.first { $0.id == selectedReactionID }
     }
 
-    struct LayoutConfig {
-        var radius: CGFloat
-        var spacerCenterPercent: CGFloat
-        var horizontalAnchor: HorizontalAnchor
-        var verticalAnchor: VerticalAnchor
-        private let offsetProvider: (CGSize) -> CGSize
-
-        init(
-            radius: CGFloat,
-            spacerCenterPercent: CGFloat,
-            horizontalAnchor: HorizontalAnchor,
-            verticalAnchor: VerticalAnchor,
-            offsetProvider: @escaping (CGSize) -> CGSize
-        ) {
-            self.radius = radius
-            self.spacerCenterPercent = spacerCenterPercent
-            self.horizontalAnchor = horizontalAnchor
-            self.verticalAnchor = verticalAnchor
-            self.offsetProvider = offsetProvider
-        }
-
-        func baseOffset(for size: CGSize) -> CGSize {
-            offsetProvider(size)
-        }
+    private var selectedEmoji: String? {
+        selectedReaction?.selectedEmoji
     }
 
-    static var defaultReactions: [AnyView] {
+    static var defaultReactions: [Reaction] {
         [
-            AnyView(Text("❤️").font(.system(size: 24))),
-            AnyView(Text("👍").font(.system(size: 24))),
-            AnyView(Text("😂").font(.system(size: 24))),
-            AnyView(Text("😮").font(.system(size: 24))),
-            AnyView(Text("😢").font(.system(size: 24))),
-            AnyView(Text("🔥").font(.system(size: 24))),
-            AnyView(
-                Image(systemName: "face.smiling")
-                    .font(.system(size: 20, weight: .medium))
-            )
+            .emoji("❤️"),
+            .emoji("👍"),
+            .emoji("😂"),
+            .emoji("😮"),
+            .emoji("😢"),
+            .emoji("🔥"),
+            .systemImage("face.dashed", selectedEmoji: "?")
         ]
-    }
-
-    enum HorizontalAnchor {
-        case center
-        case leading
-        case trailing
-
-        func xOffset(for size: CGSize) -> CGFloat {
-            switch self {
-            case .center:
-                return 0
-            case .leading:
-                return -size.width / 2
-            case .trailing:
-                return size.width / 2
-            }
-        }
-    }
-
-    enum VerticalAnchor {
-        case center
-        case top
-        case bottom
-
-        func yOffset(for size: CGSize) -> CGFloat {
-            switch self {
-            case .center:
-                return 0
-            case .top:
-                return -size.height / 2
-            case .bottom:
-                return size.height / 2
-            }
-        }
     }
 
     private let reactionSpacing: CGFloat = 50
@@ -341,14 +223,12 @@ struct TapBacksModifier: ViewModifier {
                 screenWidth = width
             }
             .overlay(alignment: .topTrailing) {
-                if let selectedEmoji, !menuIsShowing {
-                    reactionView(Text(
-                        selectedEmoji
-                    ), show: true) {
-                        //Some action when tapping, likely information on who reacted and when
-                    }
-                    .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-                    .offset(x: 20, y: -20)
+                if let reaction = selectedReaction, !menuIsShowing {
+                    reactionBubble(for: reaction, show: true)
+                        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+                        .offset(x: 20, y: -20)
+                        .accessibilityLabel(Text(selectedEmoji ?? reaction.selectedEmoji))
+                        .allowsHitTesting(false)
                 }
             }
             .background(
@@ -361,11 +241,11 @@ struct TapBacksModifier: ViewModifier {
                     parentSize: viewSize
                 ) {
                     GlassEffectContainer {
-                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, view in
-                            reactionView(view, show: menuIsShowing) {
+                        ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
+                            reactionButton(for: reaction, show: menuIsShowing) {
                                 onReactionSelected(index)
+                                selectedReactionID = reaction.id
                                 menuIsShowing = false
-                                selectedEmoji = "❤️"
                             }
                             .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                             .animation(
@@ -389,17 +269,32 @@ struct TapBacksModifier: ViewModifier {
     }
 
     @ViewBuilder
-    func reactionView(_ view: some View, show: Bool, action: @escaping () -> Void) -> some View {
-        Button {
-            action()
-        } label: {
-            Circle()
-                .fill(.clear)
-                .frame(width: 44, height: 44)
-                .overlay(
-                    view
-                        .opacity(show ? 1 : 0)
-                )
+    private func reactionButton(for reaction: Reaction, show: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            reactionBubble(for: reaction, show: show)
+        }
+    }
+
+    private func reactionBubble(for reaction: Reaction, show: Bool) -> some View {
+        Circle()
+            .fill(.clear)
+            .frame(width: 44, height: 44)
+            .overlay(
+                reactionContent(for: reaction)
+                    .opacity(show ? 1 : 0)
+            )
+            .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
+    }
+
+    @ViewBuilder
+    private func reactionContent(for reaction: Reaction) -> some View {
+        switch reaction.display {
+        case let .emoji(value, fontSize):
+            Text(value)
+                .font(.system(size: fontSize))
+        case let .systemImage(name, pointSize, weight):
+            Image(systemName: name)
+                .font(.system(size: pointSize, weight: weight))
         }
     }
 }
@@ -407,7 +302,7 @@ struct TapBacksModifier: ViewModifier {
 extension View {
     func tapBacks(
         messageID: UUID,
-        reactions: [AnyView] = TapBacksModifier.defaultReactions,
+        reactions: [Reaction] = TapBacksModifier.defaultReactions,
         onReactionSelected: @escaping (Int) -> Void = { index in
             print("Selected reaction index: \(index)")
         }
@@ -422,7 +317,168 @@ extension View {
     }
 }
 
-struct TapBackTestView: View {
+// MARK: - Layout Cases
+
+enum LayoutCase: String, CaseIterable {
+    case narrowShort = "Narrow + Short"
+    case narrowTall = "Narrow + Tall"
+    case mediumCorner = "Medium (Corner)"
+    case wideTop = "Wide (Top)"
+    // I think we'll need another case for when it's short and medium eventually.
+
+    var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
+        switch self {
+        case .narrowShort:
+            return (0, 95, 0, 80)
+        case .narrowTall:
+            return (0, 95, 80, .infinity)
+        case .mediumCorner:
+            return (95, 250, 0, .infinity)
+        case .wideTop:
+            return (250, .infinity, 0, .infinity)
+        }
+    }
+
+    var config: LayoutConfig {
+        switch self {
+        case .narrowShort:
+            return LayoutConfig(
+                radius: 80,
+                spacerCenterPercent: 0.75, // 270° - right side
+                horizontalAnchor: .trailing,
+                verticalAnchor: .center
+            ) { size in
+                let baseX: CGFloat = size.width > 65 ? -25 : 10
+                return CGSize(width: baseX, height: 0)
+            }
+        case .narrowTall:
+            return LayoutConfig(
+                radius: 500,
+                spacerCenterPercent: 0.75, // 270° - right side
+                horizontalAnchor: .trailing,
+                verticalAnchor: .center
+            ) { _ in
+                CGSize(width: -435, height: 0)
+            }
+        case .mediumCorner:
+            return LayoutConfig(
+                radius: 100,
+                spacerCenterPercent: 0.625, // 135° - top-right corner
+                horizontalAnchor: .trailing,
+                verticalAnchor: .top
+            ) { _ in
+                CGSize(width: -30, height: 30)
+            }
+        case .wideTop:
+            return LayoutConfig(
+                radius: 600,
+                spacerCenterPercent: 0.51, // 180° - top
+                horizontalAnchor: .leading,
+                verticalAnchor: .top
+            ) { _ in
+                CGSize(width: 140, height: 540)
+            }
+        }
+    }
+}
+
+struct Reaction: Identifiable, Equatable {
+    static func == (lhs: Reaction, rhs: Reaction) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    enum Display {
+        case emoji(value: String, fontSize: CGFloat)
+        case systemImage(name: String, pointSize: CGFloat, weight: Font.Weight)
+    }
+
+    let id: String
+    let display: Display
+    let selectedEmoji: String
+
+    static func emoji(_ value: String) -> Reaction {
+        Reaction(
+            id: value,
+            display: .emoji(value: value, fontSize: 24),
+            selectedEmoji: value
+        )
+    }
+
+    static func systemImage(
+        _ name: String,
+        pointSize: CGFloat = 20,
+        weight: Font.Weight = .medium,
+        selectedEmoji: String
+    ) -> Reaction {
+        Reaction(
+            id: name,
+            display: .systemImage(name: name, pointSize: pointSize, weight: weight),
+            selectedEmoji: selectedEmoji
+        )
+    }
+}
+
+enum HorizontalAnchor {
+    case center
+    case leading
+    case trailing
+
+    func xOffset(for size: CGSize) -> CGFloat {
+        switch self {
+        case .center:
+            return 0
+        case .leading:
+            return -size.width / 2
+        case .trailing:
+            return size.width / 2
+        }
+    }
+}
+
+enum VerticalAnchor {
+    case center
+    case top
+    case bottom
+
+    func yOffset(for size: CGSize) -> CGFloat {
+        switch self {
+        case .center:
+            return 0
+        case .top:
+            return -size.height / 2
+        case .bottom:
+            return size.height / 2
+        }
+    }
+}
+
+struct LayoutConfig {
+    var radius: CGFloat
+    var spacerCenterPercent: CGFloat
+    var horizontalAnchor: HorizontalAnchor
+    var verticalAnchor: VerticalAnchor
+    private let offsetProvider: (CGSize) -> CGSize
+
+    init(
+        radius: CGFloat,
+        spacerCenterPercent: CGFloat,
+        horizontalAnchor: HorizontalAnchor,
+        verticalAnchor: VerticalAnchor,
+        offsetProvider: @escaping (CGSize) -> CGSize
+    ) {
+        self.radius = radius
+        self.spacerCenterPercent = spacerCenterPercent
+        self.horizontalAnchor = horizontalAnchor
+        self.verticalAnchor = verticalAnchor
+        self.offsetProvider = offsetProvider
+    }
+
+    func baseOffset(for size: CGSize) -> CGSize {
+        offsetProvider(size)
+    }
+}
+
+fileprivate struct TapBackTestView: View {
     @State private var demoWidth: Double = 250
     @State private var demoHeight: Double = 150
 
