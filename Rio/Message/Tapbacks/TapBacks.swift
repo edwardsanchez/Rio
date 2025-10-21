@@ -224,38 +224,18 @@ struct ReactionsModifier: ViewModifier {
             }
             .overlay(alignment: .topTrailing) {
                 if let reaction = selectedReaction {
-                    reactionButton(for: reaction, isOverlay: true) {
+                    reactionButton(for: reaction, isVisible: false, isOverlay: true) {
                         // Will show who reacted
                     }
+
                 }
             }
             .background(
-                RadialLayout(
-                    radius: calculatedRadius,
-                    menuIsShowing: menuIsShowing,
-                    itemCount: reactions.count,
-                    itemSpacing: reactionSpacing,
-                    spacerCenterPercent: calculatedSpacerCenterPercent,
-                    parentSize: viewSize
-                ) {
-                    GlassEffectContainer {
-                        ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
-                            reactionButton(for: reaction, isOverlay: false) {
-                                onReactionSelected(index)
-                                selectedReactionID = reaction.id
-                                menuIsShowing = false
-                            }
-                            .animation(
-                                .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
-                                .delay(Double(index) * 0.05),
-                                value: menuIsShowing
-                            )
-                        }
-                    }
-                }
-                .offset(calculatedOffset)
-                .animation(.bouncy(duration: 0.4), value: menuIsShowing)
+                menuView(isOverlay: false)
             )
+            .overlay {
+                menuView(isOverlay: true)
+            }
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onEnded { value in
@@ -265,19 +245,46 @@ struct ReactionsModifier: ViewModifier {
             )
     }
 
+    func menuView(isOverlay: Bool) -> some View {
+        RadialLayout(
+            radius: calculatedRadius,
+            menuIsShowing: menuIsShowing,
+            itemCount: reactions.count,
+            itemSpacing: reactionSpacing,
+            spacerCenterPercent: calculatedSpacerCenterPercent,
+            parentSize: viewSize
+        ) {
+            ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
+                reactionButton(for: reaction, isVisible: (selectedReaction != reaction) != isOverlay, isOverlay: isOverlay) {
+                    onReactionSelected(index)
+                    selectedReactionID = reaction.id
+                    menuIsShowing = false
+                }
+                .animation(
+                    .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
+                    .delay(Double(index) * 0.05),
+                    value: menuIsShowing
+                )
+            }
+        }
+        .offset(calculatedOffset)
+        .animation(.bouncy(duration: 0.4), value: menuIsShowing)
+    }
+
     @ViewBuilder
-    private func reactionButton(for reaction: Reaction, isOverlay: Bool, action: @escaping () -> Void) -> some View {
+    private func reactionButton(for reaction: Reaction, isVisible: Bool, isOverlay: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             reactionBubble(for: reaction, isOverlay: isOverlay)
         }
         .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+        .opacity(isVisible ? 1 : 0)
+        .opacity(reactionOpacity(for: reaction, isOverlay: isOverlay))
         .matchedGeometryEffect(
             id: reaction.id,
             in: reactionNamespace,
             isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
         )
         .offset(x: isOverlay ? 20 : 0, y: isOverlay ? -20 : 0)
-        .opacity(reactionOpacity(for: reaction, isOverlay: isOverlay))
         .animation(.none, value: selectedReactionID)
     }
 
