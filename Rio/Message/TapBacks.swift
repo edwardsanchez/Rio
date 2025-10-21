@@ -15,8 +15,6 @@ struct RadialLayout: Layout {
     var itemSpacing: CGFloat
     var spacerCenterPercent: CGFloat
     var parentSize: CGSize
-    var distributeCollapsedX: Bool
-    var distributeCollapsedY: Bool
     
     /// Calculated spacer percentage based on item count and spacing
     private var spacerPercentage: CGFloat {
@@ -32,9 +30,7 @@ struct RadialLayout: Layout {
         itemCount: Int,
         itemSpacing: CGFloat,
         spacerCenterPercent: CGFloat,
-        parentSize: CGSize,
-        distributeCollapsedX: Bool = false,
-        distributeCollapsedY: Bool = false
+        parentSize: CGSize
     ) {
         self.radius = radius
         self.menuIsShowing = menuIsShowing
@@ -42,8 +38,6 @@ struct RadialLayout: Layout {
         self.itemSpacing = itemSpacing
         self.spacerCenterPercent = spacerCenterPercent
         self.parentSize = parentSize
-        self.distributeCollapsedX = distributeCollapsedX
-        self.distributeCollapsedY = distributeCollapsedY
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -64,19 +58,10 @@ struct RadialLayout: Layout {
         let itemHeight = itemSize.height
         let marginX = itemWidth / 2 + collapsedPadding
         let marginY = itemHeight / 2 + collapsedPadding
-        let canDistributeCollapsedX = distributeCollapsedX &&
-            !menuIsShowing &&
-            parentWidth > marginX * 2 &&
-            parentWidth > 0 &&
-            itemWidth > 0
-        let canDistributeCollapsedY = distributeCollapsedY &&
-            !menuIsShowing &&
-            parentHeight > marginY * 2 &&
-            parentHeight > 0 &&
-            itemHeight > 0
         let parentOriginX = center.x - parentWidth / 2
         let parentOriginY = center.y - parentHeight / 2
         let collapsedDenominator = max(count - 1, 1)
+        let distributeHorizontally = parentWidth >= parentHeight
 
         // Calculate available arc (360 degrees minus the spacer)
         let availableArc = 360.0 * (1.0 - spacerPercentage)
@@ -109,8 +94,30 @@ struct RadialLayout: Layout {
             // When menu is hidden, all items are at center; when shown, they move to their positions
             let defaultY = center.y + currentRadius * sin(radians)
             let defaultX = center.x + radius * cos(radians)
-            let collapsedX = canDistributeCollapsedX ? distributedX : center.x
-            let collapsedY = canDistributeCollapsedY ? distributedY : center.y
+            let collapsedX: CGFloat
+            let collapsedY: CGFloat
+            
+            if !menuIsShowing {
+                if distributeHorizontally,
+                   parentWidth > marginX * 2,
+                   parentWidth > 0,
+                   itemWidth > 0 {
+                    collapsedX = distributedX
+                    collapsedY = center.y
+                } else if !distributeHorizontally,
+                          parentHeight > marginY * 2,
+                          parentHeight > 0,
+                          itemHeight > 0 {
+                    collapsedX = center.x
+                    collapsedY = distributedY
+                } else {
+                    collapsedX = center.x
+                    collapsedY = center.y
+                }
+            } else {
+                collapsedX = center.x
+                collapsedY = center.y
+            }
             let x = menuIsShowing ? defaultX : collapsedX
             let y = menuIsShowing ? defaultY : collapsedY
 
@@ -131,87 +138,78 @@ struct TapBacksModifier: ViewModifier {
     var reactions: [String]
     var onReactionSelected: (String) -> Void
     
-    // MARK: - Layout Decision Logic
+    // MARK: - Continuous Layout Parameters
     
-    private enum LayoutMode {
-        case smallSide    // Small view, compact menu to the side
-        case largeTopArc  // Wide/medium view, shallow arc above
-        case tallSideArc  // Tall skinny view, vertical arc on side
+    private let widthMinimum: CGFloat = 30
+    private let widthMaximum: CGFloat = 300
+    private let tallHeightMinimum: CGFloat = 160
+    private let tallHeightMaximum: CGFloat = 320
+    private let sideSpacer: CGFloat = 0.75
+    private let topSpacer: CGFloat = 0.5
+    private let sideRadius: CGFloat = 100
+    private let edgePadding: CGFloat = 80
+    
+    private var widthProgress: CGFloat {
+        guard widthMaximum > widthMinimum else { return 0 }
+        let interpolator = ValueInterpolator(
+            inputMin: widthMinimum,
+            inputMax: widthMaximum,
+            outputMin: 0,
+            outputMax: 1
+        )
+        return clamp(interpolator.interpolateFrom(input: viewSize.width))
     }
     
-    private var layoutMode: LayoutMode {
-        // Small enough for side placement
-        if viewSize.height < 100 && viewSize.width < 100 {
-            return .smallSide
-        }
-        
-        // Very tall and skinny -> side arc
-        if viewSize.height > 200 && viewSize.width < 200 {
-            return .tallSideArc
-        }
-        
-        // Default to top arc for medium/wide views
-        return .largeTopArc
+    private var narrowProgress: CGFloat {
+        1 - widthProgress
+    }
+    
+    private var tallProgress: CGFloat {
+        guard tallHeightMaximum > tallHeightMinimum else { return 0 }
+        let interpolator = ValueInterpolator(
+            inputMin: tallHeightMinimum,
+            inputMax: tallHeightMaximum,
+            outputMin: 0,
+            outputMax: 1
+        )
+        let heightFactor = clamp(interpolator.interpolateFrom(input: viewSize.height))
+        return clamp(heightFactor * narrowProgress)
     }
     
     private var calculatedRadius: CGFloat {
-        switch layoutMode {
-        case .smallSide:
-            return 40
-        case .largeTopArc:
-            return 700
-        case .tallSideArc:
-            return 700
-        }
+        let wideRadius = max(400, viewSize.height * 1.5)
+        let baseRadius = lerp(from: sideRadius, to: wideRadius, progress: widthProgress)
+        let tallRadius = max(300, viewSize.height * 0.8)
+        return lerp(from: baseRadius, to: tallRadius, progress: tallProgress)
     }
     
     private var calculatedSpacerCenterPercent: CGFloat {
-        switch layoutMode {
-        case .smallSide:
-            return 0.75  // Spacer on left, items on right side
-        case .largeTopArc:
-            return 0.5   // Spacer on bottom, items arc above
-        case .tallSideArc:
-            return 0.75  // Spacer on left, items arc vertically on right side
-        }
+        lerp(from: sideSpacer, to: topSpacer, progress: widthProgress)
     }
     
     private var calculatedOffset: CGSize {
         let radius = calculatedRadius
+        let topOffsetY = radius - viewSize.height / 2 - edgePadding
+        let smallSideOffsetX = viewSize.width / 2
+        let tallSideOffsetX = max(radius - viewSize.width / 2 - edgePadding, 0)
+        let blendedSideOffsetX = lerp(from: smallSideOffsetX, to: tallSideOffsetX, progress: tallProgress)
         
-        let offset: CGSize
+        let offsetX = lerp(from: blendedSideOffsetX, to: 0, progress: widthProgress)
+        let offsetY = lerp(from: 0, to: topOffsetY, progress: widthProgress)
         
-        let edgePadding: CGFloat = 80
-        
-        switch layoutMode {
-        case .smallSide:
-            // Position to the right of the view
-            let offsetX = viewSize.width / 2// + radius
-            let offsetY: CGFloat = 0
-            offset = CGSize(width: offsetX, height: offsetY)
-            
-        case .largeTopArc:
-            // Left-align with the parent view horizontally
-            // Position circle so top arc appears just above the view
-            let offsetX: CGFloat = 0
-            // Circle center should be positioned so items at -radius are just above view top
-            // View top is at -viewSize.height/2, we want items about 30-40px above that
-            let offsetY = radius - viewSize.height / 2 - edgePadding
-            offset = CGSize(width: offsetX, height: offsetY)
-            
-        case .tallSideArc:
-            // Position circle so the vertical arc sits just beyond the parent's trailing edge
-            let offsetX = viewSize.width / 2 + edgePadding - radius
-            let offsetY: CGFloat = 0
-            offset = CGSize(width: offsetX, height: offsetY)
-        }
-        
-        if !menuIsShowing && (layoutMode == .largeTopArc || layoutMode == .tallSideArc) {
-            // Allow the reactions to collapse back to the parent center
+        guard menuIsShowing else {
             return .zero
         }
         
-        return offset
+        return CGSize(width: offsetX, height: offsetY)
+    }
+    
+    private func clamp(_ value: CGFloat) -> CGFloat {
+        min(max(value, 0), 1)
+    }
+    
+    private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
+        start + (end - start) * progress
     }
 
     func body(content: Content) -> some View {
@@ -236,11 +234,9 @@ struct TapBacksModifier: ViewModifier {
                     radius: calculatedRadius,
                     menuIsShowing: menuIsShowing,
                     itemCount: reactions.count,
-                    itemSpacing: 20,
+                    itemSpacing: 44,
                     spacerCenterPercent: calculatedSpacerCenterPercent,
-                    parentSize: viewSize,
-                    distributeCollapsedX: layoutMode == .largeTopArc,
-                    distributeCollapsedY: layoutMode == .tallSideArc
+                    parentSize: viewSize
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
@@ -299,46 +295,47 @@ extension View {
 }
 
 struct TapBackTestView: View {
-    @State private var size = CGSize(width: 400, height: 50)
+    @State private var demoWidth: Double = 220
+    @State private var demoHeight: Double = 120
 
     var body: some View {
-        VStack(spacing: 60) {
-            // Small rectangle - should show compact side menu
-//            VStack(alignment: .leading, spacing: 8) {
-//                Text("Small View (50×40)")
-//                    .font(.caption)
-//                    .foregroundStyle(.secondary)
-//                
-//                RoundedRectangle(cornerRadius: 10)
-//                    .fill(.blue)
-//                    .frame(width: 50, height: 40)
-//                    .containerShape(.rect)
-//                    .glassEffect(.regular.interactive(), in: .rect)
-//                    .tapBacks(messageID: UUID()) { reaction in
-//                        print("Small tapped: \(reaction)")
-//                    }
-//            }
-//            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding(.horizontal)
-            
-            // Wide rectangle - should show top arc with large radius
+        VStack(spacing: 32) {
             VStack(alignment: .leading, spacing: 8) {
+                Text("Demo Message")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.green)
-                    .frame(width: size.width, height: size.height)
+                    .frame(width: CGFloat(demoWidth), height: CGFloat(demoHeight))
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect)
                     .tapBacks(messageID: UUID()) { reaction in
-                        print("Wide tapped: \(reaction)")
+                        print("Tapped: \(reaction)")
                     }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
-            // TODO: Set a max width for views that are too long, so it animates max from like 300 y distribution.
-            // TODO: Make it so the views change position dynamically and continuously rather than having 3 sizes.
+            
+            VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Width: \(Int(demoWidth))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Slider(value: $demoWidth, in: 30...300)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Height: \(Int(demoHeight))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Slider(value: $demoHeight, in: 30...300)
+                }
+            }
+            .padding(.horizontal)
         }
         .frame(maxHeight: .infinity)
-        .scaleEffect(0.5)
+        .scaleEffect(0.4)
     }
 }
 
