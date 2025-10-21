@@ -312,7 +312,7 @@ struct TapBackTestView: View {
                         print("Tapped: \(reaction)")
                     }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(.horizontal)
 
             VStack(spacing: 16) {
