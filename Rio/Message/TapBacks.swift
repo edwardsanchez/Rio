@@ -133,6 +133,7 @@ struct TapBacksModifier: ViewModifier {
     @State private var viewFrame: CGRect = .zero
     @State private var tapLocation: CGPoint = .zero
     @State private var screenWidth: CGFloat = 0
+    @State private var lastLoggedSize: CGSize = .zero
     
     var messageID: UUID
     var reactions: [String]
@@ -149,6 +150,7 @@ struct TapBacksModifier: ViewModifier {
     private let sideRadius: CGFloat = 100
     private let edgePadding: CGFloat = 80
     private let reactionSpacing: CGFloat = 44
+    private let logInterval: CGFloat = 5
     
     private struct ReactionBounds {
         var minX: CGFloat
@@ -185,13 +187,40 @@ struct TapBacksModifier: ViewModifier {
     }
     
     private var calculatedRadius: CGFloat {
-        let wideRadius = max(400, viewSize.height * 1.5)
-        var widthRadius = lerp(from: sideRadius, to: wideRadius, progress: widthProgress)
-        let shrinkFactor: CGFloat = 1
-        widthRadius -= (widthRadius - sideRadius) * cornerRadiusWeight * shrinkFactor
-        widthRadius = max(widthRadius, sideRadius)
-        let tallRadius = max(300, viewSize.height * 0.8)
-        return lerp(from: widthRadius, to: tallRadius, progress: tallProgress)
+        let w = viewSize.width
+        let h = viewSize.height
+
+        // Define target radii for specific scenarios
+        let smallHugRadius: CGFloat = sideRadius  // For narrow-short and corner
+        let wideSideRadius = max(300, h * 0.8)    // For narrow-tall (side layout)
+        let wideTopRadius = max(400, h * 1.5)      // For wide (top layout)
+
+        // Base interpolation from side to wide based on width
+        var radius = lerp(from: smallHugRadius, to: wideTopRadius, progress: widthProgress)
+
+        // SHRINK at medium widths (corner placement) - this is the key fix
+        // We want radius to dip down at widthProgress ≈ 0.5
+        let isInCornerZone = widthProgress > 0.3 && widthProgress < 0.7  // Medium width range
+        let cornerShrinkAmount: CGFloat = {
+            if !isInCornerZone { return 0 }
+            // Peak shrink at exactly widthProgress = 0.5
+            let distanceFromCenter = abs(widthProgress - 0.5)
+            let shrinkWeight = 1.0 - (distanceFromCenter / 0.2)  // Peaks at 1.0
+            return clamp(shrinkWeight) * (1 - tallProgress)  // No shrink when tall
+        }()
+
+        if cornerShrinkAmount > 0 {
+            // Shrink toward smallHugRadius
+            let amountToRemove = (radius - smallHugRadius) * cornerShrinkAmount
+            radius -= amountToRemove
+        }
+
+        // GROW for narrow-tall scenarios (tallProgress increases radius)
+        if tallProgress > 0 {
+            radius = lerp(from: radius, to: wideSideRadius, progress: tallProgress)
+        }
+
+        return max(radius, smallHugRadius)
     }
     
     private var calculatedSpacerCenterPercent: CGFloat {
@@ -245,6 +274,45 @@ struct TapBacksModifier: ViewModifier {
     private var cornerRadiusWeight: CGFloat {
         let peak = 1 - abs(widthProgress - 0.5) * 1
         return clamp(peak) * (1 - tallProgress)
+    }
+
+    // MARK: - Debug Logging
+
+    private func shouldLog(for size: CGSize) -> Bool {
+        let widthBucket = floor(size.width / logInterval) * logInterval
+        let heightBucket = floor(size.height / logInterval) * logInterval
+        return abs(widthBucket - lastLoggedSize.width) >= logInterval ||
+               abs(heightBucket - lastLoggedSize.height) >= logInterval
+    }
+
+    private func logGeometry(for size: CGSize) {
+        let w = size.width
+        let h = size.height
+        let r = calculatedRadius
+        let offset = calculatedOffset
+        let spacer = calculatedSpacerCenterPercent
+
+        // Calculate intermediate values for debugging
+        let smallHugRadius: CGFloat = sideRadius
+        let wideSideRadius = max(300, h * 0.8)
+        let wideTopRadius = max(400, h * 1.5)
+        let baseRadius = lerp(from: smallHugRadius, to: wideTopRadius, progress: widthProgress)
+
+        let isInCornerZone = widthProgress > 0.3 && widthProgress < 0.7
+        let distanceFromCenter = abs(widthProgress - 0.5)
+        let shrinkWeight = isInCornerZone ? (1.0 - (distanceFromCenter / 0.2)) : 0
+        let cornerShrinkAmount = clamp(shrinkWeight) * (1 - tallProgress)
+
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("Size: \(Int(w))×\(Int(h))")
+        print("widthProgress: \(String(format: "%.2f", widthProgress)) | narrowProgress: \(String(format: "%.2f", narrowProgress)) | tallProgress: \(String(format: "%.2f", tallProgress))")
+        print("Radius: \(String(format: "%.1f", r))")
+        print("Offset: (\(String(format: "%.1f", offset.width)), \(String(format: "%.1f", offset.height)))")
+        print("Spacer: \(String(format: "%.2f", spacer)) (\(String(format: "%.0f", spacer * 360 - 90))°)")
+
+        print("  Target radii: small=\(String(format: "%.1f", smallHugRadius)) wideSide=\(String(format: "%.1f", wideSideRadius)) wideTop=\(String(format: "%.1f", wideTopRadius))")
+        print("  baseRadius (before shrink): \(String(format: "%.1f", baseRadius))")
+        print("  cornerShrinkAmount: \(String(format: "%.2f", cornerShrinkAmount)) (isCornerZone: \(isInCornerZone))")
     }
     
     private func reactionAngles() -> [CGFloat] {
@@ -314,6 +382,12 @@ struct TapBacksModifier: ViewModifier {
                 proxy.size
             } action: { newSize in
                 viewSize = newSize
+                if shouldLog(for: newSize) {
+                    logGeometry(for: newSize)
+                    let widthBucket = floor(newSize.width / logInterval) * logInterval
+                    let heightBucket = floor(newSize.height / logInterval) * logInterval
+                    lastLoggedSize = CGSize(width: widthBucket, height: heightBucket)
+                }
             }
             .onGeometryChange(for: CGRect.self) { proxy in
                 proxy.frame(in: .global)
