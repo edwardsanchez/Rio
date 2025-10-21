@@ -16,6 +16,7 @@ struct RadialLayout: Layout {
     var spacerCenterPercent: CGFloat
     var parentSize: CGSize
     var distributeCollapsedX: Bool
+    var distributeCollapsedY: Bool
     
     /// Calculated spacer percentage based on item count and spacing
     private var spacerPercentage: CGFloat {
@@ -32,7 +33,8 @@ struct RadialLayout: Layout {
         itemSpacing: CGFloat = 100,
         spacerCenterPercent: CGFloat = 0.5,
         parentSize: CGSize = .zero,
-        distributeCollapsedX: Bool = false
+        distributeCollapsedX: Bool = false,
+        distributeCollapsedY: Bool = false
     ) {
         self.radius = radius
         self.menuIsShowing = menuIsShowing
@@ -41,6 +43,7 @@ struct RadialLayout: Layout {
         self.spacerCenterPercent = spacerCenterPercent
         self.parentSize = parentSize
         self.distributeCollapsedX = distributeCollapsedX
+        self.distributeCollapsedY = distributeCollapsedY
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
@@ -54,15 +57,25 @@ struct RadialLayout: Layout {
 
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let parentWidth = parentSize.width
+        let parentHeight = parentSize.height
         let collapsedPadding: CGFloat = 10
-        let itemWidth = subviews.first?.sizeThatFits(.unspecified).width ?? 0
-        let margin = itemWidth / 2 + collapsedPadding
+        let itemSize = subviews.first?.sizeThatFits(.unspecified) ?? .zero
+        let itemWidth = itemSize.width
+        let itemHeight = itemSize.height
+        let marginX = itemWidth / 2 + collapsedPadding
+        let marginY = itemHeight / 2 + collapsedPadding
         let canDistributeCollapsedX = distributeCollapsedX &&
             !menuIsShowing &&
-            parentWidth > margin * 2 &&
+            parentWidth > marginX * 2 &&
             parentWidth > 0 &&
             itemWidth > 0
+        let canDistributeCollapsedY = distributeCollapsedY &&
+            !menuIsShowing &&
+            parentHeight > marginY * 2 &&
+            parentHeight > 0 &&
+            itemHeight > 0
         let parentOriginX = center.x - parentWidth / 2
+        let parentOriginY = center.y - parentHeight / 2
         let collapsedDenominator = max(count - 1, 1)
 
         // Calculate available arc (360 degrees minus the spacer)
@@ -84,18 +97,22 @@ struct RadialLayout: Layout {
             let angle = startAngle + (CGFloat(index) * angleIncrement)
             let radians = angle * .pi / 180.0
             let currentRadius = menuIsShowing ? radius : 0
-            let leftEdge = margin
-            let rightEdge = parentWidth - margin
             let progress = count > 1 ? CGFloat(index) / CGFloat(collapsedDenominator) : 0.5
-            let relativeX = leftEdge + (rightEdge - leftEdge) * progress
+            let availableWidth = max(parentWidth - marginX * 2, 0)
+            let relativeX = marginX + availableWidth * progress
             let distributedX = parentOriginX + relativeX
+            let availableHeight = max(parentHeight - marginY * 2, 0)
+            let relativeY = marginY + availableHeight * progress
+            let distributedY = parentOriginY + relativeY
 
             // Calculate position using polar coordinates
             // When menu is hidden, all items are at center; when shown, they move to their positions
-            let y = center.y + currentRadius * sin(radians)
+            let defaultY = center.y + currentRadius * sin(radians)
             let defaultX = center.x + radius * cos(radians)
             let collapsedX = canDistributeCollapsedX ? distributedX : center.x
+            let collapsedY = canDistributeCollapsedY ? distributedY : center.y
             let x = menuIsShowing ? defaultX : collapsedX
+            let y = menuIsShowing ? defaultY : collapsedY
 
             // Place the subview at the calculated position
             subview.place(at: CGPoint(x: x, y: y), anchor: .center, proposal: .unspecified)
@@ -164,6 +181,8 @@ struct TapBacksModifier: ViewModifier {
         
         let offset: CGSize
         
+        let edgePadding: CGFloat = 80
+        
         switch layoutMode {
         case .smallSide:
             // Position to the right of the view
@@ -177,17 +196,17 @@ struct TapBacksModifier: ViewModifier {
             let offsetX: CGFloat = 0
             // Circle center should be positioned so items at -radius are just above view top
             // View top is at -viewSize.height/2, we want items about 30-40px above that
-            let offsetY = radius - viewSize.height / 2 - 80
+            let offsetY = radius - viewSize.height / 2 - edgePadding
             offset = CGSize(width: offsetX, height: offsetY)
             
         case .tallSideArc:
-            // Position to the right of the view
-            let offsetX = viewSize.width / 2 + radius * 0.7
+            // Position circle so the vertical arc sits just beyond the parent's trailing edge
+            let offsetX = viewSize.width / 2 + edgePadding - radius
             let offsetY: CGFloat = 0
             offset = CGSize(width: offsetX, height: offsetY)
         }
         
-        if !menuIsShowing && layoutMode == .largeTopArc {
+        if !menuIsShowing && (layoutMode == .largeTopArc || layoutMode == .tallSideArc) {
             // Allow the reactions to collapse back to the parent center
             return .zero
         }
@@ -220,7 +239,8 @@ struct TapBacksModifier: ViewModifier {
                     itemSpacing: 50,
                     spacerCenterPercent: calculatedSpacerCenterPercent,
                     parentSize: viewSize,
-                    distributeCollapsedX: layoutMode == .largeTopArc
+                    distributeCollapsedX: layoutMode == .largeTopArc,
+                    distributeCollapsedY: layoutMode == .tallSideArc
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, emoji in
@@ -301,13 +321,9 @@ struct TapBackTestView: View {
             
             // Wide rectangle - should show top arc with large radius
             VStack(alignment: .leading, spacing: 8) {
-                Text("Wide View (300×150)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.green)
-                    .frame(width: 300, height: 50)
+                    .frame(width: 50, height: 300)
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect)
                     .tapBacks(messageID: UUID()) { reaction in
@@ -336,7 +352,7 @@ struct TapBackTestView: View {
 //            .padding(.horizontal)
         }
         .frame(maxHeight: .infinity)
-//        .scaleEffect(0.2)
+        .scaleEffect(0.2)
     }
 }
 
