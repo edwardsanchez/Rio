@@ -8,6 +8,25 @@ disabled_rules: # rule identifiers to exclude from running
   - large_tuple
   - function_parameter_count
   - private_over_fileprivate
+  - comment_spacing
+
+custom_rules:
+  no_space_after_slashes:
+    name: "No space after // or ///"
+    regex: "//{1,3} +(?=\\S)"
+    match_kinds:
+      - comment
+      - doccomment
+    message: "Remove the space after // or ///"
+    severity: error
+  disallow_four_or_more_slashes:
+    name: "Disallow //// or more"
+    regex: "////+"
+    match_kinds:
+      - comment
+      - doccomment
+    message: "Use // or /// only"
+    severity: error
 
 opt_in_rules: # some rules are turned off by default, so you need to opt-in
   - empty_count
