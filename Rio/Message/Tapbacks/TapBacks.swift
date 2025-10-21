@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TapBacksModifier: ViewModifier {
+struct ReactionsModifier: ViewModifier {
     @State private var menuIsShowing = true
     @State private var viewSize: CGSize = .zero
     @State private var viewFrame: CGRect = .zero
@@ -300,15 +300,15 @@ struct TapBacksModifier: ViewModifier {
 }
 
 extension View {
-    func tapBacks(
+    func reactions(
         messageID: UUID,
-        reactions: [Reaction] = TapBacksModifier.defaultReactions,
+        reactions: [Reaction] = ReactionsModifier.defaultReactions,
         onReactionSelected: @escaping (Int) -> Void = { index in
             print("Selected reaction index: \(index)")
         }
     ) -> some View {
         modifier(
-            TapBacksModifier(
+            ReactionsModifier(
                 messageID: messageID,
                 reactions: reactions,
                 onReactionSelected: onReactionSelected
@@ -501,7 +501,7 @@ fileprivate struct TapBackTestView: View {
                     .frame(width: demoWidth, height: demoHeight)
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
-                    .tapBacks(messageID: UUID()) { index in
+                    .reactions(messageID: UUID()) { index in
                         print("Tapped reaction index: \(index)")
                     }
             }
