@@ -49,6 +49,7 @@ struct TapBacksModifier: ViewModifier {
                     spacerCenterPercent: 0.75, // 270° - right side
                     offsetX: 0,
                     offsetY: 0,
+                    horizontalAnchor: .center,
                     verticalAnchor: .center
                 )
             case .narrowTall:
@@ -57,14 +58,16 @@ struct TapBacksModifier: ViewModifier {
                     spacerCenterPercent: 0.75, // 270° - right side
                     offsetX: -200,
                     offsetY: 0,
+                    horizontalAnchor: .center,
                     verticalAnchor: .center
                 )
             case .mediumCorner:
                 return LayoutConfig(
                     radius: 100,
                     spacerCenterPercent: 0.625, // 135° - top-right corner
-                    offsetX: 35,
-                    offsetY: 35,
+                    offsetX: -40,
+                    offsetY: 40,
+                    horizontalAnchor: .trailing,
                     verticalAnchor: .top
                 )
             case .wideTop:
@@ -73,6 +76,7 @@ struct TapBacksModifier: ViewModifier {
                     spacerCenterPercent: 0.5, // 180° - top
                     offsetX: 0,
                     offsetY: 230,
+                    horizontalAnchor: .center,
                     verticalAnchor: .top
                 )
             }
@@ -84,7 +88,25 @@ struct TapBacksModifier: ViewModifier {
         var spacerCenterPercent: CGFloat
         var offsetX: CGFloat
         var offsetY: CGFloat
+        var horizontalAnchor: HorizontalAnchor
         var verticalAnchor: VerticalAnchor
+    }
+
+    enum HorizontalAnchor {
+        case center
+        case leading
+        case trailing
+
+        func xOffset(for size: CGSize) -> CGFloat {
+            switch self {
+            case .center:
+                return 0
+            case .leading:
+                return -size.width / 2
+            case .trailing:
+                return size.width / 2
+            }
+        }
     }
 
     enum VerticalAnchor {
@@ -149,9 +171,10 @@ struct TapBacksModifier: ViewModifier {
         guard menuIsShowing else {
             return .zero
         }
+        let horizontalAdjustment = currentConfig.horizontalAnchor.xOffset(for: viewSize)
         let verticalAdjustment = currentConfig.verticalAnchor.yOffset(for: viewSize)
         return CGSize(
-            width: currentConfig.offsetX,
+            width: currentConfig.offsetX + horizontalAdjustment,
             height: currentConfig.offsetY + verticalAdjustment
         )
     }
@@ -170,25 +193,39 @@ struct TapBacksModifier: ViewModifier {
         let h = size.height
         let layoutCase = detectLayoutCase()
         let config = layoutCase.config
+        let horizontalAdjustment = config.horizontalAnchor.xOffset(for: size)
         let verticalAdjustment = config.verticalAnchor.yOffset(for: size)
-        let anchorDescription: String
+        let horizontalDescription: String
+        let verticalDescription: String
+
+        switch config.horizontalAnchor {
+        case .center:
+            horizontalDescription = "center"
+        case .leading:
+            horizontalDescription = "leading"
+        case .trailing:
+            horizontalDescription = "trailing"
+        }
 
         switch config.verticalAnchor {
         case .center:
-            anchorDescription = "center"
+            verticalDescription = "center"
         case .top:
-            anchorDescription = "top"
+            verticalDescription = "top"
         case .bottom:
-            anchorDescription = "bottom"
+            verticalDescription = "bottom"
         }
+
+        let effectiveX = config.offsetX + horizontalAdjustment
+        let effectiveY = config.offsetY + verticalAdjustment
 
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("Size: \(Int(w))×\(Int(h))")
         print("Layout Case: \(layoutCase.rawValue)")
         print("Radius: \(String(format: "%.1f", config.radius))")
         print("Base Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
-        print("Anchor: \(anchorDescription), adjustmentY: \(String(format: "%.1f", verticalAdjustment))")
-        print("Effective Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY + verticalAdjustment)))")
+        print("Anchors: x=\(horizontalDescription) (\(String(format: "%.1f", horizontalAdjustment))), y=\(verticalDescription) (\(String(format: "%.1f", verticalAdjustment)))")
+        print("Effective Offset: (\(String(format: "%.1f", effectiveX)), \(String(format: "%.1f", effectiveY)))")
         print("Spacer: \(String(format: "%.2f", config.spacerCenterPercent)) (\(String(format: "%.0f", config.spacerCenterPercent * 360 - 90))°)")
     }
     
