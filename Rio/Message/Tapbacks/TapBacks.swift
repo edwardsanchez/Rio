@@ -14,7 +14,9 @@ struct TapBacksModifier: ViewModifier {
     @State private var tapLocation: CGPoint = .zero
     @State private var screenWidth: CGFloat = 0
     @State private var lastLoggedSize: CGSize = .zero
-    
+
+    @State private var selectedEmoji: String?
+
     var messageID: UUID
     var reactions: [AnyView]
     var onReactionSelected: (Int) -> Void
@@ -339,13 +341,15 @@ struct TapBacksModifier: ViewModifier {
                 screenWidth = width
             }
             .overlay(alignment: .topTrailing) {
-                tapBackOptions(reactionView: Text(
-                    "❤️"
-                )) {
+                if let selectedEmoji, !menuIsShowing {
+                    tapBackOptions(reactionView: Text(
+                        selectedEmoji
+                    ), show: true) {
 
+                    }
+                    .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+                    .offset(x: 20, y: -20)
                 }
-                .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-                .offset(x: 40, y: -30)
             }
             .background(
                 RadialLayout(
@@ -358,9 +362,10 @@ struct TapBacksModifier: ViewModifier {
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.offset) { index, reactionView in
-                            tapBackOptions(reactionView: reactionView) {
+                            tapBackOptions(reactionView: reactionView, show: menuIsShowing) {
                                 onReactionSelected(index)
                                 menuIsShowing = false
+                                selectedEmoji = "❤️"
                             }
                             .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                             .animation(
@@ -384,7 +389,7 @@ struct TapBacksModifier: ViewModifier {
     }
 
     @ViewBuilder
-    func tapBackOptions(reactionView: some View, action: @escaping () -> Void) -> some View {
+    func tapBackOptions(reactionView: some View, show: Bool, action: @escaping () -> Void) -> some View {
         Button {
             action()
         } label: {
@@ -393,7 +398,7 @@ struct TapBacksModifier: ViewModifier {
                 .frame(width: 44, height: 44)
                 .overlay(
                     reactionView
-                        .opacity(menuIsShowing ? 1 : 0)
+                        .opacity(show ? 1 : 0)
                 )
         }
     }
