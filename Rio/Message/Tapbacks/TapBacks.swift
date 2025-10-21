@@ -48,28 +48,32 @@ struct TapBacksModifier: ViewModifier {
                     radius: 80,
                     spacerCenterPercent: 0.75, // 270° - right side
                     offsetX: 0,
-                    offsetY: 0
+                    offsetY: 0,
+                    verticalAnchor: .center
                 )
             case .narrowTall:
                 return LayoutConfig(
                     radius: 300,
                     spacerCenterPercent: 0.75, // 270° - right side
                     offsetX: -200,
-                    offsetY: 0
+                    offsetY: 0,
+                    verticalAnchor: .center
                 )
             case .mediumCorner:
                 return LayoutConfig(
                     radius: 100,
                     spacerCenterPercent: 0.625, // 135° - top-right corner
                     offsetX: 35,
-                    offsetY: -35
+                    offsetY: 35,
+                    verticalAnchor: .top
                 )
             case .wideTop:
                 return LayoutConfig(
                     radius: 300,
                     spacerCenterPercent: 0.5, // 180° - top
                     offsetX: 0,
-                    offsetY: 120
+                    offsetY: 230,
+                    verticalAnchor: .top
                 )
             }
         }
@@ -80,6 +84,24 @@ struct TapBacksModifier: ViewModifier {
         var spacerCenterPercent: CGFloat
         var offsetX: CGFloat
         var offsetY: CGFloat
+        var verticalAnchor: VerticalAnchor
+    }
+
+    enum VerticalAnchor {
+        case center
+        case top
+        case bottom
+
+        func yOffset(for size: CGSize) -> CGFloat {
+            switch self {
+            case .center:
+                return 0
+            case .top:
+                return -size.height / 2
+            case .bottom:
+                return size.height / 2
+            }
+        }
     }
 
     private let reactionSpacing: CGFloat = 44
@@ -127,7 +149,11 @@ struct TapBacksModifier: ViewModifier {
         guard menuIsShowing else {
             return .zero
         }
-        return CGSize(width: currentConfig.offsetX, height: currentConfig.offsetY)
+        let verticalAdjustment = currentConfig.verticalAnchor.yOffset(for: viewSize)
+        return CGSize(
+            width: currentConfig.offsetX,
+            height: currentConfig.offsetY + verticalAdjustment
+        )
     }
     
     // MARK: - Debug Logging
@@ -144,12 +170,25 @@ struct TapBacksModifier: ViewModifier {
         let h = size.height
         let layoutCase = detectLayoutCase()
         let config = layoutCase.config
+        let verticalAdjustment = config.verticalAnchor.yOffset(for: size)
+        let anchorDescription: String
+
+        switch config.verticalAnchor {
+        case .center:
+            anchorDescription = "center"
+        case .top:
+            anchorDescription = "top"
+        case .bottom:
+            anchorDescription = "bottom"
+        }
 
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("Size: \(Int(w))×\(Int(h))")
         print("Layout Case: \(layoutCase.rawValue)")
         print("Radius: \(String(format: "%.1f", config.radius))")
-        print("Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
+        print("Base Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
+        print("Anchor: \(anchorDescription), adjustmentY: \(String(format: "%.1f", verticalAdjustment))")
+        print("Effective Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY + verticalAdjustment)))")
         print("Spacer: \(String(format: "%.2f", config.spacerCenterPercent)) (\(String(format: "%.0f", config.spacerCenterPercent * 360 - 90))°)")
     }
     
@@ -288,7 +327,7 @@ extension View {
 
 struct TapBackTestView: View {
     @State private var demoWidth: Double = 250
-    @State private var demoHeight: Double = 200
+    @State private var demoHeight: Double = 150
 
     private let testCases: [(String, CGFloat, CGFloat)] = [
         ("Narrow + Short", 60, 80),
