@@ -224,11 +224,12 @@ struct ReactionsModifier: ViewModifier {
             }
             .overlay(alignment: .topTrailing) {
                 if let reaction = selectedReaction, !menuIsShowing {
-                    reactionBubble(for: reaction, show: true)
-                        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-                        .offset(x: 20, y: -20)
-                        .accessibilityLabel(Text(selectedEmoji ?? reaction.selectedEmoji))
-                        .allowsHitTesting(false)
+                    reactionButton(for: reaction, show: !menuIsShowing) {
+                        //Will show who reacted
+                    }
+                    .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+                    .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
+                    .offset(x: 20, y: -20)
                 }
             }
             .background(
@@ -248,6 +249,7 @@ struct ReactionsModifier: ViewModifier {
                                 menuIsShowing = false
                             }
                             .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+                            .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
                             .animation(
                                 .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
                                 .delay(Double(index) * 0.05),
@@ -281,9 +283,8 @@ struct ReactionsModifier: ViewModifier {
             .frame(width: 44, height: 44)
             .overlay(
                 reactionContent(for: reaction)
-                    .opacity(show ? 1 : 0)
+//                    .opacity(show ? 1 : 0)
             )
-            .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
     }
 
     @ViewBuilder
