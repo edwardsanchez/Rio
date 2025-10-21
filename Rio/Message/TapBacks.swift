@@ -148,6 +148,7 @@ struct TapBacksModifier: ViewModifier {
     private let topSpacer: CGFloat = 0.5
     private let sideRadius: CGFloat = 100
     private let edgePadding: CGFloat = 80
+    private let reactionSpacing: CGFloat = 44
     
     private var widthProgress: CGFloat {
         guard widthMaximum > widthMinimum else { return 0 }
@@ -191,7 +192,7 @@ struct TapBacksModifier: ViewModifier {
         let radius = calculatedRadius
         let topOffsetY = radius - viewSize.height / 2 - edgePadding
         let smallSideOffsetX = viewSize.width / 2
-        let tallSideOffsetX = max(radius - viewSize.width / 2 - edgePadding, 0)
+        let tallSideOffsetX = sideAlignedOffsetX()
         let blendedSideOffsetX = lerp(from: smallSideOffsetX, to: tallSideOffsetX, progress: tallProgress)
         
         let offsetX = lerp(from: blendedSideOffsetX, to: 0, progress: widthProgress)
@@ -210,6 +211,39 @@ struct TapBacksModifier: ViewModifier {
     
     private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
         start + (end - start) * progress
+    }
+    
+    private func sideAlignedOffsetX() -> CGFloat {
+        guard menuIsShowing else { return 0 }
+        guard let rightmostX = reactionAngles()
+            .map({ calculatedRadius * cos($0 * .pi / 180) })
+            .max() else {
+            return 0
+        }
+        
+        let targetX = viewSize.width / 2 + edgePadding
+        return targetX - rightmostX
+    }
+    
+    private func reactionAngles() -> [CGFloat] {
+        let radius = calculatedRadius
+        guard radius > 0, reactions.isEmpty == false else { return [] }
+        
+        let count = reactions.count
+        let circumference = 2 * .pi * radius
+        let totalSpacing = CGFloat(count) * reactionSpacing
+        let rawSpacerArc = circumference > 0 ? (circumference - totalSpacing) / circumference : 0
+        let spacerPercentage = min(0.9, max(0, rawSpacerArc))
+        let availableArc = 360.0 * (1.0 - spacerPercentage)
+        let angleIncrement = count > 0 ? availableArc / CGFloat(count) : 0
+        let spacerCenterAngle = (calculatedSpacerCenterPercent * 360.0) - 90.0
+        let spacerArc = 360.0 * spacerPercentage
+        let arcStartAngle = spacerCenterAngle + (spacerArc / 2.0)
+        let startAngle = arcStartAngle + (angleIncrement / 2.0)
+        
+        return (0..<count).map { index in
+            startAngle + (CGFloat(index) * angleIncrement)
+        }
     }
 
     func body(content: Content) -> some View {
@@ -234,7 +268,7 @@ struct TapBacksModifier: ViewModifier {
                     radius: calculatedRadius,
                     menuIsShowing: menuIsShowing,
                     itemCount: reactions.count,
-                    itemSpacing: 44,
+                    itemSpacing: reactionSpacing,
                     spacerCenterPercent: calculatedSpacerCenterPercent,
                     parentSize: viewSize
                 ) {
