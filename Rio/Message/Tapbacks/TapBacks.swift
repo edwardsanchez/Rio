@@ -127,7 +127,7 @@ struct TapBacksModifier: ViewModifier {
         }
     }
 
-    private let reactionSpacing: CGFloat = 44
+    private let reactionSpacing: CGFloat = 50
     private let logInterval: CGFloat = 5
     
     private struct ReactionBounds {
