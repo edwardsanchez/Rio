@@ -223,13 +223,10 @@ struct ReactionsModifier: ViewModifier {
                 screenWidth = width
             }
             .overlay(alignment: .topTrailing) {
-                if let reaction = selectedReaction, !menuIsShowing {
-                    reactionButton(for: reaction, show: !menuIsShowing) {
-                        //Will show who reacted
+                if let reaction = selectedReaction {
+                    reactionButton(for: reaction, isOverlay: true) {
+                        // Will show who reacted
                     }
-                    .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-                    .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
-                    .offset(x: 20, y: -20)
                 }
             }
             .background(
@@ -243,13 +240,11 @@ struct ReactionsModifier: ViewModifier {
                 ) {
                     GlassEffectContainer {
                         ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
-                            reactionButton(for: reaction, show: menuIsShowing) {
+                            reactionButton(for: reaction, isOverlay: false) {
                                 onReactionSelected(index)
                                 selectedReactionID = reaction.id
                                 menuIsShowing = false
                             }
-                            .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-                            .matchedGeometryEffect(id: reaction.id, in: reactionNamespace)
                             .animation(
                                 .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
                                 .delay(Double(index) * 0.05),
@@ -271,20 +266,52 @@ struct ReactionsModifier: ViewModifier {
     }
 
     @ViewBuilder
-    private func reactionButton(for reaction: Reaction, show: Bool, action: @escaping () -> Void) -> some View {
+    private func reactionButton(for reaction: Reaction, isOverlay: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            reactionBubble(for: reaction, show: show)
+            reactionBubble(for: reaction, isOverlay: isOverlay)
         }
+        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+        .matchedGeometryEffect(
+            id: reaction.id,
+            in: reactionNamespace,
+            isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
+        )
+        .offset(x: isOverlay ? 20 : 0, y: isOverlay ? -20 : 0)
+        .opacity(reactionOpacity(for: reaction, isOverlay: isOverlay))
+        .animation(.none, value: selectedReactionID)
     }
 
-    private func reactionBubble(for reaction: Reaction, show: Bool) -> some View {
+    private func reactionBubble(for reaction: Reaction, isOverlay: Bool) -> some View {
         Circle()
             .fill(.clear)
             .frame(width: 44, height: 44)
             .overlay(
                 reactionContent(for: reaction)
-//                    .opacity(show ? 1 : 0)
             )
+    }
+
+    private func reactionOpacity(for reaction: Reaction, isOverlay: Bool) -> Double {
+        if isOverlay {
+            return overlayOpacity(for: reaction)
+        }
+        return menuOpacity(for: reaction)
+    }
+
+    private func menuOpacity(for reaction: Reaction) -> Double {
+        guard menuIsShowing else { return 0 }
+        return selectedReactionID == reaction.id ? 0 : 1
+    }
+
+    private func overlayOpacity(for reaction: Reaction) -> Double {
+        guard selectedReactionID == reaction.id else { return 0 }
+        return 1
+    }
+
+    private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
+        guard selectedReactionID == reaction.id else {
+            return !isOverlay
+        }
+        return isOverlay ? !menuIsShowing : menuIsShowing
     }
 
     @ViewBuilder
