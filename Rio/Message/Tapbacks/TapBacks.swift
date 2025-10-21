@@ -56,9 +56,9 @@ struct TapBacksModifier: ViewModifier {
                 return LayoutConfig(
                     radius: 300,
                     spacerCenterPercent: 0.75, // 270° - right side
-                    offsetX: -200,
+                    offsetX: -230,
                     offsetY: 0,
-                    horizontalAnchor: .center,
+                    horizontalAnchor: .trailing,
                     verticalAnchor: .center
                 )
             case .mediumCorner:
@@ -182,6 +182,7 @@ struct TapBacksModifier: ViewModifier {
         guard menuIsShowing else {
             return .zero
         }
+        
         let horizontalAdjustment = currentConfig.horizontalAnchor.xOffset(for: viewSize)
         let verticalAdjustment = currentConfig.verticalAnchor.yOffset(for: viewSize)
         return CGSize(
