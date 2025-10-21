@@ -186,9 +186,12 @@ struct TapBacksModifier: ViewModifier {
     
     private var calculatedRadius: CGFloat {
         let wideRadius = max(400, viewSize.height * 1.5)
-        let baseRadius = lerp(from: sideRadius, to: wideRadius, progress: widthProgress)
+        var widthRadius = lerp(from: sideRadius, to: wideRadius, progress: widthProgress)
+        let shrinkFactor: CGFloat = 1
+        widthRadius -= (widthRadius - sideRadius) * cornerRadiusWeight * shrinkFactor
+        widthRadius = max(widthRadius, sideRadius)
         let tallRadius = max(300, viewSize.height * 0.8)
-        return lerp(from: baseRadius, to: tallRadius, progress: tallProgress)
+        return lerp(from: widthRadius, to: tallRadius, progress: tallProgress)
     }
     
     private var calculatedSpacerCenterPercent: CGFloat {
@@ -237,6 +240,11 @@ struct TapBacksModifier: ViewModifier {
     
     private func lerp(from start: CGFloat, to end: CGFloat, progress: CGFloat) -> CGFloat {
         start + (end - start) * progress
+    }
+    
+    private var cornerRadiusWeight: CGFloat {
+        let peak = 1 - abs(widthProgress - 0.5) * 1
+        return clamp(peak) * (1 - tallProgress)
     }
     
     private func reactionAngles() -> [CGFloat] {
@@ -300,6 +308,8 @@ struct TapBacksModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
+            .animation(.smooth(duration: 0.4), value: menuIsShowing)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
@@ -350,7 +360,7 @@ struct TapBacksModifier: ViewModifier {
                     }
                 }
                 .offset(calculatedOffset)
-                .animation(.spring(duration: 0.4, bounce: 0.5), value: menuIsShowing)
+                .animation(.bouncy(duration: 0.4), value: menuIsShowing)
             )
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -421,7 +431,6 @@ struct TapBackTestView: View {
             .padding(.horizontal)
         }
         .frame(maxHeight: .infinity)
-        .scaleEffect(0.4)
     }
 }
 
