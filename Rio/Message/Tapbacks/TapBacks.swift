@@ -342,10 +342,10 @@ struct TapBacksModifier: ViewModifier {
             }
             .overlay(alignment: .topTrailing) {
                 if let selectedEmoji, !menuIsShowing {
-                    tapBackOptions(reactionView: Text(
+                    reactionView(Text(
                         selectedEmoji
                     ), show: true) {
-
+                        //Some action when tapping, likely information on who reacted and when
                     }
                     .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                     .offset(x: 20, y: -20)
@@ -361,8 +361,8 @@ struct TapBacksModifier: ViewModifier {
                     parentSize: viewSize
                 ) {
                     GlassEffectContainer {
-                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, reactionView in
-                            tapBackOptions(reactionView: reactionView, show: menuIsShowing) {
+                        ForEach(Array(reactions.enumerated()), id: \.offset) { index, view in
+                            reactionView(view, show: menuIsShowing) {
                                 onReactionSelected(index)
                                 menuIsShowing = false
                                 selectedEmoji = "❤️"
@@ -389,7 +389,7 @@ struct TapBacksModifier: ViewModifier {
     }
 
     @ViewBuilder
-    func tapBackOptions(reactionView: some View, show: Bool, action: @escaping () -> Void) -> some View {
+    func reactionView(_ view: some View, show: Bool, action: @escaping () -> Void) -> some View {
         Button {
             action()
         } label: {
@@ -397,7 +397,7 @@ struct TapBacksModifier: ViewModifier {
                 .fill(.clear)
                 .frame(width: 44, height: 44)
                 .overlay(
-                    reactionView
+                    view
                         .opacity(show ? 1 : 0)
                 )
         }
