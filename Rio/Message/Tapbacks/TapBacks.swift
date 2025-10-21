@@ -369,7 +369,7 @@ struct TapBacksModifier: ViewModifier {
                             }
                             .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
                             .animation(
-                                .spring(duration: 0.4, bounce: 0.5)
+                                .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
                                 .delay(Double(index) * 0.05),
                                 value: menuIsShowing
                             )
