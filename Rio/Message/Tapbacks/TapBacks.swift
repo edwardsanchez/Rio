@@ -367,7 +367,7 @@ struct TapBackTestView: View {
     @State private var demoHeight: Double = 150
 
     private let testCases: [(String, CGFloat, CGFloat)] = [
-        ("Narrow + Short", 60, 80),
+        ("Narrow + Short", 60, 60),
         ("Narrow + Tall", 60, 200),
         ("Medium (Corner)", 150, 150),
         ("Wide (Top)", 250, 80)
@@ -382,9 +382,9 @@ struct TapBackTestView: View {
 
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.green)
-                    .frame(width: CGFloat(demoWidth), height: CGFloat(demoHeight))
+                    .frame(width: demoWidth, height: demoHeight)
                     .containerShape(.rect)
-                    .glassEffect(.regular.interactive(), in: .rect)
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
                     .tapBacks(messageID: UUID()) { reaction in
                         print("Tapped: \(reaction)")
                     }
