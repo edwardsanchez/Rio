@@ -32,12 +32,13 @@ struct TapBacksModifier: ViewModifier {
             switch self {
             case .narrowShort:
                 return (0, 80, 0, 80)
+                return (0, 95, 0, 80)
             case .narrowTall:
-                return (0, 80, 80, .infinity)
+                return (0, 95, 80, .infinity)
             case .mediumCorner:
-                return (80, 220, 0, .infinity)
+                return (95, 250, 0, .infinity)
             case .wideTop:
-                return (220, .infinity, 0, .infinity)
+                return (250, .infinity, 0, .infinity)
             }
         }
 
