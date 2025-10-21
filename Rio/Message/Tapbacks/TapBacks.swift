@@ -11,7 +11,6 @@ struct ReactionsModifier: ViewModifier {
     @State private var menuIsShowing = true
     @State private var viewSize: CGSize = .zero
     @State private var viewFrame: CGRect = .zero
-    @State private var tapLocation: CGPoint = .zero
     @State private var screenWidth: CGFloat = 0
     @State private var lastLoggedSize: CGSize = .zero
 
@@ -223,11 +222,12 @@ struct ReactionsModifier: ViewModifier {
                 screenWidth = width
             }
             .overlay(alignment: .topTrailing) {
-                if let reaction = selectedReaction {
-                    reactionButton(for: reaction, isVisible: false, isOverlay: true) {
+                if let selectedReaction {
+                    //Here only for the purposes of geometry matching
+                    reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {
                         // Will show who reacted
                     }
-
+                    .allowsHitTesting(false)
                 }
             }
             .background(
@@ -236,13 +236,9 @@ struct ReactionsModifier: ViewModifier {
             .overlay {
                 menuView(isOverlay: true)
             }
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onEnded { value in
-                        tapLocation = value.location
-                        menuIsShowing.toggle()
-                    }
-            )
+            .onTapGesture {
+                menuIsShowing.toggle()
+            }
     }
 
     func menuView(isOverlay: Bool) -> some View {
