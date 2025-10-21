@@ -47,38 +47,39 @@ struct TapBacksModifier: ViewModifier {
                 return LayoutConfig(
                     radius: 80,
                     spacerCenterPercent: 0.75, // 270° - right side
-                    offsetX: -25,
-                    offsetY: 0,
                     horizontalAnchor: .trailing,
                     verticalAnchor: .center
-                )
+                ) { size in
+                    let baseX: CGFloat = size.width > 65 ? -25 : 10
+                    return CGSize(width: baseX, height: 0)
+                }
             case .narrowTall:
                 return LayoutConfig(
                     radius: 500,
                     spacerCenterPercent: 0.75, // 270° - right side
-                    offsetX: -435,
-                    offsetY: 0,
                     horizontalAnchor: .trailing,
                     verticalAnchor: .center
-                )
+                ) { _ in
+                    CGSize(width: -435, height: 0)
+                }
             case .mediumCorner:
                 return LayoutConfig(
                     radius: 100,
                     spacerCenterPercent: 0.625, // 135° - top-right corner
-                    offsetX: -30,
-                    offsetY: 30,
                     horizontalAnchor: .trailing,
                     verticalAnchor: .top
-                )
+                ) { _ in
+                    CGSize(width: -30, height: 30)
+                }
             case .wideTop:
                 return LayoutConfig(
                     radius: 600,
                     spacerCenterPercent: 0.51, // 180° - top
-                    offsetX: 140,
-                    offsetY: 540,
                     horizontalAnchor: .leading,
                     verticalAnchor: .top
-                )
+                ) { _ in
+                    CGSize(width: 140, height: 540)
+                }
             }
         }
     }
@@ -86,10 +87,27 @@ struct TapBacksModifier: ViewModifier {
     struct LayoutConfig {
         var radius: CGFloat
         var spacerCenterPercent: CGFloat
-        var offsetX: CGFloat
-        var offsetY: CGFloat
         var horizontalAnchor: HorizontalAnchor
         var verticalAnchor: VerticalAnchor
+        private let offsetProvider: (CGSize) -> CGSize
+
+        init(
+            radius: CGFloat,
+            spacerCenterPercent: CGFloat,
+            horizontalAnchor: HorizontalAnchor,
+            verticalAnchor: VerticalAnchor,
+            offsetProvider: @escaping (CGSize) -> CGSize
+        ) {
+            self.radius = radius
+            self.spacerCenterPercent = spacerCenterPercent
+            self.horizontalAnchor = horizontalAnchor
+            self.verticalAnchor = verticalAnchor
+            self.offsetProvider = offsetProvider
+        }
+
+        func baseOffset(for size: CGSize) -> CGSize {
+            offsetProvider(size)
+        }
     }
 
     static var defaultReactions: [AnyView] {
@@ -187,11 +205,14 @@ struct TapBacksModifier: ViewModifier {
             return .zero
         }
 
-        let horizontalAdjustment = currentConfig.horizontalAnchor.xOffset(for: viewSize)
-        let verticalAdjustment = currentConfig.verticalAnchor.yOffset(for: viewSize)
+        let layoutCase = detectLayoutCase()
+        let config = layoutCase.config
+        let baseOffset = config.baseOffset(for: viewSize)
+        let horizontalAdjustment = config.horizontalAnchor.xOffset(for: viewSize)
+        let verticalAdjustment = config.verticalAnchor.yOffset(for: viewSize)
         return CGSize(
-            width: currentConfig.offsetX + horizontalAdjustment,
-            height: currentConfig.offsetY + verticalAdjustment
+            width: baseOffset.width + horizontalAdjustment,
+            height: baseOffset.height + verticalAdjustment
         )
     }
     
@@ -209,6 +230,7 @@ struct TapBacksModifier: ViewModifier {
         let h = size.height
         let layoutCase = detectLayoutCase()
         let config = layoutCase.config
+        let baseOffset = config.baseOffset(for: size)
         let horizontalAdjustment = config.horizontalAnchor.xOffset(for: size)
         let verticalAdjustment = config.verticalAnchor.yOffset(for: size)
         let horizontalDescription: String
@@ -238,14 +260,14 @@ struct TapBacksModifier: ViewModifier {
             verticalDescription = "bottom"
         }
 
-        let effectiveX = config.offsetX + horizontalAdjustment
-        let effectiveY = config.offsetY + verticalAdjustment
+        let effectiveX = baseOffset.width + horizontalAdjustment
+        let effectiveY = baseOffset.height + verticalAdjustment
 
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print("Size: \(Int(w))×\(Int(h))")
         print("Layout Case: \(layoutCase.rawValue)")
         print("Radius: \(String(format: "%.1f", config.radius))")
-        print("Base Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
+        print("Base Offset: (\(String(format: "%.1f", baseOffset.width)), \(String(format: "%.1f", baseOffset.height)))")
         print("Anchors: x=\(horizontalDescription) (\(String(format: "%.1f", horizontalAdjustment))), y=\(verticalDescription) (\(String(format: "%.1f", verticalAdjustment)))")
         print("Effective Offset: (\(String(format: "%.1f", effectiveX)), \(String(format: "%.1f", effectiveY)))")
         if angleConfiguration.angleIncrement > 0 {
