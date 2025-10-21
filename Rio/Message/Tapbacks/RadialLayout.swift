@@ -15,13 +15,11 @@ struct RadialLayout: Layout {
     var itemSpacing: CGFloat
     var spacerCenterPercent: CGFloat
     var parentSize: CGSize
-    
-    /// Calculated spacer percentage based on item count and spacing
-    private var spacerPercentage: CGFloat {
-        let circumference = 2 * .pi * radius
-        let totalItemSpacing = CGFloat(itemCount) * itemSpacing
-        let spacerArc = max(0, circumference - totalItemSpacing)
-        return min(0.9, max(0, spacerArc / circumference)) // Clamp between 0 and 0.9
+
+    struct AngleConfiguration {
+        let angles: [CGFloat]
+        let angleIncrement: CGFloat
+        let gapArc: CGFloat
     }
 
     init(
@@ -49,6 +47,15 @@ struct RadialLayout: Layout {
         let count = subviews.count
         guard count > 0 else { return }
 
+        let angleConfiguration = RadialLayout.calculateAngles(
+            radius: radius,
+            itemCount: count,
+            itemSpacing: itemSpacing,
+            spacerCenterPercent: spacerCenterPercent
+        )
+        let angles = angleConfiguration.angles
+        guard angles.count == count else { return }
+
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let parentWidth = parentSize.width
         let parentHeight = parentSize.height
@@ -63,23 +70,8 @@ struct RadialLayout: Layout {
         let collapsedDenominator = max(count - 1, 1)
         let distributeHorizontally = parentWidth >= parentHeight
 
-        // Calculate available arc (360 degrees minus the spacer)
-        let availableArc = 360.0 * (1.0 - spacerPercentage)
-        
-        // Calculate the angle increment between items
-        let angleIncrement = availableArc / CGFloat(count)
-        
-        // Calculate starting angle
-        // Convert spacerCenterPercent to degrees (0% = top = -90°, going clockwise)
-        let spacerCenterAngle = (spacerCenterPercent * 360.0) - 90.0
-        let spacerArc = 360.0 * spacerPercentage
-        // Start at the end of the spacer, plus half an increment to center the first item
-        let arcStartAngle = spacerCenterAngle + (spacerArc / 2.0)
-        let startAngle = arcStartAngle + (angleIncrement / 2.0)
-
         for (index, subview) in subviews.enumerated() {
-            // Calculate angle for this item within the available arc
-            let angle = startAngle + (CGFloat(index) * angleIncrement)
+            let angle = angles[index]
             let radians = angle * .pi / 180.0
             let currentRadius = menuIsShowing ? radius : 0
             let progress = count > 1 ? CGFloat(index) / CGFloat(collapsedDenominator) : 0.5
@@ -124,5 +116,54 @@ struct RadialLayout: Layout {
             // Place the subview at the calculated position
             subview.place(at: CGPoint(x: x, y: y), anchor: .center, proposal: .unspecified)
         }
+    }
+
+    static func calculateAngles(
+        radius: CGFloat,
+        itemCount: Int,
+        itemSpacing: CGFloat,
+        spacerCenterPercent: CGFloat
+    ) -> AngleConfiguration {
+        guard radius > 0, itemCount > 0 else {
+            return AngleConfiguration(angles: [], angleIncrement: 0, gapArc: 0)
+        }
+
+        let safeRadius = max(radius, 0.001)
+        let maxChordLength = 2 * safeRadius
+        let clampedSpacing = min(itemSpacing, maxChordLength * 0.999)
+        let spacingRatio = max(0, min(clampedSpacing / maxChordLength, 1))
+        var angleIncrement = spacingRatio > 0
+            ? (2 * asin(spacingRatio)) * 180 / .pi
+            : 360 / CGFloat(itemCount)
+
+        if angleIncrement.isNaN || angleIncrement.isInfinite || angleIncrement <= 0 {
+            angleIncrement = 360 / CGFloat(itemCount)
+        }
+
+        var usedArc = angleIncrement * CGFloat(itemCount)
+        if usedArc > 360 || usedArc.isNaN || usedArc.isInfinite {
+            angleIncrement = 360 / CGFloat(itemCount)
+            usedArc = angleIncrement * CGFloat(itemCount)
+        }
+
+        var gapArc = max(0, 360 - usedArc)
+        let maxGapArc = 360 * 0.9
+        if gapArc > maxGapArc {
+            gapArc = maxGapArc
+        }
+
+        let spacerCenterAngle = (spacerCenterPercent * 360) - 90
+        let arcStartAngle = spacerCenterAngle + (gapArc / 2)
+        let startAngle = arcStartAngle + (angleIncrement / 2)
+
+        let angles = (0..<itemCount).map { index in
+            startAngle + (CGFloat(index) * angleIncrement)
+        }
+
+        return AngleConfiguration(
+            angles: angles,
+            angleIncrement: angleIncrement,
+            gapArc: gapArc
+        )
     }
 }

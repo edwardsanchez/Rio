@@ -213,6 +213,12 @@ struct TapBacksModifier: ViewModifier {
         let verticalAdjustment = config.verticalAnchor.yOffset(for: size)
         let horizontalDescription: String
         let verticalDescription: String
+        let angleConfiguration = RadialLayout.calculateAngles(
+            radius: config.radius,
+            itemCount: reactions.count,
+            itemSpacing: reactionSpacing,
+            spacerCenterPercent: config.spacerCenterPercent
+        )
 
         switch config.horizontalAnchor {
         case .center:
@@ -242,28 +248,25 @@ struct TapBacksModifier: ViewModifier {
         print("Base Offset: (\(String(format: "%.1f", config.offsetX)), \(String(format: "%.1f", config.offsetY)))")
         print("Anchors: x=\(horizontalDescription) (\(String(format: "%.1f", horizontalAdjustment))), y=\(verticalDescription) (\(String(format: "%.1f", verticalAdjustment)))")
         print("Effective Offset: (\(String(format: "%.1f", effectiveX)), \(String(format: "%.1f", effectiveY)))")
+        if angleConfiguration.angleIncrement > 0 {
+            print("Angle Increment: \(String(format: "%.1f", angleConfiguration.angleIncrement))°")
+        }
+        if angleConfiguration.gapArc > 0 {
+            print("Gap Arc: \(String(format: "%.1f", angleConfiguration.gapArc))°")
+        }
         print("Spacer: \(String(format: "%.2f", config.spacerCenterPercent)) (\(String(format: "%.0f", config.spacerCenterPercent * 360 - 90))°)")
     }
     
     private func reactionAngles() -> [CGFloat] {
-        let radius = calculatedRadius
-        guard radius > 0, reactions.isEmpty == false else { return [] }
-        
-        let count = reactions.count
-        let circumference = 2 * .pi * radius
-        let totalSpacing = CGFloat(count) * reactionSpacing
-        let rawSpacerArc = circumference > 0 ? (circumference - totalSpacing) / circumference : 0
-        let spacerPercentage = min(0.9, max(0, rawSpacerArc))
-        let availableArc = 360.0 * (1.0 - spacerPercentage)
-        let angleIncrement = count > 0 ? availableArc / CGFloat(count) : 0
-        let spacerCenterAngle = (calculatedSpacerCenterPercent * 360.0) - 90.0
-        let spacerArc = 360.0 * spacerPercentage
-        let arcStartAngle = spacerCenterAngle + (spacerArc / 2.0)
-        let startAngle = arcStartAngle + (angleIncrement / 2.0)
-        
-        return (0..<count).map { index in
-            startAngle + (CGFloat(index) * angleIncrement)
-        }
+        guard reactions.isEmpty == false else { return [] }
+
+        let configuration = RadialLayout.calculateAngles(
+            radius: calculatedRadius,
+            itemCount: reactions.count,
+            itemSpacing: reactionSpacing,
+            spacerCenterPercent: calculatedSpacerCenterPercent
+        )
+        return configuration.angles
     }
     
     private func reactionBounds() -> ReactionBounds? {
