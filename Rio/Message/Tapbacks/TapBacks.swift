@@ -31,9 +31,9 @@ struct TapBacksModifier: ViewModifier {
         var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
             switch self {
             case .narrowShort:
-                return (0, 80, 0, 120)
+                return (0, 80, 0, 80)
             case .narrowTall:
-                return (0, 80, 120, .infinity)
+                return (0, 80, 80, .infinity)
             case .mediumCorner:
                 return (80, 220, 0, .infinity)
             case .wideTop:
