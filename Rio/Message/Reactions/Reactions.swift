@@ -120,8 +120,13 @@ struct ReactionsModifier: ViewModifier {
                 .overlay(alignment: .topTrailing) {
                     if let selectedReaction {
                         //Here only for the purposes of geometry matching
-                        reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {}
-                        .allowsHitTesting(false)
+                        reactionButton(
+                            for: selectedReaction,
+                            isVisible: false,
+                            isOverlay: true,
+                            isSelected: false
+                        ) {}
+                            .allowsHitTesting(false)
                     }
                 }
                 .background(
@@ -139,6 +144,7 @@ struct ReactionsModifier: ViewModifier {
                     menuIsShowing = true
                     setBackgroundMenuVisible(menuIsShowing)
                 }
+                .sensoryFeedback(.impact, trigger: menuIsShowing)
         } else {
             content
         }
@@ -154,8 +160,14 @@ struct ReactionsModifier: ViewModifier {
             spacerCenterPercent: calculatedSpacerCenterPercent,
             parentSize: viewSize
         ) {
-            ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
-                reactionButton(for: reaction, isVisible: (selectedReaction != reaction) != isOverlay, isOverlay: isOverlay) {
+            ForEach(Array(reactions.enumerated()), id: \.element.id) {
+                index, reaction in
+                reactionButton(
+                    for: reaction,
+                    isVisible: (selectedReaction != reaction) != isOverlay,
+                    isOverlay: isOverlay,
+                    isSelected: selectedReaction == reaction
+                ) {
                     let isSameReaction = selectedReactionID == reaction.id
                     if menuIsShowing {
                         selectedReactionID = isSameReaction ? nil : reaction.id
@@ -185,14 +197,26 @@ struct ReactionsModifier: ViewModifier {
     }
 
     @ViewBuilder
-    private func reactionButton(for reaction: Reaction, isVisible: Bool, isOverlay: Bool, action: @escaping () -> Void) -> some View {
+    private func reactionButton(
+        for reaction: Reaction,
+        isVisible: Bool,
+        isOverlay: Bool,
+        isSelected: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             reactionContent(for: reaction)
                 .frame(width: 28, height: 28)
+                .background {
+                    Circle()
+                        .fill(isSelected && menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
+                        .frame(width: 44, height: 44)
+                        .animation(.smooth, value: isSelected)
+                }
         }
         .buttonBorderShape(.circle)
-        .buttonStyle(.glassProminent)
-        //        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+        .buttonStyle(.glass)
+//        .glassEffect(menuIsShowing ? .regular.interactive() : .clear.interactive(), in: .circle)
         .animation(isVisible ? .smooth : nil) { content in
             content
                 .opacity(isVisible ? 1 : 0)
