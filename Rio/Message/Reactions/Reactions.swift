@@ -134,7 +134,11 @@ struct ReactionsModifier: ViewModifier {
                     menuView(isOverlay: true)
                 }
                 .onTapGesture {
-                    menuIsShowing.toggle()
+                    menuIsShowing = false
+                    setBackgroundMenuVisible(menuIsShowing)
+                }
+                .onLongPressGesture {
+                    menuIsShowing = true
                     setBackgroundMenuVisible(menuIsShowing)
                 }
         } else {
