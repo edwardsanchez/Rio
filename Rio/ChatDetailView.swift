@@ -175,7 +175,7 @@ struct ChatDetailView: View {
                 .zIndex(1)
             }
         }
-        .tint(Color.mixedAccent(with: chat.theme.outboundBackgroundColor))
+        .tint(chat.theme.outboundBackgroundColor)
     }
 
     // MARK: - Scrolling
