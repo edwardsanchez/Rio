@@ -4,6 +4,36 @@
   },
   "groups" : [
     {
+      "blend-mode" : "normal",
+      "blur-material" : 0.5,
+      "hidden" : true,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "glass" : true,
+          "image-name" : "Smile.png",
+          "name" : "Smile",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              92.84375
+            ]
+          }
+        }
+      ],
+      "name" : "Smile Black",
+      "shadow" : {
+        "kind" : "none",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
       "blend-mode" : "plus-lighter",
       "blur-material" : null,
       "hidden" : false,
@@ -25,6 +55,7 @@
         }
       ],
       "lighting" : "individual",
+      "name" : "Smile White",
       "opacity" : 0.5,
       "position" : {
         "scale" : 1,
@@ -60,6 +91,7 @@
           }
         }
       ],
+      "name" : "Bubble",
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5
@@ -72,23 +104,17 @@
     },
     {
       "blur-material" : null,
-      "hidden" : true,
+      "hidden" : false,
       "layers" : [
         {
           "glass" : false,
           "hidden" : false,
-          "image-name" : "Blue.png",
-          "name" : "Blur",
-          "position" : {
-            "scale" : 0.98,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
+          "image-name" : "Glow.png",
+          "name" : "Glow"
         }
       ],
-      "opacity" : 0.5,
+      "name" : "Glow",
+      "opacity" : 1,
       "shadow" : {
         "kind" : "none",
         "opacity" : 0.5
