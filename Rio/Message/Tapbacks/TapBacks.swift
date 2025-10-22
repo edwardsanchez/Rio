@@ -32,12 +32,12 @@ struct ReactionsModifier: ViewModifier {
 
     static var defaultReactions: [Reaction] {
         [
-            .emoji("❤️"),
+            .emoji("😍"),
             .emoji("👍"),
+            .emoji("👎"),
             .emoji("😂"),
-            .emoji("😮"),
-            .emoji("😢"),
-            .emoji("🔥"),
+            .emoji("😲"),
+            .emoji("🧐"),
             .systemImage("face.dashed", selectedEmoji: "?")
         ]
     }
