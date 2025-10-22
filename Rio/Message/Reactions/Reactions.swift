@@ -160,8 +160,7 @@ struct ReactionsModifier: ViewModifier {
             spacerCenterPercent: calculatedSpacerCenterPercent,
             parentSize: viewSize
         ) {
-            ForEach(Array(reactions.enumerated()), id: \.element.id) {
-                index, reaction in
+            ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(
                     for: reaction,
                     isVisible: (selectedReaction != reaction) != isOverlay,
