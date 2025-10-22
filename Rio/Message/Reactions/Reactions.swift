@@ -120,9 +120,7 @@ struct ReactionsModifier: ViewModifier {
                 .overlay(alignment: .topTrailing) {
                     if let selectedReaction {
                         //Here only for the purposes of geometry matching
-                        reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {
-                            // Will show who reacted
-                        }
+                        reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {}
                         .allowsHitTesting(false)
                     }
                 }
@@ -158,10 +156,16 @@ struct ReactionsModifier: ViewModifier {
         ) {
             ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(for: reaction, isVisible: (selectedReaction != reaction) != isOverlay, isOverlay: isOverlay) {
-                    selectedReactionID = reaction.id
-                    menuIsShowing = false
+                    let isSameReaction = selectedReactionID == reaction.id
+                    if menuIsShowing {
+                        selectedReactionID = isSameReaction ? nil : reaction.id
+                        menuIsShowing = false
 
-                    setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
+                        setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
+                    } else {
+                        menuIsShowing = true
+                        setBackgroundMenuVisible(menuIsShowing)
+                    }
                 }
                 .animation(
                     .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -5)
