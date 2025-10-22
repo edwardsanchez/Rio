@@ -16,7 +16,6 @@ struct ReactionsModifier: ViewModifier {
 
     @Namespace private var reactionNamespace
     @State private var selectedReactionID: Reaction.ID?
-
     @State private var showBackgroundMenu = false
 
     var messageID: UUID
@@ -288,16 +287,21 @@ struct ReactionsModifier: ViewModifier {
     private func reactionButton(for reaction: Reaction, isVisible: Bool, isOverlay: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             reactionContent(for: reaction)
-                .frame(width: 44, height: 44)
+                .frame(width: 28, height: 28)
         }
-        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
-        .opacity(isVisible ? 1 : 0)
+        .buttonBorderShape(.circle)
+        .buttonStyle(.glass)
+//        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+        .animation(isVisible ? .smooth : nil) { content in
+            content
+                .opacity(isVisible ? 1 : 0)
+        }
         .matchedGeometryEffect(
             id: reaction.id,
             in: reactionNamespace,
             isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
         )
-        .offset(x: isOverlay ? 20 : 0, y: isOverlay ? -20 : 0)
+        .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
         //Here we need to make it so it immediately goes invisible if it's the previously selected one, and it's in the overlay.
     }
 
@@ -345,15 +349,18 @@ enum LayoutCase: String, CaseIterable {
     // I think we'll need another case for when it's short and medium eventually.
 
     var thresholds: (widthMin: CGFloat, widthMax: CGFloat, heightMin: CGFloat, heightMax: CGFloat) {
+        let narrowWidth: Double = 105
+        let shortHeight: Double = 80
+        let wideWidth: Double = 250
         switch self {
         case .narrowShort:
-            return (0, 95, 0, 80)
+            return (0, narrowWidth, 0, shortHeight)
         case .narrowTall:
-            return (0, 95, 80, .infinity)
+            return (0, narrowWidth, shortHeight, .infinity)
         case .mediumCorner:
-            return (95, 250, 0, .infinity)
+            return (narrowWidth, wideWidth, 0, .infinity)
         case .wideTop:
-            return (250, .infinity, 0, .infinity)
+            return (wideWidth, .infinity, 0, .infinity)
         }
     }
 
@@ -509,18 +516,12 @@ fileprivate struct TapBackTestView: View {
 
     var body: some View {
         VStack(spacing: 32) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Demo Message")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.green)
-                    .frame(width: demoWidth, height: demoHeight)
-                    .containerShape(.rect)
-                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
-                    .reactions(messageID: UUID())
-            }
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.green)
+                .frame(width: demoWidth, height: demoHeight)
+                .containerShape(.rect)
+                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
+                .reactions(messageID: UUID())
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(.horizontal)
 
