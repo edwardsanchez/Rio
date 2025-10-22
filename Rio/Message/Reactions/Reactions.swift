@@ -72,7 +72,7 @@ struct ReactionsModifier: ViewModifier {
             return delay == 0 ? base : base.delay(delay)
         }
     }
-    
+
     // MARK: - Layout Detection
 
     private var layoutCase: LayoutCase {
@@ -105,7 +105,7 @@ struct ReactionsModifier: ViewModifier {
             height: baseOffset.height + verticalAdjustment
         )
     }
-    
+
     @ViewBuilder
     func body(content: Content) -> some View {
         if isEnabled {
@@ -191,8 +191,8 @@ struct ReactionsModifier: ViewModifier {
                 .frame(width: 28, height: 28)
         }
         .buttonBorderShape(.circle)
-        .buttonStyle(.glass)
-//        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
+        .buttonStyle(.glassProminent)
+        //        .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
         .animation(isVisible ? .smooth : nil) { content in
             content
                 .opacity(isVisible ? 1 : 0)
@@ -316,7 +316,7 @@ enum LayoutCase: String, CaseIterable {
         return allCases.first { layoutCase in
             let thresholds = layoutCase.thresholds
             return width >= thresholds.widthMin && width < thresholds.widthMax &&
-                height >= thresholds.heightMin && height < thresholds.heightMax
+            height >= thresholds.heightMin && height < thresholds.heightMax
         } ?? .wideTop
     }
 }
@@ -435,8 +435,8 @@ fileprivate struct TapBackTestView: View {
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
                 .reactions(messageID: UUID())
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(.horizontal)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .padding(.horizontal)
 
             VStack(spacing: 16) {
                 Text("Test Cases")
