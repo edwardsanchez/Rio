@@ -65,7 +65,7 @@ struct ReactionsModifier: ViewModifier {
         }
 
         static var menuScaleAnimation: Animation {
-            .smooth(duration: baseDuration)
+            .interpolatingSpring(duration: baseDuration, bounce: 0.5, initialVelocity: -20)
         }
 
         static var menuOffsetAnimation: Animation {
@@ -479,7 +479,6 @@ fileprivate struct TapBackTestView: View {
                 .fill(.green)
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
                 .reactions(messageID: UUID())
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(.horizontal)
