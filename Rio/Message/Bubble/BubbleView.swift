@@ -30,6 +30,7 @@ struct BubbleView: View {
     let messageType: MessageType
     /// Layout type for visual display (may be delayed relative to bubbleType)
     let layoutType: BubbleType?
+    let messageID: UUID
 
     // MARK: - Animation Managers (replaces 21 @State variables)
 
@@ -61,7 +62,8 @@ struct BubbleView: View {
         type: BubbleType = .thinking,
         showTail: Bool = false,
         messageType: MessageType = .inbound(.thinking),
-        layoutType: BubbleType? = nil
+        layoutType: BubbleType? = nil,
+        messageID: UUID
     ) {
         self.width = width
         self.height = height
@@ -71,6 +73,7 @@ struct BubbleView: View {
         self.showTail = showTail
         self.messageType = messageType
         self.layoutType = layoutType
+        self.messageID = messageID
 
         let now = Date()
         let config = BubbleConfiguration()
@@ -149,6 +152,10 @@ struct BubbleView: View {
                 previousBubbleType: previousBubbleType
             )
         }
+        .reactions(
+            messageID: messageID,
+            isEnabled: bubbleType.isTalking
+        )
         .opacity(shouldHideBubble ? 0 : 1)
         .background {
             // Hidden text to measure single-line height
@@ -614,7 +621,8 @@ fileprivate struct BubbleMorphLayout {
             width: 68,
             height: 40,
             cornerRadius: 20,
-            color: .blue
+            color: .blue,
+            messageID: UUID()
         )
     }
     .padding()
@@ -634,7 +642,9 @@ fileprivate struct BubbleMorphLayout {
             cornerRadius: 26,
             color: .Default.inboundBubble,
             type: isTalking ? .talking : .thinking,
-            showTail: true
+            showTail: true,
+            messageType: .inbound(isTalking ? .talking : .thinking),
+            messageID: UUID()
         )
         .frame(width: width + 120, height: height + 120)
 

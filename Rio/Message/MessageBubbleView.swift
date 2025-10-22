@@ -308,6 +308,7 @@ struct MessageBubbleView: View {
             messageType: message.messageType,
             backgroundColor: backgroundColor,
             showTail: showTail,
+            messageID: message.id,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,

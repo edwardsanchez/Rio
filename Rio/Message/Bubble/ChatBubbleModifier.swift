@@ -15,6 +15,7 @@ private struct ChatBubbleModifier: ViewModifier {
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
     let isVisible: Bool
+    let messageID: UUID
 
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -50,7 +51,8 @@ private struct ChatBubbleModifier: ViewModifier {
                         type: bubbleType,
                         showTail: showTail,
                         messageType: messageType,
-                        layoutType: layoutType
+                        layoutType: layoutType,
+                        messageID: messageID
                     )
                     .compositingGroup()
                     .opacity(backgroundOpacity)
@@ -73,6 +75,7 @@ extension View {
         messageType: MessageType,
         backgroundColor: Color,
         showTail: Bool,
+        messageID: UUID,
         bubbleType: BubbleType = .talking,
         layoutType: BubbleType? = nil,
         animationWidth: CGFloat? = nil,
@@ -88,7 +91,8 @@ extension View {
                 layoutType: layoutType ?? bubbleType,
                 animationWidth: animationWidth,
                 animationHeight: animationHeight,
-                isVisible: isVisible
+                isVisible: isVisible,
+                messageID: messageID
             )
         )
     }

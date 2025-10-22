@@ -17,6 +17,7 @@ struct ReactionsModifier: ViewModifier {
 
     var messageID: UUID
     var reactions: [Reaction]
+    var isEnabled: Bool
 
     private var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
@@ -105,35 +106,40 @@ struct ReactionsModifier: ViewModifier {
         )
     }
     
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content
-            .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-            .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
-            .onGeometryChange(for: CGSize.self) { proxy in
-                proxy.size
-            } action: { newSize in
-                viewSize = newSize
-            }
-            .overlay(alignment: .topTrailing) {
-                if let selectedReaction {
-                    //Here only for the purposes of geometry matching
-                    reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {
-                        // Will show who reacted
-                    }
-                    .allowsHitTesting(false)
+        if isEnabled {
+            content
+                .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
+                .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
+                .onGeometryChange(for: CGSize.self) { proxy in
+                    proxy.size
+                } action: { newSize in
+                    viewSize = newSize
                 }
-            }
-            .background(
-                menuView(isOverlay: false)
-                    .opacity(showBackgroundMenu ? 1 : 0)
-            )
-            .overlay {
-                menuView(isOverlay: true)
-            }
-            .onTapGesture {
-                menuIsShowing.toggle()
-                setBackgroundMenuVisible(menuIsShowing)
-            }
+                .overlay(alignment: .topTrailing) {
+                    if let selectedReaction {
+                        //Here only for the purposes of geometry matching
+                        reactionButton(for: selectedReaction, isVisible: false, isOverlay: true) {
+                            // Will show who reacted
+                        }
+                        .allowsHitTesting(false)
+                    }
+                }
+                .background(
+                    menuView(isOverlay: false)
+                        .opacity(showBackgroundMenu ? 1 : 0)
+                )
+                .overlay {
+                    menuView(isOverlay: true)
+                }
+                .onTapGesture {
+                    menuIsShowing.toggle()
+                    setBackgroundMenuVisible(menuIsShowing)
+                }
+        } else {
+            content
+        }
     }
 
     @ViewBuilder
@@ -215,12 +221,14 @@ struct ReactionsModifier: ViewModifier {
 extension View {
     func reactions(
         messageID: UUID,
-        reactions: [Reaction] = ReactionsModifier.defaultReactions
+        reactions: [Reaction] = ReactionsModifier.defaultReactions,
+        isEnabled: Bool = true
     ) -> some View {
         modifier(
             ReactionsModifier(
                 messageID: messageID,
-                reactions: reactions
+                reactions: reactions,
+                isEnabled: isEnabled
             )
         )
     }
