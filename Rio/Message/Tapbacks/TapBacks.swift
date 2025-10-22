@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ReactionsModifier: ViewModifier {
-    @State private var menuIsShowing = true
+    @State private var menuIsShowing = false
     @State private var viewSize: CGSize = .zero
     @State private var viewFrame: CGRect = .zero
     @State private var screenWidth: CGFloat = 0
@@ -17,9 +17,10 @@ struct ReactionsModifier: ViewModifier {
     @Namespace private var reactionNamespace
     @State private var selectedReactionID: Reaction.ID?
 
+    @State private var showBackgroundMenu = false
+
     var messageID: UUID
     var reactions: [Reaction]
-    var onReactionSelected: (Int) -> Void
 
     private var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
@@ -232,12 +233,18 @@ struct ReactionsModifier: ViewModifier {
             }
             .background(
                 menuView(isOverlay: false)
+                    .opacity(showBackgroundMenu ? 1 : 0)
             )
             .overlay {
                 menuView(isOverlay: true)
             }
             .onTapGesture {
                 menuIsShowing.toggle()
+                if menuIsShowing {
+                    delayFadeOut(delay: 0.2, set: true)
+                } else {
+                    delayFadeOut(delay: 0, set: false)
+                }
             }
     }
 
@@ -252,9 +259,10 @@ struct ReactionsModifier: ViewModifier {
         ) {
             ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(for: reaction, isVisible: (selectedReaction != reaction) != isOverlay, isOverlay: isOverlay) {
-                    onReactionSelected(index)
                     selectedReactionID = reaction.id
                     menuIsShowing = false
+
+                    delayFadeOut(delay: 0.1, set: false)
                 }
                 .animation(
                     .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
@@ -267,47 +275,30 @@ struct ReactionsModifier: ViewModifier {
         .animation(.bouncy(duration: 0.4), value: menuIsShowing)
     }
 
+    func delayFadeOut(delay: TimeInterval, set value: Bool) {
+        //Fade after 0.5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation {
+                showBackgroundMenu = value
+            }
+        }
+    }
+
     @ViewBuilder
     private func reactionButton(for reaction: Reaction, isVisible: Bool, isOverlay: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            reactionBubble(for: reaction, isOverlay: isOverlay)
+            reactionContent(for: reaction)
+                .frame(width: 44, height: 44)
         }
         .glassEffect(menuIsShowing ? .regular : .clear, in: .circle)
         .opacity(isVisible ? 1 : 0)
-        .opacity(reactionOpacity(for: reaction, isOverlay: isOverlay))
         .matchedGeometryEffect(
             id: reaction.id,
             in: reactionNamespace,
             isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
         )
         .offset(x: isOverlay ? 20 : 0, y: isOverlay ? -20 : 0)
-        .animation(.none, value: selectedReactionID)
-    }
-
-    private func reactionBubble(for reaction: Reaction, isOverlay: Bool) -> some View {
-        Circle()
-            .fill(.clear)
-            .frame(width: 44, height: 44)
-            .overlay(
-                reactionContent(for: reaction)
-            )
-    }
-
-    private func reactionOpacity(for reaction: Reaction, isOverlay: Bool) -> Double {
-        if isOverlay {
-            return overlayOpacity(for: reaction)
-        }
-        return menuOpacity(for: reaction)
-    }
-
-    private func menuOpacity(for reaction: Reaction) -> Double {
-        guard menuIsShowing else { return 0 }
-        return selectedReactionID == reaction.id ? 0 : 1
-    }
-
-    private func overlayOpacity(for reaction: Reaction) -> Double {
-        guard selectedReactionID == reaction.id else { return 0 }
-        return 1
+        //Here we need to make it so it immediately goes invisible if it's the previously selected one, and it's in the overlay.
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
@@ -333,16 +324,12 @@ struct ReactionsModifier: ViewModifier {
 extension View {
     func reactions(
         messageID: UUID,
-        reactions: [Reaction] = ReactionsModifier.defaultReactions,
-        onReactionSelected: @escaping (Int) -> Void = { index in
-            print("Selected reaction index: \(index)")
-        }
+        reactions: [Reaction] = ReactionsModifier.defaultReactions
     ) -> some View {
         modifier(
             ReactionsModifier(
                 messageID: messageID,
-                reactions: reactions,
-                onReactionSelected: onReactionSelected
+                reactions: reactions
             )
         )
     }
@@ -532,9 +519,7 @@ fileprivate struct TapBackTestView: View {
                     .frame(width: demoWidth, height: demoHeight)
                     .containerShape(.rect)
                     .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
-                    .reactions(messageID: UUID()) { index in
-                        print("Tapped reaction index: \(index)")
-                    }
+                    .reactions(messageID: UUID())
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(.horizontal)
