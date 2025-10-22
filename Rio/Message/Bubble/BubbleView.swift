@@ -123,11 +123,15 @@ struct BubbleView: View {
     var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
 
+    var resolvedColor: Color {
+        messageType.isOutbound ? color : Color.base.mix(with: color, by: 0.2)
+    }
+
     var body: some View {
         Group {
             if transitionCoordinator.canUseNative {
                 RoundedRectangle(cornerRadius: bubbleConfig.bubbleCornerRadius)
-                    .fill(color)
+                    .fill(resolvedColor)
             } else {
                 TimelineView(.animation) { timeline in
                     return makeAnimatedBubble(at: timeline.date)
@@ -136,7 +140,7 @@ struct BubbleView: View {
         }
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             TalkingTailView(
-                color: color,
+                color: resolvedColor,
                 showTail: showTail,
                 bubbleType: bubbleType,
                 layoutType: layoutType,
@@ -145,8 +149,7 @@ struct BubbleView: View {
                 previousBubbleType: previousBubbleType
             )
         }
-        .compositingGroup()
-        .opacity(shouldHideBubble ? 0 : (messageType.isOutbound ? 1 : 0.25))
+        .opacity(shouldHideBubble ? 0 : 1)
         .background {
             // Hidden text to measure single-line height
             Text("X")
