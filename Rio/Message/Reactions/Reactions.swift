@@ -10,8 +10,6 @@ import SwiftUI
 struct ReactionsModifier: ViewModifier {
     @State private var menuIsShowing = false
     @State private var viewSize: CGSize = .zero
-    @State private var viewFrame: CGRect = .zero
-    @State private var screenWidth: CGFloat = 0
 
     @Namespace private var reactionNamespace
     @State private var selectedReactionID: Reaction.ID?
@@ -23,10 +21,6 @@ struct ReactionsModifier: ViewModifier {
     private var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
         return reactions.first { $0.id == selectedReactionID }
-    }
-
-    private var selectedEmoji: String? {
-        selectedReaction?.selectedEmoji
     }
 
     static var defaultReactions: [Reaction] {
@@ -42,7 +36,6 @@ struct ReactionsModifier: ViewModifier {
     }
 
     private let reactionSpacing: CGFloat = 50
-    private let logInterval: CGFloat = 5
 
     // Centralizes timing multipliers so related animations stay in sync.
     private enum AnimationTiming {
@@ -72,39 +65,21 @@ struct ReactionsModifier: ViewModifier {
             .bouncy(duration: baseDuration)
         }
 
-        static var backgroundFadeAnimation: Animation {
-            .easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier).delay(backgroundShowDelay)
+        static func backgroundFadeAnimation(isShowing: Bool, additionalDelay: TimeInterval = 0) -> Animation {
+            let base = Animation.easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier)
+            let delay = (isShowing ? backgroundShowDelay : 0) + additionalDelay
+            return delay == 0 ? base : base.delay(delay)
         }
-    }
-    
-    private struct ReactionBounds {
-        var minX: CGFloat
-        var maxX: CGFloat
-        var minY: CGFloat
-        var maxY: CGFloat
     }
     
     // MARK: - Layout Detection
 
-    private func detectLayoutCase() -> LayoutCase {
-        let w = viewSize.width
-        let h = viewSize.height
-
-        // Check each case in priority order
-        for layoutCase in LayoutCase.allCases {
-            let thresholds = layoutCase.thresholds
-            if w >= thresholds.widthMin && w < thresholds.widthMax &&
-               h >= thresholds.heightMin && h < thresholds.heightMax {
-                return layoutCase
-            }
-        }
-
-        // Default to wideTop if no match
-        return .wideTop
+    private var layoutCase: LayoutCase {
+        LayoutCase.matching(for: viewSize)
     }
 
     private var currentConfig: LayoutConfig {
-        detectLayoutCase().config
+        layoutCase.config
     }
 
     private var calculatedRadius: CGFloat {
@@ -120,7 +95,6 @@ struct ReactionsModifier: ViewModifier {
             return .zero
         }
 
-        let layoutCase = detectLayoutCase()
         let config = layoutCase.config
         let baseOffset = config.baseOffset(for: viewSize)
         let horizontalAdjustment = config.horizontalAnchor.xOffset(for: viewSize)
@@ -131,40 +105,6 @@ struct ReactionsModifier: ViewModifier {
         )
     }
     
-    private func reactionAngles() -> [CGFloat] {
-        guard reactions.isEmpty == false else { return [] }
-
-        let configuration = RadialLayout.calculateAngles(
-            radius: calculatedRadius,
-            itemCount: reactions.count,
-            itemSpacing: reactionSpacing,
-            spacerCenterPercent: calculatedSpacerCenterPercent
-        )
-        return configuration.angles
-    }
-    
-    private func reactionBounds() -> ReactionBounds? {
-        let angles = reactionAngles()
-        guard angles.isEmpty == false else { return nil }
-        
-        var minX = CGFloat.greatestFiniteMagnitude
-        var maxX = -CGFloat.greatestFiniteMagnitude
-        var minY = CGFloat.greatestFiniteMagnitude
-        var maxY = -CGFloat.greatestFiniteMagnitude
-        
-        for angle in angles {
-            let radians = angle * .pi / 180.0
-            let x = calculatedRadius * cos(radians)
-            let y = calculatedRadius * sin(radians)
-            minX = min(minX, x)
-            maxX = max(maxX, x)
-            minY = min(minY, y)
-            maxY = max(maxY, y)
-        }
-        
-        return ReactionBounds(minX: minX, maxX: maxX, minY: minY, maxY: maxY)
-    }
-
     func body(content: Content) -> some View {
         content
             .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
@@ -173,16 +113,6 @@ struct ReactionsModifier: ViewModifier {
                 proxy.size
             } action: { newSize in
                 viewSize = newSize
-            }
-            .onGeometryChange(for: CGRect.self) { proxy in
-                proxy.frame(in: .global)
-            } action: { newFrame in
-                viewFrame = newFrame
-            }
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.width
-            } action: { width in
-                screenWidth = width
             }
             .overlay(alignment: .topTrailing) {
                 if let selectedReaction {
@@ -202,15 +132,12 @@ struct ReactionsModifier: ViewModifier {
             }
             .onTapGesture {
                 menuIsShowing.toggle()
-                if menuIsShowing {
-                    delayFade(delay: AnimationTiming.backgroundShowDelay, set: true)
-                } else {
-                    delayFade(delay: 0, set: false)
-                }
+                setBackgroundMenuVisible(menuIsShowing)
             }
     }
 
-    func menuView(isOverlay: Bool) -> some View {
+    @ViewBuilder
+    private func menuView(isOverlay: Bool) -> some View {
         RadialLayout(
             radius: calculatedRadius,
             menuIsShowing: menuIsShowing,
@@ -224,7 +151,7 @@ struct ReactionsModifier: ViewModifier {
                     selectedReactionID = reaction.id
                     menuIsShowing = false
 
-                    delayFade(delay: AnimationTiming.reactionHideDelay, set: false)
+                    setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
                 }
                 .animation(
                     .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -5)
@@ -237,8 +164,8 @@ struct ReactionsModifier: ViewModifier {
         .animation(AnimationTiming.menuOffsetAnimation, value: menuIsShowing)
     }
 
-    func delayFade(delay: TimeInterval, set value: Bool) {
-        withAnimation(AnimationTiming.backgroundFadeAnimation) {
+    private func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
+        withAnimation(AnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
             showBackgroundMenu = value
         }
     }
@@ -363,6 +290,17 @@ enum LayoutCase: String, CaseIterable {
                 CGSize(width: 140, height: 540)
             }
         }
+    }
+
+    static func matching(for size: CGSize) -> LayoutCase {
+        let width = size.width
+        let height = size.height
+
+        return allCases.first { layoutCase in
+            let thresholds = layoutCase.thresholds
+            return width >= thresholds.widthMin && width < thresholds.widthMax &&
+                height >= thresholds.heightMin && height < thresholds.heightMax
+        } ?? .wideTop
     }
 }
 
