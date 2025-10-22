@@ -207,6 +207,7 @@ struct ReactionsModifier: ViewModifier {
         case let .systemImage(name, pointSize, weight):
             Image(systemName: name)
                 .font(.system(size: pointSize, weight: weight))
+                .foregroundStyle(.secondary)
         }
     }
 }
