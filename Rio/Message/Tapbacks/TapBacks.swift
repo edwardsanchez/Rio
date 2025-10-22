@@ -12,7 +12,6 @@ struct ReactionsModifier: ViewModifier {
     @State private var viewSize: CGSize = .zero
     @State private var viewFrame: CGRect = .zero
     @State private var screenWidth: CGFloat = 0
-    @State private var lastLoggedSize: CGSize = .zero
 
     @Namespace private var reactionNamespace
     @State private var selectedReactionID: Reaction.ID?
@@ -132,69 +131,6 @@ struct ReactionsModifier: ViewModifier {
         )
     }
     
-    // MARK: - Debug Logging
-
-    private func shouldLog(for size: CGSize) -> Bool {
-        let widthBucket = floor(size.width / logInterval) * logInterval
-        let heightBucket = floor(size.height / logInterval) * logInterval
-        return abs(widthBucket - lastLoggedSize.width) >= logInterval ||
-               abs(heightBucket - lastLoggedSize.height) >= logInterval
-    }
-
-    private func logGeometry(for size: CGSize) {
-        let w = size.width
-        let h = size.height
-        let layoutCase = detectLayoutCase()
-        let config = layoutCase.config
-        let baseOffset = config.baseOffset(for: size)
-        let horizontalAdjustment = config.horizontalAnchor.xOffset(for: size)
-        let verticalAdjustment = config.verticalAnchor.yOffset(for: size)
-        let horizontalDescription: String
-        let verticalDescription: String
-        let angleConfiguration = RadialLayout.calculateAngles(
-            radius: config.radius,
-            itemCount: reactions.count,
-            itemSpacing: reactionSpacing,
-            spacerCenterPercent: config.spacerCenterPercent
-        )
-
-        switch config.horizontalAnchor {
-        case .center:
-            horizontalDescription = "center"
-        case .leading:
-            horizontalDescription = "leading"
-        case .trailing:
-            horizontalDescription = "trailing"
-        }
-
-        switch config.verticalAnchor {
-        case .center:
-            verticalDescription = "center"
-        case .top:
-            verticalDescription = "top"
-        case .bottom:
-            verticalDescription = "bottom"
-        }
-
-        let effectiveX = baseOffset.width + horizontalAdjustment
-        let effectiveY = baseOffset.height + verticalAdjustment
-
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("Size: \(Int(w))×\(Int(h))")
-        print("Layout Case: \(layoutCase.rawValue)")
-        print("Radius: \(String(format: "%.1f", config.radius))")
-        print("Base Offset: (\(String(format: "%.1f", baseOffset.width)), \(String(format: "%.1f", baseOffset.height)))")
-        print("Anchors: x=\(horizontalDescription) (\(String(format: "%.1f", horizontalAdjustment))), y=\(verticalDescription) (\(String(format: "%.1f", verticalAdjustment)))")
-        print("Effective Offset: (\(String(format: "%.1f", effectiveX)), \(String(format: "%.1f", effectiveY)))")
-        if angleConfiguration.angleIncrement > 0 {
-            print("Angle Increment: \(String(format: "%.1f", angleConfiguration.angleIncrement))°")
-        }
-        if angleConfiguration.gapArc > 0 {
-            print("Gap Arc: \(String(format: "%.1f", angleConfiguration.gapArc))°")
-        }
-        print("Spacer: \(String(format: "%.2f", config.spacerCenterPercent)) (\(String(format: "%.0f", config.spacerCenterPercent * 360 - 90))°)")
-    }
-    
     private func reactionAngles() -> [CGFloat] {
         guard reactions.isEmpty == false else { return [] }
 
@@ -237,12 +173,6 @@ struct ReactionsModifier: ViewModifier {
                 proxy.size
             } action: { newSize in
                 viewSize = newSize
-                if shouldLog(for: newSize) {
-                    logGeometry(for: newSize)
-                    let widthBucket = floor(newSize.width / logInterval) * logInterval
-                    let heightBucket = floor(newSize.height / logInterval) * logInterval
-                    lastLoggedSize = CGSize(width: widthBucket, height: heightBucket)
-                }
             }
             .onGeometryChange(for: CGRect.self) { proxy in
                 proxy.frame(in: .global)
@@ -332,7 +262,6 @@ struct ReactionsModifier: ViewModifier {
             isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
         )
         .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
-        //Here we need to make it so it immediately goes invisible if it's the previously selected one, and it's in the overlay.
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
