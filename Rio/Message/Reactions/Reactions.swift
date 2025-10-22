@@ -207,6 +207,7 @@ struct ReactionsModifier: ViewModifier {
         Button(action: action) {
             reactionContent(for: reaction)
                 .frame(width: 28, height: 28)
+                .shadow(color: Color.base.opacity(1), radius: 3)
                 .background {
                     Circle()
                         .fill(isSelected && menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
