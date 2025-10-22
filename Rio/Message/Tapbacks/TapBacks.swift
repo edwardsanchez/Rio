@@ -44,6 +44,39 @@ struct ReactionsModifier: ViewModifier {
 
     private let reactionSpacing: CGFloat = 50
     private let logInterval: CGFloat = 5
+
+    // Centralizes timing multipliers so related animations stay in sync.
+    private enum AnimationTiming {
+        static let baseDuration: TimeInterval = 0.4
+        static let reactionStaggerStepMultiplier: Double = 0.125
+        static let backgroundShowDelayMultiplier: Double = 0.5
+        static let reactionHideDelayMultiplier: Double = 0.25
+        static let backgroundFadeDurationMultiplier: Double = 0.875
+
+        static var reactionStaggerStep: TimeInterval {
+            baseDuration * reactionStaggerStepMultiplier
+        }
+
+        static var backgroundShowDelay: TimeInterval {
+            baseDuration * backgroundShowDelayMultiplier
+        }
+
+        static var reactionHideDelay: TimeInterval {
+            baseDuration * reactionHideDelayMultiplier
+        }
+
+        static var menuScaleAnimation: Animation {
+            .smooth(duration: baseDuration)
+        }
+
+        static var menuOffsetAnimation: Animation {
+            .bouncy(duration: baseDuration)
+        }
+
+        static var backgroundFadeAnimation: Animation {
+            .easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier).delay(backgroundShowDelay)
+        }
+    }
     
     private struct ReactionBounds {
         var minX: CGFloat
@@ -199,7 +232,7 @@ struct ReactionsModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-            .animation(.smooth(duration: 0.4), value: menuIsShowing)
+            .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
             .onGeometryChange(for: CGSize.self) { proxy in
                 proxy.size
             } action: { newSize in
@@ -240,9 +273,9 @@ struct ReactionsModifier: ViewModifier {
             .onTapGesture {
                 menuIsShowing.toggle()
                 if menuIsShowing {
-                    delayFadeOut(delay: 0.2, set: true)
+                    delayFade(delay: AnimationTiming.backgroundShowDelay, set: true)
                 } else {
-                    delayFadeOut(delay: 0, set: false)
+                    delayFade(delay: 0, set: false)
                 }
             }
     }
@@ -261,25 +294,22 @@ struct ReactionsModifier: ViewModifier {
                     selectedReactionID = reaction.id
                     menuIsShowing = false
 
-                    delayFadeOut(delay: 0.1, set: false)
+                    delayFade(delay: AnimationTiming.reactionHideDelay, set: false)
                 }
                 .animation(
-                    .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -10)
-                    .delay(Double(index) * 0.05),
+                    .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -5)
+                    .delay(Double(index) * AnimationTiming.reactionStaggerStep),
                     value: menuIsShowing
                 )
             }
         }
         .offset(calculatedOffset)
-        .animation(.bouncy(duration: 0.4), value: menuIsShowing)
+        .animation(AnimationTiming.menuOffsetAnimation, value: menuIsShowing)
     }
 
-    func delayFadeOut(delay: TimeInterval, set value: Bool) {
-        //Fade after 0.5 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            withAnimation {
-                showBackgroundMenu = value
-            }
+    func delayFade(delay: TimeInterval, set value: Bool) {
+        withAnimation(AnimationTiming.backgroundFadeAnimation) {
+            showBackgroundMenu = value
         }
     }
 
