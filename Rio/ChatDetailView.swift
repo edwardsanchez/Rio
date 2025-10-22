@@ -152,7 +152,7 @@ struct ChatDetailView: View {
                     autoReplyEnabled.toggle()
                 } label: {
                     Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .foregroundColor(autoReplyEnabled ? chat.theme.outboundBackgroundColor : .primary.opacity(0.3))
+                        .opacity(autoReplyEnabled ? 1 : 0.3)
                 }
             }
                 }
@@ -175,6 +175,7 @@ struct ChatDetailView: View {
                 .zIndex(1)
             }
         }
+        .tint(Color.mixedAccent(with: chat.theme.outboundBackgroundColor))
     }
 
     // MARK: - Scrolling
