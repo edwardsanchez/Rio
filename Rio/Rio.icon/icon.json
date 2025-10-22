@@ -5,7 +5,7 @@
   "groups" : [
     {
       "blend-mode" : "plus-lighter",
-      "blur-material" : 1,
+      "blur-material" : null,
       "hidden" : false,
       "layers" : [
         {
@@ -13,7 +13,7 @@
           "glass" : true,
           "hidden" : false,
           "image-name" : "Fill 1.png",
-          "name" : "Fill 1",
+          "name" : "Smile",
           "opacity" : 1,
           "position" : {
             "scale" : 0.98,
@@ -45,6 +45,7 @@
     },
     {
       "blur-material" : null,
+      "hidden" : false,
       "layers" : [
         {
           "glass" : true,
