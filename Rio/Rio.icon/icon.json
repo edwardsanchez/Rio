@@ -4,6 +4,32 @@
   },
   "groups" : [
     {
+      "blend-mode" : "plus-lighter",
+      "layers" : [
+        {
+          "image-name" : "Smile-small.png",
+          "name" : "Smile-small",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              109.4375
+            ]
+          }
+        }
+      ],
+      "name" : "Small Smile",
+      "opacity" : 0.5,
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
       "blend-mode" : "plus-darker",
       "blur-material" : 0.5,
       "hidden" : true,
@@ -37,7 +63,7 @@
     {
       "blend-mode" : "plus-lighter",
       "blur-material" : null,
-      "hidden" : false,
+      "hidden" : true,
       "layers" : [
         {
           "blend-mode" : "normal",
