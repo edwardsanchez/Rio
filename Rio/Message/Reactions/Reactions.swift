@@ -160,10 +160,18 @@ struct ReactionsModifier: ViewModifier {
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
                 .onChange(of: menuIsShowing) { _, newValue in
                     chatData.isChatScrollDisabled = newValue
+                    if newValue {
+                        chatData.activeReactionMessageID = messageID
+                    } else if chatData.activeReactionMessageID == messageID {
+                        chatData.activeReactionMessageID = nil
+                    }
                 }
                 .onDisappear {
                     if chatData.isChatScrollDisabled {
                         chatData.isChatScrollDisabled = false
+                    }
+                    if chatData.activeReactionMessageID == messageID {
+                        chatData.activeReactionMessageID = nil
                     }
                 }
         } else {

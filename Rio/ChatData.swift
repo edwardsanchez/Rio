@@ -14,6 +14,8 @@ class ChatData {
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
     // Flag used to temporarily disable chat scrolling (e.g., while reaction menus are active).
     var isChatScrollDisabled = false
+    // Tracks which message currently displays a reactions menu so we can bring it to the front.
+    var activeReactionMessageID: UUID?
 
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
