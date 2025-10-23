@@ -46,11 +46,12 @@ struct URLPreviewCard: View {
                 .redacted(reason: .placeholder)
 
             // Placeholder for description
-            Text("Consectetur adipiscing elit sed do eiusmod tempor incididunt")
+            Text("Consectetur adipiscing elit sed do eiusmod tempor incididurt")
                 .font(.subheadline)
                 .lineLimit(2)
                 .redacted(reason: .placeholder)
         }
+        .aspectRatio(472/326, contentMode: .fit)
     }
 
     // Fallback view when metadata fetch fails
