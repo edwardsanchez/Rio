@@ -136,13 +136,14 @@ struct ReactionsModifier: ViewModifier {
                 )
                 .background {
                     if menuIsShowing {
-                        Color.clear
+                        Color.black.opacity(0.5)
                             .frame(width: 10000, height: 10000, alignment: .center) //FIXME: This is likely not the proper way to do this.
                             .contentShape(.rect)
                             .onTapGesture {
                                 menuIsShowing = false
                                 setBackgroundMenuVisible(menuIsShowing)
                             }
+                            .transition(.opacity.animation(.easeIn(duration: 0.2)))
                     }
                 }
                 .overlay {
