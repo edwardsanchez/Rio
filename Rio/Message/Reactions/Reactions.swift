@@ -133,6 +133,18 @@ struct ReactionsModifier: ViewModifier {
                     menuView(isOverlay: false)
                         .opacity(showBackgroundMenu ? 1 : 0)
                 )
+                .background {
+                    if menuIsShowing {
+                        Color.clear
+                            .frame(width: 10000, height: 10000, alignment: .center) //FIXME: This is likely not the proper way to do this.
+                        //TODO: Must disable scrolling when menu is showing.
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                menuIsShowing = false
+                                setBackgroundMenuVisible(menuIsShowing)
+                            }
+                    }
+                }
                 .overlay {
                     menuView(isOverlay: true)
                 }
