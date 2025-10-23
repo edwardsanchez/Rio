@@ -246,6 +246,7 @@ struct ChatDetailView: View {
 
     OutboundGeometryMatchDebugView(messages: allMessages, newMessageId: newMessageId)
         .environment(BubbleConfiguration())
+        .environment(ChatData())
 }
 
 private struct OutboundGeometryMatchDebugView: View {

@@ -154,7 +154,7 @@ struct BubbleView: View {
         }
         .reactions(
             messageID: messageID,
-            isEnabled: bubbleType.isTalking
+            isEnabled: messageType.isInbound && bubbleType.isTalking
         )
         .opacity(shouldHideBubble ? 0 : 1)
         .background {
@@ -627,6 +627,7 @@ fileprivate struct BubbleMorphLayout {
     }
     .padding()
     .environment(bubbleConfig)
+    .environment(ChatData())
 }
 
 #Preview("Thought Bubble Morph") {
@@ -655,4 +656,5 @@ fileprivate struct BubbleMorphLayout {
     }
     .padding()
     .environment(bubbleConfig)
+    .environment(ChatData())
 }
