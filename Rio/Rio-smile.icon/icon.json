@@ -1,0 +1,125 @@
+{
+  "fill-specializations" : [
+    {
+      "value" : "automatic"
+    },
+    {
+      "appearance" : "dark",
+      "value" : "automatic"
+    }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "Smile-small-color.png",
+          "name" : "Smile-small-color",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              170
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "blend-mode" : "plus-lighter",
+      "hidden" : true,
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Smile-small.png",
+          "name" : "Smile-small",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              109.4375
+            ]
+          }
+        }
+      ],
+      "name" : "Small Smile",
+      "opacity" : 0.9,
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          0,
+          60
+        ]
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "blend-mode" : "normal",
+      "hidden" : false,
+      "layers" : [
+        {
+          "hidden-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name" : "Blur color2.png",
+          "name" : "Blur color2"
+        },
+        {
+          "hidden" : true,
+          "image-name" : "Blur color.png",
+          "name" : "Blur color",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              170
+            ]
+          }
+        }
+      ],
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          0,
+          190
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
