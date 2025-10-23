@@ -45,116 +45,117 @@ struct ChatDetailView: View {
                 VStack(spacing: 0) {
                     // Main scroll view for messages
                     ScrollView {
-                    MessageListView(
-                    messages: messages,
-                    newMessageId: $newMessageId,
-                    inputFieldFrame: inputFieldFrame,
-                    scrollViewFrame: scrollViewFrame,
-                    scrollVelocity: scrollVelocity,
-                    scrollPhase: scrollPhase,
-                    theme: chat.theme,
-                    selectedImageData: $selectedImageData
-                )
-                .onGeometryChange(for: CGRect.self) { geometryProxy in
-                    geometryProxy.frame(in: .global)
-                } action: { newValue in
-                    scrollViewFrame = newValue
-                }
-            }
-            .scrollClipDisabled()
-            .scrollPosition($scrollPosition)
-            .contentMargins(.horizontal, 20, for: .scrollContent)
-            .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.contentOffset.y
-            } action: { _, newValue in
-                let currentY = newValue
-
-                // Initialize previousScrollY on first call to prevent bad initial positioning
-                if previousScrollY == 0 {
-                    previousScrollY = currentY
-                    return
-                }
-
-                let velocity = currentY - previousScrollY
-
-                // Apply smoothing to prevent jittery movement
-                withAnimation(.smooth(duration: 0.4)) {
-                    scrollVelocity = velocity
-                }
-
-                previousScrollY = currentY
-            }
-            .onScrollPhaseChange { _, newPhase in
-                // Track scroll phase for cascading jelly effect
-                scrollPhase = newPhase
-
-                // When scrolling stops, smoothly return to neutral position
-                if newPhase == .idle {
-                    withAnimation(.smooth(duration: 0.2)) {
-                        scrollVelocity = 0
+                        MessageListView(
+                            messages: messages,
+                            newMessageId: $newMessageId,
+                            inputFieldFrame: inputFieldFrame,
+                            scrollViewFrame: scrollViewFrame,
+                            scrollVelocity: scrollVelocity,
+                            scrollPhase: scrollPhase,
+                            theme: chat.theme,
+                            selectedImageData: $selectedImageData
+                        )
+                        .onGeometryChange(for: CGRect.self) { geometryProxy in
+                            geometryProxy.frame(in: .global)
+                        } action: { newValue in
+                            scrollViewFrame = newValue
+                        }
                     }
-                }
-            }
-            .onChange(of: messages.count) { _, _ in
-                // Auto-scroll to the latest message when a new message is added
-                scrollToLatestMessage()
-            }
-            .onChange(of: newMessageId) { _, newId in
-                if newId != nil {
-                    // Slight delay to allow message to be added to view hierarchy
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    .scrollClipDisabled()
+                    .scrollDisabled(chatData.isChatScrollDisabled)
+                    .scrollPosition($scrollPosition)
+                    .contentMargins(.horizontal, 20, for: .scrollContent)
+                    .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                        geometry.contentOffset.y
+                    } action: { _, newValue in
+                        let currentY = newValue
+
+                        // Initialize previousScrollY on first call to prevent bad initial positioning
+                        if previousScrollY == 0 {
+                            previousScrollY = currentY
+                            return
+                        }
+
+                        let velocity = currentY - previousScrollY
+
+                        // Apply smoothing to prevent jittery movement
+                        withAnimation(.smooth(duration: 0.4)) {
+                            scrollVelocity = velocity
+                        }
+
+                        previousScrollY = currentY
+                    }
+                    .onScrollPhaseChange { _, newPhase in
+                        // Track scroll phase for cascading jelly effect
+                        scrollPhase = newPhase
+
+                        // When scrolling stops, smoothly return to neutral position
+                        if newPhase == .idle {
+                            withAnimation(.smooth(duration: 0.2)) {
+                                scrollVelocity = 0
+                            }
+                        }
+                    }
+                    .onChange(of: messages.count) { _, _ in
+                        // Auto-scroll to the latest message when a new message is added
                         scrollToLatestMessage()
                     }
-                }
-            }
-            .onChange(of: inputFieldFrame.height) { _, _ in
-                // Auto-scroll when input field height changes to keep latest message visible
-                // Use instant scroll to avoid competing animations
-                scrollToLatestMessageInstant()
-            }
-            .onAppear {
-                // Initialize scroll tracking state
-                scrollVelocity = 0
-                previousScrollY = 0
+                    .onChange(of: newMessageId) { _, newId in
+                        if newId != nil {
+                            // Slight delay to allow message to be added to view hierarchy
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                scrollToLatestMessage()
+                            }
+                        }
+                    }
+                    .onChange(of: inputFieldFrame.height) { _, _ in
+                        // Auto-scroll when input field height changes to keep latest message visible
+                        // Use instant scroll to avoid competing animations
+                        scrollToLatestMessageInstant()
+                    }
+                    .onAppear {
+                        // Initialize scroll tracking state
+                        scrollVelocity = 0
+                        previousScrollY = 0
 
-                // Scroll to the bottom when the view first appears
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    scrollToLatestMessage()
-                }
-                shouldFocusInput = true
-            }
+                        // Scroll to the bottom when the view first appears
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            scrollToLatestMessage()
+                        }
+                        shouldFocusInput = true
+                    }
 
-            ChatInputView(
-                inputFieldFrame: $inputFieldFrame,
-                shouldFocusInput: $shouldFocusInput,
-                messages: $messages,
-                newMessageId: $newMessageId,
-                chat: chat,
-                autoReplyEnabled: $autoReplyEnabled
-            )
-        }
-        .background {
-            Color.base
-                .ignoresSafeArea()
-        }
-        .overlay {
-            Rectangle()
-                .fill(Gradient(colors: [.white, .black]))
-                .ignoresSafeArea()
-                .opacity(0.2)
-                .blendMode(.overlay)
-        }
-        .navigationTitle(chat.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    autoReplyEnabled.toggle()
-                } label: {
-                    Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .opacity(autoReplyEnabled ? 1 : 0.3)
+                    ChatInputView(
+                        inputFieldFrame: $inputFieldFrame,
+                        shouldFocusInput: $shouldFocusInput,
+                        messages: $messages,
+                        newMessageId: $newMessageId,
+                        chat: chat,
+                        autoReplyEnabled: $autoReplyEnabled
+                    )
                 }
-            }
+                .background {
+                    Color.base
+                        .ignoresSafeArea()
+                }
+                .overlay {
+                    Rectangle()
+                        .fill(Gradient(colors: [.white, .black]))
+                        .ignoresSafeArea()
+                        .opacity(0.2)
+                        .blendMode(.overlay)
+                }
+                .navigationTitle(chat.title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            autoReplyEnabled.toggle()
+                        } label: {
+                            Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
+                                .opacity(autoReplyEnabled ? 1 : 0.3)
+                        }
+                    }
                 }
                 .coordinateSpace(name: "field")
             }

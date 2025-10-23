@@ -12,6 +12,8 @@ class ChatData {
     var chats: [Chat] = []
     // Track visible thinking bubbles per chat (chatId -> participant IDs)
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
+    // Flag used to temporarily disable chat scrolling (e.g., while reaction menus are active).
+    var isChatScrollDisabled = false
 
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)

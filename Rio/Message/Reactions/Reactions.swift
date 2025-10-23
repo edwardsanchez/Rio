@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ReactionsModifier: ViewModifier {
+    @Environment(ChatData.self) private var chatData
     @State private var menuIsShowing = false
     @State private var viewSize: CGSize = .zero
 
@@ -137,7 +138,6 @@ struct ReactionsModifier: ViewModifier {
                     if menuIsShowing {
                         Color.clear
                             .frame(width: 10000, height: 10000, alignment: .center) //FIXME: This is likely not the proper way to do this.
-                        //TODO: Must disable scrolling when menu is showing.
                             .contentShape(.rect)
                             .onTapGesture {
                                 menuIsShowing = false
@@ -157,6 +157,14 @@ struct ReactionsModifier: ViewModifier {
                     setBackgroundMenuVisible(menuIsShowing)
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
+                .onChange(of: menuIsShowing) { _, newValue in
+                    chatData.isChatScrollDisabled = newValue
+                }
+                .onDisappear {
+                    if chatData.isChatScrollDisabled {
+                        chatData.isChatScrollDisabled = false
+                    }
+                }
         } else {
             content
         }
@@ -525,6 +533,7 @@ fileprivate struct TapBackTestView: View {
     }
 }
 
-#Preview {
+#Preview("TapBackTestView") {
     TapBackTestView()
+        .environment(ChatData())
 }
