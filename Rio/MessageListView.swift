@@ -52,8 +52,8 @@ struct MessageListView: View {
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
                     .id(message.id) // Essential for ScrollPosition to work
-                    .zIndex(chatData.activeReactionMessageID == message.id ? 1000 : 0)
                 }
+                .zIndex(chatData.activeReactionMessageID == message.id ? 100000 : Double(index))
             }
         }
         .scrollTargetLayout() // Optimizes scrolling performance for iOS 18+

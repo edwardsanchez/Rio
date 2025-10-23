@@ -158,6 +158,7 @@ struct ReactionsModifier: ViewModifier {
                     setBackgroundMenuVisible(menuIsShowing)
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
+                .zIndex(menuIsShowing ? 100 : 0)
                 .onChange(of: menuIsShowing) { _, newValue in
                     chatData.isChatScrollDisabled = newValue
                     if newValue {
