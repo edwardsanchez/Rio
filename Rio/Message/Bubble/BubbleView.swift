@@ -354,7 +354,7 @@ struct BubbleView: View {
         // Canvas with metaball effect
         return Canvas { context, _ in
             if alphaThresholdMin > 0.001 {
-                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? resolvedColor : Color.red.opacity(0.5)))
             }
             if currentBlurRadius > 0.05 {
                 context.addFilter(.blur(radius: currentBlurRadius))
@@ -365,7 +365,7 @@ struct BubbleView: View {
                 let trackOrigin = layout.rectangleOrigin(for: layout.circleTrackSize)
                 let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
                     .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
-                ctx.fill(rectPath, with: .color(color))
+                ctx.fill(rectPath, with: .color(resolvedColor))
 
                 // Draw circles around the path
                 for index in morphedDiameters.indices {
@@ -389,7 +389,7 @@ struct BubbleView: View {
         .explosionEffect(isActive: isExploding, progress: explosionProgress)
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             ThinkingTailView(
-                color: color,
+                color: resolvedColor,
                 showTail: showTail,
                 bubbleType: bubbleType,
                 layoutType: layoutType,
