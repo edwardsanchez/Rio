@@ -10,7 +10,7 @@ import Foundation
 struct EmojiData {
 
     // MARK: - People Emojis
-    static let peopleEmojis: [Emoji] = [
+    static let peopleEmojisBase: [Emoji] = [
         Emoji(id: "grinningFace", character: "😀", name: "Grinning Face", keywords: ["happy", "smile", "joy", "cheerful"], category: .people(.happy)),
         Emoji(id: "grinningFaceWithBigEyes", character: "😃", name: "Grinning Face With Big Eyes", keywords: ["happy", "excited", "smile", "joy"], category: .people(.happy)),
         Emoji(id: "grinningFaceWithSmilingEyes", character: "😄", name: "Grinning Face With Smiling Eyes", keywords: ["happy", "joy", "laugh", "pleased"], category: .people(.happy)),
@@ -119,6 +119,58 @@ struct EmojiData {
         Emoji(id: "skull", character: "💀", name: "Skull", keywords: ["death", "dead", "dying", "skeleton", "spooky"], category: .people(.playful)),
         Emoji(id: "skullAndCrossbones", character: "☠️", name: "Skull And Crossbones", keywords: ["death", "poison", "danger", "pirate", "warning"], category: .people(.playful))
     ]
+
+    static var peopleEmojis: [Emoji] {
+        peopleEmojisBase.map { augmentInterjections(for: $0) }
+    }
+
+    private static func augmentInterjections(for emoji: Emoji) -> Emoji {
+        guard case let .people(subcategory) = emoji.category else { return emoji }
+        let extra = interjectionsForPeople(subcategory: subcategory)
+        if extra.isEmpty { return emoji }
+        let merged = uniqueLowercasedKeywords(emoji.keywords + extra)
+        return Emoji(id: emoji.id, character: emoji.character, name: emoji.name, keywords: merged, category: emoji.category)
+    }
+
+    private static func interjectionsForPeople(subcategory: PeopleSubcategories) -> [String] {
+        switch subcategory {
+        case .happy:
+            return ["yay", "haha", "lol", "hehe", "woohoo", "omg", "aww"]
+        case .love:
+            return ["aww", "xoxo", "ily", "mwah", "so cute", "heart eyes"]
+        case .playful:
+            return ["lol", "haha", "hehe", "jk", "teehee", "gotcha", "sike"]
+        case .sad:
+            return ["sigh", "aw", "aww", "rip", "sob", "sadge", "ugh"]
+        case .angry:
+            return ["grr", "ugh", "argh", "wtf", "ffs", "so mad"]
+        case .surprised:
+            return ["omg", "wow", "whoa", "gasp", "no way", "what"]
+        case .tired:
+            return ["sigh", "yawn", "zzz", "ugh", "so tired"]
+        case .sick:
+            return ["ew", "yuck", "bleh", "ick", "ugh", "gross"]
+        case .worried:
+            return ["uh", "uhh", "umm", "yikes", "eek", "hmm", "oh no"]
+        case .neutral:
+            return ["meh", "ok", "okay", "hmm", "shrug"]
+        default:
+            return []
+        }
+    }
+
+    private static func uniqueLowercasedKeywords(_ keywords: [String]) -> [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        for word in keywords {
+            let lower = word.lowercased()
+            if !seen.contains(lower) {
+                seen.insert(lower)
+                result.append(lower)
+            }
+        }
+        return result
+    }
 
     static let expressiveEmojis: [Emoji] = [
         Emoji(id: "pileOfPoo", character: "💩", name: "Pile Of Poo", keywords: ["poop", "crap", "shit", "💩"], category: .expressive(.creature)),
@@ -714,7 +766,7 @@ struct EmojiData {
         Emoji(id: "redApple", character: "🍎", name: "Red Apple", keywords: ["fruit", "healthy", "teacher", "crisp"], category: .food(.fruit)),
         Emoji(id: "greenApple", character: "🍏", name: "Green Apple", keywords: ["fruit", "tart", "granny smith", "crisp"], category: .food(.fruit)),
         Emoji(id: "pear", character: "🍐", name: "Pear", keywords: ["fruit", "juicy", "green"], category: .food(.fruit)),
-        Emoji(id: "peach", character: "🍑", name: "Peach", keywords: ["fruit", "fuzzy", "sweet", "butt"], category: .food(.fruit)),
+        Emoji(id: "peach", character: "🍑", name: "Peach", keywords: ["fruit", "fuzzy", "sweet"], category: .food(.fruit)),
         Emoji(id: "cherries", character: "🍒", name: "Cherries", keywords: ["fruit", "red", "sweet", "stem"], category: .food(.fruit)),
         Emoji(id: "strawberry", character: "🍓", name: "Strawberry", keywords: ["fruit", "red", "sweet", "berry"], category: .food(.fruit)),
         Emoji(id: "blueberries", character: "🫐", name: "Blueberries", keywords: ["fruit", "berry", "antioxidant", "healthy"], category: .food(.fruit)),
@@ -723,7 +775,7 @@ struct EmojiData {
         Emoji(id: "olive", character: "🫒", name: "Olive", keywords: ["mediterranean", "oil", "green", "salty"], category: .food(.fruit)),
         Emoji(id: "coconut", character: "🥥", name: "Coconut", keywords: ["tropical", "hairy", "milk", "oil"], category: .food(.fruit)),
         Emoji(id: "avocado", character: "🥑", name: "Avocado", keywords: ["green", "healthy", "guacamole", "toast"], category: .food(.fruit)),
-        Emoji(id: "eggplant", character: "🍆", name: "Eggplant", keywords: ["purple", "vegetable", "dick", "penis"], category: .food(.vegetable)),
+        Emoji(id: "eggplant", character: "🍆", name: "Eggplant", keywords: ["purple", "vegetable"], category: .food(.vegetable)),
         Emoji(id: "potato", character: "🥔", name: "Potato", keywords: ["vegetable", "brown", "starch", "spud"], category: .food(.vegetable)),
         Emoji(id: "carrot", character: "🥕", name: "Carrot", keywords: ["orange", "vegetable", "bunny", "healthy"], category: .food(.fruit)),
         Emoji(id: "earOfCorn", character: "🌽", name: "Ear Of Corn", keywords: ["yellow", "vegetable", "cob", "maize"], category: .food(.vegetable)),
