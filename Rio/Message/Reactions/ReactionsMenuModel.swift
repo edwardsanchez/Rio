@@ -10,15 +10,22 @@ import SwiftUI
 @Observable
 final class ReactionsMenuModel {
     var chatData: ChatData?
+    var onOpenEmojiPicker: (() -> Void)?
 
     let messageID: UUID
     var reactions: [Reaction]
+    private var customEmojiSelection: String?
 
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
     var showBackgroundMenu = false
 
     private let reactionSpacing: CGFloat = 50
+    private enum Constants {
+        static let customEmojiReactionID = "face.dashed"
+        static let customEmojiPlaceholder = "?"
+        static let customEmojiFontSize: CGFloat = 24
+    }
 
     init(messageID: UUID, reactions: [Reaction]) {
         self.messageID = messageID
@@ -67,6 +74,14 @@ final class ReactionsMenuModel {
 
     var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
+        if selectedReactionID == Constants.customEmojiReactionID,
+           let customEmojiSelection {
+            return Reaction(
+                id: Constants.customEmojiReactionID,
+                display: .emoji(value: customEmojiSelection, fontSize: Constants.customEmojiFontSize),
+                selectedEmoji: customEmojiSelection
+            )
+        }
         return reactions.first { $0.id == selectedReactionID }
     }
 
@@ -114,13 +129,47 @@ final class ReactionsMenuModel {
     }
 
     func handleReactionTap(_ reaction: Reaction) {
-        let isSameReaction = selectedReactionID == reaction.id
-        if menuIsShowing {
-            selectedReactionID = isSameReaction ? nil : reaction.id
-            chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-            closeMenu(delay: AnimationTiming.reactionHideDelay)
-        } else {
+        guard menuIsShowing else {
             openMenu()
+            return
+        }
+
+        if reaction.id == Constants.customEmojiReactionID {
+            onOpenEmojiPicker?()
+            return
+        }
+
+        let isSameReaction = selectedReactionID == reaction.id
+        selectedReactionID = isSameReaction ? nil : reaction.id
+        chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
+        closeMenu(delay: AnimationTiming.reactionHideDelay)
+    }
+
+    func applyCustomEmojiSelection(_ emoji: String) {
+        selectedReactionID = Constants.customEmojiReactionID
+        customEmojiSelection = emoji
+
+        if let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) {
+            reactions[index] = Reaction(
+                id: Constants.customEmojiReactionID,
+                display: .emoji(value: emoji, fontSize: Constants.customEmojiFontSize),
+                selectedEmoji: emoji
+            )
+        }
+
+        chatData?.addReaction(emoji, toMessageId: messageID)
+        closeMenu(delay: AnimationTiming.reactionHideDelay)
+    }
+
+    func resetCustomEmojiIcon() {
+        guard let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationTiming.baseDuration) { [weak self] in
+            guard let self = self else { return }
+            self.reactions[index] = Reaction.systemImage(
+                Constants.customEmojiReactionID,
+                selectedEmoji: Constants.customEmojiPlaceholder
+            )
         }
     }
 }

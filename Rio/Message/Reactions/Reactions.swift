@@ -12,6 +12,7 @@ struct ReactionsModifier: ViewModifier {
     // Centralized menu visibility in ChatData
     private var menuIsShowing: Bool { chatData.activeReactionMessageID == messageID }
     @State private var viewSize: CGSize = .zero
+    @State private var isEmojiPickerPresented = false
 
     @Namespace private var reactionNamespace
     @State private var menuModel: ReactionsMenuModel
@@ -163,14 +164,30 @@ struct ReactionsModifier: ViewModifier {
                     let isActive = newValue == messageID
                     chatData.isChatScrollDisabled = isActive
                     menuModel.setBackgroundMenuVisible(isActive)
+                    if !isActive {
+                        menuModel.resetCustomEmojiIcon()
+                        isEmojiPickerPresented = false
+                    }
                 }
-                .onAppear { menuModel.chatData = chatData }
+                .onAppear {
+                    menuModel.chatData = chatData
+                    menuModel.onOpenEmojiPicker = { isEmojiPickerPresented = true }
+                }
                 .onDisappear {
                     if chatData.isChatScrollDisabled {
                         chatData.isChatScrollDisabled = false
                     }
                     if chatData.activeReactionMessageID == messageID {
                         chatData.activeReactionMessageID = nil
+                    }
+                    menuModel.onOpenEmojiPicker = nil
+                    menuModel.resetCustomEmojiIcon()
+                    isEmojiPickerPresented = false
+                }
+                .sheet(isPresented: $isEmojiPickerPresented) {
+                    EmojiPickerView { emoji in
+                        menuModel.applyCustomEmojiSelection(emoji.character)
+                        isEmojiPickerPresented = false
                     }
                 }
         } else {
