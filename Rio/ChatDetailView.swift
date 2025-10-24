@@ -183,14 +183,19 @@ struct ChatDetailView: View {
                     .opacity(0.2)
                     .blendMode(.overlay)
             }
-            .navigationTitle(chat.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Circle()
+                        .frame(width: 80)
+                        .padding(.top, 20)
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         autoReplyEnabled.toggle()
                     } label: {
-                        Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
+                        Image(systemName: autoReplyEnabled ? "info.circle.fill" : "info.circle")
                             .opacity(autoReplyEnabled ? 1 : 0.3)
                     }
                 }
