@@ -11,7 +11,6 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
-    @State private var messages: [Message] = []
     @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
@@ -36,16 +35,62 @@ struct ChatDetailView: View {
 
     init(chat: Chat) {
         self.chat = chat
-        _messages = State(initialValue: chat.messages)
+    }
+
+    private var currentChat: Chat? {
+        chatData.chats.first(where: { $0.id == chat.id })
+    }
+
+    private var messages: [Message] {
+        currentChat?.messages ?? []
     }
 
     var body: some View {
         ZStack {
-            NavigationStack {
-                VStack(spacing: 0) {
-                    // Main scroll view for messages
-                    ScrollView {
-                    MessageListView(
+            messagesView
+            inputFieldView
+            imageOverlay
+        }
+        .tint(chat.theme.outboundBackgroundColor)
+    }
+
+    var inputFieldView: some View {
+        Color.clear
+            .safeAreaInset(edge: .bottom) {
+                ChatInputView(
+                    inputFieldFrame: $inputFieldFrame,
+                    shouldFocusInput: $shouldFocusInput,
+                    newMessageId: $newMessageId,
+                    chat: chat,
+                    autoReplyEnabled: $autoReplyEnabled
+                )
+            }
+    }
+
+    var imageOverlay: some View {
+        Group {
+            if let imageData = selectedImageData {
+                ImageDetailView(
+                    imageData: imageData,
+                    isPresented: Binding(
+                        get: { selectedImageData != nil },
+                        set: { newValue in
+                            if !newValue {
+                                selectedImageData = nil
+                            }
+                        }
+                    )
+                )
+                .zIndex(1)
+            }
+        }
+    }
+
+    var messagesView: some View {
+        // Main scroll view for messages
+        NavigationStack {
+            ScrollView {
+                MessageListView(
                     messages: messages,
                     newMessageId: $newMessageId,
                     inputFieldFrame: inputFieldFrame,
@@ -62,8 +107,11 @@ struct ChatDetailView: View {
                 }
             }
             .scrollClipDisabled()
+            .scrollDisabled(chatData.isChatScrollDisabled)
             .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
+            .padding(.bottom, 60)
+
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
             } action: { _, newValue in
@@ -95,7 +143,7 @@ struct ChatDetailView: View {
                     }
                 }
             }
-            .onChange(of: messages.count) { _, _ in
+            .onChange(of: messages.last?.id) { _, _ in
                 // Auto-scroll to the latest message when a new message is added
                 scrollToLatestMessage()
             }
@@ -123,56 +171,29 @@ struct ChatDetailView: View {
                 }
                 shouldFocusInput = true
             }
-
-            ChatInputView(
-                inputFieldFrame: $inputFieldFrame,
-                shouldFocusInput: $shouldFocusInput,
-                messages: $messages,
-                newMessageId: $newMessageId,
-                chat: chat,
-                autoReplyEnabled: $autoReplyEnabled
-            )
-        }
-        .background {
-            Color.base
-                .ignoresSafeArea()
-        }
-        .overlay {
-            Rectangle()
-                .fill(Gradient(colors: [.white, .black]))
-                .ignoresSafeArea()
-                .opacity(0.2)
-                .blendMode(.overlay)
-        }
-        .navigationTitle(chat.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    autoReplyEnabled.toggle()
-                } label: {
-                    Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
-                        .foregroundColor(autoReplyEnabled ? chat.theme.outboundBackgroundColor : .primary.opacity(0.3))
-                }
+            .frame(maxWidth: .infinity)
+            .background {
+                Color.base
+                    .ignoresSafeArea()
             }
-                }
-                .coordinateSpace(name: "field")
+            .overlay {
+                Rectangle()
+                    .fill(Gradient(colors: [.white, .black]))
+                    .ignoresSafeArea()
+                    .opacity(0.2)
+                    .blendMode(.overlay)
             }
-
-            // Image detail overlay
-            if let imageData = selectedImageData {
-                ImageDetailView(
-                    imageData: imageData,
-                    isPresented: Binding(
-                        get: { selectedImageData != nil },
-                        set: { newValue in
-                            if !newValue {
-                                selectedImageData = nil
-                            }
-                        }
-                    )
-                )
-                .zIndex(1)
+            .navigationTitle(chat.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        autoReplyEnabled.toggle()
+                    } label: {
+                        Image(systemName: autoReplyEnabled ? "bubble.left.and.bubble.right.fill" : "bubble.left.and.bubble.right")
+                            .opacity(autoReplyEnabled ? 1 : 0.3)
+                    }
+                }
             }
         }
     }
@@ -217,8 +238,11 @@ struct ChatDetailView: View {
         theme: .defaultTheme
     )
 
-    ChatDetailView(chat: sampleChat)
-        .environment(ChatData())
+    let chatData = ChatData()
+    chatData.chats = [sampleChat]
+
+    return ChatDetailView(chat: sampleChat)
+        .environment(chatData)
         .environment(BubbleConfiguration())
 }
 
@@ -244,6 +268,7 @@ struct ChatDetailView: View {
 
     OutboundGeometryMatchDebugView(messages: allMessages, newMessageId: newMessageId)
         .environment(BubbleConfiguration())
+        .environment(ChatData())
 }
 
 private struct OutboundGeometryMatchDebugView: View {

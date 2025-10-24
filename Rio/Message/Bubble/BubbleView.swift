@@ -30,6 +30,7 @@ struct BubbleView: View {
     let messageType: MessageType
     /// Layout type for visual display (may be delayed relative to bubbleType)
     let layoutType: BubbleType?
+    let messageID: UUID
 
     // MARK: - Animation Managers (replaces 21 @State variables)
 
@@ -61,7 +62,8 @@ struct BubbleView: View {
         type: BubbleType = .thinking,
         showTail: Bool = false,
         messageType: MessageType = .inbound(.thinking),
-        layoutType: BubbleType? = nil
+        layoutType: BubbleType? = nil,
+        messageID: UUID
     ) {
         self.width = width
         self.height = height
@@ -71,6 +73,7 @@ struct BubbleView: View {
         self.showTail = showTail
         self.messageType = messageType
         self.layoutType = layoutType
+        self.messageID = messageID
 
         let now = Date()
         let config = BubbleConfiguration()
@@ -123,11 +126,15 @@ struct BubbleView: View {
     var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
 
+    var resolvedColor: Color {
+        messageType.isOutbound ? color : Color.base.mix(with: color, by: 0.2)
+    }
+
     var body: some View {
         Group {
             if transitionCoordinator.canUseNative {
                 RoundedRectangle(cornerRadius: bubbleConfig.bubbleCornerRadius)
-                    .fill(color)
+                    .fill(resolvedColor)
             } else {
                 TimelineView(.animation) { timeline in
                     return makeAnimatedBubble(at: timeline.date)
@@ -136,7 +143,7 @@ struct BubbleView: View {
         }
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             TalkingTailView(
-                color: color,
+                color: resolvedColor,
                 showTail: showTail,
                 bubbleType: bubbleType,
                 layoutType: layoutType,
@@ -145,8 +152,11 @@ struct BubbleView: View {
                 previousBubbleType: previousBubbleType
             )
         }
-        .compositingGroup()
-        .opacity(shouldHideBubble ? 0 : (messageType.isOutbound ? 1 : 0.25))
+        .reactions(
+            messageID: messageID,
+            isEnabled: messageType.isInbound && bubbleType.isTalking
+        )
+        .opacity(shouldHideBubble ? 0 : 1)
         .background {
             // Hidden text to measure single-line height
             Text("X")
@@ -344,7 +354,7 @@ struct BubbleView: View {
         // Canvas with metaball effect
         return Canvas { context, _ in
             if alphaThresholdMin > 0.001 {
-                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? color : Color.red.opacity(0.5)))
+                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? resolvedColor : Color.red.opacity(0.5)))
             }
             if currentBlurRadius > 0.05 {
                 context.addFilter(.blur(radius: currentBlurRadius))
@@ -355,7 +365,7 @@ struct BubbleView: View {
                 let trackOrigin = layout.rectangleOrigin(for: layout.circleTrackSize)
                 let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
                     .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
-                ctx.fill(rectPath, with: .color(color))
+                ctx.fill(rectPath, with: .color(resolvedColor))
 
                 // Draw circles around the path
                 for index in morphedDiameters.indices {
@@ -379,7 +389,7 @@ struct BubbleView: View {
         .explosionEffect(isActive: isExploding, progress: explosionProgress)
         .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             ThinkingTailView(
-                color: color,
+                color: resolvedColor,
                 showTail: showTail,
                 bubbleType: bubbleType,
                 layoutType: layoutType,
@@ -611,11 +621,13 @@ fileprivate struct BubbleMorphLayout {
             width: 68,
             height: 40,
             cornerRadius: 20,
-            color: .blue
+            color: .blue,
+            messageID: UUID()
         )
     }
     .padding()
     .environment(bubbleConfig)
+    .environment(ChatData())
 }
 
 #Preview("Thought Bubble Morph") {
@@ -631,7 +643,9 @@ fileprivate struct BubbleMorphLayout {
             cornerRadius: 26,
             color: .Default.inboundBubble,
             type: isTalking ? .talking : .thinking,
-            showTail: true
+            showTail: true,
+            messageType: .inbound(isTalking ? .talking : .thinking),
+            messageID: UUID()
         )
         .frame(width: width + 120, height: height + 120)
 
@@ -642,4 +656,5 @@ fileprivate struct BubbleMorphLayout {
     }
     .padding()
     .environment(bubbleConfig)
+    .environment(ChatData())
 }

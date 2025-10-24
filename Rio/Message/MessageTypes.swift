@@ -62,6 +62,7 @@ struct Message: Identifiable {
     let isTypingIndicator: Bool
     let replacesTypingIndicator: Bool
     let messageType: MessageType
+    var reactions: [MessageReaction] = []
 
     var bubbleType: BubbleType {
         messageType.bubbleType
@@ -102,6 +103,13 @@ struct Message: Identifiable {
         // Update isTypingIndicator based on bubble type
         self.isTypingIndicator = isTypingIndicator || messageType.bubbleType.isThinking
     }
+}
+
+struct MessageReaction: Identifiable {
+    let id: UUID = UUID()
+    let user: User
+    let date: Date
+    let emoji: String
 }
 
 enum DateGranularity {

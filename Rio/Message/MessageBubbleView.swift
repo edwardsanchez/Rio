@@ -308,6 +308,7 @@ struct MessageBubbleView: View {
             messageType: message.messageType,
             backgroundColor: backgroundColor,
             showTail: showTail,
+            messageID: message.id,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,
@@ -698,6 +699,7 @@ private struct MessageBubblePreviewContainer: View {
 
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
+        .environment(ChatData())
 }
 
 #Preview("Message States") {
@@ -759,6 +761,7 @@ private struct MessageBubblePreviewContainer: View {
     .padding(.horizontal, 20)
     .padding(.vertical, 40)
     .environment(bubbleConfig)
+    .environment(ChatData())
 
         // Image detail overlay
         if let imageData = selectedImageData {

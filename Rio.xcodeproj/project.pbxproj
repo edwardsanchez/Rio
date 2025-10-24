@@ -156,7 +156,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */,
-				6DCBA0AD2EAC418C00891ACE /* XCRemoteSwiftPackageReference "Defaults" */,
+				6DCB9F442EAB4A3000891ACE /* XCRemoteSwiftPackageReference "Defaults" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6D3EE7F12E7E6D9B00F81D31 /* Products */;
@@ -350,7 +350,7 @@
 		6D3EE7FE2E7E6D9D00F81D31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = Rio;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Rio-smile";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -384,7 +384,7 @@
 		6D3EE7FF2E7E6D9D00F81D31 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = Rio;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Rio-smile";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -524,7 +524,7 @@
 				minimumVersion = 1.1.4;
 			};
 		};
-		6DCBA0AD2EAC418C00891ACE /* XCRemoteSwiftPackageReference "Defaults" */ = {
+		6DCB9F442EAB4A3000891ACE /* XCRemoteSwiftPackageReference "Defaults" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/Defaults.git";
 			requirement = {

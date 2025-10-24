@@ -26,6 +26,12 @@ extension Array {
     }
 }
 
+extension Color {
+    static func mixedAccent(with color: Color) -> Color {
+        .accent.mix(with: color, by: 0.15)
+    }
+}
+
 // MARK: - Double Extension
 
 extension Double {

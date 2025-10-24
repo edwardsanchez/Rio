@@ -12,6 +12,12 @@ class ChatData {
     var chats: [Chat] = []
     // Track visible thinking bubbles per chat (chatId -> participant IDs)
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
+    // Flag used to temporarily disable chat scrolling (e.g., while reaction menus are active).
+    var isChatScrollDisabled = false
+    // Tracks which message currently displays a reactions menu so we can bring it to the front.
+    var activeReactionMessageID: UUID?
+    // Current signed-in user (for adding reactions)
+    let currentUser: User
 
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
@@ -21,6 +27,7 @@ class ChatData {
     let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)
 
     init() {
+        currentUser = edwardUser
         generateSampleChats()
     }
 
@@ -117,6 +124,30 @@ class ChatData {
             )
             chats[chatIndex] = updatedChat
         }
+    }
+
+    func addReaction(_ emoji: String, toMessageId messageId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { chat in
+            chat.messages.contains(where: { $0.id == messageId })
+        }) else { return }
+
+        var updatedChat = chats[chatIndex]
+        var updatedMessages = updatedChat.messages
+        guard let messageIndex = updatedMessages.firstIndex(where: { $0.id == messageId }) else { return }
+
+        var message = updatedMessages[messageIndex]
+        let newReaction = MessageReaction(user: currentUser, date: Date(), emoji: emoji)
+        message.reactions.append(newReaction)
+        updatedMessages[messageIndex] = message
+
+        updatedChat = Chat(
+            id: updatedChat.id,
+            title: updatedChat.title,
+            participants: updatedChat.participants,
+            messages: updatedMessages,
+            theme: updatedChat.theme
+        )
+        chats[chatIndex] = updatedChat
     }
 
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
