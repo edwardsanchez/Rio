@@ -110,6 +110,7 @@ struct ChatDetailView: View {
             .scrollDisabled(chatData.isChatScrollDisabled)
             .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
+            .padding(.bottom, 60)
 
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
