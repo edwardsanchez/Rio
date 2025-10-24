@@ -151,10 +151,13 @@ final class ReactionsMenuModel {
     func applyCustomEmojiSelection(_ emoji: String) {
         selectedReactionID = Constants.customEmojiReactionID
         customEmojiSelection = emoji
+        customEmojiResetWorkItem?.cancel()
 
         updateCustomReactionDisplay(showingEmoji: true)
         chatData?.addReaction(emoji, toMessageId: messageID)
-        closeMenu(delay: AnimationTiming.reactionHideDelay)
+        DispatchQueue.main.async { [weak self] in
+            self?.closeMenu(delay: AnimationTiming.reactionHideDelay)
+        }
     }
 
     func prepareCustomEmojiForMenuOpen() {
