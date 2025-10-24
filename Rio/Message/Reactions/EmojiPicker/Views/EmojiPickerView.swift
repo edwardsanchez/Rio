@@ -17,32 +17,70 @@ struct EmojiPickerView: View {
     private let categories = EmojiCategory.allCases
 
     var body: some View {
+        NavigationStack {
+            content
+                .navigationTitle("Reactions")
+                .navigationBarTitleDisplayMode(.automatic)
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
-            // Main scrollable emoji area
-            ScrollView(.horizontal) {
-                LazyHStack(alignment: .top, spacing: 0) {
-                    ForEach(categories) { category in
-                        categorySection(for: category)
-                            .id(category)
-                        //Commented out to prevent feedback loop
+            if viewModel.isSearching {
+                searchResultsView
+            } else {
+                categoryScrollView
+                Divider()
+                categoryBarView
+            }
+        }
+        .searchable(
+            text: $viewModel.searchText,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search emoji"
+        )
+        .onAppear {
+            viewModel.refreshFrequentlyUsedEmojis()
+        }
+    }
+
+    private var searchResultsView: some View {
+        Group {
+            if viewModel.filteredEmojis.isEmpty {
+                emptySearchState
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHGrid(rows: rows, alignment: .top, spacing: 0) {
+                        ForEach(viewModel.filteredEmojis) { emoji in
+                            EmojiCellView(emoji: emoji) {
+                                handleEmojiSelection(emoji, in: emoji.category)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+            }
+        }
+    }
+
+    private var categoryScrollView: some View {
+        ScrollView(.horizontal) {
+            LazyHStack(alignment: .top, spacing: 0) {
+                ForEach(categories) { category in
+                    categorySection(for: category)
+                        .id(category)
+                    //Commented out to prevent feedback loop
 //                            .onScrollTargetVisibilityChange(idType: EmojiCategory.self, threshold: 0.5) { visibleIDs in
 //                                if let firstVisible = visibleIDs.first {
 //                                    selectedCategory = firstVisible
 //                                }
 //                            }
-                    }
                 }
-                .scrollTargetLayout()
             }
-            .scrollPosition(id: $selectedCategory, anchor: .leading)
-
-            Divider()
-
-            categoryBarView
+            .scrollTargetLayout()
         }
-        .onAppear {
-            viewModel.refreshFrequentlyUsedEmojis()
-        }
+        .scrollPosition(id: $selectedCategory, anchor: .leading)
     }
 
     private func categorySection(for category: EmojiCategory) -> some View {
@@ -84,6 +122,16 @@ struct EmojiPickerView: View {
     private func handleEmojiSelection(_ emoji: Emoji, in category: EmojiCategory) {
         viewModel.trackEmojiUsage(emoji, sourceCategory: category)
         onEmojiSelected(emoji)
+    }
+    
+    private var emptySearchState: some View {
+        VStack(spacing: 8) {
+            Text("No results")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
     }
 }
 

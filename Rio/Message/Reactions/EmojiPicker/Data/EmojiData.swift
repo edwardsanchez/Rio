@@ -656,7 +656,7 @@ struct EmojiData {
         Emoji(id: "coral", character: "🪸", name: "Coral", keywords: ["reef", "ocean", "underwater"], category: .nature(.aquatic)),
         Emoji(id: "jellyfish", character: "🪼", name: "Jellyfish", keywords: ["ocean", "sting", "transparent", "float"], category: .nature(.aquatic)),
         Emoji(id: "snail", character: "🐌", name: "Snail", keywords: ["slow", "shell", "slimy"], category: .nature(.aquatic)),
-        Emoji(id: "butterfly", character: "🦋", name: "Butterfly", keywords: ["beautiful", "flutter", "caterpillar", "metamorphosis"], category: .nature(.insect)),
+        Emoji(id: "butterfly", character: "🦋", name: "Butterfly", keywords: ["beautiful", "flutter", "blue", "insect"], category: .nature(.insect)),
         Emoji(id: "bug", character: "🐛", name: "Bug", keywords: ["caterpillar", "worm", "insect"], category: .nature(.insect)),
         Emoji(id: "ant", character: "🐜", name: "Ant", keywords: ["insect", "colony", "tiny", "work"], category: .nature(.insect)),
         Emoji(id: "honeybee", character: "🐝", name: "Honeybee", keywords: ["buzz", "sting", "honey", "pollinate"], category: .nature(.insect)),

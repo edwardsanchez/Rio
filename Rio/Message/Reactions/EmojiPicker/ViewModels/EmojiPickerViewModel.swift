@@ -14,6 +14,26 @@ class EmojiPickerViewModel {
     var searchText: String = ""
     private(set) var frequentlyUsedEmojis: [Emoji] = []
     
+    private var normalizedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    var isSearching: Bool {
+        normalizedSearchText.count >= 3
+    }
+    
+    var filteredEmojis: [Emoji] {
+        guard isSearching else { return [] }
+        
+        let allEmojis = EmojiAIService.getAllEmojis()
+        let query = normalizedSearchText.lowercased()
+        
+        return allEmojis.filter { emoji in
+            emoji.name.lowercased().contains(query) ||
+            emoji.keywords.contains { $0.lowercased().contains(query) }
+        }
+    }
+    
     private let userDefaults = UserDefaults.standard
     
     init() {
