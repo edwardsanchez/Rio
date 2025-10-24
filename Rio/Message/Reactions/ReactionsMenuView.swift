@@ -9,51 +9,38 @@ import SwiftUI
 
 struct ReactionsMenuView: View {
     var isOverlay: Bool
-    var reactions: [Reaction]
-    var menuIsShowing: Bool
-    var radius: CGFloat
-    var itemSpacing: CGFloat
-    var spacerCenterPercent: CGFloat
-    var parentSize: CGSize
-    var calculatedOffset: CGSize
-    @Binding var selectedReactionID: Reaction.ID?
+    @Bindable var model: ReactionsMenuModel
     var reactionNamespace: Namespace.ID
-    var reactionStaggerStep: TimeInterval
-    var menuOffsetAnimation: Animation
-    var onTap: (Reaction) -> Void
 
-    private var selectedReaction: Reaction? {
-        guard let selectedReactionID else { return nil }
-        return reactions.first { $0.id == selectedReactionID }
-    }
+    private var selectedReaction: Reaction? { model.selectedReaction }
 
     var body: some View {
         RadialLayout(
-            radius: radius,
-            menuIsShowing: menuIsShowing,
-            itemCount: reactions.count,
-            itemSpacing: itemSpacing,
-            spacerCenterPercent: spacerCenterPercent,
-            parentSize: parentSize
+            radius: model.calculatedRadius,
+            menuIsShowing: model.menuIsShowing,
+            itemCount: model.reactions.count,
+            itemSpacing: model.calculatedReactionSpacing,
+            spacerCenterPercent: model.calculatedSpacerCenterPercent,
+            parentSize: model.viewSize
         ) {
-            ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
+            ForEach(Array(model.reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(
                     for: reaction,
                     isVisible: (selectedReaction != reaction) != isOverlay,
                     isOverlay: isOverlay,
                     isSelected: selectedReaction == reaction
                 ) {
-                    onTap(reaction)
+                    model.handleReactionTap(reaction)
                 }
                 .animation(
-                    .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -5)
-                    .delay(Double(index) * reactionStaggerStep),
-                    value: menuIsShowing
+                    .interpolatingSpring(model.menuIsShowing ? .bouncy : .smooth, initialVelocity: model.menuIsShowing ? 0 : -5)
+                    .delay(Double(index) * ReactionsMenuModel.AnimationTiming.reactionStaggerStep),
+                    value: model.menuIsShowing
                 )
             }
         }
-        .offset(calculatedOffset)
-        .animation(menuOffsetAnimation, value: menuIsShowing)
+        .offset(model.calculatedOffset)
+        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: model.menuIsShowing)
     }
 
     @ViewBuilder
@@ -70,7 +57,7 @@ struct ReactionsMenuView: View {
                 .shadow(color: Color.base.opacity(1), radius: 3)
                 .background {
                     Circle()
-                        .fill(isSelected && menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
+                        .fill(isSelected && model.menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
                         .frame(width: 44, height: 44)
                         .animation(.smooth, value: isSelected)
                 }
@@ -90,10 +77,10 @@ struct ReactionsMenuView: View {
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
-        guard selectedReactionID == reaction.id else {
+        guard model.selectedReactionID == reaction.id else {
             return !isOverlay
         }
-        return isOverlay ? !menuIsShowing : menuIsShowing
+        return isOverlay ? !model.menuIsShowing : model.menuIsShowing
     }
 
     @ViewBuilder

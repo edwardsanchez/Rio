@@ -14,17 +14,13 @@ struct ReactionsModifier: ViewModifier {
     @State private var viewSize: CGSize = .zero
 
     @Namespace private var reactionNamespace
-    @State private var selectedReactionID: Reaction.ID?
-    @State private var showBackgroundMenu = false
+    @State private var menuModel: ReactionsMenuModel
 
     var messageID: UUID
     var reactions: [Reaction]
     var isEnabled: Bool
 
-    private var selectedReaction: Reaction? {
-        guard let selectedReactionID else { return nil }
-        return reactions.first { $0.id == selectedReactionID }
-    }
+    private var selectedReaction: Reaction? { menuModel.selectedReaction }
 
     static var defaultReactions: [Reaction] {
         [
@@ -39,6 +35,13 @@ struct ReactionsModifier: ViewModifier {
     }
 
     private let reactionSpacing: CGFloat = 50
+
+    init(messageID: UUID, reactions: [Reaction], isEnabled: Bool) {
+        self.messageID = messageID
+        self.reactions = reactions
+        self.isEnabled = isEnabled
+        _menuModel = State(initialValue: ReactionsMenuModel(messageID: messageID, reactions: reactions))
+    }
 
     // Centralizes timing multipliers so related animations stay in sync.
     private enum AnimationTiming {
@@ -118,6 +121,7 @@ struct ReactionsModifier: ViewModifier {
                     proxy.size
                 } action: { newSize in
                     viewSize = newSize
+                    menuModel.viewSize = newSize
                 }
                 .overlay(alignment: .topTrailing) {
                     if let selectedReaction {
@@ -134,74 +138,33 @@ struct ReactionsModifier: ViewModifier {
                 .background(
                     ReactionsMenuView(
                         isOverlay: false,
-                        reactions: reactions,
-                        menuIsShowing: menuIsShowing,
-                        radius: calculatedRadius,
-                        itemSpacing: reactionSpacing,
-                        spacerCenterPercent: calculatedSpacerCenterPercent,
-                        parentSize: viewSize,
-                        calculatedOffset: calculatedOffset,
-                        selectedReactionID: $selectedReactionID,
-                        reactionNamespace: reactionNamespace,
-                        reactionStaggerStep: AnimationTiming.reactionStaggerStep,
-                        menuOffsetAnimation: AnimationTiming.menuOffsetAnimation
-                    ) { reaction in
-                        let isSameReaction = selectedReactionID == reaction.id
-                        if menuIsShowing {
-                            selectedReactionID = isSameReaction ? nil : reaction.id
-                            chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-                            chatData.activeReactionMessageID = nil
-                            setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
-                        } else {
-                            chatData.activeReactionMessageID = messageID
-                            setBackgroundMenuVisible(true)
-                        }
-                    }
-                        .opacity(showBackgroundMenu ? 1 : 0)
+                        model: menuModel,
+                        reactionNamespace: reactionNamespace
+                    )
+                        .opacity(menuModel.showBackgroundMenu ? 1 : 0)
                 )
 //                }
                 .overlay {
                     ReactionsMenuView(
                         isOverlay: true,
-                        reactions: reactions,
-                        menuIsShowing: menuIsShowing,
-                        radius: calculatedRadius,
-                        itemSpacing: reactionSpacing,
-                        spacerCenterPercent: calculatedSpacerCenterPercent,
-                        parentSize: viewSize,
-                        calculatedOffset: calculatedOffset,
-                        selectedReactionID: $selectedReactionID,
-                        reactionNamespace: reactionNamespace,
-                        reactionStaggerStep: AnimationTiming.reactionStaggerStep,
-                        menuOffsetAnimation: AnimationTiming.menuOffsetAnimation
-                    ) { reaction in
-                        let isSameReaction = selectedReactionID == reaction.id
-                        if menuIsShowing {
-                            selectedReactionID = isSameReaction ? nil : reaction.id
-                            chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-                            chatData.activeReactionMessageID = nil
-                            setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
-                        } else {
-                            chatData.activeReactionMessageID = messageID
-                            setBackgroundMenuVisible(true)
-                        }
-                    }
+                        model: menuModel,
+                        reactionNamespace: reactionNamespace
+                    )
                 }
                 .onTapGesture {
-                    chatData.activeReactionMessageID = nil
-                    setBackgroundMenuVisible(false)
+                    menuModel.closeMenu()
                 }
                 .onLongPressGesture {
-                    chatData.activeReactionMessageID = messageID
-                    setBackgroundMenuVisible(true)
+                    menuModel.openMenu()
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
                 .zIndex(menuIsShowing ? 100 : 0)
                 .onChange(of: chatData.activeReactionMessageID) { _, newValue in
                     let isActive = newValue == messageID
                     chatData.isChatScrollDisabled = isActive
-                    setBackgroundMenuVisible(isActive)
+                    menuModel.setBackgroundMenuVisible(isActive)
                 }
+                .onAppear { menuModel.chatData = chatData }
                 .onDisappear {
                     if chatData.isChatScrollDisabled {
                         chatData.isChatScrollDisabled = false
@@ -212,12 +175,6 @@ struct ReactionsModifier: ViewModifier {
                 }
         } else {
             content
-        }
-    }
-
-    private func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
-        withAnimation(AnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
-            showBackgroundMenu = value
         }
     }
 
@@ -256,7 +213,7 @@ struct ReactionsModifier: ViewModifier {
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
-        guard selectedReactionID == reaction.id else {
+        guard menuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
         return isOverlay ? !menuIsShowing : menuIsShowing
@@ -368,102 +325,6 @@ enum LayoutCase: String, CaseIterable {
             return width >= thresholds.widthMin && width < thresholds.widthMax &&
             height >= thresholds.heightMin && height < thresholds.heightMax
         } ?? .wideTop
-    }
-}
-
-struct Reaction: Identifiable, Equatable {
-    static func == (lhs: Reaction, rhs: Reaction) -> Bool {
-        lhs.id == rhs.id
-    }
-
-    enum Display {
-        case emoji(value: String, fontSize: CGFloat)
-        case systemImage(name: String, pointSize: CGFloat, weight: Font.Weight)
-    }
-
-    let id: String
-    let display: Display
-    let selectedEmoji: String
-
-    static func emoji(_ value: String) -> Reaction {
-        Reaction(
-            id: value,
-            display: .emoji(value: value, fontSize: 24),
-            selectedEmoji: value
-        )
-    }
-
-    static func systemImage(
-        _ name: String,
-        pointSize: CGFloat = 20,
-        weight: Font.Weight = .medium,
-        selectedEmoji: String
-    ) -> Reaction {
-        Reaction(
-            id: name,
-            display: .systemImage(name: name, pointSize: pointSize, weight: weight),
-            selectedEmoji: selectedEmoji
-        )
-    }
-}
-
-enum HorizontalAnchor {
-    case center
-    case leading
-    case trailing
-
-    func xOffset(for size: CGSize) -> CGFloat {
-        switch self {
-        case .center:
-            return 0
-        case .leading:
-            return -size.width / 2
-        case .trailing:
-            return size.width / 2
-        }
-    }
-}
-
-enum VerticalAnchor {
-    case center
-    case top
-    case bottom
-
-    func yOffset(for size: CGSize) -> CGFloat {
-        switch self {
-        case .center:
-            return 0
-        case .top:
-            return -size.height / 2
-        case .bottom:
-            return size.height / 2
-        }
-    }
-}
-
-struct LayoutConfig {
-    var radius: CGFloat
-    var spacerCenterPercent: CGFloat
-    var horizontalAnchor: HorizontalAnchor
-    var verticalAnchor: VerticalAnchor
-    private let offsetProvider: (CGSize) -> CGSize
-
-    init(
-        radius: CGFloat,
-        spacerCenterPercent: CGFloat,
-        horizontalAnchor: HorizontalAnchor,
-        verticalAnchor: VerticalAnchor,
-        offsetProvider: @escaping (CGSize) -> CGSize
-    ) {
-        self.radius = radius
-        self.spacerCenterPercent = spacerCenterPercent
-        self.horizontalAnchor = horizontalAnchor
-        self.verticalAnchor = verticalAnchor
-        self.offsetProvider = offsetProvider
-    }
-
-    func baseOffset(for size: CGSize) -> CGSize {
-        offsetProvider(size)
     }
 }
 
