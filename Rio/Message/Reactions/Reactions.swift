@@ -136,15 +136,14 @@ struct ReactionsModifier: ViewModifier {
                             .allowsHitTesting(false)
                     }
                 }
-                .background(
+                .background {
                     ReactionsMenuView(
                         isOverlay: false,
                         model: menuModel,
                         reactionNamespace: reactionNamespace
                     )
-                        .opacity(menuModel.showBackgroundMenu ? 1 : 0)
-                )
-//                }
+                    .opacity(menuModel.showBackgroundMenu ? 1 : 0)
+                }
                 .overlay {
                     ReactionsMenuView(
                         isOverlay: true,
