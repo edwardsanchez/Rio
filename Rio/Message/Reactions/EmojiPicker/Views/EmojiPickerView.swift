@@ -9,12 +9,19 @@ import SwiftUI
 
 struct EmojiPickerView: View {
     @State private var viewModel = EmojiPickerViewModel()
-    @State private var selectedCategory: EmojiCategory? = .frequentlyUsed
+    @State private var scrollPosition: ScrollPosition = .init(idType: EmojiCategory.self)
 
     let onEmojiSelected: (Emoji) -> Void
 
     private let rows = [GridItem(.adaptive(minimum: 44), spacing: 8)]
-    private let categories = EmojiCategory.allCases
+
+    private var displayCategories: [EmojiCategory] {
+        if viewModel.frequentlyUsedEmojis.count > 1 {
+            return EmojiCategory.allCases
+        } else {
+            return EmojiCategory.allCases.filter { $0 != .frequentlyUsed }
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,12 +32,16 @@ struct EmojiPickerView: View {
                 searchResultsView
             } else {
                 categoryScrollView
-                Divider()
+
                 categoryBarView
             }
         }
         .onAppear {
             viewModel.refreshFrequentlyUsedEmojis()
+            setInitialScrollPosition()
+        }
+        .onChange(of: viewModel.frequentlyUsedEmojis.count > 1) { _, hasFrequentlyUsed in
+            updateScrollPositionForFrequentlyUsed(isAvailable: hasFrequentlyUsed)
         }
     }
 
@@ -57,20 +68,14 @@ struct EmojiPickerView: View {
     private var categoryScrollView: some View {
         ScrollView(.horizontal) {
             LazyHStack(alignment: .top, spacing: 0) {
-                ForEach(categories) { category in
+                ForEach(displayCategories) { category in
                     categorySection(for: category)
                         .id(category)
-                    //Commented out to prevent feedback loop
-//                            .onScrollTargetVisibilityChange(idType: EmojiCategory.self, threshold: 0.5) { visibleIDs in
-//                                if let firstVisible = visibleIDs.first {
-//                                    selectedCategory = firstVisible
-//                                }
-//                            }
                 }
             }
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $selectedCategory, anchor: .leading)
+        .scrollPosition($scrollPosition, anchor: .leading)
     }
 
     private func categorySection(for category: EmojiCategory) -> some View {
@@ -89,24 +94,39 @@ struct EmojiPickerView: View {
 
     // Category bar
     private var categoryBarView: some View {
-        HStack(spacing: 0) {
-            ForEach(categories) { category in
-                Button {
-                    withAnimation(.smooth) {
-                        selectedCategory = category
-                    }
-                } label: {
-                    Image(systemName: category.iconName)
-                        .font(.system(size: 22))
-//                        .foregroundStyle(selectedCategory == category ? .blue : .secondary)
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .contentShape(Rectangle())
-                }
+        Picker("Categories", selection: $scrollPosition.stablePickerValue) {
+            ForEach(displayCategories) { category in
+                Image(systemName: category.iconName)
+                    .tag(category as EmojiCategory?)
             }
         }
-        .padding(.horizontal, 8)
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+    }
+
+    private func setInitialScrollPosition() {
+        updateScrollPositionForFrequentlyUsed(
+            isAvailable: viewModel.frequentlyUsedEmojis.count > 1,
+            force: true
+        )
+    }
+
+    private func updateScrollPositionForFrequentlyUsed(isAvailable: Bool, force: Bool = false) {
+        guard let firstCategory = displayCategories.first else { return }
+
+        let currentCategory = scrollPosition.stablePickerValue
+
+        if isAvailable {
+            if force || currentCategory != .some(.frequentlyUsed) {
+                scrollPosition.stablePickerValue = .frequentlyUsed
+            }
+        } else {
+            let needsFallback = force || currentCategory == .some(.frequentlyUsed) || currentCategory == nil
+            if needsFallback {
+                scrollPosition.stablePickerValue = firstCategory
+            }
+        }
     }
 
     private func handleEmojiSelection(_ emoji: Emoji, in category: EmojiCategory) {
@@ -160,3 +180,19 @@ struct EmojiPickerView: View {
     }
     .frame(height: 400)
 }
+
+private extension ScrollPosition {
+    var stablePickerValue: EmojiCategory? {
+        get { viewID(type: EmojiCategory.self) }
+        set { scrollTo(id: newValue, anchor: .leading) }
+    }
+}
+
+//private extension ScrollPosition {
+//    var stablePickerValue: HorizontalScrolling.Group? {
+//        get { viewID(type: HorizontalScrolling.Group.self) }
+//        set {
+//            scrollTo(id: newValue, anchor: .leading)
+//        }
+//    }
+//}

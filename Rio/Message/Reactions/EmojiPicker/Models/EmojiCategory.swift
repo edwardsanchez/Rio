@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum EmojiCategory: Identifiable, Hashable {
+nonisolated enum EmojiCategory: Identifiable, Hashable, Sendable {
     case frequentlyUsed
     case people(PeopleSubcategories)
     case expressive(ExpressiveSubcategories)
@@ -28,7 +28,7 @@ enum EmojiCategory: Identifiable, Hashable {
         case .activities(let sub): return "activities_\(sub.rawValue)"
         case .travel(let sub): return "travel_\(sub.rawValue)"
         case .objects(let sub): return "objects_\(sub.rawValue)"
-        case .symbols(let sub): return "symbols_\(sub.id)"
+        case .symbols(let sub): return "symbols_\(sub.rawValue)"
         }
     }
     
@@ -272,32 +272,24 @@ enum ObjectsSubcategories: String, CaseIterable, Identifiable, Hashable {
     var id: String { rawValue }
 }
 
-enum SymbolsSubcategories: Identifiable, Hashable {
+nonisolated enum SymbolsSubcategories: Identifiable, Hashable, CaseIterable, Sendable {
     case sign, arrow, religious, zodiac, media, number
     case flag(FlagSubcategories)
     case shape, other
 
-    enum FlagSubcategories: String, CaseIterable, Identifiable, Hashable {
+    enum FlagSubcategories: String, CaseIterable, Identifiable, Hashable, Sendable {
         case northAmerica, centralAmerica, southAmerica, africa, asia, europe, oceania, other
 
         var description: String {
             switch self {
-            case .northAmerica:
-                return "Flags from North America"
-            case .centralAmerica:
-                return "Flags from Central America"
-            case .southAmerica:
-                return "Flags from South America"
-            case .africa:
-                return "Flags from Africa"
-            case .asia:
-                return "Flags from Asia"
-            case .europe:
-                return "Flags from Europe"
-            case .oceania:
-                return "Flags from Oceania"
-            case .other:
-                return "Flags not from countries"
+            case .northAmerica: "Flags from North America"
+            case .centralAmerica: "Flags from Central America"
+            case .southAmerica: "Flags from South America"
+            case .africa: "Flags from Africa"
+            case .asia: "Flags from Asia"
+            case .europe: "Flags from Europe"
+            case .oceania: "Flags from Oceania"
+            case .other: "Flags not from countries"
             }
         }
         
@@ -306,46 +298,64 @@ enum SymbolsSubcategories: Identifiable, Hashable {
 
     var description: String {
         switch self {
-        case .sign:
-            return "Warning signs and symbols"
-        case .arrow:
-            return "Arrows and directional symbols"
-        case .religious:
-            return "Religious and spiritual symbols"
-        case .zodiac:
-            return "Zodiac and astrological signs"
-        case .media:
-            return "Media controls and playback symbols"
-        case .number:
-            return "Numbers and numeric symbols"
-        case .flag:
-            return "Country and regional flags"
-        case .shape:
-            return "Geometric shapes and patterns"
-        case .other:
-            return "Other symbols and miscellaneous"
+        case .sign: "Warning signs and symbols"
+        case .arrow: "Arrows and directional symbols"
+        case .religious: "Religious and spiritual symbols"
+        case .zodiac: "Zodiac and astrological signs"
+        case .media: "Media controls and playback symbols"
+        case .number: "Numbers and numeric symbols"
+        case .flag: "Country and regional flags"
+        case .shape: "Geometric shapes and patterns"
+        case .other: "Other symbols and miscellaneous"
         }
     }
     
     var id: String {
         switch self {
-        case .sign: return "sign"
-        case .arrow: return "arrow"
-        case .religious: return "religious"
-        case .zodiac: return "zodiac"
-        case .media: return "media"
-        case .number: return "number"
-        case .flag(let subcat): return "flag_\(subcat.rawValue)"
-        case .shape: return "shape"
-        case .other: return "other"
+        case .sign: "sign"
+        case .arrow: "arrow"
+        case .religious: "religious"
+        case .zodiac: "zodiac"
+        case .media: "media"
+        case .number: "number"
+        case .flag(let subcat): "flag_\(subcat.rawValue)"
+        case .shape: "shape"
+        case .other: "other"
         }
     }
     
     // Manual implementation since we can't use CaseIterable with associated values
     static var allCases: [SymbolsSubcategories] {
         var cases: [SymbolsSubcategories] = [.sign, .arrow, .religious, .zodiac, .media, .number]
-        cases.append(contentsOf: FlagSubcategories.allCases.map { .flag($0) })
-        cases.append(contentsOf: [.shape, .other])
+        cases += FlagSubcategories.allCases.map { .flag($0) }
+        cases += [.shape, .other]
         return cases
     }
+}
+
+nonisolated extension SymbolsSubcategories: RawRepresentable {
+    typealias RawValue = String
+
+    init?(rawValue: String) {
+        switch rawValue {
+        case "sign": self = .sign
+        case "arrow": self = .arrow
+        case "religious": self = .religious
+        case "zodiac": self = .zodiac
+        case "media": self = .media
+        case "number": self = .number
+        case "shape": self = .shape
+        case "other": self = .other
+        default:
+            if rawValue.hasPrefix("flag_") {
+                let suffix = String(rawValue.dropFirst(5))
+                guard let sub = FlagSubcategories(rawValue: suffix) else { return nil }
+                self = .flag(sub)
+            } else {
+                return nil
+            }
+        }
+    }
+
+    var rawValue: String { id }
 }
