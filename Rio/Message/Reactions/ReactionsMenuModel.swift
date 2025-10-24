@@ -15,6 +15,7 @@ final class ReactionsMenuModel {
     let messageID: UUID
     var reactions: [Reaction]
     private var customEmojiSelection: String?
+    private var customEmojiResetWorkItem: DispatchWorkItem?
 
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
@@ -119,11 +120,13 @@ final class ReactionsMenuModel {
     }
 
     func openMenu() {
+        prepareCustomEmojiForMenuOpen()
         chatData?.activeReactionMessageID = messageID
         setBackgroundMenuVisible(true)
     }
 
     func closeMenu(delay: TimeInterval = 0) {
+        scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration + delay)
         chatData?.activeReactionMessageID = nil
         setBackgroundMenuVisible(false, delay: delay)
     }
@@ -149,26 +152,54 @@ final class ReactionsMenuModel {
         selectedReactionID = Constants.customEmojiReactionID
         customEmojiSelection = emoji
 
-        if let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) {
+        updateCustomReactionDisplay(showingEmoji: true)
+        chatData?.addReaction(emoji, toMessageId: messageID)
+        closeMenu(delay: AnimationTiming.reactionHideDelay)
+    }
+
+    func prepareCustomEmojiForMenuOpen() {
+        customEmojiResetWorkItem?.cancel()
+        updateCustomReactionDisplay(showingEmoji: false)
+    }
+
+    func restoreCustomEmojiAfterMenuClose(immediate: Bool = false) {
+        customEmojiResetWorkItem?.cancel()
+
+        guard customEmojiSelection != nil else { return }
+
+        if immediate {
+            updateCustomReactionDisplay(showingEmoji: true)
+        } else {
+            scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration)
+        }
+    }
+
+    private func scheduleCustomEmojiRestore(after delay: TimeInterval) {
+        customEmojiResetWorkItem?.cancel()
+
+        guard customEmojiSelection != nil else { return }
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.updateCustomReactionDisplay(showingEmoji: true)
+        }
+
+        customEmojiResetWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
+    private func updateCustomReactionDisplay(showingEmoji: Bool) {
+        guard let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
+
+        if showingEmoji, let emoji = customEmojiSelection {
             reactions[index] = Reaction(
                 id: Constants.customEmojiReactionID,
                 display: .emoji(value: emoji, fontSize: Constants.customEmojiFontSize),
                 selectedEmoji: emoji
             )
-        }
-
-        chatData?.addReaction(emoji, toMessageId: messageID)
-        closeMenu(delay: AnimationTiming.reactionHideDelay)
-    }
-
-    func resetCustomEmojiIcon() {
-        guard let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationTiming.baseDuration) { [weak self] in
-            guard let self = self else { return }
-            self.reactions[index] = Reaction.systemImage(
+        } else {
+            reactions[index] = Reaction.systemImage(
                 Constants.customEmojiReactionID,
-                selectedEmoji: Constants.customEmojiPlaceholder
+                selectedEmoji: customEmojiSelection ?? Constants.customEmojiPlaceholder
             )
         }
     }

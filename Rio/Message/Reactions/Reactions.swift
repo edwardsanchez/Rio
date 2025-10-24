@@ -164,13 +164,16 @@ struct ReactionsModifier: ViewModifier {
                     let isActive = newValue == messageID
                     chatData.isChatScrollDisabled = isActive
                     menuModel.setBackgroundMenuVisible(isActive)
-                    if !isActive {
-                        menuModel.resetCustomEmojiIcon()
+                    if isActive {
+                        menuModel.prepareCustomEmojiForMenuOpen()
+                    } else {
+                        menuModel.restoreCustomEmojiAfterMenuClose()
                         isEmojiPickerPresented = false
                     }
                 }
                 .onAppear {
                     menuModel.chatData = chatData
+                    menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
                     menuModel.onOpenEmojiPicker = { isEmojiPickerPresented = true }
                 }
                 .onDisappear {
@@ -181,7 +184,7 @@ struct ReactionsModifier: ViewModifier {
                         chatData.activeReactionMessageID = nil
                     }
                     menuModel.onOpenEmojiPicker = nil
-                    menuModel.resetCustomEmojiIcon()
+                    menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
                     isEmojiPickerPresented = false
                 }
                 .sheet(isPresented: $isEmojiPickerPresented) {
@@ -189,6 +192,7 @@ struct ReactionsModifier: ViewModifier {
                         menuModel.applyCustomEmojiSelection(emoji.character)
                         isEmojiPickerPresented = false
                     }
+                    .presentationDetents([.height(300)])
                 }
         } else {
             content
