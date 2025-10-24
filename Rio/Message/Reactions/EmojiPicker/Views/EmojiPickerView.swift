@@ -17,15 +17,9 @@ struct EmojiPickerView: View {
     private let categories = EmojiCategory.allCases
 
     var body: some View {
-        NavigationStack {
-            content
-                .navigationTitle("Reactions")
-                .navigationBarTitleDisplayMode(.automatic)
-        }
-    }
-
-    private var content: some View {
         VStack(spacing: 0) {
+            searchBar
+//            Divider()
             if viewModel.isSearching {
                 searchResultsView
             } else {
@@ -34,11 +28,6 @@ struct EmojiPickerView: View {
                 categoryBarView
             }
         }
-        .searchable(
-            text: $viewModel.searchText,
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Search emoji"
-        )
         .onAppear {
             viewModel.refreshFrequentlyUsedEmojis()
         }
@@ -122,6 +111,35 @@ struct EmojiPickerView: View {
     private func handleEmojiSelection(_ emoji: Emoji, in category: EmojiCategory) {
         viewModel.trackEmojiUsage(emoji, sourceCategory: category)
         onEmojiSelected(emoji)
+    }
+    
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+
+            TextField("Search emoji", text: $viewModel.searchText)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+
+            if !viewModel.searchText.isEmpty {
+                Button {
+                    viewModel.searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
     }
     
     private var emptySearchState: some View {
