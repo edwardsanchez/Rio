@@ -392,7 +392,6 @@ class EmojiReactionViewModel {
         }
     }
 
-    
     private func resolveFastSuggestions(
         _ suggestions: [FastEmojiSuggestion],
         tone: FastFallbackTone

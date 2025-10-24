@@ -22,4 +22,3 @@ struct Emoji: Identifiable, Hashable {
         self.category = category
     }
 }
-

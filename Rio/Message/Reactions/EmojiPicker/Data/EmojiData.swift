@@ -117,7 +117,7 @@ struct EmojiData {
         Emoji(id: "smilingFaceWithHorns", character: "😈", name: "Smiling Face With Horns", keywords: ["devil", "evil", "mischievous", "naughty", "devilish"], category: .people(.playful)),
         Emoji(id: "angryFaceWithHorns", character: "👿", name: "Angry Face With Horns", keywords: ["devil", "demon", "evil", "wicked", "villain"], category: .people(.angry)),
         Emoji(id: "skull", character: "💀", name: "Skull", keywords: ["death", "dead", "dying", "skeleton", "spooky"], category: .people(.playful)),
-        Emoji(id: "skullAndCrossbones", character: "☠️", name: "Skull And Crossbones", keywords: ["death", "poison", "danger", "pirate", "warning"], category: .people(.playful)),
+        Emoji(id: "skullAndCrossbones", character: "☠️", name: "Skull And Crossbones", keywords: ["death", "poison", "danger", "pirate", "warning"], category: .people(.playful))
     ]
 
     static let expressiveEmojis: [Emoji] = [
@@ -542,7 +542,7 @@ struct EmojiData {
         Emoji(id: "bustInSilhouette", character: "👤", name: "Bust In Silhouette", keywords: ["profile", "user", "person", "avatar"], category: .people(.ageBased)),
         Emoji(id: "bustsInSilhouette", character: "👥", name: "Busts In Silhouette", keywords: ["people", "users", "group"], category: .people(.other)),
         Emoji(id: "peopleHugging", character: "🫂", name: "People Hugging", keywords: ["embrace", "comfort", "love", "support"], category: .people(.other)),
-        Emoji(id: "footprints", character: "👣", name: "Footprints", keywords: ["steps", "tracks", "walking", "trail"], category: .people(.reactions)),
+        Emoji(id: "footprints", character: "👣", name: "Footprints", keywords: ["steps", "tracks", "walking", "trail"], category: .people(.reactions))
     ]
 
     // MARK: - Nature Emojis
@@ -698,7 +698,7 @@ struct EmojiData {
         Emoji(id: "leafFlutteringInWind", character: "🍃", name: "Leaf Fluttering In Wind", keywords: ["breeze", "blow", "green"], category: .nature(.plant)),
         Emoji(id: "emptyNest", character: "🪹", name: "Empty Nest", keywords: ["bird", "home", "twig"], category: .nature(.bird)),
         Emoji(id: "nestWithEggs", character: "🪺", name: "Nest With Eggs", keywords: ["bird", "baby", "hatching"], category: .nature(.bird)),
-        Emoji(id: "mushroom", character: "🍄", name: "Mushroom", keywords: ["fungi", "toadstool", "forest", "shroom"], category: .nature(.plant)),
+        Emoji(id: "mushroom", character: "🍄", name: "Mushroom", keywords: ["fungi", "toadstool", "forest", "shroom"], category: .nature(.plant))
     ]
 
     // MARK: - Food Emojis
@@ -835,7 +835,7 @@ struct EmojiData {
         Emoji(id: "spoon", character: "🥄", name: "Spoon", keywords: ["utensil", "eating", "soup", "silverware"], category: .food(.preparedFood)),
         Emoji(id: "kitchenKnife", character: "🔪", name: "Kitchen Knife", keywords: ["cooking", "sharp", "cutting", "chef"], category: .food(.preparedFood)),
         Emoji(id: "jar", character: "🫙", name: "Jar", keywords: ["container", "glass", "preserve", "storage"], category: .food(.preparedFood)),
-        Emoji(id: "amphora", character: "🏺", name: "Amphora", keywords: ["ancient", "greek", "vase", "pottery"], category: .food(.preparedFood)),
+        Emoji(id: "amphora", character: "🏺", name: "Amphora", keywords: ["ancient", "greek", "vase", "pottery"], category: .food(.preparedFood))
     ]
 
     // MARK: - Activities Emojis
@@ -924,7 +924,7 @@ struct EmojiData {
         Emoji(id: "thread", character: "🧵", name: "Thread", keywords: ["sewing", "spool", "craft", "needle"], category: .activities(.art)),
         Emoji(id: "sewingNeedle", character: "🪡", name: "Sewing Needle", keywords: ["sewing", "craft", "thread", "sharp"], category: .activities(.art)),
         Emoji(id: "yarn", character: "🧶", name: "Yarn", keywords: ["knitting", "craft", "wool", "crochet"], category: .activities(.art)),
-        Emoji(id: "knot", character: "🪢", name: "Knot", keywords: ["rope", "tie", "tied", "sailor"], category: .activities(.art)),
+        Emoji(id: "knot", character: "🪢", name: "Knot", keywords: ["rope", "tie", "tied", "sailor"], category: .activities(.art))
     ]
 
     // MARK: - Travel Emojis
@@ -1146,7 +1146,7 @@ struct EmojiData {
         Emoji(id: "comet", character: "☄️", name: "Comet", keywords: ["space", "meteor", "asteroid", "streak"], category: .travel(.sky)),
         Emoji(id: "fire", character: "🔥", name: "Fire", keywords: ["flame", "hot", "burn", "lit"], category: .travel(.sign)),
         Emoji(id: "droplet", character: "💧", name: "Droplet", keywords: ["water", "drop", "liquid", "wet"], category: .travel(.sky)),
-        Emoji(id: "waterWave", character: "🌊", name: "Water Wave", keywords: ["ocean", "sea", "surf", "tsunami"], category: .travel(.sky)),
+        Emoji(id: "waterWave", character: "🌊", name: "Water Wave", keywords: ["ocean", "sea", "surf", "tsunami"], category: .travel(.sky))
     ]
 
     // MARK: - Objects Emojis
@@ -1411,7 +1411,7 @@ struct EmojiData {
         Emoji(id: "hamsa", character: "🪬", name: "Hamsa", keywords: ["hand", "protection", "middle eastern", "lucky"], category: .objects(.tool)),
         Emoji(id: "moai", character: "🗿", name: "Moai", keywords: ["easter island", "statue", "stone", "head"], category: .objects(.tool)),
         Emoji(id: "placard", character: "🪧", name: "Placard", keywords: ["sign", "protest", "announcement", "board"], category: .objects(.office)),
-        Emoji(id: "identificationCard", character: "🪪", name: "Identification Card", keywords: ["id", "license", "card", "identity"], category: .objects(.office)),
+        Emoji(id: "identificationCard", character: "🪪", name: "Identification Card", keywords: ["id", "license", "card", "identity"], category: .objects(.office))
     ]
 
     // MARK: - Symbols Emojis
@@ -1640,7 +1640,7 @@ struct EmojiData {
         Emoji(id: "whiteSquareButton", character: "🔳", name: "White Square Button", keywords: ["white", "square", "button", "outlined"], category: .symbols(.shape)),
         Emoji(id: "blackSquareButton", character: "🔲", name: "Black Square Button", keywords: ["black", "square", "button", "outlined"], category: .symbols(.shape)),
 
-        //MARK: Flags
+        // MARK: Flags
         Emoji(id: "chequeredFlag", character: "🏁", name: "Chequered Flag", keywords: ["racing", "finish", "checkered", "race"], category: .symbols(.flag(.other))),
         Emoji(id: "triangularFlag", character: "🚩", name: "Triangular Flag", keywords: ["red", "marker", "warning", "post"], category: .symbols(.flag(.other))),
         Emoji(id: "crossedFlags", character: "🎌", name: "Crossed Flags", keywords: ["japanese", "celebration", "two"], category: .symbols(.flag(.other))),
@@ -1909,7 +1909,7 @@ struct EmojiData {
         Emoji(id: "flagZimbabwe", character: "🇿🇼", name: "Flag Zimbabwe", keywords: [], category: .symbols(.flag(.africa))),
         Emoji(id: "flagEngland", character: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", name: "Flag England", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagScotland", character: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", name: "Flag Scotland", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagWales", character: "🏴󠁧󠁢󠁷󠁬󠁳󠁿", name: "Flag Wales", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(id: "flagWales", character: "🏴󠁧󠁢󠁷󠁬󠁳󠁿", name: "Flag Wales", keywords: [], category: .symbols(.flag(.europe)))
     ]
 
 }

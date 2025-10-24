@@ -160,5 +160,3 @@ struct EmojiAIService {
         return getAllEmojis().first { $0.id == id }
     }
 }
-
-

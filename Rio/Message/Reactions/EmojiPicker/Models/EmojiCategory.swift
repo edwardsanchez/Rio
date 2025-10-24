@@ -170,7 +170,6 @@ enum NatureSubCatchories: String, CaseIterable, Identifiable, Hashable {
     var id: String { rawValue }
 }
 
-
 enum FoodSubcategories: String, CaseIterable, Identifiable, Hashable {
     case fruit, vegetable, preparedFood, asian, dessert, drink
     
