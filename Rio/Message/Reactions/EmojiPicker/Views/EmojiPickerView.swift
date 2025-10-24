@@ -19,7 +19,8 @@ struct EmojiPickerView: View {
     var body: some View {
         VStack(spacing: 0) {
             searchBar
-//            Divider()
+                .padding(.top, 5)
+
             if viewModel.isSearching {
                 searchResultsView
             } else {
@@ -135,7 +136,7 @@ struct EmojiPickerView: View {
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Capsule(style: .continuous)
                 .fill(Color(.secondarySystemBackground))
         )
         .padding(.horizontal, 16)
