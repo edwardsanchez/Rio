@@ -11,7 +11,6 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
-    @State private var messages: [Message] = []
     @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
@@ -36,7 +35,14 @@ struct ChatDetailView: View {
 
     init(chat: Chat) {
         self.chat = chat
-        _messages = State(initialValue: chat.messages)
+    }
+
+    private var currentChat: Chat? {
+        chatData.chats.first(where: { $0.id == chat.id })
+    }
+
+    private var messages: [Message] {
+        currentChat?.messages ?? []
     }
 
     var body: some View {
@@ -96,15 +102,10 @@ struct ChatDetailView: View {
                             }
                         }
                     }
-                    .onChange(of: messages.count) { _, _ in
+                    .onChange(of: messages.last?.id) { _, _ in
                         // Auto-scroll to the latest message when a new message is added
                         scrollToLatestMessage()
                     }
-                .onChange(of: chatData.activeReactionMessageID) { _, _ in
-                    if let updated = chatData.chats.first(where: { $0.id == chat.id }) {
-                        messages = updated.messages
-                    }
-                }
                     .onChange(of: newMessageId) { _, newId in
                         if newId != nil {
                             // Slight delay to allow message to be added to view hierarchy
@@ -133,7 +134,6 @@ struct ChatDetailView: View {
                     ChatInputView(
                         inputFieldFrame: $inputFieldFrame,
                         shouldFocusInput: $shouldFocusInput,
-                        messages: $messages,
                         newMessageId: $newMessageId,
                         chat: chat,
                         autoReplyEnabled: $autoReplyEnabled
@@ -224,8 +224,11 @@ struct ChatDetailView: View {
         theme: .defaultTheme
     )
 
-    ChatDetailView(chat: sampleChat)
-        .environment(ChatData())
+    let chatData = ChatData()
+    chatData.chats = [sampleChat]
+
+    return ChatDetailView(chat: sampleChat)
+        .environment(chatData)
         .environment(BubbleConfiguration())
 }
 

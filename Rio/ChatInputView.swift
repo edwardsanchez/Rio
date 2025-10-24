@@ -15,7 +15,6 @@ struct ChatInputView: View {
     @Binding var shouldFocusInput: Bool
 
     // Chat data
-    @Binding var messages: [Message]
     @Binding var newMessageId: UUID?
     let chat: Chat
     @Environment(ChatData.self) private var chatData
@@ -141,6 +140,10 @@ struct ChatInputView: View {
         message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var messages: [Message] {
+        chatData.chats.first(where: { $0.id == chat.id })?.messages ?? []
+    }
+
     var sendButton: some View {
         Button {
             sendMessage()
@@ -170,26 +173,20 @@ struct ChatInputView: View {
         // Check if there's an existing typing indicator that needs to be moved to the end
         var typingIndicatorToMove: Message?
         if let typingIndicatorId = currentTypingIndicatorId,
-           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-            // Store the typing indicator and remove it temporarily
-            typingIndicatorToMove = messages[typingIndex]
-            messages.remove(at: typingIndex)
-
-            // Also remove from chatData
-            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                var updatedChat = chatData.chats[chatIndex]
-                var updatedMessages = updatedChat.messages
-                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    updatedMessages.remove(at: messageIndex)
-                    updatedChat = Chat(
-                        id: updatedChat.id,
-                        title: updatedChat.title,
-                        participants: updatedChat.participants,
-                        messages: updatedMessages,
-                        theme: updatedChat.theme
-                    )
-                    chatData.chats[chatIndex] = updatedChat
-                }
+           let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+            var updatedChat = chatData.chats[chatIndex]
+            var updatedMessages = updatedChat.messages
+            if let typingIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                typingIndicatorToMove = updatedMessages[typingIndex]
+                updatedMessages.remove(at: typingIndex)
+                updatedChat = Chat(
+                    id: updatedChat.id,
+                    title: updatedChat.title,
+                    participants: updatedChat.participants,
+                    messages: updatedMessages,
+                    theme: updatedChat.theme
+                )
+                chatData.chats[chatIndex] = updatedChat
             }
         }
 
@@ -227,7 +224,6 @@ struct ChatInputView: View {
 
         // Add all created messages
         for msg in createdMessages {
-            messages.append(msg)
             chatData.addMessage(msg, to: chat.id)
         }
 
@@ -242,7 +238,6 @@ struct ChatInputView: View {
                 replacesTypingIndicator: typingIndicator.replacesTypingIndicator,
                 messageType: typingIndicator.messageType
             )
-            messages.append(updatedTypingIndicator)
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
             chatData.setTypingIndicator(true, for: typingIndicator.user.id, in: chat.id)
         }
@@ -266,28 +261,22 @@ struct ChatInputView: View {
 
         // Remove any existing typing indicator
         if let typingIndicatorId = currentTypingIndicatorId,
-           let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
-            let typingIndicatorUserId = messages[typingIndex].user.id
-            messages.remove(at: typingIndex)
-
-            // Also remove from chatData
-            if let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
-                var updatedChat = chatData.chats[chatIndex]
-                var updatedMessages = updatedChat.messages
-                if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
-                    updatedMessages.remove(at: messageIndex)
-                    updatedChat = Chat(
-                        id: updatedChat.id,
-                        title: updatedChat.title,
-                        participants: updatedChat.participants,
-                        messages: updatedMessages,
-                        theme: updatedChat.theme
-                    )
-                    chatData.chats[chatIndex] = updatedChat
-                }
+           let chatIndex = chatData.chats.firstIndex(where: { $0.id == chat.id }) {
+            var updatedChat = chatData.chats[chatIndex]
+            var updatedMessages = updatedChat.messages
+            if let messageIndex = updatedMessages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                let typingIndicatorUserId = updatedMessages[messageIndex].user.id
+                updatedMessages.remove(at: messageIndex)
+                updatedChat = Chat(
+                    id: updatedChat.id,
+                    title: updatedChat.title,
+                    participants: updatedChat.participants,
+                    messages: updatedMessages,
+                    theme: updatedChat.theme
+                )
+                chatData.chats[chatIndex] = updatedChat
+                chatData.setTypingIndicator(false, for: typingIndicatorUserId, in: chat.id)
             }
-
-            chatData.setTypingIndicator(false, for: typingIndicatorUserId, in: chat.id)
         }
 
         // Reset state variables
@@ -326,15 +315,13 @@ struct ChatInputView: View {
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
-                messages.append(typingIndicatorMessage)
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
                 chatData.setTypingIndicator(true, for: randomUser.id, in: chat.id)
 
                 // Schedule transition from .read to .thinking after 3 seconds
                 readToThinkingTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
                     if let indicatorId = currentTypingIndicatorId,
-                       let indicatorIndex = messages.firstIndex(where: { $0.id == indicatorId }) {
-                        let currentIndicator = messages[indicatorIndex]
+                       let currentIndicator = messages.first(where: { $0.id == indicatorId }) {
                         // Only transition if still in .read state
                         if currentIndicator.bubbleType.isRead {
                             let updatedIndicator = Message(
@@ -346,7 +333,6 @@ struct ChatInputView: View {
                                 replacesTypingIndicator: false,
                                 messageType: .inbound(.thinking)
                             )
-                            messages[indicatorIndex] = updatedIndicator
                             chatData.updateMessage(updatedIndicator, in: chat.id)
                         }
                     }
@@ -368,7 +354,7 @@ struct ChatInputView: View {
                 let contentType = ContentTypeDetector.contentType(for: randomResponse)
 
                 if let typingIndicatorId = currentTypingIndicatorId,
-                   let typingIndex = messages.firstIndex(where: { $0.id == typingIndicatorId }) {
+                   messages.contains(where: { $0.id == typingIndicatorId }) {
                     let updatedMessage = Message(
                         id: typingIndicatorId,
                         content: contentType,
@@ -378,7 +364,6 @@ struct ChatInputView: View {
                         replacesTypingIndicator: indicatorWasVisible,
                         messageType: .inbound(.talking)
                     )
-                    messages[typingIndex] = updatedMessage
                     chatData.updateMessage(updatedMessage, in: chat.id)
                     newMessageId = nil
                 } else {
@@ -389,7 +374,6 @@ struct ChatInputView: View {
                         messageType: .inbound(.talking)
                     )
                     newMessageId = fallbackMessage.id
-                    messages.append(fallbackMessage)
                     chatData.addMessage(fallbackMessage, to: chat.id)
                 }
 
@@ -426,7 +410,6 @@ struct ChatInputView: View {
     return ChatInputView(
         inputFieldFrame: $inputFieldFrame,
         shouldFocusInput: $shouldFocusInput,
-        messages: $messages,
         newMessageId: $newMessageId,
         chat: chat,
         autoReplyEnabled: $autoReplyEnabled
