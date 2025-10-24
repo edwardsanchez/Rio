@@ -100,6 +100,11 @@ struct ChatDetailView: View {
                         // Auto-scroll to the latest message when a new message is added
                         scrollToLatestMessage()
                     }
+                .onChange(of: chatData.activeReactionMessageID) { _, _ in
+                    if let updated = chatData.chats.first(where: { $0.id == chat.id }) {
+                        messages = updated.messages
+                    }
+                }
                     .onChange(of: newMessageId) { _, newId in
                         if newId != nil {
                             // Slight delay to allow message to be added to view hierarchy

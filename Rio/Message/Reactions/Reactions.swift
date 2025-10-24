@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
-    @State private var menuIsShowing = false
+    // Centralized menu visibility in ChatData
+    private var menuIsShowing: Bool { chatData.activeReactionMessageID == messageID }
     @State private var viewSize: CGSize = .zero
 
     @Namespace private var reactionNamespace
@@ -134,38 +135,24 @@ struct ReactionsModifier: ViewModifier {
                     menuView(isOverlay: false)
                         .opacity(showBackgroundMenu ? 1 : 0)
                 )
-                .background {
-                    if menuIsShowing {
-                        Color.black.opacity(0.5)
-                            .frame(width: 10000, height: 10000, alignment: .center) //FIXME: This is likely not the proper way to do this.
-                            .contentShape(.rect)
-                            .onTapGesture {
-                                menuIsShowing = false
-                                setBackgroundMenuVisible(menuIsShowing)
-                            }
-                            .transition(.opacity.animation(.easeIn(duration: 0.2)))
-                    }
-                }
+//                }
                 .overlay {
                     menuView(isOverlay: true)
                 }
                 .onTapGesture {
-                    menuIsShowing = false
-                    setBackgroundMenuVisible(menuIsShowing)
+                    chatData.activeReactionMessageID = nil
+                    setBackgroundMenuVisible(false)
                 }
                 .onLongPressGesture {
-                    menuIsShowing = true
-                    setBackgroundMenuVisible(menuIsShowing)
+                    chatData.activeReactionMessageID = messageID
+                    setBackgroundMenuVisible(true)
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
                 .zIndex(menuIsShowing ? 100 : 0)
-                .onChange(of: menuIsShowing) { _, newValue in
-                    chatData.isChatScrollDisabled = newValue
-                    if newValue {
-                        chatData.activeReactionMessageID = messageID
-                    } else if chatData.activeReactionMessageID == messageID {
-                        chatData.activeReactionMessageID = nil
-                    }
+                .onChange(of: chatData.activeReactionMessageID) { _, newValue in
+                    let isActive = newValue == messageID
+                    chatData.isChatScrollDisabled = isActive
+                    setBackgroundMenuVisible(isActive)
                 }
                 .onDisappear {
                     if chatData.isChatScrollDisabled {
@@ -200,12 +187,14 @@ struct ReactionsModifier: ViewModifier {
                     let isSameReaction = selectedReactionID == reaction.id
                     if menuIsShowing {
                         selectedReactionID = isSameReaction ? nil : reaction.id
-                        menuIsShowing = false
-
+                        // Persist reaction selection
+                        chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
+                        // Close menu
+                        chatData.activeReactionMessageID = nil
                         setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
                     } else {
-                        menuIsShowing = true
-                        setBackgroundMenuVisible(menuIsShowing)
+                        chatData.activeReactionMessageID = messageID
+                        setBackgroundMenuVisible(true)
                     }
                 }
                 .animation(
