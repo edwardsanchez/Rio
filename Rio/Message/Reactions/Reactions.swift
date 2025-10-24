@@ -168,13 +168,18 @@ struct ReactionsModifier: ViewModifier {
                         menuModel.prepareCustomEmojiForMenuOpen()
                     } else {
                         menuModel.restoreCustomEmojiAfterMenuClose()
+                        menuModel.setCustomEmojiHighlight(false)
                         isEmojiPickerPresented = false
                     }
                 }
                 .onAppear {
                     menuModel.chatData = chatData
+                    menuModel.setCustomEmojiHighlight(false)
                     menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
-                    menuModel.onOpenEmojiPicker = { isEmojiPickerPresented = true }
+                    menuModel.onOpenEmojiPicker = {
+                        menuModel.setCustomEmojiHighlight(true)
+                        isEmojiPickerPresented = true
+                    }
                 }
                 .onDisappear {
                     if chatData.isChatScrollDisabled {
@@ -185,11 +190,21 @@ struct ReactionsModifier: ViewModifier {
                     }
                     menuModel.onOpenEmojiPicker = nil
                     menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
+                    menuModel.setCustomEmojiHighlight(false)
                     isEmojiPickerPresented = false
                 }
-                .sheet(isPresented: $isEmojiPickerPresented) {
+                .sheet(
+                    isPresented: $isEmojiPickerPresented,
+                    onDismiss: {
+                        menuModel.setCustomEmojiHighlight(false)
+                        if menuModel.menuIsShowing {
+                            menuModel.prepareCustomEmojiForMenuOpen()
+                        }
+                    }
+                ) {
                     EmojiPickerView { emoji in
                         menuModel.applyCustomEmojiSelection(emoji.character)
+                        menuModel.setCustomEmojiHighlight(false)
                         isEmojiPickerPresented = false
                     }
                     .presentationDetents([.height(300)])
@@ -221,6 +236,7 @@ struct ReactionsModifier: ViewModifier {
         .buttonBorderShape(.circle)
         .buttonStyle(.glass)
 //        .glassEffect(menuIsShowing ? .regular.interactive() : .clear.interactive(), in: .circle)
+        .scaleEffect(scaleFactor(for: reaction))
         .animation(isVisible ? .smooth : nil) { content in
             content
                 .opacity(isVisible ? 1 : 0)
@@ -251,6 +267,10 @@ struct ReactionsModifier: ViewModifier {
                 .font(.system(size: pointSize, weight: weight))
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private func scaleFactor(for reaction: Reaction) -> CGFloat {
+        reaction.id == Reaction.customEmojiReactionID && menuModel.isCustomEmojiHighlighted ? 1.2 : 1
     }
 }
 

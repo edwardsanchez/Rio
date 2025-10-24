@@ -62,6 +62,7 @@ struct ReactionsMenuView: View {
                         .animation(.smooth, value: isSelected)
                 }
         }
+        .scaleEffect(scaleFactor(for: reaction))
         .buttonBorderShape(.circle)
         .buttonStyle(.glass)
         .animation(isVisible ? .smooth : nil) { content in
@@ -94,5 +95,9 @@ struct ReactionsMenuView: View {
                 .font(.system(size: pointSize, weight: weight))
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private func scaleFactor(for reaction: Reaction) -> CGFloat {
+        reaction.id == Reaction.customEmojiReactionID && model.isCustomEmojiHighlighted ? 1.4 : 1
     }
 }

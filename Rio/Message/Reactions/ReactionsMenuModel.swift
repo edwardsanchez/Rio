@@ -16,6 +16,7 @@ final class ReactionsMenuModel {
     var reactions: [Reaction]
     private var customEmojiSelection: String?
     private var customEmojiResetWorkItem: DispatchWorkItem?
+    var isCustomEmojiHighlighted = false
 
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
@@ -23,7 +24,7 @@ final class ReactionsMenuModel {
 
     private let reactionSpacing: CGFloat = 50
     private enum Constants {
-        static let customEmojiReactionID = "face.dashed"
+        static let customEmojiReactionID = Reaction.customEmojiReactionID
         static let customEmojiPlaceholder = "?"
         static let customEmojiFontSize: CGFloat = 24
     }
@@ -167,6 +168,7 @@ final class ReactionsMenuModel {
 
     func restoreCustomEmojiAfterMenuClose(immediate: Bool = false) {
         customEmojiResetWorkItem?.cancel()
+        setCustomEmojiHighlight(false)
 
         guard customEmojiSelection != nil else { return }
 
@@ -188,6 +190,13 @@ final class ReactionsMenuModel {
 
         customEmojiResetWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
+    func setCustomEmojiHighlight(_ highlighted: Bool) {
+        guard isCustomEmojiHighlighted != highlighted else { return }
+        withAnimation(.smooth(duration: 0.2)) {
+            isCustomEmojiHighlighted = highlighted
+        }
     }
 
     private func updateCustomReactionDisplay(showingEmoji: Bool) {
@@ -212,6 +221,8 @@ struct Reaction: Identifiable, Equatable {
     static func == (lhs: Reaction, rhs: Reaction) -> Bool {
         lhs.id == rhs.id
     }
+
+    static let customEmojiReactionID = "face.dashed"
 
     enum Display {
         case emoji(value: String, fontSize: CGFloat)
