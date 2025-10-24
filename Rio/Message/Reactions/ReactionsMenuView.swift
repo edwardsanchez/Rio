@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ReactionsMenuView: View {
     var isOverlay: Bool
-    @Bindable var model: ReactionsMenuModel
+    var model: ReactionsMenuModel
     var reactionNamespace: Namespace.ID
 
     private var selectedReaction: Reaction? { model.selectedReaction }
