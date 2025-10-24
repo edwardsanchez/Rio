@@ -10,14 +10,15 @@ import SwiftUI
 struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
     // Centralized menu visibility in ChatData
-    private var menuIsShowing: Bool { chatData.activeReactionMessageID == messageID }
+    private var menuIsShowing: Bool {
+        chatData.activeReactionMessageID == menuModel.messageID
+    }
     @State private var viewSize: CGSize = .zero
     @State private var isEmojiPickerPresented = false
 
     @Namespace private var reactionNamespace
     @State private var menuModel: ReactionsMenuModel
 
-    var messageID: UUID
     var reactions: [Reaction]
     var isEnabled: Bool
 
@@ -38,7 +39,6 @@ struct ReactionsModifier: ViewModifier {
     private let reactionSpacing: CGFloat = 50
 
     init(messageID: UUID, reactions: [Reaction], isEnabled: Bool) {
-        self.messageID = messageID
         self.reactions = reactions
         self.isEnabled = isEnabled
         _menuModel = State(initialValue: ReactionsMenuModel(messageID: messageID, reactions: reactions))
@@ -161,7 +161,7 @@ struct ReactionsModifier: ViewModifier {
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
                 .zIndex(menuIsShowing ? 100 : 0)
                 .onChange(of: chatData.activeReactionMessageID) { _, newValue in
-                    let isActive = newValue == messageID
+                    let isActive = newValue == menuModel.messageID
                     chatData.isChatScrollDisabled = isActive
                     menuModel.setBackgroundMenuVisible(isActive)
                     if isActive {
@@ -185,7 +185,7 @@ struct ReactionsModifier: ViewModifier {
                     if chatData.isChatScrollDisabled {
                         chatData.isChatScrollDisabled = false
                     }
-                    if chatData.activeReactionMessageID == messageID {
+                    if chatData.activeReactionMessageID == menuModel.messageID {
                         chatData.activeReactionMessageID = nil
                     }
                     menuModel.onOpenEmojiPicker = nil
@@ -372,6 +372,7 @@ enum LayoutCase: String, CaseIterable {
 fileprivate struct TapBackTestView: View {
     @State private var demoWidth: Double = 250
     @State private var demoHeight: Double = 150
+    @State private var messageID = UUID()
 
     private let testCases: [(String, CGFloat, CGFloat)] = [
         ("Narrow + Short", 60, 60),
@@ -386,7 +387,7 @@ fileprivate struct TapBackTestView: View {
                 .fill(.green)
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
-                .reactions(messageID: UUID())
+                .reactions(messageID: messageID)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .padding(.horizontal)
 
