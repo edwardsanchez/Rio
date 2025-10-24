@@ -80,7 +80,7 @@ nonisolated enum EmojiCategory: Identifiable, Hashable, Sendable {
 
 enum PeopleSubcategories: String, CaseIterable, Identifiable, Hashable {
     case happy, love, playful, sad, angry, surprised, tired, sick, worried, neutral
-    case jobs, fantasy, matrimony, sports, reactions, ageBased, royalty, other
+    case jobs, fantasy, matrimony, sports, reactions, ageBased, family, royalty, other
 
     var description: String {
         switch self {
@@ -116,6 +116,8 @@ enum PeopleSubcategories: String, CaseIterable, Identifiable, Hashable {
             return "Gesture-based reactions and poses"
         case .ageBased:
             return "Basic people figures by age and appearance"
+        case .family:
+            return "Family combinations and parent–child groupings"
         case .royalty:
             return "Royal figures and nobility"
         case .other:

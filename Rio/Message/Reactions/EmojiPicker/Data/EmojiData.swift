@@ -124,6 +124,10 @@ struct EmojiData {
         peopleEmojisBase.map { augmentInterjections(for: $0) }
     }
 
+    static var familyEmojis: [Emoji] {
+        familyEmojisBase.map { augmentInterjections(for: $0) }
+    }
+
     private static func augmentInterjections(for emoji: Emoji) -> Emoji {
         guard case let .people(subcategory) = emoji.category else { return emoji }
         let extra = interjectionsForPeople(subcategory: subcategory)
@@ -564,37 +568,40 @@ struct EmojiData {
         Emoji(id: "coupleWithHeartWomanMan", character: "👩‍❤️‍👨", name: "Couple With Heart Woman Man", keywords: ["love", "romance", "relationship"], category: .people(.ageBased)),
         Emoji(id: "coupleWithHeartManMan", character: "👨‍❤️‍👨", name: "Couple With Heart Man Man", keywords: ["love", "romance", "relationship", "gay"], category: .people(.ageBased)),
         Emoji(id: "coupleWithHeartWomanWoman", character: "👩‍❤️‍👩", name: "Couple With Heart Woman Woman", keywords: ["love", "romance", "relationship", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "family", character: "👪", name: "Family", keywords: ["parents", "children", "home"], category: .people(.ageBased)),
-        Emoji(id: "familyManWomanBoy", character: "👨‍👩‍👦", name: "Family Man Woman Boy", keywords: ["parents", "son"], category: .people(.ageBased)),
-        Emoji(id: "familyManWomanGirl", character: "👨‍👩‍👧", name: "Family Man Woman Girl", keywords: ["parents", "daughter"], category: .people(.ageBased)),
-        Emoji(id: "familyManWomanGirlBoy", character: "👨‍👩‍👧‍👦", name: "Family Man Woman Girl Boy", keywords: ["parents", "children"], category: .people(.ageBased)),
-        Emoji(id: "familyManWomanBoyBoy", character: "👨‍👩‍👦‍👦", name: "Family Man Woman Boy Boy", keywords: ["parents", "sons"], category: .people(.ageBased)),
-        Emoji(id: "familyManWomanGirlGirl", character: "👨‍👩‍👧‍👧", name: "Family Man Woman Girl Girl", keywords: ["parents", "daughters"], category: .people(.ageBased)),
-        Emoji(id: "familyManManBoy", character: "👨‍👨‍👦", name: "Family Man Man Boy", keywords: ["parents", "son", "gay"], category: .people(.ageBased)),
-        Emoji(id: "familyManManGirl", character: "👨‍👨‍👧", name: "Family Man Man Girl", keywords: ["parents", "daughter", "gay"], category: .people(.ageBased)),
-        Emoji(id: "familyManManGirlBoy", character: "👨‍👨‍👧‍👦", name: "Family Man Man Girl Boy", keywords: ["parents", "children", "gay"], category: .people(.ageBased)),
-        Emoji(id: "familyManManBoyBoy", character: "👨‍👨‍👦‍👦", name: "Family Man Man Boy Boy", keywords: ["parents", "sons", "gay"], category: .people(.ageBased)),
-        Emoji(id: "familyManManGirlGirl", character: "👨‍👨‍👧‍👧", name: "Family Man Man Girl Girl", keywords: ["parents", "daughters", "gay"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanWomanBoy", character: "👩‍👩‍👦", name: "Family Woman Woman Boy", keywords: ["parents", "son", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanWomanGirl", character: "👩‍👩‍👧", name: "Family Woman Woman Girl", keywords: ["parents", "daughter", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanWomanGirlBoy", character: "👩‍👩‍👧‍👦", name: "Family Woman Woman Girl Boy", keywords: ["parents", "children", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanWomanBoyBoy", character: "👩‍👩‍👦‍👦", name: "Family Woman Woman Boy Boy", keywords: ["parents", "sons", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanWomanGirlGirl", character: "👩‍👩‍👧‍👧", name: "Family Woman Woman Girl Girl", keywords: ["parents", "daughters", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "familyManBoy", character: "👨‍👦", name: "Family Man Boy", keywords: ["father", "son", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyManBoyBoy", character: "👨‍👦‍👦", name: "Family Man Boy Boy", keywords: ["father", "sons", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyManGirl", character: "👨‍👧", name: "Family Man Girl", keywords: ["father", "daughter", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyManGirlBoy", character: "👨‍👧‍👦", name: "Family Man Girl Boy", keywords: ["father", "children", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyManGirlGirl", character: "👨‍👧‍👧", name: "Family Man Girl Girl", keywords: ["father", "daughters", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanBoy", character: "👩‍👦", name: "Family Woman Boy", keywords: ["mother", "son", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanBoyBoy", character: "👩‍👦‍👦", name: "Family Woman Boy Boy", keywords: ["mother", "sons", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanGirl", character: "👩‍👧", name: "Family Woman Girl", keywords: ["mother", "daughter", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanGirlBoy", character: "👩‍👧‍👦", name: "Family Woman Girl Boy", keywords: ["mother", "children", "single parent"], category: .people(.ageBased)),
-        Emoji(id: "familyWomanGirlGirl", character: "👩‍👧‍👧", name: "Family Woman Girl Girl", keywords: ["mother", "daughters", "single parent"], category: .people(.ageBased)),
         Emoji(id: "speakingHead", character: "🗣️", name: "Speaking Head", keywords: ["talk", "speak", "voice"], category: .people(.other)),
         Emoji(id: "bustInSilhouette", character: "👤", name: "Bust In Silhouette", keywords: ["profile", "user", "person", "avatar"], category: .people(.ageBased)),
         Emoji(id: "bustsInSilhouette", character: "👥", name: "Busts In Silhouette", keywords: ["people", "users", "group"], category: .people(.other)),
         Emoji(id: "peopleHugging", character: "🫂", name: "People Hugging", keywords: ["embrace", "comfort", "love", "support"], category: .people(.other)),
         Emoji(id: "footprints", character: "👣", name: "Footprints", keywords: ["steps", "tracks", "walking", "trail"], category: .people(.reactions))
+    ]
+
+    static let familyEmojisBase: [Emoji] = [
+        Emoji(id: "family", character: "👪", name: "Family", keywords: ["parents", "children", "home"], category: .people(.family)),
+        Emoji(id: "familyManWomanBoy", character: "👨‍👩‍👦", name: "Family Man Woman Boy", keywords: ["parents", "son"], category: .people(.family)),
+        Emoji(id: "familyManWomanGirl", character: "👨‍👩‍👧", name: "Family Man Woman Girl", keywords: ["parents", "daughter"], category: .people(.family)),
+        Emoji(id: "familyManWomanGirlBoy", character: "👨‍👩‍👧‍👦", name: "Family Man Woman Girl Boy", keywords: ["parents", "children"], category: .people(.family)),
+        Emoji(id: "familyManWomanBoyBoy", character: "👨‍👩‍👦‍👦", name: "Family Man Woman Boy Boy", keywords: ["parents", "sons"], category: .people(.family)),
+        Emoji(id: "familyManWomanGirlGirl", character: "👨‍👩‍👧‍👧", name: "Family Man Woman Girl Girl", keywords: ["parents", "daughters"], category: .people(.family)),
+        Emoji(id: "familyManManBoy", character: "👨‍👨‍👦", name: "Family Man Man Boy", keywords: ["parents", "son", "gay"], category: .people(.family)),
+        Emoji(id: "familyManManGirl", character: "👨‍👨‍👧", name: "Family Man Man Girl", keywords: ["parents", "daughter", "gay"], category: .people(.family)),
+        Emoji(id: "familyManManGirlBoy", character: "👨‍👨‍👧‍👦", name: "Family Man Man Girl Boy", keywords: ["parents", "children", "gay"], category: .people(.family)),
+        Emoji(id: "familyManManBoyBoy", character: "👨‍👨‍👦‍👦", name: "Family Man Man Boy Boy", keywords: ["parents", "sons", "gay"], category: .people(.family)),
+        Emoji(id: "familyManManGirlGirl", character: "👨‍👨‍👧‍👧", name: "Family Man Man Girl Girl", keywords: ["parents", "daughters", "gay"], category: .people(.family)),
+        Emoji(id: "familyWomanWomanBoy", character: "👩‍👩‍👦", name: "Family Woman Woman Boy", keywords: ["parents", "son", "lesbian"], category: .people(.family)),
+        Emoji(id: "familyWomanWomanGirl", character: "👩‍👩‍👧", name: "Family Woman Woman Girl", keywords: ["parents", "daughter", "lesbian"], category: .people(.family)),
+        Emoji(id: "familyWomanWomanGirlBoy", character: "👩‍👩‍👧‍👦", name: "Family Woman Woman Girl Boy", keywords: ["parents", "children", "lesbian"], category: .people(.family)),
+        Emoji(id: "familyWomanWomanBoyBoy", character: "👩‍👩‍👦‍👦", name: "Family Woman Woman Boy Boy", keywords: ["parents", "sons", "lesbian"], category: .people(.family)),
+        Emoji(id: "familyWomanWomanGirlGirl", character: "👩‍👩‍👧‍👧", name: "Family Woman Woman Girl Girl", keywords: ["parents", "daughters", "lesbian"], category: .people(.family)),
+        Emoji(id: "familyManBoy", character: "👨‍👦", name: "Family Man Boy", keywords: ["father", "son", "single parent"], category: .people(.family)),
+        Emoji(id: "familyManBoyBoy", character: "👨‍👦‍👦", name: "Family Man Boy Boy", keywords: ["father", "sons", "single parent"], category: .people(.family)),
+        Emoji(id: "familyManGirl", character: "👨‍👧", name: "Family Man Girl", keywords: ["father", "daughter", "single parent"], category: .people(.family)),
+        Emoji(id: "familyManGirlBoy", character: "👨‍👧‍👦", name: "Family Man Girl Boy", keywords: ["father", "children", "single parent"], category: .people(.family)),
+        Emoji(id: "familyManGirlGirl", character: "👨‍👧‍👧", name: "Family Man Girl Girl", keywords: ["father", "daughters", "single parent"], category: .people(.family)),
+        Emoji(id: "familyWomanBoy", character: "👩‍👦", name: "Family Woman Boy", keywords: ["mother", "son", "single parent"], category: .people(.family)),
+        Emoji(id: "familyWomanBoyBoy", character: "👩‍👦‍👦", name: "Family Woman Boy Boy", keywords: ["mother", "sons", "single parent"], category: .people(.family)),
+        Emoji(id: "familyWomanGirl", character: "👩‍👧", name: "Family Woman Girl", keywords: ["mother", "daughter", "single parent"], category: .people(.family)),
+        Emoji(id: "familyWomanGirlBoy", character: "👩‍👧‍👦", name: "Family Woman Girl Boy", keywords: ["mother", "children", "single parent"], category: .people(.family)),
+        Emoji(id: "familyWomanGirlGirl", character: "👩‍👧‍👧", name: "Family Woman Girl Girl", keywords: ["mother", "daughters", "single parent"], category: .people(.family))
     ]
 
     // MARK: - Nature Emojis
