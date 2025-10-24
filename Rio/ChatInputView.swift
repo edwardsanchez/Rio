@@ -103,7 +103,7 @@ struct ChatInputView: View {
                 }
             }
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, 20)
         .padding(.top, 15)
         .background(alignment: .bottom) {
             Rectangle()
