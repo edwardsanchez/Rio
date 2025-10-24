@@ -132,12 +132,60 @@ struct ReactionsModifier: ViewModifier {
                     }
                 }
                 .background(
-                    menuView(isOverlay: false)
+                    ReactionsMenuView(
+                        isOverlay: false,
+                        reactions: reactions,
+                        menuIsShowing: menuIsShowing,
+                        radius: calculatedRadius,
+                        itemSpacing: reactionSpacing,
+                        spacerCenterPercent: calculatedSpacerCenterPercent,
+                        parentSize: viewSize,
+                        calculatedOffset: calculatedOffset,
+                        selectedReactionID: $selectedReactionID,
+                        reactionNamespace: reactionNamespace,
+                        reactionStaggerStep: AnimationTiming.reactionStaggerStep,
+                        menuOffsetAnimation: AnimationTiming.menuOffsetAnimation
+                    ) { reaction in
+                        let isSameReaction = selectedReactionID == reaction.id
+                        if menuIsShowing {
+                            selectedReactionID = isSameReaction ? nil : reaction.id
+                            chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
+                            chatData.activeReactionMessageID = nil
+                            setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
+                        } else {
+                            chatData.activeReactionMessageID = messageID
+                            setBackgroundMenuVisible(true)
+                        }
+                    }
                         .opacity(showBackgroundMenu ? 1 : 0)
                 )
 //                }
                 .overlay {
-                    menuView(isOverlay: true)
+                    ReactionsMenuView(
+                        isOverlay: true,
+                        reactions: reactions,
+                        menuIsShowing: menuIsShowing,
+                        radius: calculatedRadius,
+                        itemSpacing: reactionSpacing,
+                        spacerCenterPercent: calculatedSpacerCenterPercent,
+                        parentSize: viewSize,
+                        calculatedOffset: calculatedOffset,
+                        selectedReactionID: $selectedReactionID,
+                        reactionNamespace: reactionNamespace,
+                        reactionStaggerStep: AnimationTiming.reactionStaggerStep,
+                        menuOffsetAnimation: AnimationTiming.menuOffsetAnimation
+                    ) { reaction in
+                        let isSameReaction = selectedReactionID == reaction.id
+                        if menuIsShowing {
+                            selectedReactionID = isSameReaction ? nil : reaction.id
+                            chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
+                            chatData.activeReactionMessageID = nil
+                            setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
+                        } else {
+                            chatData.activeReactionMessageID = messageID
+                            setBackgroundMenuVisible(true)
+                        }
+                    }
                 }
                 .onTapGesture {
                     chatData.activeReactionMessageID = nil
@@ -165,47 +213,6 @@ struct ReactionsModifier: ViewModifier {
         } else {
             content
         }
-    }
-
-    @ViewBuilder
-    private func menuView(isOverlay: Bool) -> some View {
-        RadialLayout(
-            radius: calculatedRadius,
-            menuIsShowing: menuIsShowing,
-            itemCount: reactions.count,
-            itemSpacing: reactionSpacing,
-            spacerCenterPercent: calculatedSpacerCenterPercent,
-            parentSize: viewSize
-        ) {
-            ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
-                reactionButton(
-                    for: reaction,
-                    isVisible: (selectedReaction != reaction) != isOverlay,
-                    isOverlay: isOverlay,
-                    isSelected: selectedReaction == reaction
-                ) {
-                    let isSameReaction = selectedReactionID == reaction.id
-                    if menuIsShowing {
-                        selectedReactionID = isSameReaction ? nil : reaction.id
-                        // Persist reaction selection
-                        chatData.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-                        // Close menu
-                        chatData.activeReactionMessageID = nil
-                        setBackgroundMenuVisible(false, delay: AnimationTiming.reactionHideDelay)
-                    } else {
-                        chatData.activeReactionMessageID = messageID
-                        setBackgroundMenuVisible(true)
-                    }
-                }
-                .animation(
-                    .interpolatingSpring(menuIsShowing ? .bouncy : .smooth, initialVelocity: menuIsShowing ? 0 : -5)
-                    .delay(Double(index) * AnimationTiming.reactionStaggerStep),
-                    value: menuIsShowing
-                )
-            }
-        }
-        .offset(calculatedOffset)
-        .animation(AnimationTiming.menuOffsetAnimation, value: menuIsShowing)
     }
 
     private func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
