@@ -9,11 +9,17 @@ import SwiftUI
 
 struct EmojiPickerView: View {
     @State private var viewModel = EmojiPickerViewModel()
-    @State private var scrollPosition: ScrollPosition = .init(idType: EmojiCategory.self)
+    @State private var scrollPosition = ScrollPosition(idType: EmojiCategory.self)
+    @State private var selectedCategory: EmojiCategory? = .frequentlyUsed
+    @State private var lastProgrammaticTarget: EmojiCategory?
 
     let onEmojiSelected: (Emoji) -> Void
 
     private let rows = [GridItem(.adaptive(minimum: 44), spacing: 8)]
+
+    private var currentScrollCategory: EmojiCategory? {
+        scrollPosition.viewID(type: EmojiCategory.self)
+    }
 
     private var displayCategories: [EmojiCategory] {
         if viewModel.frequentlyUsedEmojis.count > 1 {
@@ -38,10 +44,22 @@ struct EmojiPickerView: View {
         }
         .onAppear {
             viewModel.refreshFrequentlyUsedEmojis()
-            setInitialScrollPosition()
+            configureInitialSelection()
         }
-        .onChange(of: viewModel.frequentlyUsedEmojis.count > 1) { _, hasFrequentlyUsed in
-            updateScrollPositionForFrequentlyUsed(isAvailable: hasFrequentlyUsed)
+        .onChange(of: viewModel.frequentlyUsedEmojis.count > 1) { _, _ in
+            syncSelection()
+        }
+        .onChange(of: selectedCategory) { _, newValue in
+            scrollPosition.scrollToCategory(newValue, lastRequest: &lastProgrammaticTarget)
+        }
+        .onChange(of: currentScrollCategory) { _, current in
+            guard let current else { return }
+            if current != selectedCategory {
+                selectedCategory = current
+            }
+            if current == lastProgrammaticTarget {
+                lastProgrammaticTarget = nil
+            }
         }
     }
 
@@ -94,7 +112,7 @@ struct EmojiPickerView: View {
 
     // Category bar
     private var categoryBarView: some View {
-        Picker("Categories", selection: $scrollPosition.stablePickerValue) {
+        Picker("Categories", selection: $selectedCategory) {
             ForEach(displayCategories) { category in
                 Image(systemName: category.iconName)
                     .tag(category as EmojiCategory?)
@@ -103,30 +121,6 @@ struct EmojiPickerView: View {
         .pickerStyle(.segmented)
         .padding(.horizontal, 16)
         .padding(.top, 4)
-    }
-
-    private func setInitialScrollPosition() {
-        updateScrollPositionForFrequentlyUsed(
-            isAvailable: viewModel.frequentlyUsedEmojis.count > 1,
-            force: true
-        )
-    }
-
-    private func updateScrollPositionForFrequentlyUsed(isAvailable: Bool, force: Bool = false) {
-        guard let firstCategory = displayCategories.first else { return }
-
-        let currentCategory = scrollPosition.stablePickerValue
-
-        if isAvailable {
-            if force || currentCategory != .some(.frequentlyUsed) {
-                scrollPosition.stablePickerValue = .frequentlyUsed
-            }
-        } else {
-            let needsFallback = force || currentCategory == .some(.frequentlyUsed) || currentCategory == nil
-            if needsFallback {
-                scrollPosition.stablePickerValue = firstCategory
-            }
-        }
     }
 
     private func handleEmojiSelection(_ emoji: Emoji, in category: EmojiCategory) {
@@ -181,18 +175,51 @@ struct EmojiPickerView: View {
     .frame(height: 400)
 }
 
-private extension ScrollPosition {
-    var stablePickerValue: EmojiCategory? {
-        get { viewID(type: EmojiCategory.self) }
-        set { scrollTo(id: newValue, anchor: .leading) }
+private extension EmojiPickerView {
+    func configureInitialSelection() {
+        syncSelection(force: true)
+    }
+
+    func syncSelection(force: Bool = false) {
+        let categories = displayCategories
+
+        guard let firstCategory = categories.first else {
+            selectedCategory = nil
+            lastProgrammaticTarget = nil
+            return
+        }
+
+        let hasFrequentlyUsed = viewModel.frequentlyUsedEmojis.count > 1
+        let preferred = hasFrequentlyUsed ? EmojiCategory.frequentlyUsed : firstCategory
+        let shouldAdoptFrequentlyUsed = hasFrequentlyUsed && selectedCategory != .some(.frequentlyUsed)
+
+        let needsUpdate =
+            force ||
+            selectedCategory == nil ||
+            shouldAdoptFrequentlyUsed ||
+            (selectedCategory == .some(.frequentlyUsed) && !hasFrequentlyUsed) ||
+            (selectedCategory.map { !categories.contains($0) } ?? true)
+
+        if needsUpdate {
+            selectedCategory = preferred
+            scrollPosition.scrollToCategory(preferred, lastRequest: &lastProgrammaticTarget)
+        }
     }
 }
 
-//private extension ScrollPosition {
-//    var stablePickerValue: HorizontalScrolling.Group? {
-//        get { viewID(type: HorizontalScrolling.Group.self) }
-//        set {
-//            scrollTo(id: newValue, anchor: .leading)
-//        }
-//    }
-//}
+@MainActor
+extension ScrollPosition {
+    /// Scrolls to the provided emoji category if it differs from the current view ID.
+    /// The `lastRequest` flag prevents re-entrant writes while SwiftUI delivers intermediate updates.
+    mutating func scrollToCategory(
+        _ target: EmojiCategory?,
+        lastRequest: inout EmojiCategory?
+    ) {
+        guard let target else { return }
+        if target == viewID(type: EmojiCategory.self) { return }
+        if target == lastRequest { return }
+
+        lastRequest = target
+        scrollTo(id: target, anchor: .leading)
+    }
+}
