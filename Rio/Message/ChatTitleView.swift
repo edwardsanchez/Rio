@@ -10,13 +10,11 @@ import SwiftUI
 struct ChatTitleView: View {
     let chat: Chat
 
-    private let avatarSize: CGFloat = 80
-
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 ForEach(chat.participants) { participant in
-                    avatarView(for: participant)
+                    AvatarView(user: participant)
                 }
             }
 
@@ -31,40 +29,6 @@ struct ChatTitleView: View {
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 20)
-    }
-
-    @ViewBuilder
-    private func avatarView(for user: User) -> some View {
-        Group {
-            if let avatar = user.avatar {
-                Image(avatar)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Circle()
-                    .fill(Color.secondary.opacity(0.15))
-                    .overlay(
-                        Text(initials(for: user))
-                            .font(.title.weight(.medium))
-                            .foregroundStyle(.primary)
-                    )
-            }
-        }
-        .frame(width: avatarSize, height: avatarSize)
-        .clipShape(Circle())
-        .overlay(
-            Circle()
-                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-        )
-        .accessibilityLabel(user.name)
-    }
-
-    private func initials(for user: User) -> String {
-        guard let firstCharacter = user.name.trimmingCharacters(in: .whitespacesAndNewlines).first else {
-            return "?"
-        }
-
-        return String(firstCharacter).uppercased()
     }
 }
 
