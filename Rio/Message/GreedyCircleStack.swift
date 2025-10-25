@@ -25,7 +25,7 @@ private struct SeededGenerator: RandomNumberGenerator {
 /// - spacing: minimum gap between the primary circle and the rest; secondary circles scale the gap proportionally.
 /// - rimPadding: margin between inner circles and the boundary ring
 /// - startAngle: angle (clockwise) for the primary circle on the rim
-struct CircleStack: Layout {
+struct GreedyCircleStack: Layout {
     private static let logger = Logger.message
 
     var spacing: CGFloat
@@ -46,7 +46,7 @@ struct CircleStack: Layout {
         self.spacing = max(0, spacing)
         // keep reasonable bounds so nothing collapses or explodes
         self.rimPadding = max(0, rimPadding)
-        self.startAngle = startAngle
+        self.startAngle = startAngle + .degrees(90)
     }
 
     func sizeThatFits(
@@ -67,7 +67,7 @@ struct CircleStack: Layout {
         cache: inout ()
     ) {
         guard !subviews.isEmpty else {
-            Self.logger.debug("CircleStack: no subviews to arrange")
+            GreedyCircleStack.logger.debug("CircleStack: no subviews to arrange")
             return
         }
 
@@ -75,7 +75,7 @@ struct CircleStack: Layout {
         let parentRadius = max(0, containerDiameter / 2.0 - rimPadding)
 
         guard parentRadius > 0 else {
-            Self.logger.error("CircleStack: invalid parent radius \(parentRadius, privacy: .public) for bounds \(bounds.debugDescription, privacy: .public)")
+            GreedyCircleStack.logger.error("CircleStack: invalid parent radius \(parentRadius, privacy: .public) for bounds \(bounds.debugDescription, privacy: .public)")
             return
         }
 
@@ -89,7 +89,7 @@ struct CircleStack: Layout {
         )
 
         if packed.count < subviews.count {
-            Self.logger.warning("CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints")
+            GreedyCircleStack.logger.warning("CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints")
         }
 
         let origin = CGPoint(x: bounds.midX, y: bounds.midY)
@@ -101,7 +101,7 @@ struct CircleStack: Layout {
                 y: origin.y - circle.center.y
             )
             subviews[index].place(at: placement, anchor: .center, proposal: proposal)
-            Self.logger.debug(
+            GreedyCircleStack.logger.debug(
                 "CircleStack: placed circle \(index, privacy: .public) radius \(Double(circle.radius), privacy: .public) center (\(Double(circle.center.x), privacy: .public), \(Double(circle.center.y), privacy: .public))"
             )
         }
@@ -130,7 +130,7 @@ struct CircleStack: Layout {
             PackedCircle(center: primaryCenter, radius: primaryRadius, isPrimary: true)
         ]
 
-        Self.logger.debug(
+        GreedyCircleStack.logger.debug(
             """
             CircleStack: packing \(count, privacy: .public) circles | parentRadius=\(Double(parentRadius), privacy: .public) \
             primaryRadius=\(Double(primaryRadius), privacy: .public) rimPadding=\(Double(rimPadding), privacy: .public) \
@@ -141,7 +141,7 @@ struct CircleStack: Layout {
         guard count > 1 else { return discs }
 
         let sampleCount = max(4000, count * 450)
-        Self.logger.debug("CircleStack: greedy sample count \(sampleCount, privacy: .public)")
+        GreedyCircleStack.logger.debug("CircleStack: greedy sample count \(sampleCount, privacy: .public)")
 
         var rng = SeededGenerator(seed: 0xC1C1E5EEDBAADF0F)
 
@@ -172,7 +172,7 @@ struct CircleStack: Layout {
             }
 
             guard bestCircle.radius > .ulpOfOne else {
-                Self.logger.warning("CircleStack: stopping after \(discs.count, privacy: .public) circles; no space for index \(index, privacy: .public)")
+                GreedyCircleStack.logger.warning("CircleStack: stopping after \(discs.count, privacy: .public) circles; no space for index \(index, privacy: .public)")
                 break
             }
 
@@ -268,7 +268,7 @@ struct CircleStackPreviewCard<Content: View>: View {
     var title: String
     var spacing: CGFloat = 3
     var rimPadding: CGFloat = 3
-    var startAngle: Angle = .degrees(120)
+    var startAngle: Angle = .degrees(45)
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -278,7 +278,7 @@ struct CircleStackPreviewCard<Content: View>: View {
                 Circle().fill(Color(.systemGray6))
                 Circle().stroke(Color(.quaternaryLabel), lineWidth: 1)
 
-                CircleStack(
+                GreedyCircleStack(
                     spacing: spacing,
                     rimPadding: rimPadding,
                     startAngle: startAngle
