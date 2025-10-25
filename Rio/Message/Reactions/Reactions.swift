@@ -161,7 +161,8 @@ struct ReactionsModifier: ViewModifier {
                 .zIndex(menuIsShowing ? 100 : 0)
                 .onChange(of: chatData.activeReactionMessageID) { _, newValue in
                     let isActive = newValue == menuModel.messageID
-                    chatData.isChatScrollDisabled = isActive
+                    chatData.isViewingReactions = isActive
+                    print("chat is \(isActive)")
                     menuModel.setBackgroundMenuVisible(isActive)
                     if isActive {
                         menuModel.prepareCustomEmojiForMenuOpen()
@@ -181,8 +182,8 @@ struct ReactionsModifier: ViewModifier {
                     }
                 }
                 .onDisappear {
-                    if chatData.isChatScrollDisabled {
-                        chatData.isChatScrollDisabled = false
+                    if chatData.isViewingReactions {
+                        chatData.isViewingReactions = false
                     }
                     if chatData.activeReactionMessageID == menuModel.messageID {
                         chatData.activeReactionMessageID = nil

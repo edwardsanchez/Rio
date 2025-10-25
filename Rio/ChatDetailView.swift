@@ -52,6 +52,13 @@ struct ChatDetailView: View {
             imageOverlay
         }
         .tint(chat.theme.outboundBackgroundColor)
+        .overlay {
+            if chatData.isViewingReactions {
+                Rectangle()
+                    .fill(Material.ultraThin)
+                    .ignoresSafeArea()
+            }
+        }
     }
 
     var inputFieldView: some View {
@@ -107,7 +114,6 @@ struct ChatDetailView: View {
                 }
             }
             .scrollClipDisabled()
-            .scrollDisabled(chatData.isChatScrollDisabled)
             .scrollPosition($scrollPosition)
             .contentMargins(.horizontal, 20, for: .scrollContent)
             .padding(.bottom, 60)
