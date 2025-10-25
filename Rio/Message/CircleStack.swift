@@ -175,6 +175,18 @@ struct CircleStack: Layout {
             .joined(separator: ", ")
         CircleStack.logDebug("chain angles: \(anglesDescription)")
 
+        if let closing = angleBetween(
+            radii[count - 1],
+            radii[0],
+            effectiveRadius: Double(effectiveRadius),
+            neighborGap: neighborGap
+        ) {
+            let totalSweep = Double(result.last?.angle ?? 0) + closing
+            CircleStack.logDebug(
+                "chain closingAngle=\(closing) totalSweep=\(totalSweep) delta=\(totalSweep - 2 * Double.pi)"
+            )
+        }
+
         return result
     }
 
@@ -258,7 +270,7 @@ struct CircleStack: Layout {
         }
 
         let hiLimit = max(1e-9, effectiveRadius * 0.999999)
-        var high = min(hiLimit, maxFirstRadius * 0.999999)
+        var high = min(hiLimit, maxFirstRadius)
 
         func totalAngle(for candidate: Double) -> Double? {
             var radii: [Double] = [candidate]
@@ -301,14 +313,15 @@ struct CircleStack: Layout {
                     break
                 }
             }
-            high *= 0.95
-            CircleStack.logDebug("solveFirstRadius adjust high radius -> \(high)")
+            let nextHigh = high * 0.97
+            CircleStack.logDebug("solveFirstRadius adjust high radius -> \(nextHigh)")
+            high = nextHigh
             if high <= 1e-12 {
                 break
             }
         }
 
-        guard let initialAngle = highAngle else {
+        guard let initialAngle = highAngle else { //Value 'initialAngle' was defined but never used; consider replacing with boolean test
             CircleStack.logError("solveFirstRadius no valid high radius count=\(count) neighborGap=\(neighborGap)")
             return nil
         }
@@ -383,7 +396,7 @@ struct CircleStackPreviewCard<Content: View>: View {
                     content()
                 }
             }
-            .frame(width: 160, height: 160)
+//            .frame(width: 160, height: 160)
 
             Text(title)
                 .font(.caption)
@@ -424,7 +437,7 @@ struct CircleStackPreviewCard<Content: View>: View {
             DemoAvatar(color: .indigo, text: "CY")
             DemoAvatar(color: .mint, text: "DJ")
         }
-
+//
         CircleStackPreviewCard(
             title: "5 avatars"
         ) {
