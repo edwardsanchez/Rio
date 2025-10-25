@@ -21,13 +21,20 @@ struct Chat: Identifiable {
 
     init(
         id: UUID = UUID(),
-        title: String,
+        title: String?,
         participants: [User],
         messages: [Message] = [],
         theme: ChatTheme
     ) {
+        var resolvedTitle = ""
+        if participants.count == 1 {
+            resolvedTitle = participants.first!.name //TODO: Must not be YOU.
+        } else {
+            resolvedTitle = title ?? "\(participants.count) people"
+        }
+
         self.id = id
-        self.title = title
+        self.title = resolvedTitle
         self.participants = participants
         self.messages = messages
         self.theme = theme
