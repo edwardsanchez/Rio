@@ -257,51 +257,36 @@ struct CircleStack: Layout {
             return accumulated + closing
         }
 
-        // Find an upper bound that yields a valid angle >= 2π.
-        var high = max(1e-9, effectiveRadius * (1 - 1e-6))
-        var highAngle: Double?
-        for _ in 0..<128 {
-            if let angle = totalAngle(for: high) {
-                highAngle = angle
-                if angle >= target { break }
-            }
-            high *= 0.95
-        }
+        // Locate the largest radius that still produces a valid total angle.
+        var validRadius = 0.0
+        var validAngle = totalAngle(for: validRadius) ?? 0
+        var invalidRadius = max(1e-9, effectiveRadius * (1 - 1e-6))
 
-        guard let initialHighAngle = highAngle, initialHighAngle >= target else {
-            CircleStack.logDebug("findFirstRadius unable to establish upper bound high=\(high) angle=\(String(describing: highAngle))")
-            return nil
-        }
+        for _ in 0..<196 {
+            let mid = 0.5 * (validRadius + invalidRadius)
+            guard mid > 0 else { break }
 
-        // Find a lower bound where the angle is <= 2π.
-        var low = high
-        var lowAngle = initialHighAngle
-        for _ in 0..<128 where lowAngle > target {
-            low *= 0.5
-            if let angle = totalAngle(for: low) {
-                lowAngle = angle
+            if let angle = totalAngle(for: mid) {
+                validRadius = mid
+                validAngle = angle
             } else {
-                lowAngle = .infinity
+                invalidRadius = mid
             }
-            if low < 1e-9 { break }
         }
 
-        guard lowAngle.isFinite else {
-            CircleStack.logDebug("findFirstRadius failed to locate finite lower bound from high=\(high)")
+        if validAngle < target - tolerance {
+            CircleStack.logDebug("findFirstRadius maximum sweep \(validAngle) below target \(target)")
             return nil
         }
 
-        if lowAngle - target > tolerance {
-            CircleStack.logDebug("findFirstRadius lower bound still above target angle low=\(low) angle=\(lowAngle)")
-            return nil
+        if abs(validAngle - target) <= tolerance {
+            CircleStack.logDebug("findFirstRadius matched target at radius=\(validRadius)")
+            return validRadius
         }
 
-        // Edge case: if even tiny circles are impossible, abort.
-        if low == high {
-            return nil
-        }
-
-        var result = high
+        var low = 0.0
+        var high = validRadius
+        var result = validRadius
         for _ in 0..<196 {
             let mid = (low + high) * 0.5
             if mid <= 0 { break }
