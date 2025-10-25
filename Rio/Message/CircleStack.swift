@@ -133,8 +133,10 @@ struct CircleStack: Layout {
         }
 
         let neighborGap = Double(spacing)
-        guard let firstRadius = solveFirstRadius(
-            effectiveRadius: Double(effectiveRadius),
+        let effectiveRadiusDouble = Double(effectiveRadius)
+
+        guard let firstRadius = findFirstRadius(
+            effectiveRadius: effectiveRadiusDouble,
             count: count,
             neighborGap: neighborGap
         ) else {
@@ -142,85 +144,77 @@ struct CircleStack: Layout {
             return nil
         }
 
-        var radii: [Double] = []
-        for index in 0..<count {
-            radii.append(firstRadius * pow(shrinkRatioDouble, Double(index)))
+        guard let geometry = calculateRadiiAndAngles(
+            firstRadius: firstRadius,
+            count: count,
+            effectiveRadius: effectiveRadiusDouble,
+            neighborGap: neighborGap
+        ) else {
+            CircleStack.logError("chain failed to compute angle sequence after solving first radius")
+            return nil
         }
 
-        let radiiDescription = radii.enumerated()
-            .map { index, value in "i\(index)=\(value)" }
+        let radiiDescription = geometry.enumerated()
+            .map { index, element in
+                "i\(index)=\(Double(element.radius))"
+            }
             .joined(separator: ", ")
         CircleStack.logDebug("chain radii: \(radiiDescription)")
 
-        var result: [(radius: CGFloat, angle: CGFloat)] = []
-        var cumulative: Double = 0
-
-        result.append((CGFloat(radii[0]), 0))
-        for index in 1..<count {
-            guard let delta = angleBetween(
-                radii[index - 1],
-                radii[index],
-                effectiveRadius: Double(effectiveRadius),
-                neighborGap: neighborGap
-            ) else {
-                CircleStack.logError("chain angleBetween failed index=\(index) rPrev=\(radii[index - 1]) rNext=\(radii[index])")
-                return nil
+        let anglesDescription = geometry.enumerated()
+            .map { index, element in
+                "i\(index)=\(Double(element.angle))"
             }
-            cumulative += delta
-            result.append((CGFloat(radii[index]), CGFloat(cumulative)))
-        }
-
-        let anglesDescription = result.enumerated()
-            .map { index, element in "i\(index)=\(Double(element.angle))" }
             .joined(separator: ", ")
         CircleStack.logDebug("chain angles: \(anglesDescription)")
 
-        if let closing = angleBetween(
-            radii[count - 1],
-            radii[0],
-            effectiveRadius: Double(effectiveRadius),
-            neighborGap: neighborGap
-        ) {
-            let totalSweep = Double(result.last?.angle ?? 0) + closing
+        if geometry.count >= 2,
+           let closing = calculateAngleBetween(
+               Double(geometry[count - 1].radius),
+               Double(geometry[0].radius),
+               effectiveRadius: effectiveRadiusDouble,
+               neighborGap: neighborGap
+           ) {
+            let totalSweep = Double(geometry.last?.angle ?? 0) + closing
             CircleStack.logDebug(
                 "chain closingAngle=\(closing) totalSweep=\(totalSweep) delta=\(totalSweep - 2 * Double.pi)"
             )
         }
 
-        return result
+        return geometry
     }
 
     /// Angle between two tangent circles that also touch the boundary circle.
-    private func angleBetween(
+    private func calculateAngleBetween(
         _ r1: Double,
         _ r2: Double,
         effectiveRadius: Double,
         neighborGap: Double
     ) -> Double? {
-        let d1 = effectiveRadius - r1
-        let d2 = effectiveRadius - r2
-        guard d1 > 0, d2 > 0 else { return nil }
+        let radial1 = effectiveRadius - r1
+        let radial2 = effectiveRadius - r2
+        guard radial1 > 0, radial2 > 0 else { return nil }
 
         let centerDistance = r1 + r2 + neighborGap
-        let maxDistance = d1 + d2
-        let minDistance = abs(d1 - d2)
-        let tolerance = 1e-6 * max(1.0, max(centerDistance, maxDistance))
+        let maxDistance = radial1 + radial2
+        let minDistance = abs(radial1 - radial2)
+        let tolerance = 1e-9 * max(1.0, max(centerDistance, maxDistance))
 
         if centerDistance - maxDistance > tolerance { return nil }
         if minDistance - centerDistance > tolerance { return nil }
 
-        let numerator = d1 * d1 + d2 * d2 - centerDistance * centerDistance
-        let denominator = 2 * d1 * d2
+        let numerator = radial1 * radial1 + radial2 * radial2 - centerDistance * centerDistance
+        let denominator = 2 * radial1 * radial2
         guard denominator > 0 else { return nil }
 
-        let value = numerator / denominator
-        if value.isNaN { return nil }
-        let clamped = max(-1.0, min(1.0, value))
+        let ratio = numerator / denominator
+        if ratio.isNaN { return nil }
+        let clamped = max(-1.0, min(1.0, ratio))
         return acos(clamped)
     }
 
-    /// Finds the first radius so the chain closes around the 2π sweep.
-    private func solveFirstRadius(
+    /// Finds the first circle radius that closes the chain around the boundary.
+    private func findFirstRadius(
         effectiveRadius: Double,
         count: Int,
         neighborGap: Double,
@@ -228,82 +222,159 @@ struct CircleStack: Layout {
     ) -> Double? {
         guard count >= 2 else { return max(0, effectiveRadius) }
 
-        func totalAngle(for candidate: Double) -> Double? {
-            var radii: [Double] = []
-            for index in 0..<count {
-                radii.append(candidate * pow(shrinkRatioDouble, Double(index)))
-            }
+        let target = 2 * Double.pi
+        let ratio = shrinkRatioDouble
 
-            var sum = 0.0
-            for index in 0..<(count - 1) {
-                guard let delta = angleBetween(
-                    radii[index],
-                    radii[index + 1],
+        func totalAngle(for firstRadius: Double) -> Double? {
+            guard firstRadius > 0 else { return 0 }
+
+            var accumulated = 0.0
+            var previousRadius = firstRadius
+
+            for index in 1..<count {
+                let nextRadius = firstRadius * pow(ratio, Double(index))
+                guard let angle = calculateAngleBetween(
+                    previousRadius,
+                    nextRadius,
                     effectiveRadius: effectiveRadius,
                     neighborGap: neighborGap
                 ) else {
-                    CircleStack.logDebug("solveFirstRadius totalAngle failed @segment \(index) candidate=\(candidate) r1=\(radii[index]) r2=\(radii[index + 1])")
                     return nil
                 }
-                sum += delta
+                accumulated += angle
+                previousRadius = nextRadius
             }
 
-            guard let closing = angleBetween(
-                radii[count - 1],
-                radii[0],
+            guard let closing = calculateAngleBetween(
+                previousRadius,
+                firstRadius,
                 effectiveRadius: effectiveRadius,
                 neighborGap: neighborGap
             ) else {
-                CircleStack.logDebug("solveFirstRadius closing angle failure candidate=\(candidate) rLast=\(radii[count - 1]) rFirst=\(radii[0])")
                 return nil
             }
 
-            return sum + closing
+            return accumulated + closing
         }
 
-        let theoreticalMax = max(1e-9, effectiveRadius * 0.99)
-        var low = 0.0
-        var high = theoreticalMax
-        var result = theoreticalMax * 0.5
+        // Find an upper bound that yields a valid angle >= 2π.
+        var high = max(1e-9, effectiveRadius * (1 - 1e-6))
+        var highAngle: Double?
+        for _ in 0..<128 {
+            if let angle = totalAngle(for: high) {
+                highAngle = angle
+                if angle >= target { break }
+            }
+            high *= 0.95
+        }
 
-        for iteration in 0..<250 {
+        guard let initialHighAngle = highAngle, initialHighAngle >= target else {
+            CircleStack.logDebug("findFirstRadius unable to establish upper bound high=\(high) angle=\(String(describing: highAngle))")
+            return nil
+        }
+
+        // Find a lower bound where the angle is <= 2π.
+        var low = high
+        var lowAngle = initialHighAngle
+        for _ in 0..<128 where lowAngle > target {
+            low *= 0.5
+            if let angle = totalAngle(for: low) {
+                lowAngle = angle
+            } else {
+                lowAngle = .infinity
+            }
+            if low < 1e-9 { break }
+        }
+
+        guard lowAngle.isFinite else {
+            CircleStack.logDebug("findFirstRadius failed to locate finite lower bound from high=\(high)")
+            return nil
+        }
+
+        if lowAngle - target > tolerance {
+            CircleStack.logDebug("findFirstRadius lower bound still above target angle low=\(low) angle=\(lowAngle)")
+            return nil
+        }
+
+        // Edge case: if even tiny circles are impossible, abort.
+        if low == high {
+            return nil
+        }
+
+        var result = high
+        for _ in 0..<196 {
             let mid = (low + high) * 0.5
-            guard mid > 0 else { break }
+            if mid <= 0 { break }
 
             guard let angle = totalAngle(for: mid) else {
-                CircleStack.logDebug("solveFirstRadius totalAngle nil at mid=\(mid)")
                 high = mid
                 continue
             }
 
-            let delta = angle - 2 * Double.pi
-            result = mid
-
-            if abs(delta) < tolerance {
-                CircleStack.logDebug("solveFirstRadius converged mid=\(mid) iterations=\(iteration)")
-                return mid
+            if abs(angle - target) <= tolerance {
+                result = mid
+                break
             }
 
-            if delta > 0 {
+            if angle > target {
+                result = mid
                 high = mid
             } else {
+                result = mid
                 low = mid
             }
         }
 
         guard let finalAngle = totalAngle(for: result) else {
-            CircleStack.logError("solveFirstRadius unable to evaluate final angle at result=\(result)")
+            CircleStack.logError("findFirstRadius unable to evaluate final angle result=\(result)")
             return nil
         }
 
-        let finalDelta = abs(finalAngle - 2 * Double.pi)
-        if finalDelta < tolerance {
-            CircleStack.logDebug("solveFirstRadius: result=\(result) finalDelta=\(finalDelta)")
-            return result
+        let finalDelta = abs(finalAngle - target)
+        guard finalDelta <= 1e-6 else {
+            CircleStack.logError("findFirstRadius did not converge result=\(result) finalAngle=\(finalAngle)")
+            return nil
         }
 
-        CircleStack.logError("solveFirstRadius did not converge result=\(result) finalAngle=\(finalAngle)")
-        return nil
+        CircleStack.logDebug("findFirstRadius succeeded radius=\(result) finalDelta=\(finalDelta)")
+        return result
+    }
+
+    /// Creates the radii array and cumulative angles for placement.
+    private func calculateRadiiAndAngles(
+        firstRadius: Double,
+        count: Int,
+        effectiveRadius: Double,
+        neighborGap: Double
+    ) -> [(radius: CGFloat, angle: CGFloat)]? {
+        let ratio = shrinkRatioDouble
+
+        var radii: [Double] = []
+        radii.reserveCapacity(count)
+        for index in 0..<count {
+            radii.append(firstRadius * pow(ratio, Double(index)))
+        }
+
+        var result: [(radius: CGFloat, angle: CGFloat)] = []
+        result.reserveCapacity(count)
+
+        var cumulative = 0.0
+        result.append((CGFloat(radii[0]), 0))
+
+        for index in 1..<count {
+            guard let delta = calculateAngleBetween(
+                radii[index - 1],
+                radii[index],
+                effectiveRadius: effectiveRadius,
+                neighborGap: neighborGap
+            ) else {
+                return nil
+            }
+            cumulative += delta
+            result.append((CGFloat(radii[index]), CGFloat(cumulative)))
+        }
+
+        return result
     }
 }
 
@@ -330,6 +401,7 @@ struct CircleStackPreviewCard<Content: View>: View {
     var spacing: CGFloat = 8
     var shrink: CGFloat = 0.1
     var rimPadding: CGFloat = 12
+    var startAngle: Angle = .degrees(330)
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -342,7 +414,8 @@ struct CircleStackPreviewCard<Content: View>: View {
                 CircleStack(
                     spacing: spacing,
                     shrink: shrink,
-                    rimPadding: rimPadding
+                    rimPadding: rimPadding,
+                    startAngle: startAngle
                 ) {
                     content()
                 }
@@ -388,13 +461,37 @@ struct CircleStackPreviewCard<Content: View>: View {
             DemoAvatar(color: .indigo, text: "CY")
             DemoAvatar(color: .mint, text: "DJ")
         }
-//
         CircleStackPreviewCard(
             title: "5 avatars"
         ) {
             ForEach(0..<5, id: \.self) { index in
                 DemoAvatar(
                     color: [.red, .green, .blue, .orange, .purple][index],
+                    text: "\(index + 1)"
+                )
+            }
+        }
+        CircleStackPreviewCard(
+            title: "Clockwise start @ 90°",
+            spacing: 4,
+            shrink: 0.15,
+            rimPadding: 14,
+            startAngle: .degrees(90)
+        ) {
+            DemoAvatar(color: .brown, text: "QH")
+            DemoAvatar(color: .indigo, text: "RJ")
+            DemoAvatar(color: .cyan, text: "SK")
+            DemoAvatar(color: .orange, text: "TL")
+        }
+        CircleStackPreviewCard(
+            title: "10 avatars, tight spacing",
+            spacing: 2,
+            shrink: 0.12,
+            rimPadding: 10
+        ) {
+            ForEach(0..<10, id: \.self) { index in
+                DemoAvatar(
+                    color: Color(hue: Double(index) / 10.0, saturation: 0.75, brightness: 0.9),
                     text: "\(index + 1)"
                 )
             }
