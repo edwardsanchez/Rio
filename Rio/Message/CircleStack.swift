@@ -227,10 +227,6 @@ struct CircleStack: Layout {
         tolerance: Double = 1e-9
     ) -> Double? {
         guard count >= 2 else { return max(0, effectiveRadius) }
-        let theoreticalMax = max(1e-9, effectiveRadius * 0.99)
-        var high = theoreticalMax
-        var low = 0.0
-        var validHigh: Double?
 
         func totalAngle(for candidate: Double) -> Double? {
             var radii: [Double] = []
@@ -265,27 +261,15 @@ struct CircleStack: Layout {
             return sum + closing
         }
 
-        for attempt in 0..<50 {
-            if let angle = totalAngle(for: high), angle.isFinite, angle >= 2 * Double.pi - 1e-6 {
-                validHigh = high
-                break
-            }
-            high *= 0.9
-            CircleStack.logDebug("solveFirstRadius adjust high radius -> \(high)")
-            if high < 1e-12 {
-                break
-            }
-        }
-
-        guard let startHigh = validHigh else {
-            CircleStack.logError("solveFirstRadius: no valid high found for count=\(count)")
-            return nil
-        }
-
-        high = startHigh
+        let theoreticalMax = max(1e-9, effectiveRadius * 0.99)
+        var low = 0.0
+        var high = theoreticalMax
+        var result = theoreticalMax * 0.5
 
         for iteration in 0..<250 {
             let mid = (low + high) * 0.5
+            guard mid > 0 else { break }
+
             guard let angle = totalAngle(for: mid) else {
                 CircleStack.logDebug("solveFirstRadius totalAngle nil at mid=\(mid)")
                 high = mid
@@ -293,24 +277,33 @@ struct CircleStack: Layout {
             }
 
             let delta = angle - 2 * Double.pi
+            result = mid
+
             if abs(delta) < tolerance {
                 CircleStack.logDebug("solveFirstRadius converged mid=\(mid) iterations=\(iteration)")
                 return mid
             }
 
-            if delta < 0 {
-                low = mid
-            } else {
+            if delta > 0 {
                 high = mid
+            } else {
+                low = mid
             }
         }
 
-        let result = (low + high) * 0.5
-        if let finalAngle = totalAngle(for: result) {
-            let finalDelta = abs(finalAngle - 2 * Double.pi)
-            CircleStack.logDebug("solveFirstRadius: result=\(result) finalDelta=\(finalDelta)")
+        guard let finalAngle = totalAngle(for: result) else {
+            CircleStack.logError("solveFirstRadius unable to evaluate final angle at result=\(result)")
+            return nil
         }
-        return result
+
+        let finalDelta = abs(finalAngle - 2 * Double.pi)
+        if finalDelta < tolerance {
+            CircleStack.logDebug("solveFirstRadius: result=\(result) finalDelta=\(finalDelta)")
+            return result
+        }
+
+        CircleStack.logError("solveFirstRadius did not converge result=\(result) finalAngle=\(finalAngle)")
+        return nil
     }
 }
 
