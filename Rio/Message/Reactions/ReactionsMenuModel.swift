@@ -21,6 +21,7 @@ final class ReactionsMenuModel {
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
     var showBackgroundMenu = false
+    var isEmojiPickerPresented = false
 
     private let reactionSpacing: CGFloat = 50
     private enum Constants {
@@ -121,13 +122,17 @@ final class ReactionsMenuModel {
     }
 
     func openMenu() {
+        chatData?.isViewingReactions = true
         prepareCustomEmojiForMenuOpen()
         chatData?.activeReactionMessageID = messageID
         setBackgroundMenuVisible(true)
     }
 
     func closeMenu(delay: TimeInterval = 0) {
+        chatData?.isViewingReactions = false
         scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration + delay)
+        setCustomEmojiHighlight(false)
+        isEmojiPickerPresented = false
         chatData?.activeReactionMessageID = nil
         setBackgroundMenuVisible(false, delay: delay)
     }

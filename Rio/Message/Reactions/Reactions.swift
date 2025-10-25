@@ -14,7 +14,6 @@ struct ReactionsModifier: ViewModifier {
         chatData.activeReactionMessageID == menuModel.messageID
     }
     @State private var viewSize: CGSize = .zero
-    @State private var isEmojiPickerPresented = false
 
     @Namespace private var reactionNamespace
     @State private var menuModel: ReactionsMenuModel
@@ -114,6 +113,7 @@ struct ReactionsModifier: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
+        @Bindable var menuModel = menuModel
         if isEnabled {
             content
                 .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
@@ -158,43 +158,15 @@ struct ReactionsModifier: ViewModifier {
                     menuModel.openMenu()
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
-                .zIndex(menuIsShowing ? 100 : 0)
-                .onChange(of: chatData.activeReactionMessageID) { _, newValue in
-                    let isActive = newValue == menuModel.messageID
-                    chatData.isViewingReactions = isActive
-                    print("chat is \(isActive)")
-                    menuModel.setBackgroundMenuVisible(isActive)
-                    if isActive {
-                        menuModel.prepareCustomEmojiForMenuOpen()
-                    } else {
-                        menuModel.restoreCustomEmojiAfterMenuClose()
-                        menuModel.setCustomEmojiHighlight(false)
-                        isEmojiPickerPresented = false
-                    }
-                }
                 .onAppear {
                     menuModel.chatData = chatData
-                    menuModel.setCustomEmojiHighlight(false)
-                    menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
                     menuModel.onOpenEmojiPicker = {
                         menuModel.setCustomEmojiHighlight(true)
-                        isEmojiPickerPresented = true
+                        menuModel.isEmojiPickerPresented = true
                     }
-                }
-                .onDisappear {
-                    if chatData.isViewingReactions {
-                        chatData.isViewingReactions = false
-                    }
-                    if chatData.activeReactionMessageID == menuModel.messageID {
-                        chatData.activeReactionMessageID = nil
-                    }
-                    menuModel.onOpenEmojiPicker = nil
-                    menuModel.restoreCustomEmojiAfterMenuClose(immediate: true)
-                    menuModel.setCustomEmojiHighlight(false)
-                    isEmojiPickerPresented = false
                 }
                 .sheet(
-                    isPresented: $isEmojiPickerPresented,
+                    isPresented: $menuModel.isEmojiPickerPresented,
                     onDismiss: {
                         menuModel.setCustomEmojiHighlight(false)
                         if menuModel.menuIsShowing {
@@ -205,7 +177,7 @@ struct ReactionsModifier: ViewModifier {
                     EmojiPickerView { emoji in
                         menuModel.applyCustomEmojiSelection(emoji.character)
                         menuModel.setCustomEmojiHighlight(false)
-                        isEmojiPickerPresented = false
+                        menuModel.isEmojiPickerPresented = false
                     }
                     .presentationDetents([.height(300)])
                 }
