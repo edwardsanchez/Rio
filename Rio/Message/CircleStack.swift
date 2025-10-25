@@ -116,7 +116,11 @@ struct CircleStack: Layout {
     ) -> [PackedCircle] {
         guard count > 0 else { return [] }
 
-        let primaryRadius = parentRadius / (1.0 + CGFloat(sqrt(Double(count))))
+//        let primaryRadius = parentRadius / (1.0 + CGFloat(sqrt(Double(count))))
+        let n = Double(count)
+        let drop = 0.3
+        let secondaryRadius = parentRadius / 65
+        let primaryRadius = parentRadius / (1 + pow(secondaryRadius * (n - 1), drop))
         let anchorDistance = parentRadius - primaryRadius
         let primaryCenter = CGPoint(
             x: anchorDistance * CGFloat(cos(pinnedAngle)),
@@ -136,7 +140,7 @@ struct CircleStack: Layout {
 
         guard count > 1 else { return discs }
 
-        let sampleCount = max(500, count * 150)
+        let sampleCount = max(4000, count * 450)
         Self.logger.debug("CircleStack: greedy sample count \(sampleCount, privacy: .public)")
 
         var rng = SeededGenerator(seed: 0xC1C1E5EEDBAADF0F)
@@ -262,9 +266,9 @@ struct DemoAvatar: View {
 
 struct CircleStackPreviewCard<Content: View>: View {
     var title: String
-    var spacing: CGFloat = 8
-    var rimPadding: CGFloat = 12
-    var startAngle: Angle = .degrees(330)
+    var spacing: CGFloat = 3
+    var rimPadding: CGFloat = 3
+    var startAngle: Angle = .degrees(120)
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -304,24 +308,24 @@ struct CircleStackPreviewCard<Content: View>: View {
             title: "2 avatars"
         ) {
             DemoAvatar(color: .purple, text: "A")
-            DemoAvatar(color: .blue, text: "HT")
+            DemoAvatar(color: .blue, text: "B")
         }
 
         CircleStackPreviewCard(
             title: "3 avatars"
         ) {
             DemoAvatar(color: .purple, text: "A")
-            DemoAvatar(color: .blue, text: "HT")
-            DemoAvatar(color: .orange, text: "B")
+            DemoAvatar(color: .blue, text: "B")
+            DemoAvatar(color: .orange, text: "C")
         }
 
         CircleStackPreviewCard(
             title: "4 avatars"
         ) {
-            DemoAvatar(color: .pink, text: "AL")
-            DemoAvatar(color: .teal, text: "BO")
-            DemoAvatar(color: .indigo, text: "CY")
-            DemoAvatar(color: .mint, text: "DJ")
+            DemoAvatar(color: .pink, text: "A")
+            DemoAvatar(color: .teal, text: "B")
+            DemoAvatar(color: .indigo, text: "C")
+            DemoAvatar(color: .mint, text: "D")
         }
         CircleStackPreviewCard(
             title: "5 avatars"
