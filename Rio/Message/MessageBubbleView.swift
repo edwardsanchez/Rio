@@ -709,6 +709,7 @@ private struct MessageBubblePreviewContainer: View {
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
         .environment(ChatData())
+        .environment(ReactionsCoordinator())
 }
 
 #Preview("Message States") {
@@ -776,6 +777,7 @@ private struct MessageBubblePreviewContainer: View {
     .padding(.vertical, 40)
     .environment(bubbleConfig)
     .environment(ChatData())
+    .environment(ReactionsCoordinator())
 
         // Image detail overlay
         if let imageData = selectedImageData {

@@ -9,9 +9,10 @@ import SwiftUI
 
 struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
-    // Centralized menu visibility in ChatData
+    @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
+    
     private var menuIsShowing: Bool {
-        chatData.activeReactionMessageID == menuModel.messageID
+        reactionsCoordinator.isMenuActive(for: menuModel.messageID)
     }
     @State private var viewSize: CGSize = .zero
 
@@ -159,14 +160,18 @@ struct ReactionsModifier: ViewModifier {
                 }
                 .sensoryFeedback(.impact, trigger: menuIsShowing)
                 .onAppear {
+                    menuModel.coordinator = reactionsCoordinator
                     menuModel.chatData = chatData
                     menuModel.onOpenEmojiPicker = {
                         menuModel.setCustomEmojiHighlight(true)
-                        menuModel.isEmojiPickerPresented = true
+                        reactionsCoordinator.isEmojiPickerPresented = true
                     }
                 }
                 .sheet(
-                    isPresented: $menuModel.isEmojiPickerPresented,
+                    isPresented: Binding(
+                        get: { reactionsCoordinator.isEmojiPickerPresented },
+                        set: { reactionsCoordinator.isEmojiPickerPresented = $0 }
+                    ),
                     onDismiss: {
                         menuModel.setCustomEmojiHighlight(false)
                         if menuModel.menuIsShowing {
@@ -177,7 +182,7 @@ struct ReactionsModifier: ViewModifier {
                     EmojiPickerView { emoji in
                         menuModel.applyCustomEmojiSelection(emoji.character)
                         menuModel.setCustomEmojiHighlight(false)
-                        menuModel.isEmojiPickerPresented = false
+                        reactionsCoordinator.isEmojiPickerPresented = false
                     }
                     .presentationDetents([.height(300)])
                 }
@@ -417,4 +422,5 @@ fileprivate struct TapBackTestView: View {
 #Preview("TapBackTestView") {
     TapBackTestView()
         .environment(ChatData())
+        .environment(ReactionsCoordinator())
 }

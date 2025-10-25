@@ -628,6 +628,7 @@ fileprivate struct BubbleMorphLayout {
     .padding()
     .environment(bubbleConfig)
     .environment(ChatData())
+    .environment(ReactionsCoordinator())
 }
 
 #Preview("Thought Bubble Morph") {
@@ -657,4 +658,5 @@ fileprivate struct BubbleMorphLayout {
     .padding()
     .environment(bubbleConfig)
     .environment(ChatData())
+    .environment(ReactionsCoordinator())
 }

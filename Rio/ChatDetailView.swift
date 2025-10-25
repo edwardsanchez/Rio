@@ -11,6 +11,7 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
+    @State private var reactionsCoordinator = ReactionsCoordinator()
     @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
     @State private var scrollViewFrame: CGRect = .zero
@@ -53,12 +54,13 @@ struct ChatDetailView: View {
         }
         .tint(chat.theme.outboundBackgroundColor)
         .overlay {
-            if chatData.isViewingReactions {
+            if reactionsCoordinator.isEmojiPickerPresented {
                 Rectangle()
                     .fill(Material.ultraThin)
                     .ignoresSafeArea()
             }
         }
+        .environment(reactionsCoordinator)
     }
 
     var inputFieldView: some View {
@@ -321,6 +323,7 @@ struct ChatDetailView: View {
     OutboundGeometryMatchDebugView(messages: allMessages, newMessageId: newMessageId)
         .environment(BubbleConfiguration())
         .environment(ChatData())
+        .environment(ReactionsCoordinator())
 }
 
 private struct OutboundGeometryMatchDebugView: View {

@@ -67,4 +67,5 @@ struct ChatRowView: View {
     }
     .environment(ChatData())
     .environment(BubbleConfiguration())
+    .environment(ReactionsCoordinator())
 }

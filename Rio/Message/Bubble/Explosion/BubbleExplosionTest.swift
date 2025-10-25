@@ -301,4 +301,5 @@ struct BubbleExplosionTestView: View {
     .padding()
     .environment(BubbleConfiguration())
     .environment(ChatData())
+    .environment(ReactionsCoordinator())
 }
