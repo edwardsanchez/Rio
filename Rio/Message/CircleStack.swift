@@ -95,7 +95,7 @@ struct CircleStack: Layout {
             let radius = element.radius
             let sweep = element.angle
             let distance = max(0, effectiveRadius - radius)
-            let angle = baseAngle - sweep
+            let angle = baseAngle + sweep
             let center = CGPoint(
                 x: bounds.midX + distance * CGFloat(cos(Double(angle))),
                 y: bounds.midY + distance * CGFloat(sin(Double(angle)))
@@ -219,38 +219,6 @@ struct CircleStack: Layout {
         return acos(clamped)
     }
 
-    private func maximumFeasibleFirstRadius(
-        effectiveRadius: Double,
-        count: Int,
-        neighborGap: Double
-    ) -> Double? {
-        let numerator = effectiveRadius - neighborGap / 2
-        guard numerator > 0 else { return nil }
-
-        let ratio = shrinkRatioDouble
-        var radiiFactors: [Double] = []
-        var current = 1.0
-        for _ in 0..<count {
-            radiiFactors.append(current)
-            current *= ratio
-        }
-
-        var limit = Double.greatestFiniteMagnitude
-        for index in 0..<(count - 1) {
-            let sum = radiiFactors[index] + radiiFactors[index + 1]
-            guard sum > 0 else { continue }
-            limit = min(limit, numerator / sum)
-        }
-
-        if let last = radiiFactors.last {
-            let closingSum = last + 1.0
-            guard closingSum > 0 else { return nil }
-            limit = min(limit, numerator / closingSum)
-        }
-
-        return limit.isFinite ? limit : nil
-    }
-
     /// Finds the first radius so the chain closes around the 2π sweep.
     private func solveFirstRadius(
         effectiveRadius: Double,
@@ -259,23 +227,15 @@ struct CircleStack: Layout {
         tolerance: Double = 1e-9
     ) -> Double? {
         guard count >= 2 else { return max(0, effectiveRadius) }
-
-        guard let maxFirstRadius = maximumFeasibleFirstRadius(
-            effectiveRadius: effectiveRadius,
-            count: count,
-            neighborGap: neighborGap
-        ) else {
-            CircleStack.logError("solveFirstRadius geometry impossible (gap too large) count=\(count) neighborGap=\(neighborGap)")
-            return nil
-        }
-
-        let hiLimit = max(1e-9, effectiveRadius * 0.999999)
-        var high = min(hiLimit, maxFirstRadius)
+        let theoreticalMax = max(1e-9, effectiveRadius * 0.99)
+        var high = theoreticalMax
+        var low = 0.0
+        var validHigh: Double?
 
         func totalAngle(for candidate: Double) -> Double? {
-            var radii: [Double] = [candidate]
-            for _ in 1..<count {
-                radii.append(radii.last! * shrinkRatioDouble)
+            var radii: [Double] = []
+            for index in 0..<count {
+                radii.append(candidate * pow(shrinkRatioDouble, Double(index)))
             }
 
             var sum = 0.0
@@ -305,54 +265,52 @@ struct CircleStack: Layout {
             return sum + closing
         }
 
-        var highAngle: Double?
-        for _ in 0..<160 {
-            if let angle = totalAngle(for: high), angle.isFinite {
-                if angle >= 2 * Double.pi {
-                    highAngle = angle
-                    break
-                }
+        for attempt in 0..<50 {
+            if let angle = totalAngle(for: high), angle.isFinite, angle >= 2 * Double.pi - 1e-6 {
+                validHigh = high
+                break
             }
-            let nextHigh = high * 0.97
-            CircleStack.logDebug("solveFirstRadius adjust high radius -> \(nextHigh)")
-            high = nextHigh
-            if high <= 1e-12 {
+            high *= 0.9
+            CircleStack.logDebug("solveFirstRadius adjust high radius -> \(high)")
+            if high < 1e-12 {
                 break
             }
         }
 
-        guard let initialAngle = highAngle else { //Value 'initialAngle' was defined but never used; consider replacing with boolean test
-            CircleStack.logError("solveFirstRadius no valid high radius count=\(count) neighborGap=\(neighborGap)")
+        guard let startHigh = validHigh else {
+            CircleStack.logError("solveFirstRadius: no valid high found for count=\(count)")
             return nil
         }
 
-        var low = 0.0
-        var upper = high
+        high = startHigh
 
-        for _ in 0..<200 {
-            let mid = (low + upper) * 0.5
+        for iteration in 0..<250 {
+            let mid = (low + high) * 0.5
             guard let angle = totalAngle(for: mid) else {
                 CircleStack.logDebug("solveFirstRadius totalAngle nil at mid=\(mid)")
-                upper = mid
+                high = mid
                 continue
             }
 
             let delta = angle - 2 * Double.pi
             if abs(delta) < tolerance {
-                CircleStack.logDebug("solveFirstRadius converged mid=\(mid) delta=\(delta)")
+                CircleStack.logDebug("solveFirstRadius converged mid=\(mid) iterations=\(iteration)")
                 return mid
             }
 
             if delta < 0 {
                 low = mid
             } else {
-                upper = mid
+                high = mid
             }
         }
 
-        let solved = (low + upper) * 0.5
-        CircleStack.logDebug("solveFirstRadius solved=\(solved) low=\(low) upper=\(upper) count=\(count) neighborGap=\(neighborGap)")
-        return solved
+        let result = (low + high) * 0.5
+        if let finalAngle = totalAngle(for: result) {
+            let finalDelta = abs(finalAngle - 2 * Double.pi)
+            CircleStack.logDebug("solveFirstRadius: result=\(result) finalDelta=\(finalDelta)")
+        }
+        return result
     }
 }
 
