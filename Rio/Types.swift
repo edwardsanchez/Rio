@@ -24,13 +24,25 @@ struct Chat: Identifiable {
         title: String?,
         participants: [User],
         messages: [Message] = [],
-        theme: ChatTheme
+        theme: ChatTheme,
+        currentUser: User? = nil
     ) {
         var resolvedTitle = ""
-        if participants.count == 1 {
-            resolvedTitle = participants.first!.name //TODO: Must not be YOU.
+        
+        // Filter out current user from participants for title generation
+        let otherParticipants = if let currentUser = currentUser {
+            participants.filter { $0.id != currentUser.id }
         } else {
-            resolvedTitle = title ?? "\(participants.count) people"
+            participants
+        }
+        
+        if otherParticipants.count == 1 {
+            resolvedTitle = otherParticipants.first!.name
+        } else if otherParticipants.isEmpty {
+            // Only the current user in the chat (edge case)
+            resolvedTitle = "Note to Self"
+        } else {
+            resolvedTitle = title ?? "\(otherParticipants.count) people"
         }
 
         self.id = id

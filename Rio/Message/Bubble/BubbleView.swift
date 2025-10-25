@@ -644,7 +644,7 @@ fileprivate struct BubbleMorphLayout {
             color: .Default.inboundBubble,
             type: isTalking ? .talking : .thinking,
             showTail: true,
-            messageType: .inbound(isTalking ? .talking : .thinking),
+            messageType: .inbound(.talking),
             messageID: UUID()
         )
         .frame(width: width + 120, height: height + 120)

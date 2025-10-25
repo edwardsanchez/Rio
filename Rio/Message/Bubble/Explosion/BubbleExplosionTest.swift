@@ -43,7 +43,7 @@ struct BubbleExplosionTestView: View {
             content: .text(""),
             user: User(id: UUID(), name: "Maya", avatar: .scarlet),
             isTypingIndicator: true,
-            messageType: .inbound(.thinking)
+            bubbleType: .thinking
         )
         self._message = State(initialValue: message ?? defaultMessage)
         self._showTail = State(initialValue: showTail)
@@ -294,7 +294,7 @@ struct BubbleExplosionTestView: View {
             content: .text(""),
             user: User(id: UUID(), name: "Maya", avatar: .scarlet),
             isTypingIndicator: true,
-            messageType: .inbound(.thinking)
+            bubbleType: .thinking
         ),
         showTail: true
     )

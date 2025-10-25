@@ -48,6 +48,7 @@ struct MessageListView: View {
                         scrollPhase: scrollPhase,
                         visibleMessageIndex: index,
                         theme: theme,
+                        currentUser: chatData.currentUser,
                         selectedImageData: $selectedImageData
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
@@ -79,8 +80,8 @@ struct MessageListView: View {
         let next = messages[index + 1]
         let isNextSameUser = current.user.id == next.user.id
 
-        // For outbound messages (from Edward), only show tail if it's the last in a sequence
-        if current.messageType.isOutbound {
+        // For outbound messages (from current user), only show tail if it's the last in a sequence
+        if current.messageType(currentUser: chatData.currentUser).isOutbound {
             // Only show tail if the next message is from a different user (end of outbound sequence)
             return !isNextSameUser
         }

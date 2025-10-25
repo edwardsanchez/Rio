@@ -383,12 +383,12 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .text("Hello, World! This is a text message."),
-                            user: sampleUser,
-                            messageType: .outbound
+                            user: sampleUser
                         ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -399,11 +399,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -414,11 +414,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .textChoice("This is a text choice option"),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -433,11 +433,11 @@ struct MessageContentView: View {
                                 .textChoice("Option C")
                             ]),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -456,11 +456,11 @@ struct MessageContentView: View {
                                 .textChoice("Sunday")
                             ]),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -488,11 +488,11 @@ struct MessageContentView: View {
                         MessageBubbleView(
                             message: Message(
                                 content: .image(Image(.cat)),
-                                user: sampleUser,
-                                messageType: .outbound
+                                user: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
+                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -503,11 +503,11 @@ struct MessageContentView: View {
                         MessageBubbleView(
                             message: Message(
                                 content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
-                                user: sampleUser,
-                                messageType: .outbound
+                                user: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
+                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -523,11 +523,11 @@ struct MessageContentView: View {
                                     .image(Image(.cat)),
                                     .image(Image(.cat))
                                 ]),
-                                user: sampleUser,
-                                messageType: .outbound
+                                user: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
+                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -574,11 +574,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -589,11 +589,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -621,11 +621,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -642,11 +642,11 @@ struct MessageContentView: View {
                                 return mapItem
                             }()),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -660,11 +660,11 @@ struct MessageContentView: View {
                                 .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
                             ]),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -682,11 +682,11 @@ struct MessageContentView: View {
                                 .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
                             ]),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -712,11 +712,11 @@ struct MessageContentView: View {
                                 }())
                             ]),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -744,11 +744,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 42.5, type: .length(.meters))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -759,11 +759,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -774,11 +774,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 99.99, type: .currency(99.99))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -789,11 +789,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -804,11 +804,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -819,11 +819,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -834,11 +834,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 60, type: .duration(.minutes))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -849,11 +849,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -864,11 +864,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -879,11 +879,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -894,11 +894,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .value(Measurement(value: 42.0, type: .number(42.0))),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -928,11 +928,11 @@ struct MessageContentView: View {
                                 Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -945,11 +945,11 @@ struct MessageContentView: View {
                                 Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -962,11 +962,11 @@ struct MessageContentView: View {
                                 Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -979,11 +979,11 @@ struct MessageContentView: View {
                                 Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -996,11 +996,11 @@ struct MessageContentView: View {
                                 Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1013,11 +1013,11 @@ struct MessageContentView: View {
                                 Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1030,11 +1030,11 @@ struct MessageContentView: View {
                                 Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1047,11 +1047,11 @@ struct MessageContentView: View {
                                 Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1064,11 +1064,11 @@ struct MessageContentView: View {
                                 Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1081,11 +1081,11 @@ struct MessageContentView: View {
                                 Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1098,11 +1098,11 @@ struct MessageContentView: View {
                                 Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -1130,11 +1130,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .date(Date.now, granularity: .dateAndTime),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1145,11 +1145,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .date(Date.now, granularity: .dateOnly),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1160,11 +1160,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .date(Date.now, granularity: .timeOnly),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1181,11 +1181,11 @@ struct MessageContentView: View {
                                 granularity: .dateAndTime
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1202,11 +1202,11 @@ struct MessageContentView: View {
                                 granularity: .dateOnly
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1223,11 +1223,11 @@ struct MessageContentView: View {
                                 granularity: .timeOnly
                             ),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1238,11 +1238,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1253,11 +1253,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }
@@ -1285,11 +1285,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .url(URL(string: "https://www.apple.com")!),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1300,11 +1300,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .url(URL(string: "https://somefakeURL.com")!),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1315,11 +1315,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .emoji("👋🎉🚀"),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1330,11 +1330,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1345,11 +1345,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .bool(true),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1360,11 +1360,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .bool(false),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1375,11 +1375,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .rating(.five),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1390,11 +1390,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .rating(.three),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
 
@@ -1405,11 +1405,11 @@ struct MessageContentView: View {
                         message: Message(
                             content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
                             user: sampleUser,
-                            messageType: .outbound
-                        ),
+                            ),
                         showTail: true,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData,
+                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
+                        selectedImageData: $selectedImageData
                     )
                 }
             }

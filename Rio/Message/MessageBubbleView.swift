@@ -40,6 +40,7 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+    let currentUser: User
 
     @State private var showTypingIndicatorContent = false
     @State private var showTalkingContent = false
@@ -56,6 +57,11 @@ struct MessageBubbleView: View {
     @Binding var selectedImageData: ImageData?
 
     @Environment(BubbleConfiguration.self) private var bubbleConfig
+    
+    // Computed property for message type
+    private var messageType: MessageType {
+        message.messageType(currentUser: currentUser)
+    }
 
     init(
         message: Message,
@@ -68,6 +74,7 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
+        currentUser: User,
         selectedImageData: Binding<ImageData?>
     ) {
         self.message = message
@@ -80,6 +87,7 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self.currentUser = currentUser
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
@@ -87,7 +95,7 @@ struct MessageBubbleView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            if message.messageType.isInbound {
+            if messageType.isInbound {
                 Group {
                     inboundAvatar
                         .opacity(inboundAvatarOpacity)
@@ -143,7 +151,7 @@ struct MessageBubbleView: View {
 
     // Computed properties for positioning and animation
     private var frameAlignment: Alignment {
-        if message.messageType.isInbound {
+        if messageType.isInbound {
             return .leading
         } else {
             return isNew ? .leading : .trailing
@@ -153,7 +161,7 @@ struct MessageBubbleView: View {
     private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
 
-        if message.messageType.isInbound {
+        if messageType.isInbound {
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
             return displayedBubbleType.isRead ? 0 : 20
@@ -168,7 +176,7 @@ struct MessageBubbleView: View {
     }
 
     private var xOffset: CGFloat {
-        guard isNew && message.messageType.isOutbound else { return 0 }
+        guard isNew && messageType.isOutbound else { return 0 }
 
         let logger = Logger(subsystem: "Rio", category: "Animation")
 
@@ -184,7 +192,7 @@ struct MessageBubbleView: View {
     }
 
     private var bubbleOpacity: Double {
-        guard message.messageType.isInbound else { return 1 }
+        guard messageType.isInbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
         // For thinking/talking, fade in when new
         if displayedBubbleType.isRead {
@@ -194,7 +202,7 @@ struct MessageBubbleView: View {
     }
 
     private var inboundAvatarOpacity: Double {
-        guard message.messageType.isInbound else { return 1 }
+        guard messageType.isInbound else { return 1 }
         guard isNew else { return 1 }
         // For read state, avatar scales from 0, don't use opacity fade
         // For thinking/talking, use opacity fade
@@ -271,9 +279,9 @@ struct MessageBubbleView: View {
         guard scrollWidth > 0 else { return nil }
 
         let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
-        let avatarWidth: CGFloat = message.messageType.isInbound ? 40 : 0
-        let bubbleSpacing: CGFloat = message.messageType.isInbound ? 12 : 0
-        let trailingSpacer: CGFloat = message.messageType.isInbound ? 10 : 0
+        let avatarWidth: CGFloat = messageType.isInbound ? 40 : 0
+        let bubbleSpacing: CGFloat = messageType.isInbound ? 12 : 0
+        let trailingSpacer: CGFloat = messageType.isInbound ? 10 : 0
 
         let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
         return width > 0 ? width : nil
@@ -305,7 +313,7 @@ struct MessageBubbleView: View {
         .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
         .frame(width: lockedWidth, alignment: .leading)
         .chatBubble(
-            messageType: message.messageType,
+            messageType: messageType,
             backgroundColor: backgroundColor,
             showTail: showTail,
             messageID: message.id,
@@ -566,12 +574,12 @@ struct MessageBubbleView: View {
     }
 
     private var outboundAnimationWidth: CGFloat? {
-        guard message.messageType.isOutbound, isNew else { return nil }
+        guard messageType.isOutbound, isNew else { return nil }
         return inputFieldFrame.width
     }
 
     private var outboundAnimationHeight: CGFloat? {
-        guard message.messageType.isOutbound, isNew else { return nil }
+        guard messageType.isOutbound, isNew else { return nil }
         return inputFieldFrame.height
     }
 }
@@ -583,7 +591,7 @@ private struct MessageBubblePreviewContainer: View {
 
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
-    private let sampleUser = User(id: UUID(), name: "Maya", avatar: .edward)
+    private let sampleUser = User(id: UUID(), name: "Maya", avatar: .scarlet)
 
     private var currentMessage: Message {
         switch bubbleType {
@@ -593,7 +601,7 @@ private struct MessageBubblePreviewContainer: View {
                 content: .text(""),
                 user: sampleUser,
                 isTypingIndicator: true,
-                messageType: .inbound(.read)
+                bubbleType: .read
             )
         case .thinking:
             Message(
@@ -601,14 +609,14 @@ private struct MessageBubblePreviewContainer: View {
                 content: .text(""),
                 user: sampleUser,
                 isTypingIndicator: true,
-                messageType: .inbound(.thinking)
+                bubbleType: .thinking
             )
         case .talking:
             Message(
                 id: messageId,
                 content: .text("How are you?"),
                 user: sampleUser,
-                messageType: .inbound(.talking)
+                bubbleType: .talking
             )
         case .none:
             // Placeholder - won't be shown
@@ -616,7 +624,7 @@ private struct MessageBubblePreviewContainer: View {
                 id: messageId,
                 content: .text(""),
                 user: sampleUser,
-                messageType: .inbound(.talking)
+                bubbleType: .talking
             )
         }
     }
@@ -639,6 +647,7 @@ private struct MessageBubblePreviewContainer: View {
                     scrollPhase: .idle,
                     visibleMessageIndex: 0,
                     theme: .defaultTheme,
+                    currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                     selectedImageData: $selectedImageData
                 )
                 .frame(height: 100)
@@ -706,6 +715,8 @@ private struct MessageBubblePreviewContainer: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
+    let currentUser = User(id: UUID(), name: "Edward", avatar: .edward)
+
     ZStack {
         VStack(spacing: 20) {
 
@@ -714,10 +725,11 @@ private struct MessageBubblePreviewContainer: View {
                 content: .text(""),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
-                messageType: .inbound(.read)
+                bubbleType: .read
             ),
             showTail: true,
             theme: .theme1,
+            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -727,10 +739,11 @@ private struct MessageBubblePreviewContainer: View {
                 content: .text(""),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
-                messageType: .inbound(.thinking)
+                bubbleType: .thinking
             ),
             showTail: true,
             theme: .theme1,
+            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -739,10 +752,11 @@ private struct MessageBubblePreviewContainer: View {
             message: Message(
                 content: .text("Hey! How's it going?"),
                 user: User(id: UUID(), name: "Maya", avatar: .scarlet),
-                messageType: .inbound(.talking)
+                bubbleType: .talking
             ),
             showTail: true,
             theme: .theme1,
+            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -750,11 +764,11 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text("Great! Just working on some code."),
-                user: User(id: UUID(), name: "Edward", avatar: .edward),
-                messageType: .outbound
+                user: currentUser
             ),
             showTail: true,
             theme: .theme1,
+            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
     }

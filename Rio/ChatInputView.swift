@@ -211,8 +211,7 @@ struct ChatInputView: View {
 
             let newMessage = Message(
                 content: content,
-                user: chatData.edwardUser,
-                messageType: .outbound
+                user: chatData.edwardUser
             )
             createdMessages.append(newMessage)
         }
@@ -236,7 +235,7 @@ struct ChatInputView: View {
                 date: Date.now, // Update timestamp to current time
                 isTypingIndicator: typingIndicator.isTypingIndicator,
                 replacesTypingIndicator: typingIndicator.replacesTypingIndicator,
-                messageType: typingIndicator.messageType
+                bubbleType: typingIndicator.bubbleType
             )
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
             chatData.setTypingIndicator(true, for: typingIndicator.user.id, in: chat.id)
@@ -311,7 +310,7 @@ struct ChatInputView: View {
                     content: .text(""), // Text is not used for typing indicator
                     user: randomUser,
                     isTypingIndicator: true,
-                    messageType: .inbound(.read)
+                    bubbleType: .read
                 )
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
@@ -331,7 +330,7 @@ struct ChatInputView: View {
                                 date: currentIndicator.date,
                                 isTypingIndicator: true,
                                 replacesTypingIndicator: false,
-                                messageType: .inbound(.thinking)
+                                bubbleType: .thinking
                             )
                             chatData.updateMessage(updatedIndicator, in: chat.id)
                         }
@@ -362,7 +361,7 @@ struct ChatInputView: View {
                         date: Date.now,
                         isTypingIndicator: false,
                         replacesTypingIndicator: indicatorWasVisible,
-                        messageType: .inbound(.talking)
+                        bubbleType: .talking
                     )
                     chatData.updateMessage(updatedMessage, in: chat.id)
                     newMessageId = nil
@@ -371,7 +370,7 @@ struct ChatInputView: View {
                         content: contentType,
                         user: randomUser,
                         replacesTypingIndicator: indicatorWasVisible,
-                        messageType: .inbound(.talking)
+                        bubbleType: .talking
                     )
                     newMessageId = fallbackMessage.id
                     chatData.addMessage(fallbackMessage, to: chat.id)

@@ -16,70 +16,74 @@ class ChatData {
     var isChatScrollDisabled = false
     // Tracks which message currently displays a reactions menu so we can bring it to the front.
     var activeReactionMessageID: UUID?
+
     // Current signed-in user (for adding reactions)
     let currentUser: User
 
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
+    let mayaUser = User(id: UUID(), name: "Maya", avatar: .amy)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
     let liamUser = User(id: UUID(), name: "Liam", avatar: .joaquin)
     let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)
 
     init() {
-        currentUser = edwardUser
+        currentUser = edwardUser //TODO: Make this not set explicitly
         generateSampleChats()
     }
 
     private func generateSampleChats() {
         // Chat 1: Edward and Maya (2 participants)
         let chat1Messages = [
-            Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-3600), messageType: .inbound(.talking)),
-            Message(content: .text("Are you good?"), user: mayaUser, date: Date().addingTimeInterval(-3500), messageType: .inbound(.talking)),
-            Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), user: edwardUser, date: Date().addingTimeInterval(-3400), messageType: .outbound),
-            Message(content: .emoji("👋"), user: edwardUser, date: Date().addingTimeInterval(-3350), messageType: .outbound),
-            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), user: mayaUser, date: Date().addingTimeInterval(-3300), messageType: .inbound(.talking)),
-            Message(content: .emoji("😊🎉"), user: mayaUser, date: Date().addingTimeInterval(-3200), messageType: .inbound(.talking))
+            Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-3600), bubbleType: .talking),
+            Message(content: .text("Are you good?"), user: mayaUser, date: Date().addingTimeInterval(-3500), bubbleType: .talking),
+            Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), user: edwardUser, date: Date().addingTimeInterval(-3400)),
+            Message(content: .emoji("👋"), user: edwardUser, date: Date().addingTimeInterval(-3350)),
+            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), user: mayaUser, date: Date().addingTimeInterval(-3300), bubbleType: .talking),
+            Message(content: .emoji("😊🎉"), user: mayaUser, date: Date().addingTimeInterval(-3200), bubbleType: .talking)
         ]
 
         let chat1 = Chat(
-            title: "Maya & Edward",
+            title: nil,
             participants: [edwardUser, mayaUser],
             messages: chat1Messages,
-            theme: .defaultTheme
+            theme: .defaultTheme,
+            currentUser: edwardUser
         )
 
         // Chat 2: Edward, Sophia, and Liam (3 participants)
         let chat2Messages = [
-            Message(content: .text("Hey everyone! Ready for the project meeting?"), user: sophiaUser, date: Date().addingTimeInterval(-7200), messageType: .inbound(.talking)),
-            Message(content: .text("Yes, I've prepared the slides"), user: edwardUser, date: Date().addingTimeInterval(-7100), messageType: .outbound),
-            Message(content: .text("Great! I'll bring the coffee ☕️"), user: liamUser, date: Date().addingTimeInterval(-7000), messageType: .inbound(.talking)),
-            Message(content: .text("Perfect team! See you at 3 PM"), user: sophiaUser, date: Date().addingTimeInterval(-6900), messageType: .inbound(.talking)),
-            Message(content: .text("Looking forward to it!"), user: edwardUser, date: Date().addingTimeInterval(-6800), messageType: .outbound)
+            Message(content: .text("Hey everyone! Ready for the project meeting?"), user: sophiaUser, date: Date().addingTimeInterval(-7200), bubbleType: .talking),
+            Message(content: .text("Yes, I've prepared the slides"), user: edwardUser, date: Date().addingTimeInterval(-7100)),
+            Message(content: .text("Great! I'll bring the coffee ☕️"), user: liamUser, date: Date().addingTimeInterval(-7000), bubbleType: .talking),
+            Message(content: .text("Perfect team! See you at 3 PM"), user: sophiaUser, date: Date().addingTimeInterval(-6900), bubbleType: .talking),
+            Message(content: .text("Looking forward to it!"), user: edwardUser, date: Date().addingTimeInterval(-6800))
         ]
 
         let chat2 = Chat(
             title: "Design Squad",
             participants: [edwardUser, sophiaUser, liamUser],
             messages: chat2Messages,
-            theme: .theme1
+            theme: .theme1,
+            currentUser: edwardUser
         )
 
         // Chat 3: Edward, Sophia, Liam, and Zoe (4 participants)
         let chat3Messages = [
-            Message(content: .text("Welcome to the group chat!"), user: amyUser, date: Date().addingTimeInterval(-10800), messageType: .inbound(.talking)),
-            Message(content: .text("Thanks for adding me!"), user: edwardUser, date: Date().addingTimeInterval(-10700), messageType: .outbound),
-            Message(content: .text("Great to have you here Edward"), user: sophiaUser, date: Date().addingTimeInterval(-10600), messageType: .inbound(.talking)),
-            Message(content: .text("We were just discussing weekend plans"), user: liamUser, date: Date().addingTimeInterval(-10500), messageType: .inbound(.talking)),
-            Message(content: .text("I'm thinking of going hiking. Anyone interested?"), user: amyUser, date: Date().addingTimeInterval(-10400), messageType: .inbound(.talking)),
-            Message(content: .text("Count me in! I love hiking"), user: edwardUser, date: Date().addingTimeInterval(-10300), messageType: .outbound)
+            Message(content: .text("Welcome to the group chat!"), user: amyUser, date: Date().addingTimeInterval(-10800), bubbleType: .talking),
+            Message(content: .text("Thanks for adding me!"), user: edwardUser, date: Date().addingTimeInterval(-10700)),
+            Message(content: .text("Great to have you here Edward"), user: sophiaUser, date: Date().addingTimeInterval(-10600), bubbleType: .talking),
+            Message(content: .text("We were just discussing weekend plans"), user: liamUser, date: Date().addingTimeInterval(-10500), bubbleType: .talking),
+            Message(content: .text("I'm thinking of going hiking. Anyone interested?"), user: amyUser, date: Date().addingTimeInterval(-10400), bubbleType: .talking),
+            Message(content: .text("Count me in! I love hiking"), user: edwardUser, date: Date().addingTimeInterval(-10300))
         ]
 
         let chat3 = Chat(
             title: "Adventure Crew",
             participants: [edwardUser, sophiaUser, liamUser, amyUser],
             messages: chat3Messages,
-            theme: .theme2
+            theme: .theme2,
+            currentUser: edwardUser
         )
 
         chats = [chat1, chat2, chat3]

@@ -61,11 +61,20 @@ struct Message: Identifiable {
     let date: Date
     let isTypingIndicator: Bool
     let replacesTypingIndicator: Bool
-    let messageType: MessageType
+    let storedBubbleType: BubbleType?
     var reactions: [MessageReaction] = []
 
+    // Computed property to determine message type based on current user
+    func messageType(currentUser: User) -> MessageType {
+        if user.id == currentUser.id {
+            return .outbound
+        } else {
+            return .inbound(storedBubbleType ?? .talking)
+        }
+    }
+
     var bubbleType: BubbleType {
-        messageType.bubbleType
+        storedBubbleType ?? .talking
     }
 
     // Computed property to extract text content
@@ -91,17 +100,18 @@ struct Message: Identifiable {
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
         replacesTypingIndicator: Bool = false,
-        messageType: MessageType
+        bubbleType: BubbleType? = nil
     ) {
         self.id = id
         self.user = user
         self.date = date
         self.replacesTypingIndicator = replacesTypingIndicator
-        self.messageType = messageType
+        self.storedBubbleType = bubbleType
         self.content = content
 
         // Update isTypingIndicator based on bubble type
-        self.isTypingIndicator = isTypingIndicator || messageType.bubbleType.isThinking
+        let effectiveBubbleType = bubbleType ?? .talking
+        self.isTypingIndicator = isTypingIndicator || effectiveBubbleType.isThinking
     }
 }
 
