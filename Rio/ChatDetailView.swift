@@ -186,9 +186,7 @@ struct ChatDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Circle()
-                        .frame(width: 80)
-                        .padding(.top, 20)
+                    titleView
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -201,6 +199,15 @@ struct ChatDetailView: View {
                 }
             }
         }
+    }
+
+    var titleView: some View {
+        GreedyCircleStack {
+            ForEach(chat.participants) { participant in
+                AvatarView(user: participant, avatarSize: nil)
+            }
+        }
+            .frame(width: 60)
     }
 
     // MARK: - Scrolling
