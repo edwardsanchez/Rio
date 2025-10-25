@@ -258,7 +258,7 @@ struct ChatDetailView: View {
 }
 
 #Preview("Chat Detail") {
-    let chatData = ChatData()
+    @Previewable @State var chatData = ChatData()
     
     // Use the same users from ChatData to ensure UUID matching
     let edwardUser = chatData.edwardUser
