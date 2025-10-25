@@ -266,13 +266,13 @@ struct ChatDetailView: View {
     let sophiaUser = chatData.sophiaUser
 
     let sampleMessages = [
-        Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-7200), bubbleType: .talking),
-        Message(content: .text("Are you good?"), user: mayaUser, date: Date().addingTimeInterval(-7100), bubbleType: .talking),
-        Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), user: edwardUser, date: Date().addingTimeInterval(-7000)),
-        Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints."), user: mayaUser, date: Date().addingTimeInterval(-3600), bubbleType: .talking),
-        Message(content: .text("That looks great!"), user: edwardUser, date: Date().addingTimeInterval(-3500)),
-        Message(content: .text("Thanks! 😊"), user: sophiaUser, date: Date().addingTimeInterval(-100), bubbleType: .talking),
-        Message(content: .text("You're welcome!"), user: edwardUser, date: Date().addingTimeInterval(-50))
+        Message(content: .text("Hi Rio!\nHow are you doing today?"), from: mayaUser, date: Date().addingTimeInterval(-7200), bubbleType: .talking),
+        Message(content: .text("Are you good?"), from: mayaUser, date: Date().addingTimeInterval(-7100), bubbleType: .talking),
+        Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), from: edwardUser, date: Date().addingTimeInterval(-7000)),
+        Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints."), from: mayaUser, date: Date().addingTimeInterval(-3600), bubbleType: .talking),
+        Message(content: .text("That looks great!"), from: edwardUser, date: Date().addingTimeInterval(-3500)),
+        Message(content: .text("Thanks! 😊"), from: sophiaUser, date: Date().addingTimeInterval(-100), bubbleType: .talking),
+        Message(content: .text("You're welcome!"), from: edwardUser, date: Date().addingTimeInterval(-50))
     ]
 
     let sampleChat = Chat(
@@ -300,12 +300,12 @@ struct ChatDetailView: View {
     let newMessage = Message(
         id: newMessageId,
         content: .text("This is a test message!"),
-        user: edwardUser
+        from: edwardUser
     )
 
     let previousMessages = [
-        Message(content: .text("Hi Rio!\nHow are you doing today?"), user: mayaUser, date: Date().addingTimeInterval(-7200), bubbleType: .talking),
-        Message(content: .text("Hey! I'm doing well, thanks!"), user: edwardUser, date: Date().addingTimeInterval(-7000))
+        Message(content: .text("Hi Rio!\nHow are you doing today?"), from: mayaUser, date: Date().addingTimeInterval(-7200), bubbleType: .talking),
+        Message(content: .text("Hey! I'm doing well, thanks!"), from: edwardUser, date: Date().addingTimeInterval(-7000))
     ]
 
     let allMessages = previousMessages + [newMessage]

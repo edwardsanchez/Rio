@@ -383,7 +383,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .text("Hello, World! This is a text message."),
-                            user: sampleUser
+                            from: sampleUser
                         ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -398,7 +398,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -413,7 +413,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .textChoice("This is a text choice option"),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -432,7 +432,7 @@ struct MessageContentView: View {
                                 .textChoice("Option B"),
                                 .textChoice("Option C")
                             ]),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -455,7 +455,7 @@ struct MessageContentView: View {
                                 .textChoice("Saturday"),
                                 .textChoice("Sunday")
                             ]),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -488,7 +488,7 @@ struct MessageContentView: View {
                         MessageBubbleView(
                             message: Message(
                                 content: .image(Image(.cat)),
-                                user: sampleUser
+                                from: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
@@ -503,7 +503,7 @@ struct MessageContentView: View {
                         MessageBubbleView(
                             message: Message(
                                 content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
-                                user: sampleUser
+                                from: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
@@ -523,7 +523,7 @@ struct MessageContentView: View {
                                     .image(Image(.cat)),
                                     .image(Image(.cat))
                                 ]),
-                                user: sampleUser
+                                from: sampleUser
                             ),
                             showTail: true,
                             theme: .defaultTheme,
@@ -573,7 +573,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -588,7 +588,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -620,7 +620,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -641,7 +641,7 @@ struct MessageContentView: View {
                                 mapItem.name = "Apple Park"
                                 return mapItem
                             }()),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -659,7 +659,7 @@ struct MessageContentView: View {
                                 .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
                                 .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
                             ]),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -681,7 +681,7 @@ struct MessageContentView: View {
                                 .color(RGB(red: 255, green: 255, blue: 100, name: "Yellow")),
                                 .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
                             ]),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -711,7 +711,7 @@ struct MessageContentView: View {
                                     return mapItem
                                 }())
                             ]),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -743,7 +743,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 42.5, type: .length(.meters))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -758,7 +758,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -773,7 +773,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 99.99, type: .currency(99.99))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -788,7 +788,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -803,7 +803,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -818,7 +818,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -833,7 +833,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 60, type: .duration(.minutes))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -848,7 +848,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -863,7 +863,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -878,7 +878,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -893,7 +893,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 42.0, type: .number(42.0))),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -927,7 +927,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -944,7 +944,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -961,7 +961,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -978,7 +978,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -995,7 +995,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1012,7 +1012,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1029,7 +1029,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1046,7 +1046,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1063,7 +1063,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1080,7 +1080,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1097,7 +1097,7 @@ struct MessageContentView: View {
                             content: .valueRange(
                                 Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1129,7 +1129,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .dateAndTime),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1144,7 +1144,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .dateOnly),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1159,7 +1159,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .timeOnly),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1180,7 +1180,7 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .dateAndTime
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1201,7 +1201,7 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .dateOnly
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1222,7 +1222,7 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .timeOnly
                             ),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1237,7 +1237,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1252,7 +1252,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1284,7 +1284,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .url(URL(string: "https://www.apple.com")!),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1299,7 +1299,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .url(URL(string: "https://somefakeURL.com")!),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1314,7 +1314,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .emoji("👋🎉🚀"),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1329,7 +1329,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1344,7 +1344,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .bool(true),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1359,7 +1359,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .bool(false),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1374,7 +1374,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .rating(.five),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1389,7 +1389,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .rating(.three),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,
@@ -1404,7 +1404,7 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
-                            user: sampleUser,
+                            from: sampleUser,
                             ),
                         showTail: true,
                         theme: .defaultTheme,

@@ -93,14 +93,31 @@ struct Message: Identifiable {
         return false
     }
 
+    // Initializer for outbound messages (from current user)
     init(
         id: UUID = UUID(),
         content: ContentType,
-        user: User,
+        from user: User,
+        date: Date = Date.now
+    ) {
+        self.id = id
+        self.user = user
+        self.date = date
+        self.replacesTypingIndicator = false
+        self.storedBubbleType = nil
+        self.content = content
+        self.isTypingIndicator = false
+    }
+    
+    // Initializer for inbound messages (from other users)
+    init(
+        id: UUID = UUID(),
+        content: ContentType,
+        from user: User,
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
         replacesTypingIndicator: Bool = false,
-        bubbleType: BubbleType? = nil
+        bubbleType: BubbleType
     ) {
         self.id = id
         self.user = user
@@ -108,10 +125,9 @@ struct Message: Identifiable {
         self.replacesTypingIndicator = replacesTypingIndicator
         self.storedBubbleType = bubbleType
         self.content = content
-
+        
         // Update isTypingIndicator based on bubble type
-        let effectiveBubbleType = bubbleType ?? .talking
-        self.isTypingIndicator = isTypingIndicator || effectiveBubbleType.isThinking
+        self.isTypingIndicator = isTypingIndicator || bubbleType.isThinking
     }
 }
 

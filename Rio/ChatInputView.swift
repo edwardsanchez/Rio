@@ -211,7 +211,7 @@ struct ChatInputView: View {
 
             let newMessage = Message(
                 content: content,
-                user: chatData.edwardUser
+                from: chatData.edwardUser
             )
             createdMessages.append(newMessage)
         }
@@ -231,7 +231,7 @@ struct ChatInputView: View {
             let updatedTypingIndicator = Message(
                 id: typingIndicator.id, // Keep the same ID
                 content: typingIndicator.content,
-                user: typingIndicator.user,
+                from: typingIndicator.user,
                 date: Date.now, // Update timestamp to current time
                 isTypingIndicator: typingIndicator.isTypingIndicator,
                 replacesTypingIndicator: typingIndicator.replacesTypingIndicator,
@@ -308,7 +308,7 @@ struct ChatInputView: View {
                 // Stage 2: Show typing indicator in .read state
                 let typingIndicatorMessage = Message(
                     content: .text(""), // Text is not used for typing indicator
-                    user: randomUser,
+                    from: randomUser,
                     isTypingIndicator: true,
                     bubbleType: .read
                 )
@@ -326,7 +326,7 @@ struct ChatInputView: View {
                             let updatedIndicator = Message(
                                 id: currentIndicator.id,
                                 content: currentIndicator.content,
-                                user: currentIndicator.user,
+                                from: currentIndicator.user,
                                 date: currentIndicator.date,
                                 isTypingIndicator: true,
                                 replacesTypingIndicator: false,
@@ -357,7 +357,7 @@ struct ChatInputView: View {
                     let updatedMessage = Message(
                         id: typingIndicatorId,
                         content: contentType,
-                        user: randomUser,
+                        from: randomUser,
                         date: Date.now,
                         isTypingIndicator: false,
                         replacesTypingIndicator: indicatorWasVisible,
@@ -368,7 +368,7 @@ struct ChatInputView: View {
                 } else {
                     let fallbackMessage = Message(
                         content: contentType,
-                        user: randomUser,
+                        from: randomUser,
                         replacesTypingIndicator: indicatorWasVisible,
                         bubbleType: .talking
                     )

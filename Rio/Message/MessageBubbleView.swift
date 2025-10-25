@@ -599,7 +599,7 @@ private struct MessageBubblePreviewContainer: View {
             Message(
                 id: messageId,
                 content: .text(""),
-                user: sampleUser,
+                from: sampleUser,
                 isTypingIndicator: true,
                 bubbleType: .read
             )
@@ -607,7 +607,7 @@ private struct MessageBubblePreviewContainer: View {
             Message(
                 id: messageId,
                 content: .text(""),
-                user: sampleUser,
+                from: sampleUser,
                 isTypingIndicator: true,
                 bubbleType: .thinking
             )
@@ -615,7 +615,7 @@ private struct MessageBubblePreviewContainer: View {
             Message(
                 id: messageId,
                 content: .text("How are you?"),
-                user: sampleUser,
+                from: sampleUser,
                 bubbleType: .talking
             )
         case .none:
@@ -623,7 +623,7 @@ private struct MessageBubblePreviewContainer: View {
             Message(
                 id: messageId,
                 content: .text(""),
-                user: sampleUser,
+                from: sampleUser,
                 bubbleType: .talking
             )
         }
@@ -723,7 +723,7 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text(""),
-                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
                 bubbleType: .read
             ),
@@ -737,7 +737,7 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text(""),
-                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 isTypingIndicator: true,
                 bubbleType: .thinking
             ),
@@ -751,7 +751,7 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text("Hey! How's it going?"),
-                user: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
                 bubbleType: .talking
             ),
             showTail: true,
@@ -764,7 +764,7 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text("Great! Just working on some code."),
-                user: currentUser
+                from: currentUser
             ),
             showTail: true,
             theme: .theme1,
