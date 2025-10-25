@@ -187,6 +187,7 @@ struct ChatDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     titleView
+                        .padding(.top, 25)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -202,12 +203,40 @@ struct ChatDetailView: View {
     }
 
     var titleView: some View {
-        GreedyCircleStack {
-            ForEach(chat.participants) { participant in
-                AvatarView(user: participant, avatarSize: nil)
+        VStack(spacing: 4) {
+            GreedyCircleStack {
+                ForEach(chat.participants) { participant in
+                    AvatarView(user: participant, avatarSize: nil)
+                }
             }
+            .padding(3)
+            .background {
+                Circle()
+                    .fill(Color.clear)
+            }
+            .glassEffect(.regular.interactive())
+            .frame(width: 60, height: 60)
+            .onTapGesture {
+                tapAvatar()
+            }
+
+            Text(chat.title)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 10)
+                .background {
+                    Capsule()
+                        .fill(Color.clear)
+                }
+                .glassEffect(.regular.interactive())
+                .onTapGesture {
+                    tapAvatar()
+                }
         }
-            .frame(width: 60)
+
+    }
+
+    func tapAvatar() {
+        //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others
     }
 
     // MARK: - Scrolling
@@ -229,7 +258,7 @@ struct ChatDetailView: View {
 }
 
 #Preview("Chat Detail") {
-    let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let edwardUser = User(id: UUID(), name: "Edward", avatar: .joaquin)
     let mayaUser = User(id: UUID(), name: "Maya", avatar: .edward)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
 
@@ -247,7 +276,7 @@ struct ChatDetailView: View {
         title: "Maya & Sophia",
         participants: [edwardUser, mayaUser, sophiaUser],
         messages: sampleMessages,
-        theme: .defaultTheme
+        theme: .theme1
     )
 
     let chatData = ChatData()
