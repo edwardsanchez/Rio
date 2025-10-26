@@ -41,6 +41,8 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+    let bubbleNamespace: Namespace.ID?
+    let activeReactingMessageID: UUID?
     let isReactionsOverlay: Bool
 
     @State private var showTypingIndicatorContent = false
@@ -64,6 +66,10 @@ struct MessageBubbleView: View {
         message.messageType(currentUser: chatData.currentUser)
     }
 
+    private var isActiveReactionBubble: Bool {
+        activeReactingMessageID == message.id
+    }
+
     init(
         message: Message,
         showTail: Bool = true,
@@ -75,6 +81,8 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
+        bubbleNamespace: Namespace.ID? = nil,
+        activeReactingMessageID: UUID? = nil,
         isReactionsOverlay: Bool = false,
         selectedImageData: Binding<ImageData?>
     ) {
@@ -88,6 +96,8 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self.bubbleNamespace = bubbleNamespace
+        self.activeReactingMessageID = activeReactingMessageID
         self.isReactionsOverlay = isReactionsOverlay
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
@@ -148,6 +158,7 @@ struct MessageBubbleView: View {
         .onDisappear {
             cancelPendingContentTransitions()
         }
+        .allowsHitTesting(!isActiveReactionBubble || isReactionsOverlay)
     }
 
     // Computed properties for positioning and animation
@@ -319,6 +330,8 @@ struct MessageBubbleView: View {
             messageID: message.id,
             context: ReactingMessageContext(message: message, showTail: showTail, theme: theme),
             isReactionsOverlay: isReactionsOverlay,
+            namespace: bubbleNamespace,
+            activeReactionMessageID: activeReactingMessageID,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,

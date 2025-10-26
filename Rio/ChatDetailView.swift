@@ -33,6 +33,7 @@ struct ChatDetailView: View {
 
     // Image zoom transition
     @State private var selectedImageData: ImageData?
+    @Namespace private var bubbleNamespace
 
     init(chat: Chat) {
         self.chat = chat
@@ -73,6 +74,8 @@ struct ChatDetailView: View {
                         message: context.message,
                         showTail: context.showTail,
                         theme: context.theme,
+                        bubbleNamespace: bubbleNamespace,
+                        activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
                         isReactionsOverlay: true,
                         selectedImageData: $selectedImageData
                     )
@@ -126,7 +129,9 @@ struct ChatDetailView: View {
                     scrollVelocity: scrollVelocity,
                     scrollPhase: scrollPhase,
                     theme: chat.theme,
-                    selectedImageData: $selectedImageData
+                    selectedImageData: $selectedImageData,
+                    bubbleNamespace: bubbleNamespace,
+                    reactionsCoordinator: reactionsCoordinator
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -353,6 +358,8 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData?
+    @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
+    @Namespace private var bubbleNamespace
 
     var body: some View {
         NavigationStack {
@@ -367,7 +374,9 @@ private struct OutboundGeometryMatchDebugView: View {
                         scrollVelocity: 0,
                         scrollPhase: .idle,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData
+                        selectedImageData: $selectedImageData,
+                        bubbleNamespace: bubbleNamespace,
+                        reactionsCoordinator: reactionsCoordinator
                     )
                     .onGeometryChange(for: CGRect.self) { geometryProxy in
                         geometryProxy.frame(in: .global)
