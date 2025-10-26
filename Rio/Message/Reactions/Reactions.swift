@@ -155,14 +155,18 @@ struct ReactionsModifier: ViewModifier {
                 content
                     .overlay(alignment: .topTrailing) {
                         if let selectedReaction {
-                            //Here only for the purposes of geometry matching
                             reactionButton(
                                 for: selectedReaction,
                                 isVisible: true,
                                 isOverlay: true,
                                 isSelected: false
-                            ) {}
-                            .allowsHitTesting(false)
+                            ) {
+                                reactionsMenuModel.openReactionsMenu()
+                                reactionsCoordinator.openReactionsMenu(
+                                    with: context,
+                                    menuModel: reactionsMenuModel
+                                )
+                            }
                         }
                     }
                     .onLongPressGesture {

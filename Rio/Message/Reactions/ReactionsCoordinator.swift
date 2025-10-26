@@ -21,18 +21,36 @@ final class ReactionsCoordinator {
     var isCustomEmojiPickerPresented = false
     // Weak storage so list bubbles and overlay share the same menu model instance
     private var menuModels: [UUID: WeakMenuModel] = [:]
+    private var closeWorkItems: [UUID: DispatchWorkItem] = [:]
 
     func openReactionsMenu(
         with context: ReactingMessageContext,
         menuModel: ReactionsMenuModel
     ) {
+        cancelCloseTimer(for: context.message.id)
         self.registerMenuModel(menuModel, for: context.message.id)
         reactingMessage = context
     }
 
-    func closeReactionsMenu() {
-        reactingMessage = nil
+    func closeReactionsMenu(after delay: TimeInterval = 0) {
+        guard let messageID = reactingMessage?.message.id else {
+            return
+        }
+
+        cancelCloseTimer(for: messageID)
         isCustomEmojiPickerPresented = false
+
+        guard delay > 0 else {
+            finishClosing(messageID)
+            return
+        }
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.finishClosing(messageID)
+        }
+
+        closeWorkItems[messageID] = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
 
     func isMenuActive(for messageID: UUID) -> Bool {
@@ -53,10 +71,43 @@ final class ReactionsCoordinator {
         return menuModels[messageID]?.model
     }
 
+    func closeActiveMenu(delay: TimeInterval = 0) {
+        guard let messageID = reactingMessage?.message.id else {
+            closeReactionsMenu(after: delay)
+            return
+        }
+
+        if let model = menuModels[messageID]?.model {
+            model.closeReactionsMenu(delay: delay)
+        } else {
+            closeReactionsMenu(after: delay)
+        }
+    }
+
+    // Legacy entry point used by older previews; keep for compatibility.
+    func dismissReactionWithoutPickingEmoji(delay: TimeInterval = 0) {
+        closeActiveMenu(delay: delay)
+    }
+
     private func cleanupStaleMenuModels() {
         menuModels = menuModels.filter { $0.value.model != nil }
     }
 
+    private func cancelCloseTimer(for messageID: UUID) {
+        if let workItem = closeWorkItems[messageID] {
+            workItem.cancel()
+            closeWorkItems.removeValue(forKey: messageID)
+        }
+    }
+
+    private func finishClosing(_ messageID: UUID) {
+        closeWorkItems[messageID]?.cancel()
+        closeWorkItems.removeValue(forKey: messageID)
+
+        if reactingMessage?.message.id == messageID {
+            reactingMessage = nil
+        }
+    }
 }
 
 private final class WeakMenuModel {

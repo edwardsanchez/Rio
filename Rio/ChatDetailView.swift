@@ -65,7 +65,7 @@ struct ChatDetailView: View {
                         .fill(Material.ultraThin)
                         .ignoresSafeArea()
                         .onTapGesture {
-                            reactionsCoordinator.closeReactionsMenu()
+                            reactionsCoordinator.closeActiveMenu()
                         }
 
                     MessageBubbleView(

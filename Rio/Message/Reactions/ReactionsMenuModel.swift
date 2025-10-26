@@ -93,9 +93,10 @@ final class ReactionsMenuModel {
     }
 
     func closeReactionsMenu(delay: TimeInterval = 0) {
-        scheduleCustomEmojiRestore(after: ReactionsAnimationTiming.baseDuration + delay)
+        let totalDelay = ReactionsAnimationTiming.baseDuration + delay
+        scheduleCustomEmojiRestore(after: totalDelay)
         setCustomEmojiHighlight(false)
-        coordinator?.closeReactionsMenu()
+        coordinator?.closeReactionsMenu(after: totalDelay)
         backgroundHideWorkItem?.cancel()
         setBackgroundMenuVisible(false, delay: delay)
     }
