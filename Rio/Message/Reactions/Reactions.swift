@@ -49,41 +49,6 @@ struct ReactionsModifier: ViewModifier {
         _reactionsMenuModel = State(initialValue: ReactionsMenuModel(messageID: context.message.id, reactions: reactions))
     }
 
-    // Centralizes timing multipliers so related animations stay in sync.
-    private enum AnimationTiming {
-        static let baseDuration: TimeInterval = 0.4
-        static let reactionStaggerStepMultiplier: Double = 0.125
-        static let backgroundShowDelayMultiplier: Double = 0.5
-        static let reactionHideDelayMultiplier: Double = 0.25
-        static let backgroundFadeDurationMultiplier: Double = 0.875
-
-        static var reactionStaggerStep: TimeInterval {
-            baseDuration * reactionStaggerStepMultiplier
-        }
-
-        static var backgroundShowDelay: TimeInterval {
-            baseDuration * backgroundShowDelayMultiplier
-        }
-
-        static var reactionHideDelay: TimeInterval {
-            baseDuration * reactionHideDelayMultiplier
-        }
-
-        static var menuScaleAnimation: Animation {
-            .interpolatingSpring(duration: baseDuration, bounce: 0.5, initialVelocity: -20)
-        }
-
-        static var menuOffsetAnimation: Animation {
-            .bouncy(duration: baseDuration)
-        }
-
-        static func backgroundFadeAnimation(isShowing: Bool, additionalDelay: TimeInterval = 0) -> Animation {
-            let base = Animation.easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier)
-            let delay = (isShowing ? backgroundShowDelay : 0) + additionalDelay
-            return delay == 0 ? base : base.delay(delay)
-        }
-    }
-
     // MARK: - Layout Detection
 
     private var layoutCase: LayoutCase {
@@ -124,7 +89,7 @@ struct ReactionsModifier: ViewModifier {
             if isReactionOverlay {
                 content
                     .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-                    .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
+                    .animation(ReactionsAnimationTiming.menuScaleAnimation, value: menuIsShowing)
                     .onGeometryChange(for: CGSize.self) { proxy in
                         proxy.size
                     } action: { newSize in

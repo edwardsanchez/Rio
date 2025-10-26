@@ -38,13 +38,13 @@ struct ReactionsMenuView: View {
                 }
                 .animation(
                     .interpolatingSpring(reactionsMenuModel.isShowingReactionMenu ? .bouncy : .smooth, initialVelocity: reactionsMenuModel.isShowingReactionMenu ? 0 : -5)
-                    .delay(Double(index) * ReactionsMenuModel.AnimationTiming.reactionStaggerStep),
+                    .delay(Double(index) * ReactionsAnimationTiming.reactionStaggerStep),
                     value: reactionsMenuModel.isShowingReactionMenu
                 )
             }
         }
         .offset(reactionsMenuModel.calculatedOffset)
-        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isShowingReactionMenu)
+        .animation(ReactionsAnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isShowingReactionMenu)
     }
 
     private func reactionButton(

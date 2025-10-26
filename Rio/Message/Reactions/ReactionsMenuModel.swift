@@ -35,41 +35,6 @@ final class ReactionsMenuModel {
         self.reactions = reactions
     }
 
-    // MARK: - Animation Timing
-    enum AnimationTiming {
-        static let baseDuration: TimeInterval = 0.4
-        static let reactionStaggerStepMultiplier: Double = 0.125
-        static let backgroundShowDelayMultiplier: Double = 0.5
-        static let reactionHideDelayMultiplier: Double = 0.25
-        static let backgroundFadeDurationMultiplier: Double = 0.875
-
-        static var reactionStaggerStep: TimeInterval {
-            baseDuration * reactionStaggerStepMultiplier
-        }
-
-        static var backgroundShowDelay: TimeInterval {
-            baseDuration * backgroundShowDelayMultiplier
-        }
-
-        static var reactionHideDelay: TimeInterval {
-            baseDuration * reactionHideDelayMultiplier
-        }
-
-        static var menuScaleAnimation: Animation {
-            .interpolatingSpring(duration: baseDuration, bounce: 0.5, initialVelocity: -20)
-        }
-
-        static var menuOffsetAnimation: Animation {
-            .bouncy(duration: baseDuration)
-        }
-
-        static func backgroundFadeAnimation(isShowing: Bool, additionalDelay: TimeInterval = 0) -> Animation {
-            let base = Animation.easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier)
-            let delay = (isShowing ? backgroundShowDelay : 0) + additionalDelay
-            return delay == 0 ? base : base.delay(delay)
-        }
-    }
-
     // MARK: - Derived State
     var isShowingReactionMenu: Bool {
         coordinator?.isMenuActive(for: messageID) ?? false
@@ -116,7 +81,7 @@ final class ReactionsMenuModel {
 
     // MARK: - Intents
     func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
-        withAnimation(AnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
+        withAnimation(ReactionsAnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
             showBackgroundMenu = value
         }
     }
@@ -128,7 +93,7 @@ final class ReactionsMenuModel {
     }
 
     func closeReactionsMenu(delay: TimeInterval = 0) {
-        scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration + delay)
+        scheduleCustomEmojiRestore(after: ReactionsAnimationTiming.baseDuration + delay)
         setCustomEmojiHighlight(false)
         coordinator?.closeReactionsMenu()
         backgroundHideWorkItem?.cancel()
@@ -150,7 +115,7 @@ final class ReactionsMenuModel {
         let isSameReaction = selectedReactionID == reaction.id
         selectedReactionID = isSameReaction ? nil : reaction.id
         chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-        closeReactionsMenu(delay: AnimationTiming.reactionHideDelay)
+        closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
     }
 
     func applyCustomEmojiSelection(_ emoji: String) {
@@ -161,7 +126,7 @@ final class ReactionsMenuModel {
         updateCustomReactionDisplay(showingEmoji: true)
         chatData?.addReaction(emoji, toMessageId: messageID)
         DispatchQueue.main.async { [weak self] in
-            self?.closeReactionsMenu(delay: AnimationTiming.reactionHideDelay)
+            self?.closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
         }
     }
 
@@ -179,7 +144,7 @@ final class ReactionsMenuModel {
         if immediate {
             updateCustomReactionDisplay(showingEmoji: true)
         } else {
-            scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration)
+            scheduleCustomEmojiRestore(after: ReactionsAnimationTiming.baseDuration)
         }
     }
 
@@ -229,7 +194,7 @@ final class ReactionsMenuModel {
         }
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + AnimationTiming.baseDuration,
+            deadline: .now() + ReactionsAnimationTiming.baseDuration,
             execute: workItem
         )
     }
@@ -270,6 +235,41 @@ struct Reaction: Identifiable, Equatable {
             display: .systemImage(name: name, pointSize: pointSize, weight: weight),
             selectedEmoji: selectedEmoji
         )
+    }
+}
+
+// MARK: - Animation Timing
+enum ReactionsAnimationTiming {
+    static let baseDuration: TimeInterval = 0.4
+    static let reactionStaggerStepMultiplier: Double = 0.125
+    static let backgroundShowDelayMultiplier: Double = 0.5
+    static let reactionHideDelayMultiplier: Double = 0.25
+    static let backgroundFadeDurationMultiplier: Double = 0.875
+
+    static var reactionStaggerStep: TimeInterval {
+        baseDuration * reactionStaggerStepMultiplier
+    }
+
+    static var backgroundShowDelay: TimeInterval {
+        baseDuration * backgroundShowDelayMultiplier
+    }
+
+    static var reactionHideDelay: TimeInterval {
+        baseDuration * reactionHideDelayMultiplier
+    }
+
+    static var menuScaleAnimation: Animation {
+        .interpolatingSpring(duration: baseDuration, bounce: 0.5, initialVelocity: -20)
+    }
+
+    static var menuOffsetAnimation: Animation {
+        .bouncy(duration: baseDuration)
+    }
+
+    static func backgroundFadeAnimation(isShowing: Bool, additionalDelay: TimeInterval = 0) -> Animation {
+        let base = Animation.easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier)
+        let delay = (isShowing ? backgroundShowDelay : 0) + additionalDelay
+        return delay == 0 ? base : base.delay(delay)
     }
 }
 
