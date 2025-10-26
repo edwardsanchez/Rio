@@ -47,7 +47,6 @@ struct ReactionsMenuView: View {
         .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isReactionMenuShowing)
     }
 
-    @ViewBuilder
     private func reactionButton(
         for reaction: Reaction,
         isVisible: Bool,

@@ -270,7 +270,6 @@ struct MessageContentView: View {
 
     // MARK: - Reusable Content View Helpers
 
-    @ViewBuilder
     private func colorView(_ rgb: RGB, compact: Bool = false) -> some View {
         // Compact chip for multi-choice grids
         VStack(spacing: 4) {
@@ -294,7 +293,6 @@ struct MessageContentView: View {
         }
     }
 
-    @ViewBuilder
     private func imageView(_ image: Image, compact: Bool = false) -> some View {
         image
             .resizable()
@@ -305,7 +303,6 @@ struct MessageContentView: View {
             }
     }
 
-    @ViewBuilder
     private func labeledImageView(_ labeledImage: LabeledImage, compact: Bool = false) -> some View {
         VStack(spacing: compact ? 4 : 8) {
             Group {
@@ -324,7 +321,6 @@ struct MessageContentView: View {
         }
     }
 
-    @ViewBuilder
     private func locationView(_ mapItem: MKMapItem, compact: Bool = false) -> some View {
         Button {
             mapItem.openInMaps()

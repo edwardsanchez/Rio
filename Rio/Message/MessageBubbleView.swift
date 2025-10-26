@@ -288,7 +288,6 @@ struct MessageBubbleView: View {
         return width > 0 ? width : nil
     }
 
-    @ViewBuilder
     private func bubbleView(
         textColor: Color,
         backgroundColor: Color
@@ -296,7 +295,7 @@ struct MessageBubbleView: View {
 
         let hasContent = message.content.hasContent
 
-        ZStack(alignment: .leading) {
+        return ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
                 .opacity(0)
 

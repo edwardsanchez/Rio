@@ -220,7 +220,6 @@ struct ReactionsModifier: ViewModifier {
         }
     }
 
-    @ViewBuilder
     private func reactionButton(
         for reaction: Reaction,
         isVisible: Bool,

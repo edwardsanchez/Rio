@@ -365,7 +365,6 @@ struct ParticleExplosionTestView: View {
     }
     
     // Helper views
-    @ViewBuilder
     private func parameterTextField(_ label: String, value: Binding<Float>, binding: @escaping () -> Void) -> some View {
         HStack {
             Text(label + ":")
@@ -377,7 +376,6 @@ struct ParticleExplosionTestView: View {
         }
     }
     
-    @ViewBuilder
     private func parameterSlider(_ label: String, value: Binding<Float>, range: ClosedRange<Float>, binding: @escaping () -> Void) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
