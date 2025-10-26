@@ -269,7 +269,7 @@ class EmojiReactionViewModel {
             }
             let decoded = try JSONDecoder().decode(OpenAIEmojiReactionResponse.self, from: data)
             let suggestions = decoded.suggestions.map { s in
-                FastEmojiSuggestion(character: s.character, name: s.name, reason: s.reason)
+                FastEmojiSuggestion(character: s.character)
             }
             logSuggestions(suggestions, attempt: attempt)
             return suggestions
@@ -292,11 +292,9 @@ class EmojiReactionViewModel {
                         "items": [
                             "type": "object",
                             "properties": [
-                                "character": ["type": "string"],
-                                "name": ["type": "string"],
-                                "reason": ["type": "string"]
+                                "character": ["type": "string"]
                             ],
-                            "required": ["character", "name", "reason"],
+                            "required": ["character"],
                             "additionalProperties": false
                         ]
                     ]
@@ -398,14 +396,18 @@ class EmojiReactionViewModel {
     }
     
     let systemPrompt = """
-        Return six emoji reactions for chat messages. Each suggestion has fields:
-        - character: single emoji glyph (no text, codes, or placeholders)
-        - name: at most three words
-        - reason: at most twelve words referencing the message
-        Order suggestions best to worst, avoid duplicates, and respect tone_hint.
-        Reactions should respond thoughtfully to the message rather than mirror the sender's emotion.
-        If the user asks a question, always respond with 👍 and 👎 among the 6 options, unless either would be insensitive to include.
-        Use 👍 as a gentle acknowledgement whenever it fits and isn't tone-deaf, and reserve 👎 for cases where disagreement would still feel kind. Skip both for sensitive moments (grief, deep sadness, serious illness).
+        You are a conversation-aware emoji curator specializing in expressive yet thoughtful reactions for chat platforms.
+        Your task is to return six emoji suggestions, each with:
+        •    character: one emoji glyph (no emoji names, codes, or placeholders)
+        
+        Organize the reactions from most to least fitting based on the original message. Avoid repeating emojis and ensure reactions respond to the message rather than just mirror the sender’s tone.
+        
+        Key behavior requirements:
+        1.    Be context-sensitive: Avoid 👍/👎 in serious/sensitive moments (e.g., grief, illness).
+        2.    Use 👍 and or 👎 when a question is asked, and when doing so would not feel tone-deaf or insensitive.
+        3.    If a humorous attempt is detected, include 1–2 laughing emojis near the top of the list.
+        4.    Never duplicate emojis within the same list.
+        5.    Responses should consider tone_hint (if provided) to guide overall mood and relevance.
         """
     
     private func requestFastSuggestions(
@@ -527,13 +529,13 @@ class EmojiReactionViewModel {
             prompt = """
             last_message: "\(message)"
             tone_hint: \(toneHint)
-            Return six emoji suggestions (fields: character, name, reason). character must be a single emoji, name ≤ 3 words, reason ≤ 12 words tied to the message. Avoid duplicates. Base the reaction primarily on last_message, but consider conversation_context if provided.
+            Return six emoji suggestions as emoji glyphs only (character). Avoid duplicates. Base the reaction primarily on last_message, but consider conversation_context if provided.
             """
         case .minimal:
             prompt = """
             last_message: "\(message)"
             tone_hint: \(toneHint)
-            Provide six emoji suggestions (character, name, reason). Use only emoji glyphs; no text, codes, or repeats. Use last_message and consider conversation_context if present.
+            Provide six emoji suggestions (emoji glyphs only). Use only emoji glyphs; no text, codes, or repeats. Use last_message and consider conversation_context if present.
             """
         }
         
@@ -581,7 +583,7 @@ class EmojiReactionViewModel {
         let attemptLabel = isRetry ? "retry" : "attempt"
         log("   ⚡️ Fast model returned \(suggestions.count) suggestions (\(attemptLabel) \(attempt + 1)):")
         for (index, suggestion) in suggestions.enumerated() {
-            log("     \(index + 1). \(suggestion.character) \(suggestion.name): \(suggestion.reason)")
+            log("     \(index + 1). \(suggestion.character)")
         }
     }
 
@@ -595,7 +597,7 @@ class EmojiReactionViewModel {
         log("   🔍 Evaluating \(suggestions.count) suggestions against tone \(tone)")
         
         for (index, suggestion) in suggestions.enumerated() {
-            log("     ➡️ Suggestion \(index + 1): '\(suggestion.character)' named '\(suggestion.name)' – \(suggestion.reason)")
+            log("     ➡️ Suggestion \(index + 1): '\(suggestion.character)'")
             guard let emoji = normalizedEmoji(
                 from: suggestion,
                 using: allEmojis,
@@ -622,7 +624,7 @@ class EmojiReactionViewModel {
             .map { String(format: "%04X", $0.value) }
             .joined(separator: "_")
         let fallbackId = "fast_\(scalarId)"
-        let fallbackName = name.isEmpty ? "Emoji Reaction" : name
+        let fallbackName = name.isEmpty ? "" : name
         
         return Emoji(
             id: fallbackId,
@@ -670,7 +672,7 @@ class EmojiReactionViewModel {
             // Character is a valid single emoji, but not in our DB — create a fallback entry
             let fallback = makeFallbackEmoji(
                 character: trimmedCharacter,
-                name: suggestion.name
+                name: ""
             )
             log("     ✅ Accepted suggestion \(index + 1) '\(trimmedCharacter)' – created fallback emoji \(fallback.id)")
             return fallback

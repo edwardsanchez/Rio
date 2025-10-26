@@ -22,12 +22,6 @@ enum EmojiProvider: String, CaseIterable, Identifiable {
 struct FastEmojiSuggestion: Sendable {
     @Guide(description: "Emoji character for the reaction")
     let character: String
-    
-    @Guide(description: "Short descriptive name for the emoji reaction")
-    let name: String
-    
-    @Guide(description: "Brief reason tying the emoji to user_text")
-    let reason: String
 }
 
 @Generable
@@ -40,8 +34,6 @@ struct FastEmojiReactionResponse: Sendable {
 
 struct OpenAIEmojiSuggestion: Decodable {
     let character: String
-    let name: String
-    let reason: String
 }
 
 struct OpenAIEmojiReactionResponse: Decodable {

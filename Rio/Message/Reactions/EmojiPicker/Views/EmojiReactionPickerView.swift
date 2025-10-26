@@ -54,8 +54,7 @@ struct EmojiReactionPickerView: View {
                         You: That could be fun—who else is going?
                         Alex: A bunch of our college friends. Starts at 7.
                         You: Nice, I’ll grab a card on the way.
-                        Alex: So… want to go to the party together?
-                        You: Yes
+                        Alex: Ok awesome!
                         """.trimmingCharacters(in: .whitespacesAndNewlines)
                         conversationText = transcript
                         lastMessage = "Yes"
@@ -71,7 +70,6 @@ struct EmojiReactionPickerView: View {
                         Alex: I just heard about your uncle. I’m so sorry.
                         You: Thanks… it’s been a hard week.
                         Alex: Do you want to go to the funeral together?
-                        You: Yes
                         """.trimmingCharacters(in: .whitespacesAndNewlines)
                         conversationText = transcript
                         lastMessage = "Yes"
@@ -87,7 +85,6 @@ struct EmojiReactionPickerView: View {
                         PM: I pushed the latest brief into the shared folder.
                         You: Got it—reviewing now.
                         PM: Can you send the draft by EOD if possible?
-                        You: Sounds good
                         """.trimmingCharacters(in: .whitespacesAndNewlines)
                         conversationText = transcript
                         lastMessage = "Sounds good"
@@ -103,7 +100,6 @@ struct EmojiReactionPickerView: View {
                         Partner: Can we talk about splitting chores more evenly?
                         You: I’ve been swamped lately, but I hear you.
                         Partner: Could you handle dishes tonight and laundry tomorrow?
-                        You: Fine
                         """.trimmingCharacters(in: .whitespacesAndNewlines)
                         conversationText = transcript
                         lastMessage = "Fine"
