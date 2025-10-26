@@ -10,7 +10,7 @@ import SwiftUI
 /// Custom layout that positions items in a circular arrangement around a center point
 struct RadialLayout: Layout {
     var radius: CGFloat
-    var menuIsShowing: Bool
+    var isReactionMenuShowing: Bool
     var itemCount: Int
     var itemSpacing: CGFloat
     var spacerCenterPercent: CGFloat
@@ -24,14 +24,14 @@ struct RadialLayout: Layout {
 
     init(
         radius: CGFloat,
-        menuIsShowing: Bool = false,
+        isReactionMenuShowing: Bool = false,
         itemCount: Int,
         itemSpacing: CGFloat,
         spacerCenterPercent: CGFloat,
         parentSize: CGSize
     ) {
         self.radius = radius
-        self.menuIsShowing = menuIsShowing
+        self.isReactionMenuShowing = isReactionMenuShowing
         self.itemCount = itemCount
         self.itemSpacing = itemSpacing
         self.spacerCenterPercent = spacerCenterPercent
@@ -73,7 +73,7 @@ struct RadialLayout: Layout {
         for (index, subview) in subviews.enumerated() {
             let angle = angles[index]
             let radians = angle * .pi / 180.0
-            let currentRadius = menuIsShowing ? radius : 0
+            let currentRadius = isReactionMenuShowing ? radius : 0
             let progress = count > 1 ? CGFloat(index) / CGFloat(collapsedDenominator) : 0.5
             let availableWidth = max(parentWidth - marginX * 2, 0)
             let relativeX = marginX + availableWidth * progress
@@ -89,7 +89,7 @@ struct RadialLayout: Layout {
             let collapsedX: CGFloat
             let collapsedY: CGFloat
             
-            if !menuIsShowing {
+            if !isReactionMenuShowing {
                 if distributeHorizontally,
                    parentWidth > marginX * 2,
                    parentWidth > 0,
@@ -110,8 +110,8 @@ struct RadialLayout: Layout {
                 collapsedX = center.x
                 collapsedY = center.y
             }
-            let x = menuIsShowing ? defaultX : collapsedX
-            let y = menuIsShowing ? defaultY : collapsedY
+            let x = isReactionMenuShowing ? defaultX : collapsedX
+            let y = isReactionMenuShowing ? defaultY : collapsedY
 
             // Place the subview at the calculated position
             subview.place(at: CGPoint(x: x, y: y), anchor: .center, proposal: .unspecified)

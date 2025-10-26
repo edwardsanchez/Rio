@@ -11,18 +11,21 @@ struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
     @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
     
+    let context: ReactingMessageContext
+    
     private var menuIsShowing: Bool {
-        reactionsCoordinator.isMenuActive(for: menuModel.messageID)
+        reactionsCoordinator.isMenuActive(for: reactionsMenuModel.messageID)
     }
     @State private var viewSize: CGSize = .zero
 
     @Namespace private var reactionNamespace
-    @State private var menuModel: ReactionsMenuModel
+    @State private var reactionsMenuModel: ReactionsMenuModel
 
     var reactions: [Reaction]
-    var isEnabled: Bool
+    var isAvailable: Bool
+    var isReactionOverlay: Bool
 
-    private var selectedReaction: Reaction? { menuModel.selectedReaction }
+    private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
 
     static var defaultReactions: [Reaction] {
         [
@@ -38,10 +41,12 @@ struct ReactionsModifier: ViewModifier {
 
     private let reactionSpacing: CGFloat = 50
 
-    init(messageID: UUID, reactions: [Reaction], isEnabled: Bool) {
+    init(context: ReactingMessageContext, reactions: [Reaction], isAvailable: Bool, isReactionOverlay: Bool) {
+        self.context = context
         self.reactions = reactions
-        self.isEnabled = isEnabled
-        _menuModel = State(initialValue: ReactionsMenuModel(messageID: messageID, reactions: reactions))
+        self.isAvailable = isAvailable
+        self.isReactionOverlay = isReactionOverlay
+        _reactionsMenuModel = State(initialValue: ReactionsMenuModel(messageID: context.message.id, reactions: reactions))
     }
 
     // Centralizes timing multipliers so related animations stay in sync.
@@ -114,78 +119,79 @@ struct ReactionsModifier: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
-        @Bindable var menuModel = menuModel
-        if isEnabled {
-            content
-                .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-                .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
-                .onGeometryChange(for: CGSize.self) { proxy in
-                    proxy.size
-                } action: { newSize in
-                    viewSize = newSize
-                    menuModel.viewSize = newSize
-                }
-                .overlay(alignment: .topTrailing) {
-                    if let selectedReaction {
-                        //Here only for the purposes of geometry matching
-                        reactionButton(
-                            for: selectedReaction,
-                            isVisible: false,
-                            isOverlay: true,
-                            isSelected: false
-                        ) {}
-                            .allowsHitTesting(false)
+        @Bindable var reactionsMenuModel = reactionsMenuModel
+        if isAvailable {
+            if isReactionOverlay {
+                content
+                    .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
+                    .animation(AnimationTiming.menuScaleAnimation, value: menuIsShowing)
+                    .onGeometryChange(for: CGSize.self) { proxy in
+                        proxy.size
+                    } action: { newSize in
+                        viewSize = newSize
+                        reactionsMenuModel.viewSize = newSize
                     }
-                }
-                .background {
-                    ReactionsMenuView(
-                        isOverlay: false,
-                        model: menuModel,
-                        reactionNamespace: reactionNamespace
-                    )
-                    .opacity(menuModel.showBackgroundMenu ? 1 : 0)
-                }
-                .overlay {
-                    ReactionsMenuView(
-                        isOverlay: true,
-                        model: menuModel,
-                        reactionNamespace: reactionNamespace
-                    )
-                }
-                .onTapGesture {
-                    menuModel.closeMenu()
-                }
-                .onLongPressGesture {
-                    menuModel.openMenu()
-                }
-                .sensoryFeedback(.impact, trigger: menuIsShowing)
-                .onAppear {
-                    menuModel.coordinator = reactionsCoordinator
-                    menuModel.chatData = chatData
-                    menuModel.onOpenEmojiPicker = {
-                        menuModel.setCustomEmojiHighlight(true)
-                        reactionsCoordinator.isEmojiPickerPresented = true
-                    }
-                }
-                .sheet(
-                    isPresented: Binding(
-                        get: { reactionsCoordinator.isEmojiPickerPresented },
-                        set: { reactionsCoordinator.isEmojiPickerPresented = $0 }
-                    ),
-                    onDismiss: {
-                        menuModel.setCustomEmojiHighlight(false)
-                        if menuModel.menuIsShowing {
-                            menuModel.prepareCustomEmojiForMenuOpen()
+                    .overlay(alignment: .topTrailing) {
+                        if let selectedReaction {
+                            //Here only for the purposes of geometry matching
+                            reactionButton(
+                                for: selectedReaction,
+                                isVisible: false,
+                                isOverlay: true,
+                                isSelected: false
+                            ) {}
+                                .allowsHitTesting(false)
                         }
                     }
-                ) {
-                    EmojiPickerView { emoji in
-                        menuModel.applyCustomEmojiSelection(emoji.character)
-                        menuModel.setCustomEmojiHighlight(false)
-                        reactionsCoordinator.isEmojiPickerPresented = false
+                    .background {
+                        ReactionsMenuView(
+                            isOverlay: false,
+                            reactionsMenuModel: reactionsMenuModel,
+                            reactionNamespace: reactionNamespace
+                        )
+                        .opacity(reactionsMenuModel.showBackgroundMenu ? 1 : 0)
                     }
-                    .presentationDetents([.height(300)])
-                }
+                    .overlay {
+                        ReactionsMenuView(
+                            isOverlay: true,
+                            reactionsMenuModel: reactionsMenuModel,
+                            reactionNamespace: reactionNamespace
+                        )
+                    }
+                    .onAppear {
+                        reactionsMenuModel.coordinator = reactionsCoordinator
+                        reactionsMenuModel.chatData = chatData
+                    }
+                    .sheet(
+                        isPresented: Binding(
+                            get: { reactionsCoordinator.isCustomEmojiPickerPresented },
+                            set: { reactionsCoordinator.isCustomEmojiPickerPresented = $0 }
+                        ),
+                        onDismiss: {
+                            reactionsMenuModel.setCustomEmojiHighlight(false)
+                            if reactionsMenuModel.isReactionMenuShowing {
+                                reactionsMenuModel.prepareCustomEmojiForMenuOpen()
+                            }
+                        }
+                    ) {
+                        EmojiPickerView { emoji in
+                            reactionsMenuModel.applyCustomEmojiSelection(emoji.character)
+                            reactionsMenuModel.setCustomEmojiHighlight(false)
+                            reactionsCoordinator.isCustomEmojiPickerPresented = false
+                        }
+                        .presentationDetents([.height(300)])
+                    }
+                    .onTapGesture {
+                        reactionsMenuModel.closeReactionsMenu()
+                    }
+            } else {
+                content
+                    .onLongPressGesture {
+                        reactionsMenuModel.openReactionsMenu()
+                        reactionsCoordinator.openReactionsMenu(with: context)
+                    }
+                    .sensoryFeedback(.impact, trigger: menuIsShowing)
+            }
         } else {
             content
         }
@@ -227,7 +233,7 @@ struct ReactionsModifier: ViewModifier {
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
-        guard menuModel.selectedReactionID == reaction.id else {
+        guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
         return isOverlay ? !menuIsShowing : menuIsShowing
@@ -247,21 +253,23 @@ struct ReactionsModifier: ViewModifier {
     }
 
     private func scaleFactor(for reaction: Reaction) -> CGFloat {
-        reaction.id == Reaction.customEmojiReactionID && menuModel.isCustomEmojiHighlighted ? 1.2 : 1
+        reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.2 : 1
     }
 }
 
 extension View {
     func reactions(
-        messageID: UUID,
+        context: ReactingMessageContext,
         reactions: [Reaction] = ReactionsModifier.defaultReactions,
-        isEnabled: Bool = true
+        isAvailable: Bool = true,
+        isReactionOverlay: Bool
     ) -> some View {
         modifier(
             ReactionsModifier(
-                messageID: messageID,
+                context: context,
                 reactions: reactions,
-                isEnabled: isEnabled
+                isAvailable: isAvailable,
+                isReactionOverlay: isReactionOverlay
             )
         )
     }
@@ -350,6 +358,7 @@ fileprivate struct TapBackTestView: View {
     @State private var demoWidth: Double = 250
     @State private var demoHeight: Double = 150
     @State private var messageID = UUID()
+    @Environment(ChatData.self) private var chatData
 
     private let testCases: [(String, CGFloat, CGFloat)] = [
         ("Narrow + Short", 60, 60),
@@ -364,7 +373,13 @@ fileprivate struct TapBackTestView: View {
                 .fill(.green)
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
-                .reactions(messageID: messageID)
+                .reactions(
+                    context: ReactingMessageContext(
+                        message: Message(content: .text("Test"), from: chatData.currentUser, date: Date()),
+                        showTail: true,
+                        theme: .defaultTheme
+                    ), isReactionOverlay: false
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .padding(.horizontal)
 

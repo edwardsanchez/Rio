@@ -11,7 +11,6 @@ import SwiftUI
 final class ReactionsMenuModel {
     var coordinator: ReactionsCoordinator?
     var chatData: ChatData?
-    var onOpenEmojiPicker: (() -> Void)?
 
     let messageID: UUID
     var reactions: [Reaction]
@@ -71,7 +70,7 @@ final class ReactionsMenuModel {
     }
 
     // MARK: - Derived State
-    var menuIsShowing: Bool {
+    var isReactionMenuShowing: Bool {
         coordinator?.isMenuActive(for: messageID) ?? false
     }
 
@@ -101,7 +100,7 @@ final class ReactionsMenuModel {
     }
 
     var calculatedOffset: CGSize {
-        guard menuIsShowing else { return .zero }
+        guard isReactionMenuShowing else { return .zero }
         let config = layoutCase.config
         let baseOffset = config.baseOffset(for: viewSize)
         let horizontalAdjustment = config.horizontalAnchor.xOffset(for: viewSize)
@@ -121,34 +120,34 @@ final class ReactionsMenuModel {
         }
     }
 
-    func openMenu() {
+    func openReactionsMenu() {
         prepareCustomEmojiForMenuOpen()
-        coordinator?.openMenu(for: messageID)
         setBackgroundMenuVisible(true)
     }
 
-    func closeMenu(delay: TimeInterval = 0) {
+    func closeReactionsMenu(delay: TimeInterval = 0) {
         scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration + delay)
         setCustomEmojiHighlight(false)
-        coordinator?.closeMenu()
+        coordinator?.closeReactionsMenu()
         setBackgroundMenuVisible(false, delay: delay)
     }
 
     func handleReactionTap(_ reaction: Reaction) {
-        guard menuIsShowing else {
-            openMenu()
+        guard isReactionMenuShowing else {
+            openReactionsMenu()
             return
         }
 
         if reaction.id == Constants.customEmojiReactionID {
-            onOpenEmojiPicker?()
+            setCustomEmojiHighlight(true)
+            coordinator?.isCustomEmojiPickerPresented = true
             return
         }
 
         let isSameReaction = selectedReactionID == reaction.id
         selectedReactionID = isSameReaction ? nil : reaction.id
         chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-        closeMenu(delay: AnimationTiming.reactionHideDelay)
+        closeReactionsMenu(delay: AnimationTiming.reactionHideDelay)
     }
 
     func applyCustomEmojiSelection(_ emoji: String) {
@@ -159,7 +158,7 @@ final class ReactionsMenuModel {
         updateCustomReactionDisplay(showingEmoji: true)
         chatData?.addReaction(emoji, toMessageId: messageID)
         DispatchQueue.main.async { [weak self] in
-            self?.closeMenu(delay: AnimationTiming.reactionHideDelay)
+            self?.closeReactionsMenu(delay: AnimationTiming.reactionHideDelay)
         }
     }
 

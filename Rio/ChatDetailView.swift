@@ -51,16 +51,34 @@ struct ChatDetailView: View {
             messagesView
             inputFieldView
             imageOverlay
+            reactionsOverlay
         }
         .tint(chat.theme.outboundBackgroundColor)
-        .overlay {
-            if reactionsCoordinator.isEmojiPickerPresented {
-                Rectangle()
-                    .fill(Material.ultraThin)
-                    .ignoresSafeArea()
+        .environment(reactionsCoordinator)
+    }
+
+    var reactionsOverlay: some View {
+        Group {
+            if let context = reactionsCoordinator.reactingMessage {
+                ZStack {
+                    Rectangle()
+                        .fill(Material.ultraThin)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            reactionsCoordinator.closeReactionsMenu()
+                        }
+
+                    MessageBubbleView(
+                        message: context.message,
+                        showTail: context.showTail,
+                        theme: context.theme,
+                        isReactionsOverlay: true,
+                        selectedImageData: $selectedImageData
+                    )
+                    .padding(20)
+                }
             }
         }
-        .environment(reactionsCoordinator)
     }
 
     var inputFieldView: some View {

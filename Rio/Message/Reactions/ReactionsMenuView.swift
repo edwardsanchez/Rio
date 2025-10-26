@@ -9,38 +9,38 @@ import SwiftUI
 
 struct ReactionsMenuView: View {
     var isOverlay: Bool
-    var model: ReactionsMenuModel
+    var reactionsMenuModel: ReactionsMenuModel
     var reactionNamespace: Namespace.ID
 
-    private var selectedReaction: Reaction? { model.selectedReaction }
+    private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
 
     var body: some View {
         RadialLayout(
-            radius: model.calculatedRadius,
-            menuIsShowing: model.menuIsShowing,
-            itemCount: model.reactions.count,
-            itemSpacing: model.calculatedReactionSpacing,
-            spacerCenterPercent: model.calculatedSpacerCenterPercent,
-            parentSize: model.viewSize
+            radius: reactionsMenuModel.calculatedRadius,
+            isReactionMenuShowing: reactionsMenuModel.isReactionMenuShowing,
+            itemCount: reactionsMenuModel.reactions.count,
+            itemSpacing: reactionsMenuModel.calculatedReactionSpacing,
+            spacerCenterPercent: reactionsMenuModel.calculatedSpacerCenterPercent,
+            parentSize: reactionsMenuModel.viewSize
         ) {
-            ForEach(Array(model.reactions.enumerated()), id: \.element.id) { index, reaction in
+            ForEach(Array(reactionsMenuModel.reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(
                     for: reaction,
                     isVisible: (selectedReaction != reaction) != isOverlay,
                     isOverlay: isOverlay,
                     isSelected: selectedReaction == reaction
                 ) {
-                    model.handleReactionTap(reaction)
+                    reactionsMenuModel.handleReactionTap(reaction)
                 }
                 .animation(
-                    .interpolatingSpring(model.menuIsShowing ? .bouncy : .smooth, initialVelocity: model.menuIsShowing ? 0 : -5)
+                    .interpolatingSpring(reactionsMenuModel.isReactionMenuShowing ? .bouncy : .smooth, initialVelocity: reactionsMenuModel.isReactionMenuShowing ? 0 : -5)
                     .delay(Double(index) * ReactionsMenuModel.AnimationTiming.reactionStaggerStep),
-                    value: model.menuIsShowing
+                    value: reactionsMenuModel.isReactionMenuShowing
                 )
             }
         }
-        .offset(model.calculatedOffset)
-        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: model.menuIsShowing)
+        .offset(reactionsMenuModel.calculatedOffset)
+        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isReactionMenuShowing)
     }
 
     @ViewBuilder
@@ -57,7 +57,7 @@ struct ReactionsMenuView: View {
                 .shadow(color: Color.base.opacity(1), radius: 3)
                 .background {
                     Circle()
-                        .fill(isSelected && model.menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
+                        .fill(isSelected && reactionsMenuModel.isReactionMenuShowing ? Color.accentColor.opacity(0.3) : .clear)
                         .frame(width: 44, height: 44)
                         .animation(.smooth, value: isSelected)
                 }
@@ -78,10 +78,10 @@ struct ReactionsMenuView: View {
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
-        guard model.selectedReactionID == reaction.id else {
+        guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
-        return isOverlay ? !model.menuIsShowing : model.menuIsShowing
+        return isOverlay ? !reactionsMenuModel.isReactionMenuShowing : reactionsMenuModel.isReactionMenuShowing
     }
 
     @ViewBuilder
@@ -98,6 +98,6 @@ struct ReactionsMenuView: View {
     }
 
     private func scaleFactor(for reaction: Reaction) -> CGFloat {
-        reaction.id == Reaction.customEmojiReactionID && model.isCustomEmojiHighlighted ? 1.4 : 1
+        reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.4 : 1
     }
 }

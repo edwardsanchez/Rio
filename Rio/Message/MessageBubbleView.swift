@@ -41,6 +41,7 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+    let isReactionsOverlay: Bool
 
     @State private var showTypingIndicatorContent = false
     @State private var showTalkingContent = false
@@ -74,6 +75,7 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
+        isReactionsOverlay: Bool = false,
         selectedImageData: Binding<ImageData?>
     ) {
         self.message = message
@@ -86,6 +88,7 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self.isReactionsOverlay = isReactionsOverlay
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
@@ -315,6 +318,8 @@ struct MessageBubbleView: View {
             backgroundColor: backgroundColor,
             showTail: showTail,
             messageID: message.id,
+            context: ReactingMessageContext(message: message, showTail: showTail, theme: theme),
+            isReactionsOverlay: isReactionsOverlay,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,

@@ -7,23 +7,29 @@
 
 import SwiftUI
 
+struct ReactingMessageContext {
+    let message: Message
+    let showTail: Bool
+    let theme: ChatTheme
+}
+
 @Observable
 final class ReactionsCoordinator {
-    // Tracks which message currently displays a reactions menu
-    var activeReactionMessageID: UUID?
+    // Tracks the message currently displaying a reactions menu with full context
+    var reactingMessage: ReactingMessageContext?
     // Tracks whether the emoji picker sheet is presented (only one can be shown at a time)
-    var isEmojiPickerPresented = false
+    var isCustomEmojiPickerPresented = false
 
-    func openMenu(for messageID: UUID) {
-        activeReactionMessageID = messageID
+    func openReactionsMenu(with context: ReactingMessageContext) {
+        reactingMessage = context
     }
 
-    func closeMenu() {
-        activeReactionMessageID = nil
-        isEmojiPickerPresented = false
+    func closeReactionsMenu() {
+        reactingMessage = nil
+        isCustomEmojiPickerPresented = false
     }
 
     func isMenuActive(for messageID: UUID) -> Bool {
-        activeReactionMessageID == messageID
+        reactingMessage?.message.id == messageID
     }
 }
