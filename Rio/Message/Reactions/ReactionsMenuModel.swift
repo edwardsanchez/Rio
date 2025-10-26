@@ -81,8 +81,17 @@ final class ReactionsMenuModel {
     var calculatedReactionSpacing: CGFloat { reactionSpacing }
 
     // MARK: - Intents
-    func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
-        withAnimation(ReactionsAnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
+    func setBackgroundMenuVisible(
+        _ value: Bool,
+        delay: TimeInterval = 0,
+        includeShowDelay: Bool = true
+    ) {
+        let animation = ReactionsAnimationTiming.backgroundFadeAnimation(
+            isShowing: value,
+            additionalDelay: delay,
+            includeShowDelay: includeShowDelay
+        )
+        withAnimation(animation) {
             showBackgroundMenu = value
         }
     }
@@ -115,10 +124,10 @@ final class ReactionsMenuModel {
         backgroundHideWorkItem?.cancel()
         menuCloseWorkItem?.cancel()
 
+        setBackgroundMenuVisible(true, includeShowDelay: false)
+
         let collapseWorkItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
-
-            self.setBackgroundMenuVisible(true)
 
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
                 self.menuIsOpen = false
@@ -139,7 +148,7 @@ final class ReactionsMenuModel {
             )
         }
 
-        let totalDelay = ReactionsAnimationTiming.baseDuration + delay
+        let totalDelay = ReactionsAnimationTiming.baseDuration + ReactionsAnimationTiming.overlayHoldDuration + delay
         scheduleCustomEmojiRestore(after: totalDelay)
         setCustomEmojiHighlight(false)
         coordinator?.closeReactionsMenu(after: totalDelay)
@@ -253,7 +262,7 @@ final class ReactionsMenuModel {
 
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + ReactionsAnimationTiming.baseDuration + 0.5,
+            deadline: .now() + ReactionsAnimationTiming.baseDuration + ReactionsAnimationTiming.overlayHoldDuration,
             execute: workItem
         )
     }
@@ -304,6 +313,7 @@ enum ReactionsAnimationTiming {
     static let backgroundShowDelayMultiplier: Double = 0.5
     static let reactionHideDelayMultiplier: Double = 0.25
     static let backgroundFadeDurationMultiplier: Double = 0.875
+    static let overlayHoldDelayMultiplier: Double = 0.75
     static let fanOutDelay: TimeInterval = 0.3
 
     static var reactionStaggerStep: TimeInterval {
@@ -318,6 +328,10 @@ enum ReactionsAnimationTiming {
         baseDuration * reactionHideDelayMultiplier
     }
 
+    static var overlayHoldDuration: TimeInterval {
+        baseDuration * overlayHoldDelayMultiplier
+    }
+
     static var menuScaleAnimation: Animation {
         .interpolatingSpring(duration: baseDuration, bounce: 0.5, initialVelocity: -20)
     }
@@ -330,9 +344,14 @@ enum ReactionsAnimationTiming {
         .bouncy(duration: baseDuration)
     }
 
-    static func backgroundFadeAnimation(isShowing: Bool, additionalDelay: TimeInterval = 0) -> Animation {
+    static func backgroundFadeAnimation(
+        isShowing: Bool,
+        additionalDelay: TimeInterval = 0,
+        includeShowDelay: Bool = true
+    ) -> Animation {
         let base = Animation.easeInOut(duration: baseDuration * backgroundFadeDurationMultiplier)
-        let delay = (isShowing ? backgroundShowDelay : 0) + additionalDelay
+        let showDelay = isShowing && includeShowDelay ? backgroundShowDelay : 0
+        let delay = showDelay + additionalDelay
         return delay == 0 ? base : base.delay(delay)
     }
 }

@@ -120,7 +120,9 @@ struct ReactionsModifier: ViewModifier {
                             reactionsMenuModel: reactionsMenuModel,
                             reactionNamespace: reactionNamespace
                         )
-                        .opacity(reactionsMenuModel.showBackgroundMenu ? 0 : 1)
+                        .opacity(
+                            reactionsMenuModel.isShowingReactionMenu && !reactionsMenuModel.showBackgroundMenu ? 1 : 0
+                        )
                     }
                     .onAppear {
                         adoptSharedMenuModel()
