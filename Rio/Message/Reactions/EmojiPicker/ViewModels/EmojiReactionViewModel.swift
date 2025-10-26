@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import FoundationModels
+// OpenAI integration helper lives in: OpenAI Example/OpenAI.swift
 
 @MainActor
 @Observable
@@ -16,6 +17,7 @@ class EmojiReactionViewModel {
     var finalists: [Emoji] = []
     var isLoading: Bool = false
     var errorMessage: String?
+    var provider: EmojiProvider = .openai
 
     private static var isRunningInPreview: Bool {
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
@@ -54,7 +56,6 @@ class EmojiReactionViewModel {
     }
 
     func findEmojis(for text: String, context: String?) async {
-        log("\n⚙️ Fast emoji pipeline requested for input length \(text.count) characters")
         guard !text.isEmpty else {
             errorMessage = "Please enter some text"
             return
@@ -63,20 +64,6 @@ class EmojiReactionViewModel {
         let trimmedText = trimmedInput(for: text)
         if trimmedText.count != text.count {
             log("✂️ Input truncated from \(text.count) to \(trimmedText.count) characters to cap prompt size")
-        }
-
-        guard let fastModel = fastModel else {
-            errorMessage = "Emoji reactions require the on-device language model, which isn't available in previews."
-            log("ℹ️ Fast model unavailable – likely running inside previews or unsupported platform.")
-            return
-        }
-
-        log("ℹ️ Fast model use case: general")
-        log("ℹ️ Fast model availability: \(fastModel.availability)")
-
-        guard fastModel.isAvailable else {
-            errorMessage = "Fast emoji model is not available"
-            return
         }
 
         isLoading = true
@@ -88,6 +75,29 @@ class EmojiReactionViewModel {
             logPromptMetrics("Conversation context", text: trimmedContext)
         }
 
+        switch provider {
+        case .apple:
+            await runApplePipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
+        case .openai:
+            await runOpenAIPipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
+        }
+
+        isLoading = false
+    }
+
+    private func runApplePipeline(trimmedText: String, trimmedContext: String?) async {
+        log("\n⚙️ Apple fast emoji pipeline requested for input length \(trimmedText.count) characters")
+        guard let fastModel = fastModel else {
+            errorMessage = "Emoji reactions require the on-device language model, which isn't available in previews."
+            log("ℹ️ Fast model unavailable – likely running inside previews or unsupported platform.")
+            return
+        }
+        log("ℹ️ Fast model use case: general")
+        log("ℹ️ Fast model availability: \(fastModel.availability)")
+        guard fastModel.isAvailable else {
+            errorMessage = "Fast emoji model is not available"
+            return
+        }
         do {
             log("⚡️ Running fast emoji reaction pipeline for: '\(trimmedText)'")
             let fastEmojis = try await fastSelectFinalists(text: trimmedText, context: trimmedContext, model: fastModel)
@@ -105,8 +115,26 @@ class EmojiReactionViewModel {
             }
             log("⚠️ Fast pipeline error: \(error)")
         }
+    }
 
-        isLoading = false
+    private func runOpenAIPipeline(trimmedText: String, trimmedContext: String?) async {
+        log("\n🔵 OpenAI emoji pipeline requested for input length \(trimmedText.count) characters")
+        do {
+            let openAIEmojis = try await openAISelectFinalists(text: trimmedText, context: trimmedContext)
+            finalists = openAIEmojis
+            log("✅ OpenAI pipeline complete! Found \(openAIEmojis.count) finalists")
+            log("🎯 Final finalists: \(openAIEmojis.map { $0.character }.joined(separator: ", "))")
+        } catch {
+            let tone = detectTone(for: trimmedText)
+            let fallback = fallbackFinalists(for: tone)
+            if fallback.isEmpty {
+                errorMessage = "Emoji reactions are temporarily unavailable (\(error.localizedDescription))"
+            } else {
+                finalists = fallback
+                errorMessage = "Showing quick emoji suggestions while OpenAI catches up."
+            }
+            log("⚠️ OpenAI pipeline error: \(error)")
+        }
     }
     
     // MARK: - Fast Pipeline
@@ -160,6 +188,170 @@ class EmojiReactionViewModel {
         return finalists
     }
 
+    // MARK: - OpenAI Pipeline
+
+    private func openAISelectFinalists(text: String, context: String?) async throws -> [Emoji] {
+        let tone = detectTone(for: text)
+        var bestResolved: [Emoji] = []
+        log("   🧭 (OpenAI) Detected tone: \(tone)")
+        log("   🎯 (OpenAI) Target finalists: \(fastEmojiTargetCount)")
+
+        for attempt in 0..<3 {
+            let suggestions = try await requestOpenAISuggestions(
+                text: text,
+                context: context,
+                tone: tone,
+                attempt: attempt
+            )
+            let resolved = resolveFastSuggestions(
+                suggestions,
+                tone: tone
+            )
+            log("   📊 (OpenAI) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
+
+            if !resolved.isEmpty {
+                bestResolved = resolved
+            }
+
+            if resolved.count >= fastEmojiTargetCount {
+                log("   ✅ (OpenAI) Attempt \(attempt + 1) met target with \(resolved.count) emoji")
+                let finalists = resolved.count > fastEmojiTargetCount
+                    ? Array(resolved.prefix(fastEmojiTargetCount))
+                    : resolved
+                log("   🎉 (OpenAI) Finalists selected: \(finalists.map { $0.character }.joined(separator: ", "))")
+                return finalists
+            }
+        }
+
+        if bestResolved.isEmpty {
+            log("   ⚠️ (OpenAI) Pipeline could not obtain valid emoji suggestions")
+        } else if bestResolved.count < fastEmojiTargetCount {
+            log("   ⚠️ (OpenAI) Resolved only \(bestResolved.count) of \(fastEmojiTargetCount) emoji")
+        }
+
+        let finalists = Array(bestResolved.prefix(fastEmojiTargetCount))
+        log("   🎉 (OpenAI) Finalists selected after retries: \(finalists.map { $0.character }.joined(separator: ", "))")
+        return finalists
+    }
+
+    private func requestOpenAISuggestions(
+        text: String,
+        context: String?,
+        tone: FastFallbackTone,
+        attempt: Int
+    ) async throws -> [FastEmojiSuggestion] {
+        let config = requestConfiguration(for: attempt)
+        let toneHint = toneHint(for: tone)
+        let promptText = fastUserPrompt(
+            message: text,
+            context: context,
+            tone: tone,
+            toneHint: toneHint,
+            attempt: attempt,
+            variant: config.variant
+        )
+
+        logPromptMetrics("(OpenAI) System prompt", text: systemPrompt)
+        logPromptMetrics("(OpenAI) User prompt", text: promptText)
+
+        let start = Date()
+        do {
+            log("   🚀 (OpenAI) Calling OpenAI (attempt \(attempt + 1))")
+            let content = try await sendOpenAICompletion(
+                systemPrompt: systemPrompt,
+                userPrompt: promptText,
+                schema: openAIResponseSchema()
+            )
+            let elapsed = Date().timeIntervalSince(start)
+            log(String(format: "   ⏱️ (OpenAI) Responded in %.2fs", elapsed))
+            guard let data = content.data(using: String.Encoding.utf8) else {
+                throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid OpenAI content encoding"])
+            }
+            let decoded = try JSONDecoder().decode(OpenAIEmojiReactionResponse.self, from: data)
+            let suggestions = decoded.suggestions.map { s in
+                FastEmojiSuggestion(character: s.character, name: s.name, reason: s.reason)
+            }
+            logSuggestions(suggestions, attempt: attempt)
+            return suggestions
+        } catch {
+            log("   ❌ (OpenAI) Error on attempt \(attempt + 1): \(error)")
+            throw error
+        }
+    }
+
+    private func openAIResponseSchema() -> [String: Any] {
+        [
+            "name": "emoji_reaction_response",
+            "schema": [
+                "type": "object",
+                "properties": [
+                    "suggestions": [
+                        "type": "array",
+                        "minItems": 6,
+                        "maxItems": 6,
+                        "items": [
+                            "type": "object",
+                            "properties": [
+                                "character": ["type": "string"],
+                                "name": ["type": "string"],
+                                "reason": ["type": "string"]
+                            ],
+                            "required": ["character", "name", "reason"],
+                            "additionalProperties": false
+                        ]
+                    ]
+                ],
+                "required": ["suggestions"],
+                "additionalProperties": false
+            ]
+        ]
+    }
+
+    // MARK: - OpenAI HTTP Helper
+    private func sendOpenAICompletion(
+        systemPrompt: String,
+        userPrompt: String,
+        schema: [String: Any]
+    ) async throws -> String {
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !apiKey.isEmpty else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -2, userInfo: [NSLocalizedDescriptionKey: "OPENAI_API_KEY environment variable not set"])
+        }
+        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        let payload: [String: Any] = [
+            "model": "gpt-5-nano-2025-08-07",
+            "messages": [
+                ["role": "system", "content": systemPrompt],
+                ["role": "user", "content": userPrompt]
+            ],
+            "response_format": [
+                "type": "json_schema",
+                "json_schema": schema
+            ]
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: payload)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response from OpenAI"])
+        }
+        guard httpResponse.statusCode == 200 else {
+            let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
+            throw NSError(domain: "EmojiReactionViewModel", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "OpenAI HTTP \(httpResponse.statusCode): \(body)"])
+        }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let choices = json["choices"] as? [[String: Any]],
+              let message = choices.first?["message"] as? [String: Any],
+              let content = message["content"] as? String else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse OpenAI content"])
+        }
+        return content
+    }
+
     private func fallbackFinalists(for tone: FastFallbackTone) -> [Emoji] {
         let characters: [String]
         switch tone {
@@ -205,14 +397,7 @@ class EmojiReactionViewModel {
         }
     }
     
-    private func requestFastSuggestions(
-        text: String,
-        context: String?,
-        tone: FastFallbackTone,
-        attempt: Int,
-        model: SystemLanguageModel
-    ) async throws -> [FastEmojiSuggestion] {
-        let systemPrompt = """
+    let systemPrompt = """
         Return six emoji reactions for chat messages. Each suggestion has fields:
         - character: single emoji glyph (no text, codes, or placeholders)
         - name: at most three words
@@ -222,6 +407,14 @@ class EmojiReactionViewModel {
         If the user asks a question, always respond with 👍 and 👎 among the 6 options, unless either would be insensitive to include.
         Use 👍 as a gentle acknowledgement whenever it fits and isn't tone-deaf, and reserve 👎 for cases where disagreement would still feel kind. Skip both for sensitive moments (grief, deep sadness, serious illness).
         """
+    
+    private func requestFastSuggestions(
+        text: String,
+        context: String?,
+        tone: FastFallbackTone,
+        attempt: Int,
+        model: SystemLanguageModel
+    ) async throws -> [FastEmojiSuggestion] {
         let temperature: Double = 0.4
         let config = requestConfiguration(for: attempt)
         let toneHint = toneHint(for: tone)

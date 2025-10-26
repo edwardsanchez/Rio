@@ -16,12 +16,32 @@ struct EmojiReactionPickerView: View {
     
     var body: some View {
         VStack(spacing: 24) {
+            // Provider toggle
+            Picker("Provider", selection: $viewModel.provider) {
+                ForEach(EmojiProvider.allCases) { provider in
+                    Text(provider.rawValue).tag(provider)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .onChange(of: viewModel.provider) { _, _ in
+                // Re-run with the latest inputs if available
+                let message = lastMessage.isEmpty ? viewModel.inputText : lastMessage
+                guard !message.isEmpty else { return }
+                Task {
+                    await viewModel.findEmojis(
+                        for: message,
+                        context: conversationText.isEmpty ? nil : conversationText
+                    )
+                }
+            }
+
             // Title
             Text("AI Emoji Reaction Picker")
                 .font(.title)
                 .fontWeight(.bold)
 
-            // Fast model is always used; toggle removed
+            // Fast/OpenAI toggle above
             
             // Preset conversations
             VStack(alignment: .leading, spacing: 12) {

@@ -8,6 +8,14 @@
 import Foundation
 import FoundationModels
 
+// MARK: - Provider
+
+enum EmojiProvider: String, CaseIterable, Identifiable {
+    case openai = "OpenAI"
+    case apple = "Apple"
+    var id: String { rawValue }
+}
+
 // MARK: - Fast Reaction Models
 
 @Generable
@@ -26,4 +34,16 @@ struct FastEmojiSuggestion: Sendable {
 struct FastEmojiReactionResponse: Sendable {
     @Guide(description: "Exactly six emoji reactions ordered best to worst", .count(6))
     let suggestions: [FastEmojiSuggestion]
+}
+
+// MARK: - OpenAI DTOs
+
+struct OpenAIEmojiSuggestion: Decodable {
+    let character: String
+    let name: String
+    let reason: String
+}
+
+struct OpenAIEmojiReactionResponse: Decodable {
+    let suggestions: [OpenAIEmojiSuggestion]
 }
