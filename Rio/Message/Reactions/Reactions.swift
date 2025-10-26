@@ -184,7 +184,6 @@ struct ReactionsModifier: ViewModifier {
                         .presentationDetents([.height(300)])
                     }
                     .onTapGesture {
-                        debugLog("Overlay tap closing menu for \(context.message.id.uuidString)")
                         reactionsMenuModel.closeReactionsMenu()
                     }
             } else {
@@ -202,7 +201,6 @@ struct ReactionsModifier: ViewModifier {
                         }
                     }
                     .onLongPressGesture {
-                        debugLog("Long press triggered for \(context.message.id.uuidString). Opening reactions menu.")
                         reactionsMenuModel.openReactionsMenu()
                         reactionsCoordinator.openReactionsMenu(
                             with: context,
@@ -284,13 +282,9 @@ struct ReactionsModifier: ViewModifier {
     private func adoptSharedMenuModel() {
         if let sharedModel = reactionsCoordinator.menuModel(for: context.message.id) {
             if sharedModel !== reactionsMenuModel {
-                debugLog("Adopting shared menu model \(modelIdentifier(sharedModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
                 reactionsMenuModel = sharedModel
-            } else {
-                debugLog("Reusing existing menu model \(modelIdentifier(sharedModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
             }
         } else {
-            debugLog("Registering new menu model \(modelIdentifier(reactionsMenuModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
             reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
             return
         }
@@ -298,15 +292,6 @@ struct ReactionsModifier: ViewModifier {
         reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
     }
 
-    private func modelIdentifier(_ model: ReactionsMenuModel) -> String {
-        String(describing: ObjectIdentifier(model))
-    }
-
-    private func debugLog(_ message: String) {
-#if DEBUG
-        print("[ReactionsModifier] \(message)")
-#endif
-    }
 }
 
 extension View {

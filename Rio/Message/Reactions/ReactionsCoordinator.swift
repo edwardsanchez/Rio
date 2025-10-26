@@ -26,17 +26,11 @@ final class ReactionsCoordinator {
         with context: ReactingMessageContext,
         menuModel: ReactionsMenuModel
     ) {
-        debugLog("Opening reactions menu for \(context.message.id.uuidString) with model \(self.modelIdentifier(menuModel))")
         self.registerMenuModel(menuModel, for: context.message.id)
         reactingMessage = context
     }
 
     func closeReactionsMenu() {
-        if let reactingMessage {
-            debugLog("Closing reactions menu for \(reactingMessage.message.id.uuidString)")
-        } else {
-            debugLog("Closing reactions menu with no active message")
-        }
         reactingMessage = nil
         isCustomEmojiPickerPresented = false
     }
@@ -48,40 +42,21 @@ final class ReactionsCoordinator {
     func registerMenuModel(_ model: ReactionsMenuModel, for messageID: UUID) {
         cleanupStaleMenuModels()
         if let existing = menuModels[messageID]?.model, existing !== model {
-            debugLog("Replacing menu model for \(messageID.uuidString) with \(self.modelIdentifier(model))")
             menuModels[messageID] = WeakMenuModel(model)
         } else if menuModels[messageID] == nil {
-            debugLog("Registering menu model \(self.modelIdentifier(model)) for \(messageID.uuidString)")
             menuModels[messageID] = WeakMenuModel(model)
-        } else {
-            debugLog("Keeping existing menu model for \(messageID.uuidString)")
         }
     }
 
     func menuModel(for messageID: UUID) -> ReactionsMenuModel? {
         cleanupStaleMenuModels()
-        let model = menuModels[messageID]?.model
-        if let model {
-            debugLog("Found menu model \(self.modelIdentifier(model)) for \(messageID.uuidString)")
-        } else {
-            debugLog("No menu model registered for \(messageID.uuidString)")
-        }
-        return model
+        return menuModels[messageID]?.model
     }
 
     private func cleanupStaleMenuModels() {
         menuModels = menuModels.filter { $0.value.model != nil }
     }
 
-    private func modelIdentifier(_ model: ReactionsMenuModel) -> String {
-        String(describing: ObjectIdentifier(model))
-    }
-
-    private func debugLog(_ message: String) {
-#if DEBUG
-        print("[ReactionsCoordinator] \(message)")
-#endif
-    }
 }
 
 private final class WeakMenuModel {
