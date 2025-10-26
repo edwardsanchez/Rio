@@ -321,7 +321,7 @@ class EmojiReactionViewModel {
         }
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let payload: [String: Any] = [
-            "model": "gpt-4o-mini-2024-07-18",
+            "model": "gpt-4.1-nano-2025-04-14",
             "messages": [
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": userPrompt]
