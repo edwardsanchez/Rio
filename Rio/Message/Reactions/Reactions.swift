@@ -13,9 +13,7 @@ struct ReactionsModifier: ViewModifier {
     
     let context: ReactingMessageContext
     
-    private var menuIsShowing: Bool {
-        reactionsCoordinator.isMenuActive(for: reactionsMenuModel.messageID)
-    }
+    private var menuIsShowing: Bool { reactionsMenuModel.isShowingReactionMenu }
     @State private var viewSize: CGSize = .zero
 
     @Namespace private var reactionNamespace

@@ -17,11 +17,13 @@ final class ReactionsMenuModel {
     private var customEmojiSelection: String?
     private var customEmojiResetWorkItem: DispatchWorkItem?
     private var backgroundHideWorkItem: DispatchWorkItem?
+    private var fanOutWorkItem: DispatchWorkItem?
     var isCustomEmojiHighlighted = false
 
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
     var showBackgroundMenu = false
+    var menuIsOpen = false
 
     private let reactionSpacing: CGFloat = 50
     private enum Constants {
@@ -36,9 +38,7 @@ final class ReactionsMenuModel {
     }
 
     // MARK: - Derived State
-    var isShowingReactionMenu: Bool {
-        coordinator?.isMenuActive(for: messageID) ?? false
-    }
+    var isShowingReactionMenu: Bool { menuIsOpen }
 
     var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
@@ -87,12 +87,33 @@ final class ReactionsMenuModel {
     }
 
     func openReactionsMenu() {
+        fanOutWorkItem?.cancel()
         prepareCustomEmojiForMenuOpen()
-        setBackgroundMenuVisible(true)
-        scheduleBackgroundMenuHide()
+
+        menuIsOpen = false
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
+                self.menuIsOpen = true
+            }
+            self.setBackgroundMenuVisible(true)
+            self.scheduleBackgroundMenuHide()
+        }
+
+        fanOutWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + ReactionsAnimationTiming.fanOutDelay,
+            execute: workItem
+        )
     }
 
     func closeReactionsMenu(delay: TimeInterval = 0) {
+        fanOutWorkItem?.cancel()
+        withAnimation {
+            menuIsOpen = false
+        }
+
         let totalDelay = ReactionsAnimationTiming.baseDuration + delay
         scheduleCustomEmojiRestore(after: totalDelay)
         setCustomEmojiHighlight(false)
@@ -246,6 +267,7 @@ enum ReactionsAnimationTiming {
     static let backgroundShowDelayMultiplier: Double = 0.5
     static let reactionHideDelayMultiplier: Double = 0.25
     static let backgroundFadeDurationMultiplier: Double = 0.875
+    static let fanOutDelay: TimeInterval = 0.3
 
     static var reactionStaggerStep: TimeInterval {
         baseDuration * reactionStaggerStepMultiplier
@@ -264,6 +286,10 @@ enum ReactionsAnimationTiming {
     }
 
     static var menuOffsetAnimation: Animation {
+        .bouncy(duration: baseDuration)
+    }
+
+    static var menuOpenAnimation: Animation {
         .bouncy(duration: baseDuration)
     }
 
