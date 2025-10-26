@@ -66,6 +66,8 @@ class EmojiReactionViewModel {
             log("✂️ Input truncated from \(text.count) to \(trimmedText.count) characters to cap prompt size")
         }
 
+        let activeProvider = provider
+        let requestStart = Date()
         isLoading = true
         errorMessage = nil
         finalists = []
@@ -75,12 +77,15 @@ class EmojiReactionViewModel {
             logPromptMetrics("Conversation context", text: trimmedContext)
         }
 
-        switch provider {
+        switch activeProvider {
         case .apple:
             await runApplePipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
         case .openai:
             await runOpenAIPipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
         }
+
+        let totalElapsed = Date().timeIntervalSince(requestStart)
+        log(String(format: "⏱️ Request finished in %.2fs using %@", totalElapsed, activeProvider.rawValue))
 
         isLoading = false
     }
@@ -316,7 +321,7 @@ class EmojiReactionViewModel {
         }
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let payload: [String: Any] = [
-            "model": "gpt-5-nano-2025-08-07",
+            "model": "gpt-4o-mini-2024-07-18",
             "messages": [
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": userPrompt]
@@ -354,7 +359,7 @@ class EmojiReactionViewModel {
         let characters: [String]
         switch tone {
         case .grief:
-            characters = ["🤍", "🤗", "🙏", "🕯️", "💐", "🤝"]
+            characters = ["🤍", "🙏", "🕯️", "💐", "😟"]
         case .celebration:
             characters = ["🎉", "🥳", "🎊", "🎈", "👏", "🎁"]
         case .question:
@@ -549,12 +554,12 @@ class EmojiReactionViewModel {
         if tone == .question {
             prompt += """
             
-            When the message is a question and the tone allows, include both 👍 and 👎 among the six reactions so the receiver can signal agreement or disagreement. Skip them only if they would be inappropriate for the context.
+            When the message is a question and the tone allows, include both 👍 and 👎 among the six reactions so the receiver can signal agreement or disagreement. Skip them only if they would be very inappropriate for the context.
             """
         } else if tone == .acknowledgement {
             prompt += """
             
-            When the message shares a plan or status update, include 👍 to acknowledge it. Offer 👎 only if expressing gentle disagreement would be considerate.
+            When the message shares a plan or status update, include 👍 to acknowledge it. Offer 👎 only if expressing gentle disagreement would not be insensitive.
             """
         } else if encouragesThumbsUp(for: tone) {
             prompt += """
@@ -741,7 +746,7 @@ class EmojiReactionViewModel {
             return [
                 "🎉", "🥳", "🎊", "🎈", "🍾", "🍻", "🥂", "🏆",
                 "😂", "🤣", "😆", "😜", "😝", "🤪", "😺", "😹",
-                "👏", "💃", "🕺", "🔥", "👍", "👎", "🪦", "🖤", "⚰️", "⚱️"
+                "👏", "💃", "🕺", "🔥", "👍", "👎", "🪦", "🖤", "⚰️", "⚱️", "🤗", "🤝", "🤑", "🤓", "👻", "👹", "👽", "👾"
             ].contains(character)
         case .celebration:
             return ["😢", "😭", "💔", "🕯️", "🪦", "🖤", "⚰️", "⚱️"].contains(character)
