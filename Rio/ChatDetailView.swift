@@ -63,7 +63,7 @@ struct ChatDetailView: View {
             if let context = reactionsCoordinator.reactingMessage {
                 ZStack {
                     Rectangle()
-                        .fill(.black.opacity(0.5))
+                        .fill(.base.opacity(0.9))
                         .ignoresSafeArea()
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
