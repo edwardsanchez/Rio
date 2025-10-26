@@ -118,6 +118,10 @@ struct ReactionsMenuView: View {
             return selectedReaction == reaction
         }
 
+        if reactionsMenuModel.showBackgroundMenu {
+            return true
+        }
+
         return menuIsShowing
     }
 }

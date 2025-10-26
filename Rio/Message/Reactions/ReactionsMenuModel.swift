@@ -18,6 +18,7 @@ final class ReactionsMenuModel {
     private var customEmojiResetWorkItem: DispatchWorkItem?
     private var backgroundHideWorkItem: DispatchWorkItem?
     private var fanOutWorkItem: DispatchWorkItem?
+    private var menuCloseWorkItem: DispatchWorkItem?
     var isCustomEmojiHighlighted = false
 
     var viewSize: CGSize = .zero
@@ -88,6 +89,7 @@ final class ReactionsMenuModel {
 
     func openReactionsMenu() {
         fanOutWorkItem?.cancel()
+        menuCloseWorkItem?.cancel()
         prepareCustomEmojiForMenuOpen()
 
         menuIsOpen = false
@@ -110,16 +112,37 @@ final class ReactionsMenuModel {
 
     func closeReactionsMenu(delay: TimeInterval = 0) {
         fanOutWorkItem?.cancel()
-        withAnimation {
-            menuIsOpen = false
+        backgroundHideWorkItem?.cancel()
+        menuCloseWorkItem?.cancel()
+
+        let collapseWorkItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+
+            self.setBackgroundMenuVisible(true)
+
+            withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
+                self.menuIsOpen = false
+            }
+
+            self.scheduleBackgroundMenuHideAfterClose()
+            self.menuCloseWorkItem = nil
+        }
+
+        menuCloseWorkItem = collapseWorkItem
+
+        if delay == 0 {
+            collapseWorkItem.perform()
+        } else {
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + delay,
+                execute: collapseWorkItem
+            )
         }
 
         let totalDelay = ReactionsAnimationTiming.baseDuration + delay
         scheduleCustomEmojiRestore(after: totalDelay)
         setCustomEmojiHighlight(false)
         coordinator?.closeReactionsMenu(after: totalDelay)
-        backgroundHideWorkItem?.cancel()
-        setBackgroundMenuVisible(false, delay: delay)
     }
 
     func handleReactionTap(_ reaction: Reaction) {
@@ -217,6 +240,20 @@ final class ReactionsMenuModel {
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
             deadline: .now() + ReactionsAnimationTiming.baseDuration,
+            execute: workItem
+        )
+    }
+
+    private func scheduleBackgroundMenuHideAfterClose() {
+        backgroundHideWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.setBackgroundMenuVisible(false)
+        }
+
+        backgroundHideWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + ReactionsAnimationTiming.baseDuration + 0.5,
             execute: workItem
         )
     }
