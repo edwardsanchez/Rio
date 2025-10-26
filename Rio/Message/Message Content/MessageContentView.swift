@@ -387,7 +387,6 @@ struct MessageContentView: View {
                         ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -402,7 +401,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -417,7 +415,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -436,7 +433,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -459,7 +455,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -492,7 +487,6 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -507,7 +501,6 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -527,7 +520,6 @@ struct MessageContentView: View {
                             ),
                             showTail: true,
                             theme: .defaultTheme,
-                            currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                             selectedImageData: $selectedImageData
                         )
                     }
@@ -577,7 +569,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -592,7 +583,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -624,7 +614,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -645,7 +634,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -663,7 +651,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -685,7 +672,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -715,7 +701,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -747,7 +732,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -762,7 +746,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -777,7 +760,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -792,7 +774,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -807,7 +788,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -822,7 +802,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -837,7 +816,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -852,7 +830,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -867,7 +844,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -882,7 +858,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -897,7 +872,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -931,7 +905,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -948,7 +921,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -965,7 +937,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -982,7 +953,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -999,7 +969,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1016,7 +985,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1033,7 +1001,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1050,7 +1017,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1067,7 +1033,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1084,7 +1049,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1101,7 +1065,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1133,7 +1096,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1148,7 +1110,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1163,7 +1124,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1184,7 +1144,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1205,7 +1164,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1226,7 +1184,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1241,7 +1198,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1256,7 +1212,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1288,7 +1243,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1303,7 +1257,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1318,7 +1271,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1333,7 +1285,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1348,7 +1299,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1363,7 +1313,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1378,7 +1327,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1393,7 +1341,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }
@@ -1408,7 +1355,6 @@ struct MessageContentView: View {
                             ),
                         showTail: true,
                         theme: .defaultTheme,
-                        currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                         selectedImageData: $selectedImageData
                     )
                 }

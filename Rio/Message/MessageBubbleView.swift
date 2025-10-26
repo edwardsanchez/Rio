@@ -30,6 +30,7 @@ import SwiftUI
 import OSLog
 
 struct MessageBubbleView: View {
+    @Environment(ChatData.self) private var chatData
     let message: Message
     let showTail: Bool
     let isNew: Bool
@@ -40,7 +41,6 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
-    let currentUser: User
 
     @State private var showTypingIndicatorContent = false
     @State private var showTalkingContent = false
@@ -60,7 +60,7 @@ struct MessageBubbleView: View {
     
     // Computed property for message type
     private var messageType: MessageType {
-        message.messageType(currentUser: currentUser)
+        message.messageType(currentUser: chatData.currentUser)
     }
 
     init(
@@ -74,7 +74,6 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
-        currentUser: User,
         selectedImageData: Binding<ImageData?>
     ) {
         self.message = message
@@ -87,7 +86,6 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
-        self.currentUser = currentUser
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
@@ -647,7 +645,6 @@ private struct MessageBubblePreviewContainer: View {
                     scrollPhase: .idle,
                     visibleMessageIndex: 0,
                     theme: .defaultTheme,
-                    currentUser: User(id: UUID(), name: "Edward", avatar: .edward),
                     selectedImageData: $selectedImageData
                 )
                 .frame(height: 100)
@@ -717,6 +714,7 @@ private struct MessageBubblePreviewContainer: View {
     @Previewable @State var selectedImageData: ImageData?
 
     let currentUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let maya = User(id: UUID(), name: "Maya", avatar: .scarlet)
 
     ZStack {
         VStack(spacing: 20) {
@@ -724,13 +722,12 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text(""),
-                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: maya,
                 isTypingIndicator: true,
                 bubbleType: .read
             ),
             showTail: true,
             theme: .theme1,
-            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -738,13 +735,12 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text(""),
-                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: maya,
                 isTypingIndicator: true,
                 bubbleType: .thinking
             ),
             showTail: true,
             theme: .theme1,
-            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -752,12 +748,11 @@ private struct MessageBubblePreviewContainer: View {
         MessageBubbleView(
             message: Message(
                 content: .text("Hey! How's it going?"),
-                from: User(id: UUID(), name: "Maya", avatar: .scarlet),
+                from: maya,
                 bubbleType: .talking
             ),
             showTail: true,
             theme: .theme1,
-            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
 
@@ -769,7 +764,6 @@ private struct MessageBubblePreviewContainer: View {
             ),
             showTail: true,
             theme: .theme1,
-            currentUser: currentUser,
             selectedImageData: $selectedImageData
         )
     }

@@ -48,7 +48,6 @@ struct MessageListView: View {
                         scrollPhase: scrollPhase,
                         visibleMessageIndex: index,
                         theme: theme,
-                        currentUser: chatData.currentUser,
                         selectedImageData: $selectedImageData
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))
