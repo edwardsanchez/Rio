@@ -171,7 +171,7 @@ struct ReactionsModifier: ViewModifier {
                         ),
                         onDismiss: {
                             reactionsMenuModel.setCustomEmojiHighlight(false)
-                            if reactionsMenuModel.isReactionMenuShowing {
+                            if reactionsMenuModel.isShowingReactionMenu {
                                 reactionsMenuModel.prepareCustomEmojiForMenuOpen()
                             }
                         }

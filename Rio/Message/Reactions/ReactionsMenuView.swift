@@ -17,7 +17,7 @@ struct ReactionsMenuView: View {
     var body: some View {
         RadialLayout(
             radius: reactionsMenuModel.calculatedRadius,
-            isReactionMenuShowing: reactionsMenuModel.isReactionMenuShowing,
+            isShowingReactionMenu: reactionsMenuModel.isShowingReactionMenu,
             itemCount: reactionsMenuModel.reactions.count,
             itemSpacing: reactionsMenuModel.calculatedReactionSpacing,
             spacerCenterPercent: reactionsMenuModel.calculatedSpacerCenterPercent,
@@ -37,14 +37,14 @@ struct ReactionsMenuView: View {
                     reactionsMenuModel.handleReactionTap(reaction)
                 }
                 .animation(
-                    .interpolatingSpring(reactionsMenuModel.isReactionMenuShowing ? .bouncy : .smooth, initialVelocity: reactionsMenuModel.isReactionMenuShowing ? 0 : -5)
+                    .interpolatingSpring(reactionsMenuModel.isShowingReactionMenu ? .bouncy : .smooth, initialVelocity: reactionsMenuModel.isShowingReactionMenu ? 0 : -5)
                     .delay(Double(index) * ReactionsMenuModel.AnimationTiming.reactionStaggerStep),
-                    value: reactionsMenuModel.isReactionMenuShowing
+                    value: reactionsMenuModel.isShowingReactionMenu
                 )
             }
         }
         .offset(reactionsMenuModel.calculatedOffset)
-        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isReactionMenuShowing)
+        .animation(ReactionsMenuModel.AnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isShowingReactionMenu)
     }
 
     private func reactionButton(
@@ -60,7 +60,7 @@ struct ReactionsMenuView: View {
                 .shadow(color: Color.base.opacity(1), radius: 3)
                 .background {
                     Circle()
-                        .fill(isSelected && reactionsMenuModel.isReactionMenuShowing ? Color.accentColor.opacity(0.3) : .clear)
+                        .fill(isSelected && reactionsMenuModel.isShowingReactionMenu ? Color.accentColor.opacity(0.3) : .clear)
                         .frame(width: 44, height: 44)
                         .animation(.smooth, value: isSelected)
                 }
@@ -84,7 +84,7 @@ struct ReactionsMenuView: View {
         guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
-        return isOverlay ? !reactionsMenuModel.isReactionMenuShowing : reactionsMenuModel.isReactionMenuShowing
+        return isOverlay ? !reactionsMenuModel.isShowingReactionMenu : reactionsMenuModel.isShowingReactionMenu
     }
 
     @ViewBuilder
@@ -109,7 +109,7 @@ struct ReactionsMenuView: View {
         isOverlay: Bool,
         selectedReaction: Reaction?
     ) -> Bool {
-        let menuIsShowing = reactionsMenuModel.isReactionMenuShowing
+        let menuIsShowing = reactionsMenuModel.isShowingReactionMenu
 
         if isOverlay {
             if menuIsShowing {

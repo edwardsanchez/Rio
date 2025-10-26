@@ -71,7 +71,7 @@ final class ReactionsMenuModel {
     }
 
     // MARK: - Derived State
-    var isReactionMenuShowing: Bool {
+    var isShowingReactionMenu: Bool {
         coordinator?.isMenuActive(for: messageID) ?? false
     }
 
@@ -101,7 +101,7 @@ final class ReactionsMenuModel {
     }
 
     var calculatedOffset: CGSize {
-        guard isReactionMenuShowing else { return .zero }
+        guard isShowingReactionMenu else { return .zero }
         let config = layoutCase.config
         let baseOffset = config.baseOffset(for: viewSize)
         let horizontalAdjustment = config.horizontalAnchor.xOffset(for: viewSize)
@@ -136,7 +136,7 @@ final class ReactionsMenuModel {
     }
 
     func handleReactionTap(_ reaction: Reaction) {
-        guard isReactionMenuShowing else {
+        guard isShowingReactionMenu else {
             openReactionsMenu()
             return
         }
@@ -224,7 +224,7 @@ final class ReactionsMenuModel {
         backgroundHideWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            guard self.isReactionMenuShowing else { return }
+            guard self.isShowingReactionMenu else { return }
             self.setBackgroundMenuVisible(false)
         }
         backgroundHideWorkItem = workItem
