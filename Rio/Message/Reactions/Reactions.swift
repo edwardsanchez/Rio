@@ -83,6 +83,7 @@ struct ReactionsModifier: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
+        @Bindable var reactionsCoordinator = reactionsCoordinator
         if isAvailable {
             if isReactionOverlay {
                 content
@@ -96,7 +97,7 @@ struct ReactionsModifier: ViewModifier {
                     }
                     .overlay(alignment: .topTrailing) {
                         if let selectedReaction {
-                            //Here only for the purposes of geometry matching
+                            //Here only for the purposes of geometry matching as it has the right location to appear as a badge.
                             reactionButton(
                                 for: selectedReaction,
                                 isVisible: false,
@@ -107,6 +108,7 @@ struct ReactionsModifier: ViewModifier {
                         }
                     }
                     .background {
+                        //Background version so it animates BEHIND the bubble on open and on close, should disappear as open animation ends, should reappear when close animation starts
                         ReactionsMenuView(
                             isOverlay: false,
                             reactionsMenuModel: reactionsMenuModel,
@@ -115,6 +117,7 @@ struct ReactionsModifier: ViewModifier {
                         .opacity(reactionsMenuModel.showBackgroundMenu ? 1 : 0)
                     }
                     .overlay {
+                        //Foreground version so it animates back on top of the bubble. Should be visible especially to show the one that was just selected so it ends up at the top
                         ReactionsMenuView(
                             isOverlay: true,
                             reactionsMenuModel: reactionsMenuModel,
@@ -130,10 +133,7 @@ struct ReactionsModifier: ViewModifier {
                         reactionsMenuModel.chatData = chatData
                     }
                     .sheet(
-                        isPresented: Binding(
-                            get: { reactionsCoordinator.isCustomEmojiPickerPresented },
-                            set: { reactionsCoordinator.isCustomEmojiPickerPresented = $0 }
-                        ),
+                        isPresented: $reactionsCoordinator.isCustomEmojiPickerPresented,
                         onDismiss: {
                             reactionsMenuModel.setCustomEmojiHighlight(false)
                             if reactionsMenuModel.isShowingReactionMenu {
@@ -154,6 +154,7 @@ struct ReactionsModifier: ViewModifier {
             } else {
                 content
                     .overlay(alignment: .topTrailing) {
+                        //This is the version that shows up when it's just a badge on the corner, if there's a reaction for this message.
                         if let selectedReaction {
                             reactionButton(
                                 for: selectedReaction,
@@ -189,6 +190,7 @@ struct ReactionsModifier: ViewModifier {
         }
     }
 
+    ///A button that contains the reaction, whether selected or not. Can appear in the radial menu or as a badge on the corner of a chat bubble.
     private func reactionButton(
         for reaction: Reaction,
         isVisible: Bool,

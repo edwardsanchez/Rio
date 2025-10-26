@@ -57,6 +57,7 @@ struct ChatDetailView: View {
         .environment(reactionsCoordinator)
     }
 
+    //This is the overlay that shows a copy of the message bubble that show the reactions animations.
     var reactionsOverlay: some View {
         Group {
             if let context = reactionsCoordinator.reactingMessage {
