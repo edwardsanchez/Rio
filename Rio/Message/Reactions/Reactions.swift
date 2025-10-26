@@ -115,6 +115,7 @@ struct ReactionsModifier: ViewModifier {
                             reactionNamespace: reactionNamespace
                         )
                         .opacity(reactionsMenuModel.showBackgroundMenu ? 1 : 0)
+                        .allowsHitTesting(false)
                     }
                     .overlay {
                         //Foreground version so it animates back on top of the bubble. Should be visible especially to show the one that was just selected so it ends up at the top
@@ -123,9 +124,7 @@ struct ReactionsModifier: ViewModifier {
                             reactionsMenuModel: reactionsMenuModel,
                             reactionNamespace: reactionNamespace
                         )
-                        .opacity(
-                            reactionsMenuModel.isShowingReactionMenu && !reactionsMenuModel.showBackgroundMenu ? 1 : 0
-                        )
+                        .allowsHitTesting(!reactionsMenuModel.showBackgroundMenu)
                     }
                     .onAppear {
                         adoptSharedMenuModel()

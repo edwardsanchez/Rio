@@ -102,13 +102,13 @@ final class ReactionsMenuModel {
         prepareCustomEmojiForMenuOpen()
 
         menuIsOpen = false
+        setBackgroundMenuVisible(true, includeShowDelay: false)
 
         let workItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
                 self.menuIsOpen = true
             }
-            self.setBackgroundMenuVisible(true)
             self.scheduleBackgroundMenuHide()
         }
 

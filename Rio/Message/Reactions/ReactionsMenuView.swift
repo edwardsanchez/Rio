@@ -110,18 +110,19 @@ struct ReactionsMenuView: View {
         selectedReaction: Reaction?
     ) -> Bool {
         let menuIsShowing = reactionsMenuModel.isShowingReactionMenu
+        let backgroundIsShowing = reactionsMenuModel.showBackgroundMenu
+        let isSelected = selectedReaction == reaction
 
         if isOverlay {
-            if menuIsShowing {
+            if isSelected {
                 return true
             }
-            return selectedReaction == reaction
+            guard menuIsShowing else { return false }
+            return !backgroundIsShowing
         }
 
-        if reactionsMenuModel.showBackgroundMenu {
-            return true
-        }
+        if isSelected { return false }
 
-        return menuIsShowing
+        return backgroundIsShowing
     }
 }
