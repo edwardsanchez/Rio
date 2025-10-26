@@ -7,6 +7,31 @@
 
 import SwiftUI
 
+// MARK: - Reaction Visibility Helper
+
+/// Determines which reactions should be visible based on menu state
+struct ReactionVisibility {
+    let menuIsShowing: Bool
+    let showBackgroundMenu: Bool
+    let isOverlay: Bool
+    let isSelected: Bool
+
+    var isVisible: Bool {
+        if isOverlay {
+            // Overlay shows selected reaction always, others only when menu is open and background is hidden
+            if isSelected { return true }
+            guard menuIsShowing else { return false }
+            return !showBackgroundMenu
+        }
+
+        // Background shows non-selected reactions when background is visible
+        if isSelected { return false }
+        return showBackgroundMenu
+    }
+}
+
+// MARK: - Reactions Menu View
+
 struct ReactionsMenuView: View {
     var isOverlay: Bool
     var reactionsMenuModel: ReactionsMenuModel
@@ -24,15 +49,24 @@ struct ReactionsMenuView: View {
             parentSize: reactionsMenuModel.viewSize
         ) {
             ForEach(Array(reactionsMenuModel.reactions.enumerated()), id: \.element.id) { index, reaction in
-                reactionButton(
-                    for: reaction,
-                    isVisible: isReactionVisible(
-                        reaction,
-                        isOverlay: isOverlay,
-                        selectedReaction: selectedReaction
-                    ),
+                let isSelected = selectedReaction == reaction
+                let visibility = ReactionVisibility(
+                    menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
+                    showBackgroundMenu: reactionsMenuModel.showBackgroundMenu,
                     isOverlay: isOverlay,
-                    isSelected: selectedReaction == reaction
+                    isSelected: isSelected
+                )
+                
+                ReactionButton(
+                    reaction: reaction,
+                    isVisible: visibility.isVisible,
+                    isOverlay: isOverlay,
+                    isSelected: isSelected,
+                    menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
+                    isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
+                    reactionNamespace: reactionNamespace,
+                    matchedGeometryIsSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay),
+                    visibilityAnimation: nil
                 ) {
                     reactionsMenuModel.handleReactionTap(reaction)
                 }
@@ -47,82 +81,10 @@ struct ReactionsMenuView: View {
         .animation(ReactionsAnimationTiming.menuOffsetAnimation, value: reactionsMenuModel.isShowingReactionMenu)
     }
 
-    private func reactionButton(
-        for reaction: Reaction,
-        isVisible: Bool,
-        isOverlay: Bool,
-        isSelected: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            reactionContent(for: reaction)
-                .frame(width: 28, height: 28)
-                .shadow(color: Color.base.opacity(1), radius: 3)
-                .background {
-                    Circle()
-                        .fill(isSelected && reactionsMenuModel.isShowingReactionMenu ? Color.accentColor.opacity(0.3) : .clear)
-                        .frame(width: 44, height: 44)
-                        .animation(.smooth, value: isSelected)
-                }
-        }
-        .scaleEffect(scaleFactor(for: reaction))
-        .buttonBorderShape(.circle)
-        .buttonStyle(.glass)
-        .animation(nil) { content in
-            content
-                .opacity(isVisible ? 1 : 0) //Prevents animation as it switches
-        }
-        .matchedGeometryEffect(
-            id: reaction.id,
-            in: reactionNamespace,
-            isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
-        )
-        .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
-    }
-
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
         guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
         return isOverlay ? !reactionsMenuModel.isShowingReactionMenu : reactionsMenuModel.isShowingReactionMenu
-    }
-
-    @ViewBuilder
-    private func reactionContent(for reaction: Reaction) -> some View {
-        switch reaction.display {
-        case let .emoji(value, fontSize):
-            Text(value)
-                .font(.system(size: fontSize))
-        case let .systemImage(name, pointSize, weight):
-            Image(systemName: name)
-                .font(.system(size: pointSize, weight: weight))
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private func scaleFactor(for reaction: Reaction) -> CGFloat {
-        reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.4 : 1
-    }
-
-    private func isReactionVisible(
-        _ reaction: Reaction,
-        isOverlay: Bool,
-        selectedReaction: Reaction?
-    ) -> Bool {
-        let menuIsShowing = reactionsMenuModel.isShowingReactionMenu
-        let backgroundIsShowing = reactionsMenuModel.showBackgroundMenu
-        let isSelected = selectedReaction == reaction
-
-        if isOverlay {
-            if isSelected {
-                return true
-            }
-            guard menuIsShowing else { return false }
-            return !backgroundIsShowing
-        }
-
-        if isSelected { return false }
-
-        return backgroundIsShowing
     }
 }

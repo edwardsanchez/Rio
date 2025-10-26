@@ -7,6 +7,21 @@
 
 import SwiftUI
 
+// MARK: - Menu State Machine
+
+enum MenuState {
+    case closed
+    case opening           // Background menu visible, reactions animating out
+    case open              // Fully expanded, background hidden, overlay visible
+    case selectedClosing   // User tapped reaction, animating back
+
+    var isShowingMenu: Bool {
+        self != .closed
+    }
+}
+
+// MARK: - Reactions Menu Model
+
 @Observable
 final class ReactionsMenuModel {
     var coordinator: ReactionsCoordinator?
@@ -14,44 +29,39 @@ final class ReactionsMenuModel {
 
     let messageID: UUID
     var reactions: [Reaction]
-    private var customEmojiSelection: String?
-    private var customEmojiResetWorkItem: DispatchWorkItem?
-    private var backgroundHideWorkItem: DispatchWorkItem?
-    private var fanOutWorkItem: DispatchWorkItem?
-    private var menuCloseWorkItem: DispatchWorkItem?
-    var isCustomEmojiHighlighted = false
-
     var viewSize: CGSize = .zero
     var selectedReactionID: Reaction.ID?
+    var state: MenuState = .closed
     var showBackgroundMenu = false
-    var menuIsOpen = false
 
     private let reactionSpacing: CGFloat = 50
+    fileprivate var orchestrator: AnimationOrchestrator!
+    fileprivate var customEmojiManager: CustomEmojiManager!
+
     private enum Constants {
         static let customEmojiReactionID = Reaction.customEmojiReactionID
-        static let customEmojiPlaceholder = "?"
-        static let customEmojiFontSize: CGFloat = 24
     }
 
     init(messageID: UUID, reactions: [Reaction]) {
         self.messageID = messageID
         self.reactions = reactions
+        self.orchestrator = AnimationOrchestrator(model: self)
+        self.customEmojiManager = CustomEmojiManager(model: self)
     }
 
     // MARK: - Derived State
-    var isShowingReactionMenu: Bool { menuIsOpen }
+    var isShowingReactionMenu: Bool { state == .open }
 
     var selectedReaction: Reaction? {
         guard let selectedReactionID else { return nil }
-        if selectedReactionID == Constants.customEmojiReactionID,
-           let customEmojiSelection {
-            return Reaction(
-                id: Constants.customEmojiReactionID,
-                display: .emoji(value: customEmojiSelection, fontSize: Constants.customEmojiFontSize),
-                selectedEmoji: customEmojiSelection
-            )
+        if selectedReactionID == Constants.customEmojiReactionID {
+            return customEmojiManager.selectedReaction
         }
         return reactions.first { $0.id == selectedReactionID }
+    }
+
+    var isCustomEmojiHighlighted: Bool {
+        customEmojiManager.isHighlighted
     }
 
     private var layoutCase: LayoutCase {
@@ -81,33 +91,77 @@ final class ReactionsMenuModel {
     var calculatedReactionSpacing: CGFloat { reactionSpacing }
 
     // MARK: - Intents
-    func setBackgroundMenuVisible(
-        _ value: Bool,
-        delay: TimeInterval = 0,
-        includeShowDelay: Bool = true
-    ) {
-        let animation = ReactionsAnimationTiming.backgroundFadeAnimation(
-            isShowing: value,
-            additionalDelay: delay,
-            includeShowDelay: includeShowDelay
-        )
-        withAnimation(animation) {
-            showBackgroundMenu = value
+    func openReactionsMenu() {
+        orchestrator.transitionToOpening()
+    }
+
+    func closeReactionsMenu(delay: TimeInterval = 0) {
+        orchestrator.transitionToClosing(delay: delay)
+    }
+
+    func handleReactionTap(_ reaction: Reaction) {
+        guard isShowingReactionMenu else {
+            openReactionsMenu()
+            return
+        }
+
+        if reaction.id == Constants.customEmojiReactionID {
+            customEmojiManager.openPicker()
+            return
+        }
+
+        let isSameReaction = selectedReactionID == reaction.id
+        selectedReactionID = isSameReaction ? nil : reaction.id
+        chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
+        closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
+    }
+
+    func applyCustomEmojiSelection(_ emoji: String) {
+        customEmojiManager.applySelection(emoji)
+        selectedReactionID = Constants.customEmojiReactionID
+        chatData?.addReaction(emoji, toMessageId: messageID)
+        DispatchQueue.main.async { [weak self] in
+            self?.closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
         }
     }
 
-    func openReactionsMenu() {
-        fanOutWorkItem?.cancel()
-        menuCloseWorkItem?.cancel()
-        prepareCustomEmojiForMenuOpen()
+    func prepareCustomEmojiForMenuOpen() {
+        customEmojiManager.showPlaceholder()
+    }
 
-        menuIsOpen = false
+    func setCustomEmojiHighlight(_ highlighted: Bool) {
+        customEmojiManager.setHighlight(highlighted)
+    }
+}
+
+// MARK: - Animation Orchestrator
+
+/// Centralizes all animation timing and state transitions
+final class AnimationOrchestrator {
+    weak var model: ReactionsMenuModel?
+    private var fanOutWorkItem: DispatchWorkItem?
+    private var backgroundHideWorkItem: DispatchWorkItem?
+    private var closingWorkItem: DispatchWorkItem?
+
+    init(model: ReactionsMenuModel) {
+        self.model = model
+    }
+
+    func transitionToOpening() {
+        cancelAll()
+        guard let model else { return }
+
+        model.customEmojiManager.showPlaceholder()
+        
+        // Immediately set state and show background
+        model.state = .opening
         setBackgroundMenuVisible(true, includeShowDelay: false)
 
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self else { return }
+        // Schedule transition to fully open state
+        let workItem = DispatchWorkItem { [weak self, weak model] in
+            guard let self, let model else { return }
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
-                self.menuIsOpen = true
+                model.state = .open
             }
             self.scheduleBackgroundMenuHide()
         }
@@ -119,29 +173,27 @@ final class ReactionsMenuModel {
         )
     }
 
-    func closeReactionsMenu(delay: TimeInterval = 0) {
-        fanOutWorkItem?.cancel()
-        backgroundHideWorkItem?.cancel()
-        menuCloseWorkItem?.cancel()
+    func transitionToClosing(delay: TimeInterval) {
+        cancelAll()
+        guard let model else { return }
 
+        // Immediately show background menu
         setBackgroundMenuVisible(true, includeShowDelay: false)
 
-        let collapseWorkItem = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-
+        let collapseWorkItem = DispatchWorkItem { [weak self, weak model] in
+            guard let self, let model else { return }
+            
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
-                self.menuIsOpen = false
+                model.state = .selectedClosing
             }
 
             self.scheduleBackgroundMenuHideAfterClose()
-            self.menuCloseWorkItem = nil
         }
-
-        menuCloseWorkItem = collapseWorkItem
 
         if delay == 0 {
             collapseWorkItem.perform()
         } else {
+            closingWorkItem = collapseWorkItem
             DispatchQueue.main.asyncAfter(
                 deadline: .now() + delay,
                 execute: collapseWorkItem
@@ -149,103 +201,37 @@ final class ReactionsMenuModel {
         }
 
         let totalDelay = ReactionsAnimationTiming.baseDuration + ReactionsAnimationTiming.overlayHoldDuration + delay
-        scheduleCustomEmojiRestore(after: totalDelay)
-        setCustomEmojiHighlight(false)
-        coordinator?.closeReactionsMenu(after: totalDelay)
+        model.customEmojiManager.scheduleRestore(after: totalDelay)
+        model.customEmojiManager.setHighlight(false)
+        model.coordinator?.closeReactionsMenu(after: totalDelay)
     }
 
-    func handleReactionTap(_ reaction: Reaction) {
-        guard isShowingReactionMenu else {
-            openReactionsMenu()
-            return
-        }
-
-        if reaction.id == Constants.customEmojiReactionID {
-            setCustomEmojiHighlight(true)
-            coordinator?.isCustomEmojiPickerPresented = true
-            return
-        }
-
-        let isSameReaction = selectedReactionID == reaction.id
-        selectedReactionID = isSameReaction ? nil : reaction.id
-        chatData?.addReaction(reaction.selectedEmoji, toMessageId: messageID)
-        closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
-    }
-
-    func applyCustomEmojiSelection(_ emoji: String) {
-        selectedReactionID = Constants.customEmojiReactionID
-        customEmojiSelection = emoji
-        customEmojiResetWorkItem?.cancel()
-
-        updateCustomReactionDisplay(showingEmoji: true)
-        chatData?.addReaction(emoji, toMessageId: messageID)
-        DispatchQueue.main.async { [weak self] in
-            self?.closeReactionsMenu(delay: ReactionsAnimationTiming.reactionHideDelay)
-        }
-    }
-
-    func prepareCustomEmojiForMenuOpen() {
-        customEmojiResetWorkItem?.cancel()
-        updateCustomReactionDisplay(showingEmoji: false)
-    }
-
-    func restoreCustomEmojiAfterMenuClose(immediate: Bool = false) {
-        customEmojiResetWorkItem?.cancel()
-        setCustomEmojiHighlight(false)
-
-        guard customEmojiSelection != nil else { return }
-
-        if immediate {
-            updateCustomReactionDisplay(showingEmoji: true)
-        } else {
-            scheduleCustomEmojiRestore(after: ReactionsAnimationTiming.baseDuration)
-        }
-    }
-
-    private func scheduleCustomEmojiRestore(after delay: TimeInterval) {
-        customEmojiResetWorkItem?.cancel()
-
-        guard customEmojiSelection != nil else { return }
-
-        let workItem = DispatchWorkItem { [weak self] in
-            self?.updateCustomReactionDisplay(showingEmoji: true)
-        }
-
-        customEmojiResetWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
-    }
-
-    func setCustomEmojiHighlight(_ highlighted: Bool) {
-        guard isCustomEmojiHighlighted != highlighted else { return }
-        withAnimation(.smooth(duration: 0.2)) {
-            isCustomEmojiHighlighted = highlighted
-        }
-    }
-
-    private func updateCustomReactionDisplay(showingEmoji: Bool) {
-        guard let index = reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
-
-        if showingEmoji, let emoji = customEmojiSelection {
-            reactions[index] = Reaction(
-                id: Constants.customEmojiReactionID,
-                display: .emoji(value: emoji, fontSize: Constants.customEmojiFontSize),
-                selectedEmoji: emoji
-            )
-        } else {
-            reactions[index] = Reaction.systemImage(
-                Constants.customEmojiReactionID,
-                selectedEmoji: customEmojiSelection ?? Constants.customEmojiPlaceholder
-            )
+    private func setBackgroundMenuVisible(
+        _ value: Bool,
+        delay: TimeInterval = 0,
+        includeShowDelay: Bool = true
+    ) {
+        guard let model else { return }
+        let animation = ReactionsAnimationTiming.backgroundFadeAnimation(
+            isShowing: value,
+            additionalDelay: delay,
+            includeShowDelay: includeShowDelay
+        )
+        withAnimation(animation) {
+            model.showBackgroundMenu = value
         }
     }
 
     private func scheduleBackgroundMenuHide() {
         backgroundHideWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            guard self.isShowingReactionMenu else { return }
-            self.setBackgroundMenuVisible(false)
+        guard let model else { return }
+        
+        let workItem = DispatchWorkItem { [weak self, weak model] in
+            guard let model else { return }
+            guard model.isShowingReactionMenu else { return }
+            self?.setBackgroundMenuVisible(false)
         }
+        
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
             deadline: .now() + ReactionsAnimationTiming.baseDuration,
@@ -255,18 +241,116 @@ final class ReactionsMenuModel {
 
     private func scheduleBackgroundMenuHideAfterClose() {
         backgroundHideWorkItem?.cancel()
-
-        let workItem = DispatchWorkItem { [weak self] in
+        
+        let workItem = DispatchWorkItem { [weak self, weak model] in
+            guard let model else { return }
             self?.setBackgroundMenuVisible(false)
+            // Transition to closed state after background fades
+            withAnimation(.easeInOut(duration: 0.01)) {
+                model.state = .closed
+            }
         }
-
+        
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
             deadline: .now() + ReactionsAnimationTiming.baseDuration + ReactionsAnimationTiming.overlayHoldDuration,
             execute: workItem
         )
     }
+
+    private func cancelAll() {
+        fanOutWorkItem?.cancel()
+        backgroundHideWorkItem?.cancel()
+        closingWorkItem?.cancel()
+        fanOutWorkItem = nil
+        backgroundHideWorkItem = nil
+        closingWorkItem = nil
+    }
 }
+
+// MARK: - Custom Emoji Manager
+
+/// Manages the custom emoji placeholder ↔ selected emoji swapping behavior
+final class CustomEmojiManager {
+    weak var model: ReactionsMenuModel?
+    private var selection: String?
+    private var restoreWorkItem: DispatchWorkItem?
+    private(set) var isHighlighted = false
+
+    private enum Constants {
+        static let customEmojiReactionID = Reaction.customEmojiReactionID
+        static let customEmojiPlaceholder = "?"
+        static let customEmojiFontSize: CGFloat = 24
+    }
+
+    init(model: ReactionsMenuModel) {
+        self.model = model
+    }
+
+    var selectedReaction: Reaction? {
+        guard let selection else { return nil }
+        return Reaction(
+            id: Constants.customEmojiReactionID,
+            display: .emoji(value: selection, fontSize: Constants.customEmojiFontSize),
+            selectedEmoji: selection
+        )
+    }
+
+    func openPicker() {
+        setHighlight(true)
+        model?.coordinator?.isCustomEmojiPickerPresented = true
+    }
+
+    func applySelection(_ emoji: String) {
+        selection = emoji
+        restoreWorkItem?.cancel()
+        updateReactionsList(showingEmoji: true)
+    }
+
+    func showPlaceholder() {
+        restoreWorkItem?.cancel()
+        updateReactionsList(showingEmoji: false)
+    }
+
+    func scheduleRestore(after delay: TimeInterval) {
+        restoreWorkItem?.cancel()
+        guard selection != nil else { return }
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.updateReactionsList(showingEmoji: true)
+        }
+
+        restoreWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
+    func setHighlight(_ highlighted: Bool) {
+        guard isHighlighted != highlighted else { return }
+        withAnimation(.smooth(duration: 0.2)) {
+            isHighlighted = highlighted
+        }
+    }
+
+    private func updateReactionsList(showingEmoji: Bool) {
+        guard let model,
+              let index = model.reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
+
+        if showingEmoji, let emoji = selection {
+            model.reactions[index] = Reaction(
+                id: Constants.customEmojiReactionID,
+                display: .emoji(value: emoji, fontSize: Constants.customEmojiFontSize),
+                selectedEmoji: emoji
+            )
+        } else {
+            model.reactions[index] = Reaction.systemImage(
+                Constants.customEmojiReactionID,
+                selectedEmoji: selection ?? Constants.customEmojiPlaceholder
+            )
+        }
+    }
+}
+
+// MARK: - Reaction Model
 
 struct Reaction: Identifiable, Equatable {
     static func == (lhs: Reaction, rhs: Reaction) -> Bool {

@@ -189,7 +189,7 @@ struct ReactionsModifier: ViewModifier {
         }
     }
 
-    ///A button that contains the reaction, whether selected or not. Can appear in the radial menu or as a badge on the corner of a chat bubble.
+    /// Helper to create reaction button with shared component
     private func reactionButton(
         for reaction: Reaction,
         isVisible: Bool,
@@ -197,31 +197,18 @@ struct ReactionsModifier: ViewModifier {
         isSelected: Bool,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
-            reactionContent(for: reaction)
-                .frame(width: 28, height: 28)
-                .shadow(color: Color.base.opacity(1), radius: 3)
-                .background {
-                    Circle()
-                        .fill(isSelected && menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
-                        .frame(width: 44, height: 44)
-                        .animation(.smooth, value: isSelected)
-                }
-        }
-        .buttonBorderShape(.circle)
-        .buttonStyle(.glass)
-//        .glassEffect(menuIsShowing ? .regular.interactive() : .clear.interactive(), in: .circle)
-        .scaleEffect(scaleFactor(for: reaction))
-        .animation(isVisible ? .smooth : nil) { content in
-            content
-                .opacity(isVisible ? 1 : 0)
-        }
-        .matchedGeometryEffect(
-            id: reaction.id,
-            in: reactionNamespace,
-            isSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay)
+        ReactionButton(
+            reaction: reaction,
+            isVisible: isVisible,
+            isOverlay: isOverlay,
+            isSelected: isSelected,
+            menuIsShowing: menuIsShowing,
+            isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
+            reactionNamespace: reactionNamespace,
+            matchedGeometryIsSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay),
+            visibilityAnimation: isVisible ? .smooth : nil,
+            action: action
         )
-        .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
     }
 
     private func matchedGeometryIsSource(for reaction: Reaction, isOverlay: Bool) -> Bool {
@@ -229,23 +216,6 @@ struct ReactionsModifier: ViewModifier {
             return !isOverlay
         }
         return isOverlay ? !menuIsShowing : menuIsShowing
-    }
-
-    @ViewBuilder
-    private func reactionContent(for reaction: Reaction) -> some View {
-        switch reaction.display {
-        case let .emoji(value, fontSize):
-            Text(value)
-                .font(.system(size: fontSize))
-        case let .systemImage(name, pointSize, weight):
-            Image(systemName: name)
-                .font(.system(size: pointSize, weight: weight))
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private func scaleFactor(for reaction: Reaction) -> CGFloat {
-        reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.2 : 1
     }
 
     private func adoptSharedMenuModel() {
