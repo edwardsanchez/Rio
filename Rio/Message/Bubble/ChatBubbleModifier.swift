@@ -22,10 +22,6 @@ private struct ChatBubbleModifier: ViewModifier {
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
 
-    private var backgroundOpacity: Double {
-        bubbleConfig.backgroundOpacity(for: messageType)
-    }
-
     private var measuredWidth: CGFloat {
         max(contentSize.width, animationWidth ?? 0, 12)
     }
@@ -59,7 +55,6 @@ private struct ChatBubbleModifier: ViewModifier {
                         isReactionsOverlay: isReactionsOverlay
                     )
                     .compositingGroup()
-                    .opacity(backgroundOpacity)
                 }
             }
             .animation(.smooth) { content in

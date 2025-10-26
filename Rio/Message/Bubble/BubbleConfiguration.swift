@@ -49,11 +49,6 @@ class BubbleConfiguration {
 
     // MARK: - Helper Functions
 
-    /// Calculate background opacity based on message type
-    func backgroundOpacity(for messageType: MessageType) -> Double {
-        messageType.isInbound ? 0.6 : 1.0
-    }
-
     /// Calculate parallax offset for cascading jelly effect
     func calculateParallaxOffset(
         scrollVelocity: CGFloat,
