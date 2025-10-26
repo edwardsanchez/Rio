@@ -413,6 +413,7 @@ class EmojiReactionViewModel {
         3.    If a humorous attempt is detected, include 1–2 laughing emojis near the top of the list.
         4.    Never duplicate emojis within the same list.
         5.    Responses should consider tone_hint (if provided) to guide overall mood and relevance.
+        6.    Out of the 6, at least 4 should be a face, hand or in appropriate cases, a heart type emoji. These types are most common as reactions.
         """
     
     private func requestFastSuggestions(
