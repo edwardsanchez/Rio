@@ -156,18 +156,16 @@ struct EmojiReactionPickerView: View {
                     Text("Emoji reactions")
                         .font(.headline)
                         .padding(.horizontal)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(viewModel.finalists) { emoji in
-                                Text(emoji.character)
-                                    .font(.system(size: 36))
-                                    .padding(8)
-                                    .background(Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
-                            }
+                    HStack(spacing: 12) {
+                        ForEach(viewModel.finalists) { emoji in
+                            Text(emoji.character)
+                                .font(.system(size: 25))
+                                .padding(8)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.horizontal)
                 }
             }
 
