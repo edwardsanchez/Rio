@@ -157,8 +157,10 @@ struct ReactionsModifier: ViewModifier {
                             reactionsMenuModel: reactionsMenuModel,
                             reactionNamespace: reactionNamespace
                         )
+                        .opacity(reactionsMenuModel.showBackgroundMenu ? 0 : 1)
                     }
                     .onAppear {
+                        adoptSharedMenuModel()
                         reactionsMenuModel.coordinator = reactionsCoordinator
                         reactionsMenuModel.chatData = chatData
                     }
@@ -182,17 +184,40 @@ struct ReactionsModifier: ViewModifier {
                         .presentationDetents([.height(300)])
                     }
                     .onTapGesture {
+                        debugLog("Overlay tap closing menu for \(context.message.id.uuidString)")
                         reactionsMenuModel.closeReactionsMenu()
                     }
             } else {
                 content
+                    .overlay(alignment: .topTrailing) {
+                        if let selectedReaction {
+                            //Here only for the purposes of geometry matching
+                            reactionButton(
+                                for: selectedReaction,
+                                isVisible: true,
+                                isOverlay: true,
+                                isSelected: false
+                            ) {}
+                            .allowsHitTesting(false)
+                        }
+                    }
                     .onLongPressGesture {
+                        debugLog("Long press triggered for \(context.message.id.uuidString). Opening reactions menu.")
                         reactionsMenuModel.openReactionsMenu()
-                        reactionsCoordinator.openReactionsMenu(with: context)
+                        reactionsCoordinator.openReactionsMenu(
+                            with: context,
+                            menuModel: reactionsMenuModel
+                        )
                     }
                     .sensoryFeedback(.impact, trigger: menuIsShowing)
+                    .onAppear {
+                        adoptSharedMenuModel()
+                        reactionsMenuModel.coordinator = reactionsCoordinator
+                        reactionsMenuModel.chatData = chatData
+                    }
             }
         } else {
+            //For outbound messages since you can't like your own messages
             content
         }
     }
@@ -254,6 +279,33 @@ struct ReactionsModifier: ViewModifier {
 
     private func scaleFactor(for reaction: Reaction) -> CGFloat {
         reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.2 : 1
+    }
+
+    private func adoptSharedMenuModel() {
+        if let sharedModel = reactionsCoordinator.menuModel(for: context.message.id) {
+            if sharedModel !== reactionsMenuModel {
+                debugLog("Adopting shared menu model \(modelIdentifier(sharedModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
+                reactionsMenuModel = sharedModel
+            } else {
+                debugLog("Reusing existing menu model \(modelIdentifier(sharedModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
+            }
+        } else {
+            debugLog("Registering new menu model \(modelIdentifier(reactionsMenuModel)) for \(context.message.id.uuidString) overlay=\(isReactionOverlay)")
+            reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
+            return
+        }
+
+        reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
+    }
+
+    private func modelIdentifier(_ model: ReactionsMenuModel) -> String {
+        String(describing: ObjectIdentifier(model))
+    }
+
+    private func debugLog(_ message: String) {
+#if DEBUG
+        print("[ReactionsModifier] \(message)")
+#endif
     }
 }
 

@@ -16,6 +16,7 @@ final class ReactionsMenuModel {
     var reactions: [Reaction]
     private var customEmojiSelection: String?
     private var customEmojiResetWorkItem: DispatchWorkItem?
+    private var backgroundHideWorkItem: DispatchWorkItem?
     var isCustomEmojiHighlighted = false
 
     var viewSize: CGSize = .zero
@@ -115,24 +116,30 @@ final class ReactionsMenuModel {
 
     // MARK: - Intents
     func setBackgroundMenuVisible(_ value: Bool, delay: TimeInterval = 0) {
+        debugLog("Setting background menu visible \(value) for \(self.messageID.uuidString) with delay \(delay)")
         withAnimation(AnimationTiming.backgroundFadeAnimation(isShowing: value, additionalDelay: delay)) {
             showBackgroundMenu = value
         }
     }
 
     func openReactionsMenu() {
+        debugLog("Open reactions menu requested for \(self.messageID.uuidString)")
         prepareCustomEmojiForMenuOpen()
         setBackgroundMenuVisible(true)
+        scheduleBackgroundMenuHide()
     }
 
     func closeReactionsMenu(delay: TimeInterval = 0) {
+        debugLog("Close reactions menu requested for \(self.messageID.uuidString) delay \(delay)")
         scheduleCustomEmojiRestore(after: AnimationTiming.baseDuration + delay)
         setCustomEmojiHighlight(false)
         coordinator?.closeReactionsMenu()
+        backgroundHideWorkItem?.cancel()
         setBackgroundMenuVisible(false, delay: delay)
     }
 
     func handleReactionTap(_ reaction: Reaction) {
+        debugLog("Handle reaction tap \(reaction.id) on \(self.messageID.uuidString)")
         guard isReactionMenuShowing else {
             openReactionsMenu()
             return
@@ -151,6 +158,7 @@ final class ReactionsMenuModel {
     }
 
     func applyCustomEmojiSelection(_ emoji: String) {
+        debugLog("Applying custom emoji \(emoji) on \(self.messageID.uuidString)")
         selectedReactionID = Constants.customEmojiReactionID
         customEmojiSelection = emoji
         customEmojiResetWorkItem?.cancel()
@@ -163,11 +171,13 @@ final class ReactionsMenuModel {
     }
 
     func prepareCustomEmojiForMenuOpen() {
+        debugLog("Preparing custom emoji for menu open on \(self.messageID.uuidString)")
         customEmojiResetWorkItem?.cancel()
         updateCustomReactionDisplay(showingEmoji: false)
     }
 
     func restoreCustomEmojiAfterMenuClose(immediate: Bool = false) {
+        debugLog("Restoring custom emoji after menu close on \(self.messageID.uuidString), immediate=\(immediate)")
         customEmojiResetWorkItem?.cancel()
         setCustomEmojiHighlight(false)
 
@@ -181,6 +191,7 @@ final class ReactionsMenuModel {
     }
 
     private func scheduleCustomEmojiRestore(after delay: TimeInterval) {
+        debugLog("Scheduling custom emoji restore after \(delay)s on \(self.messageID.uuidString)")
         customEmojiResetWorkItem?.cancel()
 
         guard customEmojiSelection != nil else { return }
@@ -194,6 +205,7 @@ final class ReactionsMenuModel {
     }
 
     func setCustomEmojiHighlight(_ highlighted: Bool) {
+        debugLog("Setting custom emoji highlight=\(highlighted) on \(self.messageID.uuidString)")
         guard isCustomEmojiHighlighted != highlighted else { return }
         withAnimation(.smooth(duration: 0.2)) {
             isCustomEmojiHighlighted = highlighted
@@ -215,6 +227,27 @@ final class ReactionsMenuModel {
                 selectedEmoji: customEmojiSelection ?? Constants.customEmojiPlaceholder
             )
         }
+    }
+
+    private func scheduleBackgroundMenuHide() {
+        backgroundHideWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            guard self.isReactionMenuShowing else { return }
+            self.debugLog("Auto-hiding background menu for \(self.messageID.uuidString)")
+            self.setBackgroundMenuVisible(false)
+        }
+        backgroundHideWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + AnimationTiming.baseDuration,
+            execute: workItem
+        )
+    }
+
+    private func debugLog(_ message: String) {
+#if DEBUG
+        print("[ReactionsMenuModel \(messageID)] \(message)")
+#endif
     }
 }
 

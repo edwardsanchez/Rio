@@ -26,7 +26,11 @@ struct ReactionsMenuView: View {
             ForEach(Array(reactionsMenuModel.reactions.enumerated()), id: \.element.id) { index, reaction in
                 reactionButton(
                     for: reaction,
-                    isVisible: (selectedReaction != reaction) != isOverlay,
+                    isVisible: isReactionVisible(
+                        reaction,
+                        isOverlay: isOverlay,
+                        selectedReaction: selectedReaction
+                    ),
                     isOverlay: isOverlay,
                     isSelected: selectedReaction == reaction
                 ) {
@@ -99,5 +103,22 @@ struct ReactionsMenuView: View {
 
     private func scaleFactor(for reaction: Reaction) -> CGFloat {
         reaction.id == Reaction.customEmojiReactionID && reactionsMenuModel.isCustomEmojiHighlighted ? 1.4 : 1
+    }
+
+    private func isReactionVisible(
+        _ reaction: Reaction,
+        isOverlay: Bool,
+        selectedReaction: Reaction?
+    ) -> Bool {
+        let menuIsShowing = reactionsMenuModel.isReactionMenuShowing
+
+        if isOverlay {
+            if menuIsShowing {
+                return true
+            }
+            return selectedReaction == reaction
+        }
+
+        return menuIsShowing
     }
 }
