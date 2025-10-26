@@ -68,9 +68,9 @@ struct ReactionsMenuView: View {
         .scaleEffect(scaleFactor(for: reaction))
         .buttonBorderShape(.circle)
         .buttonStyle(.glass)
-        .animation(isVisible ? .smooth : nil) { content in
+        .animation(nil) { content in
             content
-                .opacity(isVisible ? 1 : 0)
+                .opacity(isVisible ? 1 : 0) //Prevents animation as it switches
         }
         .matchedGeometryEffect(
             id: reaction.id,
