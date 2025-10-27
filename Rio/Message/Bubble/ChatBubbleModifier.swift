@@ -18,8 +18,6 @@ private struct ChatBubbleModifier: ViewModifier {
     let messageID: UUID
     let context: ReactingMessageContext
     let isReactionsOverlay: Bool
-    let namespace: Namespace.ID?
-    let activeReactionMessageID: UUID?
 
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -30,18 +28,6 @@ private struct ChatBubbleModifier: ViewModifier {
 
     private var measuredHeight: CGFloat {
         max(contentSize.height, animationHeight ?? 0, 12)
-    }
-
-    private var shouldShowBubble: Bool {
-        guard isVisible else { return false }
-        guard let activeID = activeReactionMessageID else {
-            return !isReactionsOverlay
-        }
-        if isReactionsOverlay {
-            return activeID == messageID
-        } else {
-            return activeID != messageID
-        }
     }
 
     func body(content: Content) -> some View {
@@ -71,7 +57,7 @@ private struct ChatBubbleModifier: ViewModifier {
     @ViewBuilder
     private func bubbleBackground(for sizingType: BubbleType) -> some View {
         if isVisible {
-            let baseBubble = BubbleView(
+            BubbleView(
                 width: sizingType == .thinking ? 80 : measuredWidth,
                 height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
                 color: backgroundColor,
@@ -84,23 +70,6 @@ private struct ChatBubbleModifier: ViewModifier {
                 isReactionsOverlay: isReactionsOverlay
             )
             .compositingGroup()
-
-            let styledBubble = baseBubble
-                .opacity(shouldShowBubble ? 1 : 0)
-                .allowsHitTesting(shouldShowBubble)
-
-            if let namespace {
-                styledBubble
-                    .matchedGeometryEffect(
-                        id: "bubble-\(messageID)",
-                        in: namespace,
-                        properties: .frame,
-                        anchor: .center,
-                        isSource: !isReactionsOverlay
-                    )
-            } else {
-                styledBubble
-            }
         } else {
             EmptyView()
         }
@@ -115,8 +84,6 @@ extension View {
         messageID: UUID,
         context: ReactingMessageContext,
         isReactionsOverlay: Bool = false,
-        namespace: Namespace.ID? = nil,
-        activeReactionMessageID: UUID? = nil,
         bubbleType: BubbleType = .talking,
         layoutType: BubbleType? = nil,
         animationWidth: CGFloat? = nil,
@@ -135,9 +102,7 @@ extension View {
                 isVisible: isVisible,
                 messageID: messageID,
                 context: context,
-                isReactionsOverlay: isReactionsOverlay,
-                namespace: namespace,
-                activeReactionMessageID: activeReactionMessageID
+                isReactionsOverlay: isReactionsOverlay
             )
         )
     }

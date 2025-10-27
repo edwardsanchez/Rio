@@ -70,6 +70,27 @@ struct MessageBubbleView: View {
         activeReactingMessageID == message.id
     }
 
+    private var shouldDisplayBubble: Bool {
+        guard let activeID = activeReactingMessageID else { return true }
+        if isReactionsOverlay {
+            return activeID == message.id
+        } else {
+            return activeID != message.id
+        }
+    }
+
+    private var displayOpacity: Double {
+        shouldDisplayBubble ? 1 : 0
+    }
+
+    private var allowsInteraction: Bool {
+        shouldDisplayBubble && (!isActiveReactionBubble || isReactionsOverlay)
+    }
+
+    private var matchedGeometryID: String {
+        "bubble-\(message.id)"
+    }
+
     init(
         message: Message,
         showTail: Bool = true,
@@ -105,6 +126,30 @@ struct MessageBubbleView: View {
     }
 
     var body: some View {
+        Group {
+            if let namespace = bubbleNamespace {
+                decoratedBubbleLayout
+                    .matchedGeometryEffect(
+                        id: matchedGeometryID,
+                        in: namespace,
+                        properties: .frame,
+                        anchor: .center,
+                        isSource: !isReactionsOverlay
+                    )
+            } else {
+                decoratedBubbleLayout
+            }
+        }
+    }
+
+    private var decoratedBubbleLayout: some View {
+        baseBubbleLayout
+            .opacity(displayOpacity)
+            .allowsHitTesting(allowsInteraction)
+            .animation(.smooth(duration: 0.2), value: shouldDisplayBubble)
+    }
+
+    private var baseBubbleLayout: some View {
         HStack(alignment: .bottom, spacing: 12) {
             if messageType.isInbound {
                 Group {
@@ -158,7 +203,6 @@ struct MessageBubbleView: View {
         .onDisappear {
             cancelPendingContentTransitions()
         }
-        .allowsHitTesting(!isActiveReactionBubble || isReactionsOverlay)
     }
 
     // Computed properties for positioning and animation
@@ -330,8 +374,6 @@ struct MessageBubbleView: View {
             messageID: message.id,
             context: ReactingMessageContext(message: message, showTail: showTail, theme: theme),
             isReactionsOverlay: isReactionsOverlay,
-            namespace: bubbleNamespace,
-            activeReactionMessageID: activeReactingMessageID,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
             animationWidth: outboundAnimationWidth,
