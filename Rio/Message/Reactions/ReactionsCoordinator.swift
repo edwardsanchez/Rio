@@ -47,7 +47,9 @@ final class ReactionsCoordinator {
 
         cancelCloseTimer(for: messageID)
         isCustomEmojiPickerPresented = false
-        geometrySource = .list
+        withAnimation(.smooth(duration: 0.35)) {
+            geometrySource = .list
+        }
 
         guard delay > 0 else {
             finishClosing(messageID)
@@ -84,12 +86,16 @@ final class ReactionsCoordinator {
         guard geometrySource != .overlay else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, self.reactingMessage?.message.id == messageID else { return }
-            self.geometrySource = .overlay
+            withAnimation(.smooth(duration: 0.35)) {
+                self.geometrySource = .overlay
+            }
         }
     }
 
     func resetGeometrySourceToList() {
-        geometrySource = .list
+        withAnimation(.smooth(duration: 0.35)) {
+            geometrySource = .list
+        }
     }
 
     func closeActiveMenu(delay: TimeInterval = 0) {
@@ -125,7 +131,9 @@ final class ReactionsCoordinator {
         closeWorkItems[messageID]?.cancel()
         closeWorkItems.removeValue(forKey: messageID)
 
-        geometrySource = .list
+        withAnimation(.smooth(duration: 0.35)) {
+            geometrySource = .list
+        }
 
         if reactingMessage?.message.id == messageID {
             reactingMessage = nil
