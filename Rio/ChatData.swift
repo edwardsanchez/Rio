@@ -35,8 +35,7 @@ class ChatData {
             Message(content: .text("Are you good?"), from: mayaUser, date: Date().addingTimeInterval(-3500), bubbleType: .talking),
             Message(content: .text("Hey!\nI'm doing well, thanks for asking!"), from: edwardUser, date: Date().addingTimeInterval(-3400)),
             Message(content: .emoji("👋"), from: edwardUser, date: Date().addingTimeInterval(-3350)),
-            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), from: mayaUser, date: Date().addingTimeInterval(-3300), bubbleType: .talking),
-            Message(content: .emoji("😊🎉"), from: mayaUser, date: Date().addingTimeInterval(-3200), bubbleType: .talking)
+            Message(content: .text("This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."), from: mayaUser, date: Date().addingTimeInterval(-3300), bubbleType: .talking)
         ]
 
         let chat1 = Chat(
@@ -197,7 +196,7 @@ class ChatData {
                 currentUser: self.currentUser
             )
             guard !options.isEmpty else { return }
-            await self.applyReactionOptions(options, to: messageId, in: chatId)
+            self.applyReactionOptions(options, to: messageId, in: chatId)
         }
     }
 
