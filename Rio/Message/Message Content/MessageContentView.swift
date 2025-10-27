@@ -458,6 +458,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -523,6 +525,8 @@ struct MessageContentView: View {
                 .padding(20)
             }
             .environment(bubbleConfig)
+            .environment(ChatData())
+            .environment(ReactionsCoordinator())
         }
 
         // Image detail overlay
@@ -586,6 +590,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -704,6 +710,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -875,6 +883,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -1068,6 +1078,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -1215,6 +1227,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
@@ -1358,6 +1372,8 @@ struct MessageContentView: View {
             .padding(20)
         }
         .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
     }
 }
 
