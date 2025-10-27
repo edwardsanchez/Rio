@@ -12,6 +12,7 @@ import FoundationModels
 
 enum EmojiProvider: String, CaseIterable, Identifiable {
     case openai = "OpenAI"
+    case claude = "Claude"
     case apple = "Apple"
     var id: String { rawValue }
 }
@@ -38,4 +39,14 @@ struct OpenAIEmojiSuggestion: Decodable {
 
 struct OpenAIEmojiReactionResponse: Decodable {
     let suggestions: [OpenAIEmojiSuggestion]
+}
+
+// MARK: - Claude DTOs
+
+struct ClaudeEmojiSuggestion: Decodable {
+    let character: String
+}
+
+struct ClaudeEmojiReactionResponse: Decodable {
+    let suggestions: [ClaudeEmojiSuggestion]
 }

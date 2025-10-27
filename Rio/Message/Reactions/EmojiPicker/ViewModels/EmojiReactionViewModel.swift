@@ -82,6 +82,8 @@ class EmojiReactionViewModel {
             await runApplePipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
         case .openai:
             await runOpenAIPipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
+        case .claude:
+            await runClaudePipeline(trimmedText: trimmedText, trimmedContext: trimmedContext)
         }
 
         let totalElapsed = Date().timeIntervalSince(requestStart)
@@ -139,6 +141,26 @@ class EmojiReactionViewModel {
                 errorMessage = "Showing quick emoji suggestions while OpenAI catches up."
             }
             log("⚠️ OpenAI pipeline error: \(error)")
+        }
+    }
+
+    private func runClaudePipeline(trimmedText: String, trimmedContext: String?) async {
+        log("\n🟣 Claude emoji pipeline requested for input length \(trimmedText.count) characters")
+        do {
+            let claudeEmojis = try await claudeSelectFinalists(text: trimmedText, context: trimmedContext)
+            finalists = claudeEmojis
+            log("✅ Claude pipeline complete! Found \(claudeEmojis.count) finalists")
+            log("🎯 Final finalists: \(claudeEmojis.map { $0.character }.joined(separator: ", "))")
+        } catch {
+            let tone = detectTone(for: trimmedText)
+            let fallback = fallbackFinalists(for: tone)
+            if fallback.isEmpty {
+                errorMessage = "Emoji reactions are temporarily unavailable (\(error.localizedDescription))"
+            } else {
+                finalists = fallback
+                errorMessage = "Showing quick emoji suggestions while Claude catches up."
+            }
+            log("⚠️ Claude pipeline error: \(error)")
         }
     }
     
@@ -310,6 +332,100 @@ class EmojiReactionViewModel {
         ]
     }
 
+    // MARK: - Claude Pipeline
+
+    private func claudeSelectFinalists(text: String, context: String?) async throws -> [Emoji] {
+        let tone = detectTone(for: text)
+        var bestResolved: [Emoji] = []
+        log("   🧭 (Claude) Detected tone: \(tone)")
+        log("   🎯 (Claude) Target finalists: \(fastEmojiTargetCount)")
+
+        for attempt in 0..<3 {
+            let suggestions = try await requestClaudeSuggestions(
+                text: text,
+                context: context,
+                tone: tone,
+                attempt: attempt
+            )
+            let resolved = resolveFastSuggestions(
+                suggestions,
+                tone: tone
+            )
+            log("   📊 (Claude) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
+
+            if !resolved.isEmpty {
+                bestResolved = resolved
+            }
+
+            if resolved.count >= fastEmojiTargetCount {
+                log("   ✅ (Claude) Attempt \(attempt + 1) met target with \(resolved.count) emoji")
+                let finalists = resolved.count > fastEmojiTargetCount
+                    ? Array(resolved.prefix(fastEmojiTargetCount))
+                    : resolved
+                log("   🎉 (Claude) Finalists selected: \(finalists.map { $0.character }.joined(separator: ", "))")
+                return finalists
+            }
+        }
+
+        if bestResolved.isEmpty {
+            log("   ⚠️ (Claude) Pipeline could not obtain valid emoji suggestions")
+        } else if bestResolved.count < fastEmojiTargetCount {
+            log("   ⚠️ (Claude) Resolved only \(bestResolved.count) of \(fastEmojiTargetCount) emoji")
+        }
+
+        let finalists = Array(bestResolved.prefix(fastEmojiTargetCount))
+        log("   🎉 (Claude) Finalists selected after retries: \(finalists.map { $0.character }.joined(separator: ", "))")
+        return finalists
+    }
+
+    private func requestClaudeSuggestions(
+        text: String,
+        context: String?,
+        tone: FastFallbackTone,
+        attempt: Int
+    ) async throws -> [FastEmojiSuggestion] {
+        let config = requestConfiguration(for: attempt)
+        let toneHint = toneHint(for: tone)
+        let promptText = fastUserPrompt(
+            message: text,
+            context: context,
+            tone: tone,
+            toneHint: toneHint,
+            attempt: attempt,
+            variant: config.variant
+        )
+
+        logPromptMetrics("(Claude) System prompt", text: systemPrompt)
+        logPromptMetrics("(Claude) User prompt", text: promptText)
+
+        let start = Date()
+        do {
+            log("   🚀 (Claude) Calling Claude (attempt \(attempt + 1))")
+            let content = try await sendClaudeCompletion(
+                systemPrompt: systemPrompt,
+                userPrompt: promptText
+            )
+            let elapsed = Date().timeIntervalSince(start)
+            log(String(format: "   ⏱️ (Claude) Responded in %.2fs", elapsed))
+            
+            // Extract JSON from the response (Claude might add extra text)
+            let cleanedContent = extractJSON(from: content)
+            
+            guard let data = cleanedContent.data(using: String.Encoding.utf8) else {
+                throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Claude content encoding"])
+            }
+            let decoded = try JSONDecoder().decode(ClaudeEmojiReactionResponse.self, from: data)
+            let suggestions = decoded.suggestions.map { s in
+                FastEmojiSuggestion(character: s.character)
+            }
+            logSuggestions(suggestions, attempt: attempt)
+            return suggestions
+        } catch {
+            log("   ❌ (Claude) Error on attempt \(attempt + 1): \(error)")
+            throw error
+        }
+    }
+
     // MARK: - OpenAI HTTP Helper
     private func sendOpenAICompletion(
         systemPrompt: String,
@@ -353,6 +469,67 @@ class EmojiReactionViewModel {
             throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse OpenAI content"])
         }
         return content
+    }
+
+    // MARK: - Claude HTTP Helper
+    private func sendClaudeCompletion(
+        systemPrompt: String,
+        userPrompt: String
+    ) async throws -> String {
+        guard let apiKey = ProcessInfo.processInfo.environment["CLAUDE_API_KEY"], !apiKey.isEmpty else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -2, userInfo: [NSLocalizedDescriptionKey: "CLAUDE_API_KEY environment variable not set"])
+        }
+        let url = URL(string: "https://api.anthropic.com/v1/messages")!
+        
+        // Add JSON formatting instruction to the user prompt
+        let jsonFormattedPrompt = """
+        \(userPrompt)
+        
+        IMPORTANT: Return ONLY valid JSON with no additional text, explanation, or commentary before or after. The response must be exactly this structure with nothing else:
+        {
+          "suggestions": [
+            {"character": "emoji1"},
+            {"character": "emoji2"},
+            {"character": "emoji3"},
+            {"character": "emoji4"},
+            {"character": "emoji5"},
+            {"character": "emoji6"}
+          ]
+        }
+        Do not include markdown code blocks, backticks, or any other formatting. Just the raw JSON object.
+        """
+        
+        let payload: [String: Any] = [
+            "model": "claude-3-5-haiku-20241022",
+            "max_tokens": 1024,
+            "system": systemPrompt,
+            "messages": [
+                ["role": "user", "content": jsonFormattedPrompt]
+            ]
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: payload)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.addValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response from Claude"])
+        }
+        guard httpResponse.statusCode == 200 else {
+            let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
+            throw NSError(domain: "EmojiReactionViewModel", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Claude HTTP \(httpResponse.statusCode): \(body)"])
+        }
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let content = json["content"] as? [[String: Any]],
+              let firstContent = content.first,
+              let text = firstContent["text"] as? String else {
+            throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Claude content"])
+        }
+        return text
     }
 
     private func fallbackFinalists(for tone: FastFallbackTone) -> [Emoji] {
@@ -768,6 +945,24 @@ class EmojiReactionViewModel {
         guard !string.isEmpty else { return false }
         // One extended grapheme cluster and it is renderable as emoji
         return string.count == 1 && containsRenderableEmoji(string)
+    }
+    
+    private func extractJSON(from text: String) -> String {
+        // Try to find JSON object in the text
+        guard let startIndex = text.firstIndex(of: "{"),
+              let endIndex = text.lastIndex(of: "}") else {
+            return text
+        }
+        
+        let jsonCandidate = String(text[startIndex...endIndex])
+        
+        // Validate it's actually JSON
+        if let data = jsonCandidate.data(using: .utf8),
+           (try? JSONSerialization.jsonObject(with: data)) != nil {
+            return jsonCandidate
+        }
+        
+        return text
     }
     
     private func detectTone(for text: String) -> FastFallbackTone {
