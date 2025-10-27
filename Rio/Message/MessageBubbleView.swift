@@ -73,10 +73,12 @@ struct MessageBubbleView: View {
 
     private var shouldDisplayBubble: Bool {
         guard let activeID = activeReactingMessageID else { return true }
+        guard activeID == message.id else { return true }
+
         if isReactionsOverlay {
-            return activeID == message.id
+            return true
         } else {
-            return activeID != message.id
+            return geometrySource == .list
         }
     }
 

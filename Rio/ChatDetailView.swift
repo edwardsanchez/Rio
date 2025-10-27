@@ -66,8 +66,7 @@ struct ChatDetailView: View {
                     Rectangle()
                         .fill(.base.opacity(0.9))
                         .ignoresSafeArea()
-                        .transition(.opacity.animation(.smooth))
-
+                        .transition(.opacity.animation(.easeIn))
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
