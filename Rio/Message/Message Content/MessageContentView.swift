@@ -166,7 +166,7 @@ struct MessageContentView: View {
             // Emoji content - larger text
             Text(emoji)
                 .font(.system(size: 60))
-                .padding()
+                .padding(.bottom, -30)
 
         case .code(let code):
             // Placeholder for code content
