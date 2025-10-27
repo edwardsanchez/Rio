@@ -393,6 +393,7 @@ struct Reaction: Identifiable, Equatable {
 // MARK: - Animation Timing
 enum ReactionsAnimationTiming {
     static let baseDuration: TimeInterval = 0.4
+    static let matchedGeometryReturnDuration: TimeInterval = 0.35
     static let reactionStaggerStepMultiplier: Double = 0.125
     static let backgroundShowDelayMultiplier: Double = 0.5
     static let reactionHideDelayMultiplier: Double = 0.25

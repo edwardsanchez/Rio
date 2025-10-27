@@ -29,12 +29,14 @@ final class ReactionsCoordinator {
     // Weak storage so list bubbles and overlay share the same menu model instance
     private var menuModels: [UUID: WeakMenuModel] = [:]
     private var closeWorkItems: [UUID: DispatchWorkItem] = [:]
+    private var overlayRemovalWorkItems: [UUID: DispatchWorkItem] = [:]
 
     func openReactionsMenu(
         with context: ReactingMessageContext,
         menuModel: ReactionsMenuModel
     ) {
         cancelCloseTimer(for: context.message.id)
+        cancelOverlayRemoval(for: context.message.id)
         self.registerMenuModel(menuModel, for: context.message.id)
         geometrySource = .list
         reactingMessage = context
@@ -46,10 +48,8 @@ final class ReactionsCoordinator {
         }
 
         cancelCloseTimer(for: messageID)
+        cancelOverlayRemoval(for: messageID)
         isCustomEmojiPickerPresented = false
-        withAnimation(.smooth(duration: 0.35)) {
-            geometrySource = .list
-        }
 
         guard delay > 0 else {
             finishClosing(messageID)
@@ -126,18 +126,37 @@ final class ReactionsCoordinator {
             closeWorkItems.removeValue(forKey: messageID)
         }
     }
+    
+    private func cancelOverlayRemoval(for messageID: UUID) {
+        if let workItem = overlayRemovalWorkItems[messageID] {
+            workItem.cancel()
+            overlayRemovalWorkItems.removeValue(forKey: messageID)
+        }
+    }
 
     private func finishClosing(_ messageID: UUID) {
         closeWorkItems[messageID]?.cancel()
         closeWorkItems.removeValue(forKey: messageID)
 
-        withAnimation(.smooth(duration: 0.35)) {
+        withAnimation(.smooth(duration: ReactionsAnimationTiming.matchedGeometryReturnDuration)) {
             geometrySource = .list
         }
 
-        if reactingMessage?.message.id == messageID {
-            reactingMessage = nil
+        cancelOverlayRemoval(for: messageID)
+
+        let removalWorkItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            if self.reactingMessage?.message.id == messageID {
+                self.reactingMessage = nil
+            }
+            self.overlayRemovalWorkItems.removeValue(forKey: messageID)
         }
+
+        overlayRemovalWorkItems[messageID] = removalWorkItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + ReactionsAnimationTiming.matchedGeometryReturnDuration,
+            execute: removalWorkItem
+        )
     }
 }
 

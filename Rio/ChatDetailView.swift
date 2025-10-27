@@ -70,7 +70,6 @@ struct ChatDetailView: View {
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
-
                 }
             if let context = reactionsCoordinator.reactingMessage {
                     MessageBubbleView(
