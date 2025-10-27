@@ -71,27 +71,75 @@ struct ChatDetailView: View {
                             reactionsCoordinator.closeActiveMenu()
                         }
                 }
-            if let context = reactionsCoordinator.reactingMessage {
-                    MessageBubbleView(
-                        message: context.message,
-                        showTail: context.showTail,
-                        theme: context.theme,
-                        bubbleNamespace: bubbleNamespace,
-                        activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
-                        geometrySource: reactionsCoordinator.geometrySource,
-                        isReactionsOverlay: true,
-                        selectedImageData: $selectedImageData
-                    )
-                    .onAppear {
-                        reactionsCoordinator.promoteGeometrySourceToOverlay(for: context.message.id)
+
+                VStack {
+                    if let context = reactionsCoordinator.reactingMessage {
+                        Spacer()
+
+                        MessageBubbleView(
+                            message: context.message,
+                            showTail: context.showTail,
+                            theme: context.theme,
+                            bubbleNamespace: bubbleNamespace,
+                            activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
+                            geometrySource: reactionsCoordinator.geometrySource,
+                            isReactionsOverlay: true,
+                            selectedImageData: $selectedImageData
+                        )
+                        .padding(.horizontal, 20)
+                        .onAppear {
+                            reactionsCoordinator.promoteGeometrySourceToOverlay(for: context.message.id)
+                        }
+                        .onDisappear {
+                            reactionsCoordinator.resetGeometrySourceToList()
+                        }
                     }
-                    .onDisappear {
-                        reactionsCoordinator.resetGeometrySourceToList()
+
+                    Spacer()
+
+                    if reactionsCoordinator.isBackgroundDimmerVisible {
+                        contextMenu
+                        .transition(.move(edge: .bottom))
+                    } else {
+                        contextMenu //Spacer
+                            .hidden()
+                            .allowsHitTesting(false)
                     }
-                    .padding(20)
                 }
+                .padding(.bottom, 20)
+                .ignoresSafeArea()
+                .animation(.smooth, value: reactionsCoordinator.isBackgroundDimmerVisible)
             }
         }
+    }
+
+    var contextMenu: some View {
+        VStack(spacing: 30) {
+            Button(action: {
+
+            }) {
+                Label("Reply", systemImage: "arrowshape.turn.up.left")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
+            }
+
+            Button(action: {
+
+            }) {
+                Label("Copy", systemImage: "document.on.document")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
+            }
+        }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 40)
+        .buttonSizing(.flexible)
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+        .glassEffect(.regular, in: .containerRelative)
+        .padding(.top, 60)
+        .padding(.horizontal, 20)
+        .contentShape(.rect)
     }
 
     var inputFieldView: some View {
