@@ -61,15 +61,19 @@ struct ChatDetailView: View {
     //This is the overlay that shows a copy of the message bubble that show the reactions animations.
     var reactionsOverlay: some View {
         Group {
-            if let context = reactionsCoordinator.reactingMessage {
-                ZStack {
+            ZStack {
+                if reactionsCoordinator.reactingMessage != nil {
                     Rectangle()
                         .fill(.base.opacity(0.9))
                         .ignoresSafeArea()
+                        .transition(.opacity.animation(.smooth))
+
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
 
+                }
+            if let context = reactionsCoordinator.reactingMessage {
                     MessageBubbleView(
                         message: context.message,
                         showTail: context.showTail,
