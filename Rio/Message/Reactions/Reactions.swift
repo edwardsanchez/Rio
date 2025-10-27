@@ -254,9 +254,7 @@ struct ReactionsModifier: ViewModifier {
         }
     }
 
-    private var isAvailable: Bool {
-        availabilityGate && !context.message.reactionOptions.isEmpty
-    }
+    private var isAvailable: Bool { availabilityGate }
 }
 
 extension View {
@@ -284,9 +282,8 @@ private extension ReactionsModifier {
         guard !message.reactionOptions.isEmpty else {
             return []
         }
-
-        let emojiReactions = message.reactionOptions.map { Reaction.emoji($0) }
-        var combined = emojiReactions
+        
+        var combined = message.reactionOptions.map { Reaction.emoji($0) }
         if !combined.contains(where: { $0.id == Reaction.customEmojiReactionID }) {
             combined.append(.systemImage("face.dashed", selectedEmoji: "?"))
         }

@@ -160,7 +160,7 @@ struct BubbleView: View {
         }
         .reactions(
             context: context,
-            isAvailable: messageType.isInbound && bubbleType.isTalking && !context.message.reactionOptions.isEmpty,
+            isAvailable: messageType.isInbound && bubbleType.isTalking,
             isReactionOverlay: isReactionsOverlay
         )
         .opacity(shouldHideBubble ? 0 : 1)

@@ -45,6 +45,7 @@ struct ReactionButton: View {
             isSource: matchedGeometryIsSource
         )
         .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
+        .disabled(!isInteractable)
     }
 
     @ViewBuilder
@@ -62,5 +63,14 @@ struct ReactionButton: View {
 
     private var scaleFactor: CGFloat {
         reaction.id == Reaction.customEmojiReactionID && isCustomEmojiHighlighted ? 1.2 : 1
+    }
+
+    private var isInteractable: Bool {
+        switch reaction.display {
+        case let .emoji(value, _):
+            return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .systemImage:
+            return true
+        }
     }
 }
