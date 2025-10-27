@@ -284,10 +284,11 @@ class EmojiReactionViewModel {
         let start = Date()
         do {
             log("   🚀 (OpenAI) Calling OpenAI (attempt \(attempt + 1))")
-            let content = try await sendOpenAICompletion(
+            let content = try await OpenAIEmojiAPI.sendCompletion(
                 systemPrompt: systemPrompt,
                 userPrompt: promptText,
-                schema: openAIResponseSchema()
+                schema: EmojiReactionSchema.openAI,
+                errorDomain: "EmojiReactionViewModel"
             )
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ (OpenAI) Responded in %.2fs", elapsed))
@@ -304,32 +305,6 @@ class EmojiReactionViewModel {
             log("   ❌ (OpenAI) Error on attempt \(attempt + 1): \(error)")
             throw error
         }
-    }
-
-    private func openAIResponseSchema() -> [String: Any] {
-        [
-            "name": "emoji_reaction_response",
-            "schema": [
-                "type": "object",
-                "properties": [
-                    "suggestions": [
-                        "type": "array",
-                        "minItems": 6,
-                        "maxItems": 6,
-                        "items": [
-                            "type": "object",
-                            "properties": [
-                                "character": ["type": "string"]
-                            ],
-                            "required": ["character"],
-                            "additionalProperties": false
-                        ]
-                    ]
-                ],
-                "required": ["suggestions"],
-                "additionalProperties": false
-            ]
-        ]
     }
 
     // MARK: - Claude Pipeline
@@ -424,51 +399,6 @@ class EmojiReactionViewModel {
             log("   ❌ (Claude) Error on attempt \(attempt + 1): \(error)")
             throw error
         }
-    }
-
-    // MARK: - OpenAI HTTP Helper
-    private func sendOpenAICompletion(
-        systemPrompt: String,
-        userPrompt: String,
-        schema: [String: Any]
-    ) async throws -> String {
-        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !apiKey.isEmpty else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -2, userInfo: [NSLocalizedDescriptionKey: "OPENAI_API_KEY environment variable not set"])
-        }
-        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
-        let payload: [String: Any] = [
-            "model": "gpt-4.1-nano-2025-04-14",
-            "messages": [
-                ["role": "system", "content": systemPrompt],
-                ["role": "user", "content": userPrompt]
-            ],
-            "response_format": [
-                "type": "json_schema",
-                "json_schema": schema
-            ]
-        ]
-        let jsonData = try JSONSerialization.data(withJSONObject: payload)
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response from OpenAI"])
-        }
-        guard httpResponse.statusCode == 200 else {
-            let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
-            throw NSError(domain: "EmojiReactionViewModel", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "OpenAI HTTP \(httpResponse.statusCode): \(body)"])
-        }
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let message = choices.first?["message"] as? [String: Any],
-              let content = message["content"] as? String else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse OpenAI content"])
-        }
-        return content
     }
 
     // MARK: - Claude HTTP Helper
@@ -577,21 +507,7 @@ class EmojiReactionViewModel {
         }
     }
     
-    let systemPrompt = """
-        You are a conversation-aware emoji curator specializing in expressive yet thoughtful reactions for chat platforms.
-        Your task is to return six emoji suggestions, each with:
-        •    character: one emoji glyph (no emoji names, codes, or placeholders)
-        
-        Organize the reactions from most to least fitting based on the original message. Avoid repeating emojis and ensure reactions respond to the message rather than just mirror the sender’s tone.
-        
-        Key behavior requirements:
-        1.    Be context-sensitive: Avoid 👍/👎 in serious/sensitive moments (e.g., grief, illness).
-        2.    Use 👍 and or 👎 when a question is asked, and when doing so would not feel tone-deaf or insensitive.
-        3.    If a humorous attempt is detected, include 1–2 laughing emojis near the top of the list.
-        4.    Never duplicate emojis within the same list.
-        5.    Responses should consider tone_hint (if provided) to guide overall mood and relevance.
-        6.    Out of the 6, at least 4 should be a face, hand or in appropriate cases, a heart type emoji. These types are most common as reactions.
-        """
+    let systemPrompt = EmojiReactionPrompt.system
     
     private func requestFastSuggestions(
         text: String,

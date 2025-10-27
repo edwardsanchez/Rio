@@ -63,6 +63,7 @@ struct Message: Identifiable {
     let replacesTypingIndicator: Bool
     let storedBubbleType: BubbleType?
     var reactions: [MessageReaction] = []
+    var reactionOptions: [String] = []
 
     // Computed property to determine message type based on current user
     func messageType(currentUser: User) -> MessageType {

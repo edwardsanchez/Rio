@@ -19,8 +19,7 @@ struct ReactionsModifier: ViewModifier {
     @Namespace private var reactionNamespace
     @State private var reactionsMenuModel: ReactionsMenuModel
 
-    var reactions: [Reaction]
-    var isAvailable: Bool
+    private let availabilityGate: Bool
     var isReactionOverlay: Bool
 
     private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
@@ -33,7 +32,7 @@ struct ReactionsModifier: ViewModifier {
             .emoji("😂"),
             .emoji("😲"),
             .emoji("🧐"),
-            .systemImage("face.dashed", selectedEmoji: "?")
+            .systemImage("face.dashed", selectedEmoji: "?") //Custom set
         ]
     }
 
@@ -41,10 +40,16 @@ struct ReactionsModifier: ViewModifier {
 
     init(context: ReactingMessageContext, reactions: [Reaction], isAvailable: Bool, isReactionOverlay: Bool) {
         self.context = context
-        self.reactions = reactions
-        self.isAvailable = isAvailable
+        _ = reactions
+        let resolvedReactions = ReactionsModifier.makeReactions(from: context.message)
+        self.availabilityGate = isAvailable
         self.isReactionOverlay = isReactionOverlay
-        _reactionsMenuModel = State(initialValue: ReactionsMenuModel(messageID: context.message.id, reactions: reactions))
+        _reactionsMenuModel = State(
+            initialValue: ReactionsMenuModel(
+                messageID: context.message.id,
+                reactions: resolvedReactions
+            )
+        )
     }
 
     // MARK: - Layout Detection
@@ -130,6 +135,7 @@ struct ReactionsModifier: ViewModifier {
                         adoptSharedMenuModel()
                         reactionsMenuModel.coordinator = reactionsCoordinator
                         reactionsMenuModel.chatData = chatData
+                        updateMenuModelReactionsIfNeeded()
                     }
                     .sheet(
                         isPresented: $reactionsCoordinator.isCustomEmojiPickerPresented,
@@ -149,6 +155,9 @@ struct ReactionsModifier: ViewModifier {
                     }
                     .onTapGesture {
                         reactionsMenuModel.closeReactionsMenu()
+                    }
+                    .onChange(of: context.message.reactionOptions) { _, _ in
+                        updateMenuModelReactionsIfNeeded()
                     }
             } else {
                 content
@@ -181,11 +190,18 @@ struct ReactionsModifier: ViewModifier {
                         adoptSharedMenuModel()
                         reactionsMenuModel.coordinator = reactionsCoordinator
                         reactionsMenuModel.chatData = chatData
+                        updateMenuModelReactionsIfNeeded()
+                    }
+                    .onChange(of: context.message.reactionOptions) { _, _ in
+                        updateMenuModelReactionsIfNeeded()
                     }
             }
         } else {
             //For outbound messages since you can't like your own messages
             content
+                .onChange(of: context.message.reactionOptions) { _, _ in
+                    updateMenuModelReactionsIfNeeded()
+                }
         }
     }
 
@@ -231,12 +247,22 @@ struct ReactionsModifier: ViewModifier {
         reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
     }
 
+    private func updateMenuModelReactionsIfNeeded() {
+        let latest = ReactionsModifier.makeReactions(from: context.message)
+        if reactionsMenuModel.reactions != latest {
+            reactionsMenuModel.reactions = latest
+        }
+    }
+
+    private var isAvailable: Bool {
+        availabilityGate && !context.message.reactionOptions.isEmpty
+    }
 }
 
 extension View {
     func reactions(
         context: ReactingMessageContext,
-        reactions: [Reaction] = ReactionsModifier.defaultReactions,
+        reactions: [Reaction] = [],
         isAvailable: Bool = true,
         isReactionOverlay: Bool
     ) -> some View {
@@ -252,6 +278,21 @@ extension View {
 }
 
 // MARK: - Layout Cases
+
+private extension ReactionsModifier {
+    static func makeReactions(from message: Message) -> [Reaction] {
+        guard !message.reactionOptions.isEmpty else {
+            return []
+        }
+
+        let emojiReactions = message.reactionOptions.map { Reaction.emoji($0) }
+        var combined = emojiReactions
+        if !combined.contains(where: { $0.id == Reaction.customEmojiReactionID }) {
+            combined.append(.systemImage("face.dashed", selectedEmoji: "?"))
+        }
+        return combined
+    }
+}
 
 enum LayoutCase: String, CaseIterable {
     case narrowShort = "Narrow + Short"

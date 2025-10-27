@@ -106,6 +106,9 @@ class ChatData {
             )
 
             chats[chatIndex] = updatedChat
+            if let appendedMessage = updatedChat.messages.last {
+                scheduleReactionOptions(for: appendedMessage, in: updatedChat)
+            }
         }
     }
 
@@ -123,6 +126,8 @@ class ChatData {
                 theme: updatedChat.theme
             )
             chats[chatIndex] = updatedChat
+            let resolvedMessage = updatedMessages[messageIndex]
+            scheduleReactionOptions(for: resolvedMessage, in: updatedChat)
         }
     }
 
@@ -173,5 +178,49 @@ class ChatData {
     func getRandomParticipantForReply(in chat: Chat) -> User? {
         let otherParticipants = getOtherParticipants(in: chat)
         return otherParticipants.randomElement()
+    }
+
+    private func scheduleReactionOptions(for message: Message, in chat: Chat) {
+        guard message.messageType(currentUser: currentUser).isInbound,
+              !message.isTypingIndicator,
+              message.reactionOptions.isEmpty else { return }
+
+        let chatId = chat.id
+        let messageId = message.id
+        let messagesSnapshot = chat.messages
+
+        Task { [weak self] in
+            guard let self else { return }
+            let options = await MessageEmojiService.reactionOptions(
+                for: message,
+                in: messagesSnapshot,
+                currentUser: self.currentUser
+            )
+            guard !options.isEmpty else { return }
+            await self.applyReactionOptions(options, to: messageId, in: chatId)
+        }
+    }
+
+    @MainActor
+    private func applyReactionOptions(_ options: [String], to messageId: UUID, in chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        var chat = chats[chatIndex]
+        var messages = chat.messages
+        guard let messageIndex = messages.firstIndex(where: { $0.id == messageId }) else { return }
+
+        var targetMessage = messages[messageIndex]
+        guard targetMessage.reactionOptions != options else { return }
+
+        targetMessage.reactionOptions = options
+        messages[messageIndex] = targetMessage
+
+        chat = Chat(
+            id: chat.id,
+            title: chat.title,
+            participants: chat.participants,
+            messages: messages,
+            theme: chat.theme
+        )
+        chats[chatIndex] = chat
     }
 }
