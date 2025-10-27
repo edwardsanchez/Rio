@@ -54,6 +54,7 @@ struct ReactionButton: View {
         case let .emoji(value, fontSize):
             Text(value)
                 .font(.system(size: fontSize))
+                .transition(.scale.combined(with: .opacity).animation(.smooth))
         case let .systemImage(name, pointSize, weight):
             Image(systemName: name)
                 .font(.system(size: pointSize, weight: weight))
@@ -62,8 +63,9 @@ struct ReactionButton: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .tint(.secondary)
-                .scaleEffect(0.6)
+                .scaleEffect(0.8)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.scale.combined(with: .opacity).animation(.smooth))
         }
     }
 

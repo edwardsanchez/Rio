@@ -125,7 +125,11 @@ enum MessageEmojiService {
 
     static var isEnabled = true
     /// Debug helper to hold results before returning (seconds). Set to 0 to disable.
-    static var artificialDelay: TimeInterval = 12
+    #if DEBUG
+    static var artificialDelay: TimeInterval = 4
+    #else
+    static var artificialDelay: TimeInterval = 0
+    #endif
 
     private static let fallbackEmojis: [String] = {
         let reactions = ReactionsModifier.defaultReactions
