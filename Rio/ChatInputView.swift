@@ -40,9 +40,7 @@ struct ChatInputView: View {
         "Never!",
         "That's cool!",
         "👍",
-        "😊",
-        "🤔💭",
-        "🎉🎊🥳"
+        "😊"
     ]
 
     var body: some View {
