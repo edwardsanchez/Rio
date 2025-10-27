@@ -58,6 +58,12 @@ struct ReactionButton: View {
             Image(systemName: name)
                 .font(.system(size: pointSize, weight: weight))
                 .foregroundStyle(.secondary)
+        case .placeholder:
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(.secondary)
+                .scaleEffect(0.6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -71,6 +77,8 @@ struct ReactionButton: View {
             return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .systemImage:
             return true
+        case .placeholder:
+            return false
         }
     }
 }

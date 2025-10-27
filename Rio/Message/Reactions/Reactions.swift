@@ -279,11 +279,21 @@ extension View {
 
 private extension ReactionsModifier {
     static func makeReactions(from message: Message) -> [Reaction] {
-        guard !message.reactionOptions.isEmpty else {
-            return []
+        let baseReactions: [Reaction]
+        if message.reactionOptions.isEmpty {
+            baseReactions = (0..<6).map { index in
+                Reaction.placeholder(id: "placeholder-\(message.id.uuidString)-\(index)")
+            }
+        } else {
+            baseReactions = message.reactionOptions.enumerated().map { index, value in
+                Reaction.emoji(
+                    value,
+                    id: "emoji-\(message.id.uuidString)-\(index)"
+                )
+            }
         }
-        
-        var combined = message.reactionOptions.map { Reaction.emoji($0) }
+
+        var combined = baseReactions
         if !combined.contains(where: { $0.id == Reaction.customEmojiReactionID }) {
             combined.append(.systemImage("face.dashed", selectedEmoji: "?"))
         }

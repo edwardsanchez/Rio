@@ -124,6 +124,8 @@ enum MessageEmojiService {
     private struct TimeoutError: Error {}
 
     static var isEnabled = true
+    /// Debug helper to hold results before returning (seconds). Set to 0 to disable.
+    static var artificialDelay: TimeInterval = 12
 
     private static let fallbackEmojis: [String] = {
         let reactions = ReactionsModifier.defaultReactions
@@ -160,7 +162,9 @@ enum MessageEmojiService {
 
         do {
             let suggestions = try await fetchWithTimeout(prompt: prompt)
-            return suggestions.isEmpty ? fallbackEmojis : suggestions
+            let resolved = suggestions.isEmpty ? fallbackEmojis : suggestions
+            await applyArtificialDelayIfNeeded()
+            return resolved
         } catch {
             return fallbackEmojis
         }
@@ -332,4 +336,12 @@ private extension DateFormatter {
         formatter.timeStyle = .short
         return formatter
     }()
+}
+
+private extension MessageEmojiService {
+    static func applyArtificialDelayIfNeeded() async {
+        guard artificialDelay > 0 else { return }
+        let nanoseconds = UInt64(artificialDelay * 1_000_000_000)
+        try? await Task.sleep(nanoseconds: nanoseconds)
+    }
 }

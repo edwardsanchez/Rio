@@ -362,15 +362,16 @@ struct Reaction: Identifiable, Equatable {
     enum Display {
         case emoji(value: String, fontSize: CGFloat)
         case systemImage(name: String, pointSize: CGFloat, weight: Font.Weight)
+        case placeholder
     }
 
     let id: String
     let display: Display
     let selectedEmoji: String
 
-    static func emoji(_ value: String) -> Reaction {
+    static func emoji(_ value: String, id: String? = nil) -> Reaction {
         Reaction(
-            id: value,
+            id: id ?? value,
             display: .emoji(value: value, fontSize: 24),
             selectedEmoji: value
         )
@@ -386,6 +387,14 @@ struct Reaction: Identifiable, Equatable {
             id: name,
             display: .systemImage(name: name, pointSize: pointSize, weight: weight),
             selectedEmoji: selectedEmoji
+        )
+    }
+
+    static func placeholder(id: String) -> Reaction {
+        Reaction(
+            id: id,
+            display: .placeholder,
+            selectedEmoji: ""
         )
     }
 }
