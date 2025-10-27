@@ -26,6 +26,8 @@ final class ReactionsCoordinator {
     var isCustomEmojiPickerPresented = false
     // Controls which bubble instance should be treated as the geometry source during transitions
     var geometrySource: ReactionGeometrySource = .list
+    // Drives the dimmed background overlay visibility independently of the bubble teardown
+    var isBackgroundDimmerVisible = false
     // Weak storage so list bubbles and overlay share the same menu model instance
     private var menuModels: [UUID: WeakMenuModel] = [:]
     private var closeWorkItems: [UUID: DispatchWorkItem] = [:]
@@ -40,6 +42,8 @@ final class ReactionsCoordinator {
         self.registerMenuModel(menuModel, for: context.message.id)
         geometrySource = .list
         reactingMessage = context
+
+        isBackgroundDimmerVisible = true
     }
 
     func closeReactionsMenu(after delay: TimeInterval = 0) {
@@ -50,6 +54,8 @@ final class ReactionsCoordinator {
         cancelCloseTimer(for: messageID)
         cancelOverlayRemoval(for: messageID)
         isCustomEmojiPickerPresented = false
+
+        isBackgroundDimmerVisible = false
 
         guard delay > 0 else {
             finishClosing(messageID)

@@ -62,11 +62,11 @@ struct ChatDetailView: View {
     var reactionsOverlay: some View {
         Group {
             ZStack {
-                if reactionsCoordinator.reactingMessage != nil {
+                if reactionsCoordinator.isBackgroundDimmerVisible {
                     Rectangle()
                         .fill(.base.opacity(0.9))
                         .ignoresSafeArea()
-                        .transition(.opacity.animation(.easeIn))
+                        .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
