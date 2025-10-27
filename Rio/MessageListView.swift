@@ -19,6 +19,7 @@ struct MessageListView: View {
     @Binding var selectedImageData: ImageData?
     let bubbleNamespace: Namespace.ID?
     let reactionsCoordinator: ReactionsCoordinator?
+    let geometrySource: ReactionGeometrySource
     @Environment(ChatData.self) private var chatData
     @Environment(ReactionsCoordinator.self) private var environmentReactionsCoordinator
 
@@ -59,6 +60,7 @@ struct MessageListView: View {
                         theme: theme,
                         bubbleNamespace: bubbleNamespace,
                         activeReactingMessageID: activeReactionMessageID,
+                        geometrySource: geometrySource,
                         selectedImageData: $selectedImageData
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))

@@ -13,12 +13,19 @@ struct ReactingMessageContext {
     let theme: ChatTheme
 }
 
+enum ReactionGeometrySource {
+    case list
+    case overlay
+}
+
 @Observable
 final class ReactionsCoordinator {
     // Tracks the message currently displaying a reactions menu with full context
     var reactingMessage: ReactingMessageContext?
     // Tracks whether the emoji picker sheet is presented (only one can be shown at a time)
     var isCustomEmojiPickerPresented = false
+    // Controls which bubble instance should be treated as the geometry source during transitions
+    var geometrySource: ReactionGeometrySource = .list
     // Weak storage so list bubbles and overlay share the same menu model instance
     private var menuModels: [UUID: WeakMenuModel] = [:]
     private var closeWorkItems: [UUID: DispatchWorkItem] = [:]
@@ -29,6 +36,7 @@ final class ReactionsCoordinator {
     ) {
         cancelCloseTimer(for: context.message.id)
         self.registerMenuModel(menuModel, for: context.message.id)
+        geometrySource = .list
         reactingMessage = context
     }
 
@@ -39,6 +47,7 @@ final class ReactionsCoordinator {
 
         cancelCloseTimer(for: messageID)
         isCustomEmojiPickerPresented = false
+        geometrySource = .list
 
         guard delay > 0 else {
             finishClosing(messageID)
@@ -69,6 +78,18 @@ final class ReactionsCoordinator {
     func menuModel(for messageID: UUID) -> ReactionsMenuModel? {
         cleanupStaleMenuModels()
         return menuModels[messageID]?.model
+    }
+
+    func promoteGeometrySourceToOverlay(for messageID: UUID, after delay: TimeInterval = 0.18) {
+        guard geometrySource != .overlay else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self, self.reactingMessage?.message.id == messageID else { return }
+            self.geometrySource = .overlay
+        }
+    }
+
+    func resetGeometrySourceToList() {
+        geometrySource = .list
     }
 
     func closeActiveMenu(delay: TimeInterval = 0) {
@@ -103,6 +124,8 @@ final class ReactionsCoordinator {
     private func finishClosing(_ messageID: UUID) {
         closeWorkItems[messageID]?.cancel()
         closeWorkItems.removeValue(forKey: messageID)
+
+        geometrySource = .list
 
         if reactingMessage?.message.id == messageID {
             reactingMessage = nil

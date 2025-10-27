@@ -76,9 +76,16 @@ struct ChatDetailView: View {
                         theme: context.theme,
                         bubbleNamespace: bubbleNamespace,
                         activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
+                        geometrySource: reactionsCoordinator.geometrySource,
                         isReactionsOverlay: true,
                         selectedImageData: $selectedImageData
                     )
+                    .onAppear {
+                        reactionsCoordinator.promoteGeometrySourceToOverlay(for: context.message.id)
+                    }
+                    .onDisappear {
+                        reactionsCoordinator.resetGeometrySourceToList()
+                    }
                     .padding(20)
                 }
             }
@@ -131,7 +138,8 @@ struct ChatDetailView: View {
                     theme: chat.theme,
                     selectedImageData: $selectedImageData,
                     bubbleNamespace: bubbleNamespace,
-                    reactionsCoordinator: reactionsCoordinator
+                    reactionsCoordinator: reactionsCoordinator,
+                    geometrySource: reactionsCoordinator.geometrySource
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -376,7 +384,8 @@ private struct OutboundGeometryMatchDebugView: View {
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
                         bubbleNamespace: bubbleNamespace,
-                        reactionsCoordinator: reactionsCoordinator
+                        reactionsCoordinator: reactionsCoordinator,
+                        geometrySource: reactionsCoordinator.geometrySource
                     )
                     .onGeometryChange(for: CGRect.self) { geometryProxy in
                         geometryProxy.frame(in: .global)

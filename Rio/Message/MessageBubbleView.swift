@@ -43,6 +43,7 @@ struct MessageBubbleView: View {
     let theme: ChatTheme
     let bubbleNamespace: Namespace.ID?
     let activeReactingMessageID: UUID?
+    let geometrySource: ReactionGeometrySource
     let isReactionsOverlay: Bool
 
     @State private var showTypingIndicatorContent = false
@@ -91,6 +92,19 @@ struct MessageBubbleView: View {
         "bubble-\(message.id)"
     }
 
+    private var isSourceForGeometry: Bool {
+        guard let activeID = activeReactingMessageID, activeID == message.id else {
+            return geometrySource == .list
+        }
+
+        switch geometrySource {
+        case .list:
+            return !isReactionsOverlay
+        case .overlay:
+            return isReactionsOverlay
+        }
+    }
+
     init(
         message: Message,
         showTail: Bool = true,
@@ -104,6 +118,7 @@ struct MessageBubbleView: View {
         theme: ChatTheme = .defaultTheme,
         bubbleNamespace: Namespace.ID? = nil,
         activeReactingMessageID: UUID? = nil,
+        geometrySource: ReactionGeometrySource = .list,
         isReactionsOverlay: Bool = false,
         selectedImageData: Binding<ImageData?>
     ) {
@@ -119,6 +134,7 @@ struct MessageBubbleView: View {
         self.theme = theme
         self.bubbleNamespace = bubbleNamespace
         self.activeReactingMessageID = activeReactingMessageID
+        self.geometrySource = geometrySource
         self.isReactionsOverlay = isReactionsOverlay
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
@@ -134,7 +150,7 @@ struct MessageBubbleView: View {
                         in: namespace,
                         properties: .frame,
                         anchor: .center,
-                        isSource: !isReactionsOverlay
+                        isSource: isSourceForGeometry
                     )
             } else {
                 decoratedBubbleLayout
