@@ -115,21 +115,33 @@ struct ChatDetailView: View {
 
     var contextMenu: some View {
         VStack(spacing: 30) {
+            //DO NOT DELETE
+//            Button(action: {
+//
+//            }) {
+//                Label("Reply", systemImage: "arrowshape.turn.up.left")
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    .contentShape(.rect)
+//            }
+
             Button(action: {
-
-            }) {
-                Label("Reply", systemImage: "arrowshape.turn.up.left")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(.rect)
-            }
-
-            Button(action: {
-
+                if let message = reactionsCoordinator.reactingMessage?.message {
+                    message.copyToClipboard()
+                    // Provide haptic feedback
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    // Close the reactions menu
+                    reactionsCoordinator.closeActiveMenu()
+                }
             }) {
                 Label("Copy", systemImage: "document.on.document")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(.rect)
             }
+
+            //TODO: Need to implement save for inbound + outbound images and videos
+
+            //TODO: For outbound, need to eventually implement Undo send
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 40)

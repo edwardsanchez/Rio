@@ -245,3 +245,181 @@ enum DaysOfWeek: Int, Codable, CaseIterable {
 enum Rating: Int, Codable, CaseIterable {
     case one, two, three, four, five
 }
+
+// MARK: - Message Copy Extension
+
+extension Message {
+    /// Copies the message content to the system clipboard
+    func copyToClipboard() {
+        let pasteboard = UIPasteboard.general
+        
+        switch content {
+        // Simple text types
+        case .text(let string), .emoji(let string), .code(let string), .textChoice(let string):
+            pasteboard.string = string
+            
+        // Image types
+        case .image(let image):
+            copyImage(image, to: pasteboard)
+            
+        case .labeledImage(let labeledImage):
+            copyImage(labeledImage.image, to: pasteboard)
+            
+        // Video/Audio - try to copy data, fallback to URL or description
+        case .video(let url):
+            copyMediaFromURL(url, fallbackText: "Video", to: pasteboard)
+            
+        case .audio(let url):
+            copyMediaFromURL(url, fallbackText: "Audio", to: pasteboard)
+            
+        // Location - generate Apple Maps URL or use name
+        case .location(let mapItem):
+            if let mapsURL = generateAppleMapsURL(for: mapItem) {
+                pasteboard.string = mapsURL
+            } else if let name = mapItem.name {
+                pasteboard.string = name
+            } else {
+                pasteboard.string = "Location"
+            }
+            
+        // Dates
+        case .date(let date, let granularity):
+            pasteboard.string = formatDate(date, granularity: granularity)
+            
+        case .dateRange(let range, let granularity):
+            pasteboard.string = formatDateRange(range, granularity: granularity)
+            
+        case .dateFrequency(let frequency):
+            pasteboard.string = formatDateFrequency(frequency)
+            
+        // Values
+        case .value(let measurement):
+            pasteboard.string = formatMeasurementValue(measurement)
+            
+        case .valueRange(let range):
+            let minStr = formatMeasurementValue(range.lowerBound)
+            let maxStr = formatMeasurementValue(range.upperBound)
+            pasteboard.string = "\(minStr) - \(maxStr)"
+            
+        case .bool(let value):
+            pasteboard.string = value ? "YES" : "NO"
+            
+        case .rating(let rating):
+            pasteboard.string = "\(rating.rawValue + 1) stars"
+            
+        // URLs and files
+        case .url(let url):
+            pasteboard.string = url.absoluteString
+            
+        case .file(let url):
+            pasteboard.string = url.lastPathComponent
+            
+        // Color
+        case .color(let rgb):
+            if let name = rgb.name {
+                pasteboard.string = name
+            } else {
+                let hex = String(format: "#%02X%02X%02X", rgb.red, rgb.green, rgb.blue)
+                pasteboard.string = hex
+            }
+            
+        // Multi-choice - skip for now
+        case .multiChoice:
+            break
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func copyImage(_ image: Image, to pasteboard: UIPasteboard) {
+        // Use ImageRenderer to convert SwiftUI Image to UIImage
+        let renderer = ImageRenderer(content: image.resizable().scaledToFit())
+        
+        // Set a reasonable size for rendering
+        renderer.proposedSize = ProposedViewSize(width: 1024, height: 1024)
+        
+        if let uiImage = renderer.uiImage {
+            pasteboard.image = uiImage
+        }
+    }
+    
+    private func copyMediaFromURL(_ url: URL, fallbackText: String, to pasteboard: UIPasteboard) {
+        // For remote URLs, just copy the URL string
+        // For local files, we could copy the data, but that's complex for video
+        if url.isFileURL {
+            // Try to copy file data for local files
+            if let data = try? Data(contentsOf: url) {
+                pasteboard.setData(data, forPasteboardType: "public.data")
+            } else {
+                pasteboard.string = url.path
+            }
+        } else {
+            // Remote URL - just copy the URL string
+            pasteboard.string = url.absoluteString
+        }
+    }
+    
+    private func generateAppleMapsURL(for mapItem: MKMapItem) -> String? {
+        let location = mapItem.location
+        let coordinate = location.coordinate
+        let lat = coordinate.latitude
+        let lon = coordinate.longitude
+        
+        if let name = mapItem.name {
+            let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? name
+            return "http://maps.apple.com/?q=\(encodedName)&ll=\(lat),\(lon)"
+        } else {
+            return "http://maps.apple.com/?ll=\(lat),\(lon)"
+        }
+    }
+    
+    private func formatDate(_ date: Date, granularity: DateGranularity) -> String {
+        switch granularity {
+        case .dateAndTime:
+            return date.formatted(date: .abbreviated, time: .shortened)
+        case .dateOnly:
+            return date.formatted(date: .abbreviated, time: .omitted)
+        case .timeOnly:
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+    }
+    
+    private func formatDateRange(_ range: DateRange, granularity: DateGranularity) -> String {
+        let startStr = formatDate(range.start, granularity: granularity)
+        let endStr = formatDate(range.end, granularity: granularity)
+        return "\(startStr) → \(endStr)"
+    }
+    
+    private func formatDateFrequency(_ frequency: DateFrequency) -> String {
+        let dayName = Calendar.current.weekdaySymbols[frequency.dayOfWeek.rawValue]
+        let prefix = frequency.interval == 1 ? "Every" : "Every \(frequency.interval)"
+        return "\(prefix) \(dayName)"
+    }
+    
+    private func formatMeasurementValue(_ measurement: Measurement) -> String {
+        switch measurement.type {
+        case .length(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .percentage:
+            return String(format: "%.1f%%", measurement.value)
+        case .currency:
+            return String(format: "$%.2f", measurement.value)
+        case .mass(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .volume(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .temperature(let unit):
+            return String(format: "%.1f%@", measurement.value, unit.symbol)
+        case .duration(let unit):
+            return String(format: "%.0f%@", measurement.value, unit.symbol)
+        case .speed(let unit):
+            return String(format: "%.1f%@", measurement.value, unit.symbol)
+        case .area(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .energy(let unit):
+            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case .number:
+            return String(format: "%.2f", measurement.value)
+        }
+    }
+}
