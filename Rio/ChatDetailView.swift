@@ -33,6 +33,7 @@ struct ChatDetailView: View {
 
     // Image zoom transition
     @State private var selectedImageData: ImageData?
+    @Namespace private var bubbleNamespace
 
     init(chat: Chat) {
         self.chat = chat
@@ -60,22 +61,33 @@ struct ChatDetailView: View {
     //This is the overlay that shows a copy of the message bubble that show the reactions animations.
     var reactionsOverlay: some View {
         Group {
-            if let context = reactionsCoordinator.reactingMessage {
-                ZStack {
+            ZStack {
+                if reactionsCoordinator.isBackgroundDimmerVisible {
                     Rectangle()
                         .fill(.base.opacity(0.9))
                         .ignoresSafeArea()
+                        .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
-
+                }
+            if let context = reactionsCoordinator.reactingMessage {
                     MessageBubbleView(
                         message: context.message,
                         showTail: context.showTail,
                         theme: context.theme,
+                        bubbleNamespace: bubbleNamespace,
+                        activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
+                        geometrySource: reactionsCoordinator.geometrySource,
                         isReactionsOverlay: true,
                         selectedImageData: $selectedImageData
                     )
+                    .onAppear {
+                        reactionsCoordinator.promoteGeometrySourceToOverlay(for: context.message.id)
+                    }
+                    .onDisappear {
+                        reactionsCoordinator.resetGeometrySourceToList()
+                    }
                     .padding(20)
                 }
             }
@@ -126,7 +138,10 @@ struct ChatDetailView: View {
                     scrollVelocity: scrollVelocity,
                     scrollPhase: scrollPhase,
                     theme: chat.theme,
-                    selectedImageData: $selectedImageData
+                    selectedImageData: $selectedImageData,
+                    bubbleNamespace: bubbleNamespace,
+                    reactionsCoordinator: reactionsCoordinator,
+                    geometrySource: reactionsCoordinator.geometrySource
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -353,6 +368,8 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData?
+    @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
+    @Namespace private var bubbleNamespace
 
     var body: some View {
         NavigationStack {
@@ -367,7 +384,10 @@ private struct OutboundGeometryMatchDebugView: View {
                         scrollVelocity: 0,
                         scrollPhase: .idle,
                         theme: .defaultTheme,
-                        selectedImageData: $selectedImageData
+                        selectedImageData: $selectedImageData,
+                        bubbleNamespace: bubbleNamespace,
+                        reactionsCoordinator: reactionsCoordinator,
+                        geometrySource: reactionsCoordinator.geometrySource
                     )
                     .onGeometryChange(for: CGRect.self) { geometryProxy in
                         geometryProxy.frame(in: .global)

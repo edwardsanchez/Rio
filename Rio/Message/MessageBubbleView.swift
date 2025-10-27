@@ -41,6 +41,9 @@ struct MessageBubbleView: View {
     let scrollPhase: ScrollPhase
     let visibleMessageIndex: Int
     let theme: ChatTheme
+    let bubbleNamespace: Namespace.ID?
+    let activeReactingMessageID: UUID?
+    let geometrySource: ReactionGeometrySource
     let isReactionsOverlay: Bool
 
     @State private var showTypingIndicatorContent = false
@@ -64,6 +67,46 @@ struct MessageBubbleView: View {
         message.messageType(currentUser: chatData.currentUser)
     }
 
+    private var isActiveReactionBubble: Bool {
+        activeReactingMessageID == message.id
+    }
+
+    private var shouldDisplayBubble: Bool {
+        guard let activeID = activeReactingMessageID else { return true }
+        guard activeID == message.id else { return true }
+
+        if isReactionsOverlay {
+            return true
+        } else {
+            return geometrySource == .list
+        }
+    }
+
+    private var displayOpacity: Double {
+        shouldDisplayBubble ? 1 : 0
+    }
+
+    private var allowsInteraction: Bool {
+        shouldDisplayBubble && (!isActiveReactionBubble || isReactionsOverlay)
+    }
+
+    private var matchedGeometryID: String {
+        "bubble-\(message.id)"
+    }
+
+    private var isSourceForGeometry: Bool {
+        guard let activeID = activeReactingMessageID, activeID == message.id else {
+            return geometrySource == .list
+        }
+
+        switch geometrySource {
+        case .list:
+            return !isReactionsOverlay
+        case .overlay:
+            return isReactionsOverlay
+        }
+    }
+
     init(
         message: Message,
         showTail: Bool = true,
@@ -75,6 +118,9 @@ struct MessageBubbleView: View {
         scrollPhase: ScrollPhase = .idle,
         visibleMessageIndex: Int = 0,
         theme: ChatTheme = .defaultTheme,
+        bubbleNamespace: Namespace.ID? = nil,
+        activeReactingMessageID: UUID? = nil,
+        geometrySource: ReactionGeometrySource = .list,
         isReactionsOverlay: Bool = false,
         selectedImageData: Binding<ImageData?>
     ) {
@@ -88,6 +134,9 @@ struct MessageBubbleView: View {
         self.scrollPhase = scrollPhase
         self.visibleMessageIndex = visibleMessageIndex
         self.theme = theme
+        self.bubbleNamespace = bubbleNamespace
+        self.activeReactingMessageID = activeReactingMessageID
+        self.geometrySource = geometrySource
         self.isReactionsOverlay = isReactionsOverlay
         self._selectedImageData = selectedImageData
         // Initialize displayedBubbleType to match actual bubbleType
@@ -95,6 +144,30 @@ struct MessageBubbleView: View {
     }
 
     var body: some View {
+        Group {
+            if let namespace = bubbleNamespace {
+                decoratedBubbleLayout
+                    .matchedGeometryEffect(
+                        id: matchedGeometryID,
+                        in: namespace,
+                        properties: .frame,
+                        anchor: .center,
+                        isSource: isSourceForGeometry
+                    )
+            } else {
+                decoratedBubbleLayout
+            }
+        }
+    }
+
+    private var decoratedBubbleLayout: some View {
+        baseBubbleLayout
+            .opacity(displayOpacity)
+            .allowsHitTesting(allowsInteraction)
+            .animation(.smooth(duration: 0.2), value: shouldDisplayBubble)
+    }
+
+    private var baseBubbleLayout: some View {
         HStack(alignment: .bottom, spacing: 12) {
             if messageType.isInbound {
                 Group {

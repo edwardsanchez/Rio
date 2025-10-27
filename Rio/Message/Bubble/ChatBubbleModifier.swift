@@ -41,21 +41,7 @@ private struct ChatBubbleModifier: ViewModifier {
             .padding(.vertical, 10)
             .padding(.horizontal, layoutType == .thinking ? 17 : 13)
             .background(alignment: .leading) {
-                if isVisible {
-                    BubbleView(
-                        width: sizingType == .thinking ? 80 : measuredWidth,
-                        height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
-                        color: backgroundColor,
-                        type: bubbleType,
-                        showTail: showTail,
-                        messageType: messageType,
-                        layoutType: layoutType,
-                        messageID: messageID,
-                        context: context,
-                        isReactionsOverlay: isReactionsOverlay
-                    )
-                    .compositingGroup()
-                }
+                bubbleBackground(for: sizingType)
             }
             .animation(.smooth) { content in
                 content
@@ -66,6 +52,27 @@ private struct ChatBubbleModifier: ViewModifier {
             } action: { newSize in
                 contentSize = newSize
             }
+    }
+
+    @ViewBuilder
+    private func bubbleBackground(for sizingType: BubbleType) -> some View {
+        if isVisible {
+            BubbleView(
+                width: sizingType == .thinking ? 80 : measuredWidth,
+                height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
+                color: backgroundColor,
+                type: bubbleType,
+                showTail: showTail,
+                messageType: messageType,
+                layoutType: layoutType,
+                messageID: messageID,
+                context: context,
+                isReactionsOverlay: isReactionsOverlay
+            )
+            .compositingGroup()
+        } else {
+            EmptyView()
+        }
     }
 }
 
