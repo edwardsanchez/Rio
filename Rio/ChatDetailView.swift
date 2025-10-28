@@ -70,22 +70,19 @@ struct ChatDetailView: View {
     }
 
     var chatDetailOverlay: some View {
-        Group {
+        ZStack {
             if isShowingDetailScim {
                 scrimView
                     .onTapGesture {
                         isShowingDetailContent = false
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            isShowingDetailScim = false
-                        }
+                        isShowingDetailScim = false
                     }
             }
 
             if isShowingDetailContent {
-                //Placeholder for the detail view
-                Circle()
-                    .transition(.opacity.animation(.easeInOut))
+                //This should be the avatar, matching geometry
+                ChatTitleView(chat: chat, isVertical: isShowingDetailContent, onTap: {
+                })
             }
         }
     }
@@ -317,7 +314,7 @@ struct ChatDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    ChatTitleView(chat: chat, onTap: {
+                    ChatTitleView(chat: chat, isVertical: isShowingDetailContent, onTap: {
                         tapAvatar()
                     })
                         .padding(.top, 25)
@@ -337,10 +334,10 @@ struct ChatDetailView: View {
 
     func tapAvatar() {
         isShowingDetailScim = true
-        //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others
 
+        isShowingDetailContent = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            isShowingDetailContent = true
+            //do not delete queue
         }
     }
 

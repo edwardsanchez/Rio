@@ -10,6 +10,7 @@ import SwiftUI
 struct AvatarView: View {
     let user: User
     var avatarSize: CGFloat? = 80
+    var isVertical : Bool = false
     @State private var renderedSize: CGSize = .zero
 
     var body: some View {

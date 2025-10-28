@@ -9,12 +9,13 @@ import SwiftUI
 
 struct ChatTitleView: View {
     let chat: Chat
+    var isVertical: Bool
     var onTap: (() -> Void)?
 
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 4) {
-                GreedyCircleStack {
+                GreedyCircleStack(isVertical: isVertical, verticalSpacing: 20, verticalDiameter: 44) {
                     ForEach(chat.participants) { participant in
                         AvatarView(user: participant, avatarSize: nil)
                     }
