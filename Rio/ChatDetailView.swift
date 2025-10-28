@@ -37,6 +37,7 @@ struct ChatDetailView: View {
     // Image zoom transition
     @State private var selectedImageData: ImageData?
     @Namespace private var bubbleNamespace
+    @Namespace private var avatarNamespace
 
     init(chat: Chat) {
         self.chat = chat
@@ -48,6 +49,10 @@ struct ChatDetailView: View {
 
     private var messages: [Message] {
         currentChat?.messages ?? []
+    }
+
+    private var isDetailOverlayActive: Bool {
+        isShowingDetailContent && isShowingDetailScim
     }
 
     var body: some View {
@@ -74,15 +79,22 @@ struct ChatDetailView: View {
             if isShowingDetailScim {
                 scrimView
                     .onTapGesture {
-                        isShowingDetailContent = false
-                        isShowingDetailScim = false
+                        closeDetailOverlay()
                     }
             }
 
-            if isShowingDetailContent {
-                //This should be the avatar, matching geometry
-                ChatTitleView(chat: chat, isVertical: isShowingDetailContent, onTap: {
-                })
+            if isDetailOverlayActive {
+                ChatTitleView(
+                    chat: chat,
+                    isVertical: true,
+                    onTap: {
+                        closeDetailOverlay()
+                    },
+                    avatarNamespace: avatarNamespace,
+                    avatarMatchedGeometryId: chat.id,
+                    isGeometrySource: false
+                )
+                .transition(.opacity.animation(.easeInOut))
             }
         }
     }
@@ -314,10 +326,16 @@ struct ChatDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    ChatTitleView(chat: chat, isVertical: isShowingDetailContent, onTap: {
-                        tapAvatar()
-                    })
-                        .padding(.top, 25)
+                    ChatTitleView(
+                        chat: chat,
+                        isVertical: isDetailOverlayActive,
+                        onTap: {
+                            tapAvatar()
+                        },
+                        avatarNamespace: avatarNamespace,
+                        avatarMatchedGeometryId: chat.id
+                    )
+                    .padding(.top, 25)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -333,9 +351,10 @@ struct ChatDetailView: View {
     }
 
     func tapAvatar() {
-        isShowingDetailScim = true
-
-        isShowingDetailContent = true
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isShowingDetailScim = true
+            isShowingDetailContent = true
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             //do not delete queue
         }
@@ -356,6 +375,13 @@ struct ChatDetailView: View {
 
         // Instant scroll without animation for input field height changes
         scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
+    }
+
+    private func closeDetailOverlay() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isShowingDetailContent = false
+            isShowingDetailScim = false
+        }
     }
 }
 
