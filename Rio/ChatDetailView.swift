@@ -53,6 +53,7 @@ struct ChatDetailView: View {
             inputFieldView
             imageOverlay
             reactionsOverlay
+            chatDetailOverlay
         }
         .tint(chat.theme.outboundBackgroundColor)
         .environment(reactionsCoordinator)
@@ -63,6 +64,11 @@ struct ChatDetailView: View {
             .fill(.base.opacity(0.9))
             .ignoresSafeArea()
             .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
+    }
+
+    var chatDetailOverlay: some View {
+        scrimView
+            .hidden()
     }
 
     //This is the overlay that shows a copy of the message bubble that show the reactions animations.
