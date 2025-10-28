@@ -15,8 +15,6 @@ struct ChatTitleView: View {
     var avatarMatchedGeometryId: AnyHashable?
     var isGeometrySource: Bool = true
 
-    @State private var displayedIsVertical: Bool
-
     private var resolvedAvatarGeometryId: AnyHashable {
         avatarMatchedGeometryId ?? AnyHashable("chat-avatar-\(chat.id)")
     }
@@ -35,7 +33,6 @@ struct ChatTitleView: View {
         self.avatarNamespace = avatarNamespace
         self.avatarMatchedGeometryId = avatarMatchedGeometryId
         self.isGeometrySource = isGeometrySource
-        _displayedIsVertical = State(initialValue: isVertical)
     }
 
     var body: some View {
@@ -60,15 +57,14 @@ struct ChatTitleView: View {
                     }
             }
         }
-        .onChange(of: isVertical) { _, newValue in
-            withAnimation(.smooth(duration: 0.35)) {
-                displayedIsVertical = newValue
-            }
-        }
     }
 
     private var avatarBase: some View {
-        GreedyCircleStack(isVertical: displayedIsVertical, verticalSpacing: 20, verticalDiameter: 44) {
+        GreedyCircleStack(
+            isVertical: isVertical,
+            verticalSpacing: 20,
+            verticalDiameter: 44
+        ) {
             ForEach(chat.participants) { participant in
                 AvatarView(user: participant, avatarSize: nil)
             }
@@ -78,7 +74,7 @@ struct ChatTitleView: View {
             Circle()
                 .fill(Color.clear)
         }
-        .glassEffect(.regular.interactive())
+        .glassEffect(isVertical ? .identity : .regular.interactive())
         .frame(width: 60, height: 60)
     }
 
@@ -107,6 +103,22 @@ struct ChatTitleView: View {
         ChatTitleView(chat: .sample(title: "Quartet Chat", participantNames: ["Amy", "Ben", "Cara", "Dan"]))
         ChatTitleView(chat: .sample(title: "Group Hang", participantNames: ["Amy", "Ben", "Cara", "Dan", "Eli", "Fiona", "Gus", "Hana"]))
     }
+    .padding()
+    .background(Color.base)
+}
+
+#Preview("ChatTitleView Single") {
+    @Previewable @State var isVertical = true
+    ChatTitleView(
+        chat: .sample(title: "Quartet Chat", participantNames: ["Amy", "Ben", "Cara", "Dan"]),
+        isVertical: isVertical,
+        onTap: {
+            withAnimation {
+                isVertical.toggle()
+            }
+        }
+    )
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding()
     .background(Color.base)
 }
