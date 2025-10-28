@@ -578,7 +578,7 @@ struct CircleStackPreviewCard<Content: View>: View {
 //                DemoAvatar(color: .red, text: "F")
 //                DemoAvatar(color: .yellow, text: "G")
             }
-            .animation(.smooth(duration: 2), value: isVertical)
+            .animation(.smooth(duration: 1), value: isVertical)
         }
         // Let layout compute height in vertical mode; constrain only width
         .frame(width: 80)
