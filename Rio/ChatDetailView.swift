@@ -51,10 +51,6 @@ struct ChatDetailView: View {
         currentChat?.messages ?? []
     }
 
-    private var isDetailOverlayActive: Bool {
-        isShowingDetailContent && isShowingDetailScim
-    }
-
     var body: some View {
         ZStack {
             messagesView
@@ -83,12 +79,12 @@ struct ChatDetailView: View {
                     }
             }
 
-            if isDetailOverlayActive {
+            if isShowingDetailContent {
                 ChatTitleView(
                     chat: chat,
                     isVertical: true,
                     onTap: {
-                        closeDetailOverlay()
+                        //Do nothing
                     },
                     avatarNamespace: avatarNamespace,
                     avatarMatchedGeometryId: chat.id,
@@ -328,7 +324,7 @@ struct ChatDetailView: View {
                 ToolbarItem(placement: .principal) {
                     ChatTitleView(
                         chat: chat,
-                        isVertical: isDetailOverlayActive,
+                        isVertical: isShowingDetailContent,
                         onTap: {
                             tapAvatar()
                         },
@@ -352,11 +348,11 @@ struct ChatDetailView: View {
 
     func tapAvatar() {
         withAnimation(.easeInOut(duration: 0.25)) {
-            isShowingDetailScim = true
             isShowingDetailContent = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            //do not delete queue
+
+        withAnimation(.easeInOut(duration: 0.25).delay(0.25)) {
+            isShowingDetailScim = true
         }
     }
 
@@ -378,9 +374,14 @@ struct ChatDetailView: View {
     }
 
     private func closeDetailOverlay() {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            isShowingDetailContent = false
+        withAnimation(.easeInOut(duration: 0.15)) {
             isShowingDetailScim = false
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
+            withAnimation(.easeInOut(duration: 0.25)) {
+                isShowingDetailContent = false
+            }
         }
     }
 }

@@ -9,21 +9,39 @@ import SwiftUI
 
 struct ChatTitleView: View {
     let chat: Chat
-    var isVertical: Bool = false
+    var isVertical: Bool
     var onTap: (() -> Void)?
     var avatarNamespace: Namespace.ID?
     var avatarMatchedGeometryId: AnyHashable?
     var isGeometrySource: Bool = true
 
+    @State private var displayedIsVertical: Bool
+
     private var resolvedAvatarGeometryId: AnyHashable {
         avatarMatchedGeometryId ?? AnyHashable("chat-avatar-\(chat.id)")
+    }
+
+    init(
+        chat: Chat,
+        isVertical: Bool = false,
+        onTap: (() -> Void)? = nil,
+        avatarNamespace: Namespace.ID? = nil,
+        avatarMatchedGeometryId: AnyHashable? = nil,
+        isGeometrySource: Bool = true
+    ) {
+        self.chat = chat
+        self.isVertical = isVertical
+        self.onTap = onTap
+        self.avatarNamespace = avatarNamespace
+        self.avatarMatchedGeometryId = avatarMatchedGeometryId
+        self.isGeometrySource = isGeometrySource
+        _displayedIsVertical = State(initialValue: isVertical)
     }
 
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 4) {
                 avatarContent
-                    .animation(.smooth(duration: 0.35), value: isVertical)
                     .onTapGesture {
                         onTap?()
                     }
@@ -42,10 +60,15 @@ struct ChatTitleView: View {
                     }
             }
         }
+        .onChange(of: isVertical) { _, newValue in
+            withAnimation(.smooth(duration: 0.35)) {
+                displayedIsVertical = newValue
+            }
+        }
     }
 
     private var avatarBase: some View {
-        GreedyCircleStack(isVertical: isVertical, verticalSpacing: 20, verticalDiameter: 44) {
+        GreedyCircleStack(isVertical: displayedIsVertical, verticalSpacing: 20, verticalDiameter: 44) {
             ForEach(chat.participants) { participant in
                 AvatarView(user: participant, avatarSize: nil)
             }
