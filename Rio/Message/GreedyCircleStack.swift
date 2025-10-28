@@ -38,6 +38,8 @@ struct GreedyCircleStack: Layout {
     var verticalSpacing: CGFloat
     // Fixed circle diameter when isVertical is enabled (optional). If nil, fits to bounds.
     var verticalDiameter: CGFloat?
+    // Preferred square side when in greedy mode (fallback if proposal doesn't provide size)
+    var greedyPreferredSide: CGFloat?
     // (No animation state; fixed layouts only)
 
     private struct PackedCircle {
@@ -52,7 +54,8 @@ struct GreedyCircleStack: Layout {
         startAngle: Angle = .degrees(315),
         isVertical: Bool = false,
         verticalSpacing: CGFloat = 8,
-        verticalDiameter: CGFloat? = nil
+        verticalDiameter: CGFloat? = nil,
+        greedyPreferredSide: CGFloat? = nil
     ) {
         self.spacing = max(0, spacing)
         // keep reasonable bounds so nothing collapses or explodes
@@ -61,6 +64,7 @@ struct GreedyCircleStack: Layout {
         self.isVertical = isVertical
         self.verticalSpacing = max(0, verticalSpacing)
         self.verticalDiameter = verticalDiameter
+        self.greedyPreferredSide = greedyPreferredSide
         // No animation state
     }
 
@@ -69,10 +73,29 @@ struct GreedyCircleStack: Layout {
         subviews: Subviews,
         cache: inout ()
     ) -> CGSize {
-        CGSize(
-            width: proposal.width ?? 0,
-            height: proposal.height ?? 0
-        )
+        let count = subviews.count
+        guard count > 0 else { return .zero }
+
+        if isVertical {
+            // Width: respect proposal if present, else use verticalDiameter, else sensible default
+            let proposedWidth = proposal.width ?? verticalDiameter ?? 60
+            let diameter = min(verticalDiameter ?? proposedWidth, proposedWidth)
+            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
+            return CGSize(width: proposedWidth, height: totalHeight)
+        } else {
+            // Greedy is a square; prefer parent's proposed size, else fallback
+            if let w = proposal.width, let h = proposal.height {
+                let side = min(w, h)
+                return CGSize(width: side, height: side)
+            } else if let w = proposal.width {
+                return CGSize(width: w, height: w)
+            } else if let h = proposal.height {
+                return CGSize(width: h, height: h)
+            } else {
+                let side = greedyPreferredSide ?? 170
+                return CGSize(width: side, height: side)
+            }
+        }
     }
 
     func placeSubviews(
@@ -417,11 +440,8 @@ struct CircleStackPreviewCard<Content: View>: View {
                 DemoAvatar(color: .yellow, text: "G")
             }
         }
-        // Frame height adjusts to number of avatars so vertical layout fits 5+
-        .frame(
-            width: 170,
-            height: isVertical ? (diameter * 7 + vSpacing * 6) : 170
-        )
+        // Let layout compute height in vertical mode; constrain only width
+        .frame(width: 80)
     }
     .padding()
 }
