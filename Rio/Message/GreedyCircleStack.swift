@@ -359,7 +359,7 @@ struct GreedyCircleStack: Layout, Animatable {
     
     // MARK: - Simple Collision Avoidance
     
-    /// Simple single-pass collision resolution - only for small circle counts
+    /// Multi-pass collision resolution - only for small circle counts
     private func resolveCollisions(
         circles: inout [AnimatedCircle],
         spacing: CGFloat
@@ -367,24 +367,29 @@ struct GreedyCircleStack: Layout, Animatable {
         // Only apply collision resolution for small numbers of circles (performance)
         guard circles.count > 1 && circles.count <= 10 else { return }
         
-        // Single pass - check each pair once and push apart if overlapping
-        for i in 0..<circles.count {
-            for j in (i + 1)..<circles.count {
-                let dx = circles[j].center.x - circles[i].center.x
-                let dy = circles[j].center.y - circles[i].center.y
-                let distance = hypot(dx, dy)
-                let minDistance = circles[i].radius + circles[j].radius + spacing
-                
-                // If overlapping, push them apart equally
-                if distance < minDistance && distance > .ulpOfOne {
-                    let overlap = minDistance - distance
-                    let offsetX = (dx / distance) * overlap * 0.5
-                    let offsetY = (dy / distance) * overlap * 0.5
+        // Multiple passes to fully resolve overlaps (fewer passes for larger counts)
+        let iterations = circles.count <= 5 ? 10 : 2
+
+        for _ in 0..<iterations {
+            // Check each pair and push apart if overlapping
+            for i in 0..<circles.count {
+                for j in (i + 1)..<circles.count {
+                    let dx = circles[j].center.x - circles[i].center.x
+                    let dy = circles[j].center.y - circles[i].center.y
+                    let distance = hypot(dx, dy)
+                    let minDistance = circles[i].radius + circles[j].radius + spacing
                     
-                    circles[i].center.x -= offsetX
-                    circles[i].center.y -= offsetY
-                    circles[j].center.x += offsetX
-                    circles[j].center.y += offsetY
+                    // If overlapping, push them apart equally
+                    if distance < minDistance && distance > .ulpOfOne {
+                        let overlap = minDistance - distance
+                        let offsetX = (dx / distance) * overlap * 0.5
+                        let offsetY = (dy / distance) * overlap * 0.5
+                        
+                        circles[i].center.x -= offsetX
+                        circles[i].center.y -= offsetY
+                        circles[j].center.x += offsetX
+                        circles[j].center.y += offsetY
+                    }
                 }
             }
         }
