@@ -32,6 +32,13 @@ struct GreedyCircleStack: Layout {
     var rimPadding: CGFloat
     var startAngle: Angle
 
+    // When true, bypass greedy packing and render a vertical VStack-like layout
+    var isVertical: Bool
+    // Spacing between circles when isVertical is enabled
+    var verticalSpacing: CGFloat
+    // Fixed circle diameter when isVertical is enabled (optional). If nil, fits to bounds.
+    var verticalDiameter: CGFloat?
+
     private struct PackedCircle {
         var center: CGPoint
         var radius: CGFloat
@@ -41,12 +48,18 @@ struct GreedyCircleStack: Layout {
     init(
         spacing: CGFloat = 0,
         rimPadding: CGFloat = 0,
-        startAngle: Angle = .degrees(315)
+        startAngle: Angle = .degrees(315),
+        isVertical: Bool = false,
+        verticalSpacing: CGFloat = 8,
+        verticalDiameter: CGFloat? = nil
     ) {
         self.spacing = max(0, spacing)
         // keep reasonable bounds so nothing collapses or explodes
         self.rimPadding = max(0, rimPadding)
         self.startAngle = startAngle + .degrees(90)
+        self.isVertical = isVertical
+        self.verticalSpacing = max(0, verticalSpacing)
+        self.verticalDiameter = verticalDiameter
     }
 
     func sizeThatFits(
@@ -68,6 +81,21 @@ struct GreedyCircleStack: Layout {
     ) {
         guard !subviews.isEmpty else {
             GreedyCircleStack.logger.debug("CircleStack: no subviews to arrange")
+            return
+        }
+        
+        // Vertical mode: place equally sized circles top-to-bottom
+        if isVertical {
+            let diameter = verticalDiameter ?? min(bounds.width, bounds.height)
+            let count = subviews.count
+            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
+            var currentY = bounds.midY - totalHeight / 2 + diameter / 2
+            for index in 0..<count where index < subviews.count {
+                let proposal = ProposedViewSize(width: diameter, height: diameter)
+                let placement = CGPoint(x: bounds.midX, y: currentY)
+                subviews[index].place(at: placement, anchor: .center, proposal: proposal)
+                currentY += diameter + verticalSpacing
+            }
             return
         }
 
@@ -349,4 +377,41 @@ struct CircleStackPreviewCard<Content: View>: View {
             }
         }
     }
+}
+
+#Preview("Greedy vs Vertical (4 avatars)") {
+    @Previewable @State var isVertical = false
+    let diameter: CGFloat = 48
+    let vSpacing: CGFloat = 10
+
+    VStack(spacing: 12) {
+        Toggle("Vertical layout", isOn: $isVertical)
+            .toggleStyle(.switch)
+
+        ZStack {
+            if !isVertical {
+                Circle().fill(Color(.systemGray6))
+                Circle().stroke(Color(.quaternaryLabel), lineWidth: 1)
+            }
+
+            GreedyCircleStack(
+                spacing: 3,
+                rimPadding: 3,
+                startAngle: .degrees(45),
+                isVertical: isVertical,
+                verticalSpacing: vSpacing,
+                verticalDiameter: diameter
+            ) {
+                DemoAvatar(color: .pink, text: "A")
+                DemoAvatar(color: .teal, text: "B")
+                DemoAvatar(color: .indigo, text: "C")
+                DemoAvatar(color: .mint, text: "D")
+            }
+        }
+        .frame(
+            width: 170,
+            height: isVertical ? (diameter * 4 + vSpacing * 3) : 170
+        )
+    }
+    .padding()
 }
