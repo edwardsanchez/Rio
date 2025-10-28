@@ -10,6 +10,7 @@ import SwiftUI
 struct AvatarView: View {
     let user: User
     var avatarSize: CGFloat? = 80
+    @State private var renderedSize: CGSize = .zero
 
     var body: some View {
         Group {
@@ -20,11 +21,21 @@ struct AvatarView: View {
             } else {
                 Circle()
                     .fill(Color.secondary.opacity(0.15))
-                    .overlay(
+                    .overlay {
+                        let diameter = max(1, min(renderedSize.width, renderedSize.height, avatarSize ?? 80))
                         Text(initials(for: user))
-                            .font(.title.weight(.medium))
+                            .font(.system(size: diameter * 0.42, weight: .medium))
+                            .minimumScaleFactor(0.4)
+                            .lineLimit(1)
+                            .allowsTightening(true)
                             .foregroundStyle(.primary)
-                    )
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .onGeometryChange(for: CGSize.self) { proxy in
+                        proxy.size
+                    } action: { newSize in
+                        renderedSize = newSize
+                    }
             }
         }
         .frame(width: avatarSize, height: avatarSize)
