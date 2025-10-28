@@ -494,6 +494,9 @@ struct CircleStackPreviewCard<Content: View>: View {
                 DemoAvatar(color: .teal, text: "B")
                 DemoAvatar(color: .indigo, text: "C")
                 DemoAvatar(color: .mint, text: "D")
+                DemoAvatar(color: .orange, text: "E")
+                DemoAvatar(color: .red, text: "F")
+                DemoAvatar(color: .yellow, text: "G")
             }
         }
         .frame(
@@ -502,5 +505,5 @@ struct CircleStackPreviewCard<Content: View>: View {
         )
     }
     .padding()
-    .animation(.smooth(duration: 0.6), value: isVertical)
+    .animation(.smooth(duration: 2.6), value: isVertical)
 }
