@@ -34,7 +34,6 @@ struct MessageBubbleView: View {
     let message: Message
     let showTail: Bool
     let isNew: Bool
-    let inputFieldFrame: CGRect
     let scrollViewFrame: CGRect
     @Binding var newMessageId: UUID?
     let scrollVelocity: CGFloat
@@ -111,7 +110,6 @@ struct MessageBubbleView: View {
         message: Message,
         showTail: Bool = true,
         isNew: Bool = false,
-        inputFieldFrame: CGRect = .zero,
         scrollViewFrame: CGRect = .zero,
         newMessageId: Binding<UUID?> = .constant(nil),
         scrollVelocity: CGFloat = 0,
@@ -127,7 +125,6 @@ struct MessageBubbleView: View {
         self.message = message
         self.showTail = showTail
         self.isNew = isNew
-        self.inputFieldFrame = inputFieldFrame
         self.scrollViewFrame = scrollViewFrame
         self._newMessageId = newMessageId
         self.scrollVelocity = scrollVelocity
@@ -202,7 +199,7 @@ struct MessageBubbleView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
-        .offset(x: xOffset, y: rowYOffset + parallaxOffset)
+        .offset(y: rowYOffset + parallaxOffset)
         .animation(.interactiveSpring, value: parallaxOffset)
         .animation(.smooth(duration: 0.4), value: rowYOffset)
         .animation(.smooth(duration: 0.4), value: bubbleOpacity)
@@ -225,11 +222,7 @@ struct MessageBubbleView: View {
 
     // Computed properties for positioning and animation
     private var frameAlignment: Alignment {
-        if messageType.isInbound {
-            return .leading
-        } else {
-            return isNew ? .leading : .trailing
-        }
+        messageType.isInbound ? .leading : .trailing
     }
 
     private var rowYOffset: CGFloat {
@@ -240,29 +233,13 @@ struct MessageBubbleView: View {
             // Thinking and Talking states slide up from 20px below
             return displayedBubbleType.isRead ? 0 : 20
         } else {
-            return calculateYOffset()
+            return 0
         }
     }
 
     private var bubbleYOffset: CGFloat {
         guard isNew else { return 0 }
         return 0
-    }
-
-    private var xOffset: CGFloat {
-        guard isNew && messageType.isOutbound else { return 0 }
-
-        let logger = Logger(subsystem: "Rio", category: "Animation")
-
-        // Both frames are now captured in the same coordinate space (MainContainer)
-        logger.debug("🎯 TextField frame in MainContainer: \(String(describing: inputFieldFrame))")
-        logger.debug("🎯 Scroll view frame in MainContainer: \(String(describing: scrollViewFrame))")
-
-        let textFieldRelativeToContent = inputFieldFrame.minX
-
-        logger.debug("🎯 TextField relative to content: \(textFieldRelativeToContent)")
-
-        return textFieldRelativeToContent
     }
 
     private var bubbleOpacity: Double {
@@ -291,26 +268,6 @@ struct MessageBubbleView: View {
             visibleMessageIndex: visibleMessageIndex,
             isNewMessage: isNew
         )
-    }
-
-    private func calculateYOffset() -> CGFloat {
-        // Both frames are in global coordinates
-        // Calculate the vertical distance from the input field to the scroll view
-        // The message bubble needs to appear at the input field's vertical position
-
-        // Calculate where the input field is relative to the scroll view's bottom
-        let inputFieldBottom = inputFieldFrame.maxY
-        let scrollViewBottom = scrollViewFrame.maxY
-
-        // The offset moves the bubble UP from its normal position to align with input field
-        let offset = inputFieldBottom - scrollViewBottom
-
-        let logger = Logger(subsystem: "Rio", category: "Animation")
-        logger.debug("🎯 Input field bottom: \(inputFieldBottom)")
-        logger.debug("🎯 Scroll view bottom: \(scrollViewBottom)")
-        logger.debug("🎯 Y Offset: \(offset)")
-
-        return offset
     }
 
     private var inboundAvatar: some View {
@@ -385,6 +342,9 @@ struct MessageBubbleView: View {
         }
         .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
         .frame(width: lockedWidth, alignment: .leading)
+        //.matchedGeometryEffect(id: -, in: -)
+        //This here is the width we want to control with matched geometry when you read the input field.
+        //We can use matched geometry, this is not the source.
         .chatBubble(
             messageType: messageType,
             backgroundColor: backgroundColor,
@@ -394,8 +354,8 @@ struct MessageBubbleView: View {
             isReactionsOverlay: isReactionsOverlay,
             bubbleType: message.bubbleType,
             layoutType: displayedBubbleType,
-            animationWidth: outboundAnimationWidth,
-            animationHeight: outboundAnimationHeight,
+            animationWidth: nil,
+            animationHeight: nil,
             isVisible: !message.content.isEmoji
         )
         .overlay(alignment: .leading) {
@@ -647,16 +607,6 @@ struct MessageBubbleView: View {
         bubbleFadeWorkItem = nil
         bubbleFadeOpacity = 1
     }
-
-    private var outboundAnimationWidth: CGFloat? {
-        guard messageType.isOutbound, isNew else { return nil }
-        return inputFieldFrame.width
-    }
-
-    private var outboundAnimationHeight: CGFloat? {
-        guard messageType.isOutbound, isNew else { return nil }
-        return inputFieldFrame.height
-    }
 }
 
 private struct MessageBubblePreviewContainer: View {
@@ -715,7 +665,6 @@ private struct MessageBubblePreviewContainer: View {
                     message: currentMessage,
                     showTail: true,
                     isNew: isNew,
-                    inputFieldFrame: .zero,
                     scrollViewFrame: .zero,
                     newMessageId: $newMessageId,
                     scrollVelocity: 0,

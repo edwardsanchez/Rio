@@ -91,6 +91,7 @@ struct ChatInputView: View {
                         .padding(.bottom, 5)
                 }
                 .glassEffect(.regular.tint(.base.opacity(0.5)).interactive(), in: .rect(cornerRadius: 25))
+                //.matchedGeometryEffect can go here to capture the size.
                 .onGeometryChange(for: CGRect.self) { proxy in
                     // Capture the text input field frame (excluding the plus button)
                     // This is after the glass effect and padding are applied
