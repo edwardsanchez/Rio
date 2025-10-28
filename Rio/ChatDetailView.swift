@@ -306,8 +306,6 @@ struct ChatDetailView: View {
         }
     }
 
-    
-
     func tapAvatar() {
         //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others
     }

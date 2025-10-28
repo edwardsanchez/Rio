@@ -25,7 +25,7 @@ private struct SeededGenerator: RandomNumberGenerator {
 /// - spacing: minimum gap between the primary circle and the rest; secondary circles scale the gap proportionally.
 /// - rimPadding: margin between inner circles and the boundary ring
 /// - startAngle: angle (clockwise) for the primary circle on the rim
-struct GreedyCircleStack: Layout {
+struct GreedyCircleStack: Layout, Animatable {
     private static let logger = Logger.message
 
     var spacing: CGFloat
@@ -40,12 +40,19 @@ struct GreedyCircleStack: Layout {
     var verticalDiameter: CGFloat?
     // Preferred square side when in greedy mode (fallback if proposal doesn't provide size)
     var greedyPreferredSide: CGFloat?
-    // (No animation state; fixed layouts only)
+    
+    // Animation progress: 0.0 = greedy layout, 1.0 = vertical layout
+    var animationProgress: CGFloat
 
     private struct PackedCircle {
         var center: CGPoint
         var radius: CGFloat
         var isPrimary: Bool
+    }
+    
+    private struct AnimatedCircle {
+        var center: CGPoint
+        var radius: CGFloat
     }
 
     init(
@@ -65,7 +72,8 @@ struct GreedyCircleStack: Layout {
         self.verticalSpacing = max(0, verticalSpacing)
         self.verticalDiameter = verticalDiameter
         self.greedyPreferredSide = greedyPreferredSide
-        // No animation state
+        // Set animation progress based on isVertical
+        self.animationProgress = isVertical ? 1.0 : 0.0
     }
 
     func sizeThatFits(
@@ -116,13 +124,64 @@ struct GreedyCircleStack: Layout {
             return
         }
 
-        // Vertical layout: place equally sized circles top-to-bottom
         let count = subviews.count
         let availableHeight = bounds.height - verticalSpacing * CGFloat(max(0, count - 1))
         let fitDiameter = max(0, availableHeight / CGFloat(max(count, 1)))
         let computedDiameter = min(bounds.width, fitDiameter)
-        if isVertical {
-            // Clamp requested diameter to fit the available space
+        
+        // Check if we're animating (progress is between 0 and 1)
+        let isAnimating = animationProgress > 0.001 && animationProgress < 0.999
+        
+        if isAnimating {
+            // During animation, interpolate between greedy and vertical layouts
+            
+            // Calculate greedy layout
+            let angle = startAngle.radians
+            let greedyPacked = packCircles(
+                parentRadius: parentRadius,
+                count: subviews.count,
+                pinnedAngle: angle,
+                spacing: spacing,
+                rimPadding: rimPadding
+            )
+            
+            // Calculate vertical layout positions (same order as greedy)
+            let diameter = max(0, min(verticalDiameter ?? computedDiameter, computedDiameter))
+            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
+            var verticalPacked: [PackedCircle] = []
+            var currentY = totalHeight / 2 - diameter / 2  // Start from top
+            
+            for index in 0..<count where index < subviews.count {
+                // Vertical positions are relative to bounds center (origin at 0,0)
+                verticalPacked.append(PackedCircle(
+                    center: CGPoint(x: 0, y: currentY),
+                    radius: diameter / 2,
+                    isPrimary: false
+                ))
+                currentY -= diameter + verticalSpacing  // Move down (negative Y)
+            }
+            
+            // Interpolate with collision resolution
+            let interpolated = interpolateLayouts(
+                greedyCircles: greedyPacked,
+                verticalCircles: verticalPacked,
+                progress: animationProgress,
+                bounds: bounds
+            )
+            
+            let origin = CGPoint(x: bounds.midX, y: bounds.midY)
+            
+            for (index, circle) in interpolated.enumerated() where index < subviews.count {
+                let proposal = ProposedViewSize(width: circle.radius * 2, height: circle.radius * 2)
+                let placement = CGPoint(
+                    x: origin.x + circle.center.x,
+                    y: origin.y - circle.center.y
+                )
+                subviews[index].place(at: placement, anchor: .center, proposal: proposal)
+            }
+            
+        } else if animationProgress >= 0.999 {
+            // Fully vertical layout
             let diameter = max(0, min(verticalDiameter ?? computedDiameter, computedDiameter))
             let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
             var currentY = bounds.midY - totalHeight / 2 + diameter / 2
@@ -132,35 +191,32 @@ struct GreedyCircleStack: Layout {
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
                 currentY += diameter + verticalSpacing
             }
-            return
-        }
-
-        // Greedy layout
-        let angle = startAngle.radians
-        let packed = packCircles(
-            parentRadius: parentRadius,
-            count: subviews.count,
-            pinnedAngle: angle,
-            spacing: spacing,
-            rimPadding: rimPadding
-        )
-
-        if packed.count < subviews.count {
-            GreedyCircleStack.logger.warning("CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints")
-        }
-
-        let origin = CGPoint(x: bounds.midX, y: bounds.midY)
-
-        for (index, circle) in packed.enumerated() where index < subviews.count {
-            let proposal = ProposedViewSize(width: circle.radius * 2, height: circle.radius * 2)
-            let placement = CGPoint(
-                x: origin.x + circle.center.x,
-                y: origin.y - circle.center.y
+            
+        } else {
+            // Fully greedy layout
+            let angle = startAngle.radians
+            let packed = packCircles(
+                parentRadius: parentRadius,
+                count: subviews.count,
+                pinnedAngle: angle,
+                spacing: spacing,
+                rimPadding: rimPadding
             )
-            subviews[index].place(at: placement, anchor: .center, proposal: proposal)
-            GreedyCircleStack.logger.debug(
-                "CircleStack: placed circle \(index, privacy: .public) radius \(Double(circle.radius), privacy: .public) center (\(Double(circle.center.x), privacy: .public), \(Double(circle.center.y), privacy: .public))"
-            )
+
+            if packed.count < subviews.count {
+                GreedyCircleStack.logger.warning("CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints")
+            }
+
+            let origin = CGPoint(x: bounds.midX, y: bounds.midY)
+
+            for (index, circle) in packed.enumerated() where index < subviews.count {
+                let proposal = ProposedViewSize(width: circle.radius * 2, height: circle.radius * 2)
+                let placement = CGPoint(
+                    x: origin.x + circle.center.x,
+                    y: origin.y - circle.center.y
+                )
+                subviews[index].place(at: placement, anchor: .center, proposal: proposal)
+            }
         }
     }
 
@@ -300,6 +356,81 @@ struct GreedyCircleStack: Layout {
             return max(candidateBeyond, 0)
         }
     }
+    
+    // MARK: - Simple Collision Avoidance
+    
+    /// Simple single-pass collision resolution - only for small circle counts
+    private func resolveCollisions(
+        circles: inout [AnimatedCircle],
+        spacing: CGFloat
+    ) {
+        // Only apply collision resolution for small numbers of circles (performance)
+        guard circles.count > 1 && circles.count <= 10 else { return }
+        
+        // Single pass - check each pair once and push apart if overlapping
+        for i in 0..<circles.count {
+            for j in (i + 1)..<circles.count {
+                let dx = circles[j].center.x - circles[i].center.x
+                let dy = circles[j].center.y - circles[i].center.y
+                let distance = hypot(dx, dy)
+                let minDistance = circles[i].radius + circles[j].radius + spacing
+                
+                // If overlapping, push them apart equally
+                if distance < minDistance && distance > .ulpOfOne {
+                    let overlap = minDistance - distance
+                    let offsetX = (dx / distance) * overlap * 0.5
+                    let offsetY = (dy / distance) * overlap * 0.5
+                    
+                    circles[i].center.x -= offsetX
+                    circles[i].center.y -= offsetY
+                    circles[j].center.x += offsetX
+                    circles[j].center.y += offsetY
+                }
+            }
+        }
+    }
+    
+    /// Interpolates between greedy and vertical layouts with collision resolution
+    private func interpolateLayouts(
+        greedyCircles: [PackedCircle],
+        verticalCircles: [PackedCircle],
+        progress: CGFloat,
+        bounds: CGRect
+    ) -> [AnimatedCircle] {
+        let count = min(greedyCircles.count, verticalCircles.count)
+        guard count > 0 else { return [] }
+        
+        var animated: [AnimatedCircle] = []
+        
+        for i in 0..<count {
+            let greedyPos = greedyCircles[i].center
+            let verticalPos = verticalCircles[i].center
+            let greedyRadius = greedyCircles[i].radius
+            let verticalRadius = verticalCircles[i].radius
+            
+            // Linear interpolation for target position and radius
+            let targetX = greedyPos.x + (verticalPos.x - greedyPos.x) * progress
+            let targetY = greedyPos.y + (verticalPos.y - greedyPos.y) * progress
+            let targetRadius = greedyRadius + (verticalRadius - greedyRadius) * progress
+            
+            animated.append(AnimatedCircle(
+                center: CGPoint(x: targetX, y: targetY),
+                radius: targetRadius
+            ))
+        }
+        
+        // Apply collision resolution
+        resolveCollisions(circles: &animated, spacing: spacing)
+        
+        return animated
+    }
+    
+    // MARK: - Animatable Conformance
+    
+    var animatableData: CGFloat {
+        get { animationProgress }
+        set { animationProgress = newValue }
+    }
 
 }
 
@@ -416,6 +547,9 @@ struct CircleStackPreviewCard<Content: View>: View {
     VStack(spacing: 12) {
         Toggle("Vertical layout", isOn: $isVertical)
             .toggleStyle(.switch)
+            .onChange(of: isVertical) { _, _ in
+                // Trigger animation when toggle changes
+            }
 
         ZStack {
             if !isVertical {
@@ -436,12 +570,14 @@ struct CircleStackPreviewCard<Content: View>: View {
                 DemoAvatar(color: .indigo, text: "C")
                 DemoAvatar(color: .mint, text: "D")
                 DemoAvatar(color: .orange, text: "E")
-                DemoAvatar(color: .red, text: "F")
-                DemoAvatar(color: .yellow, text: "G")
+//                DemoAvatar(color: .red, text: "F")
+//                DemoAvatar(color: .yellow, text: "G")
             }
+            .animation(.smooth(duration: 2), value: isVertical)
         }
         // Let layout compute height in vertical mode; constrain only width
         .frame(width: 80)
+        .frame(maxHeight: .infinity)
     }
     .padding()
 }
