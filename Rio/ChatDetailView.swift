@@ -11,7 +11,8 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
-    @State private var isShowingDetail = false
+    @State private var isShowingDetailScim = false
+    @State private var isShowingDetailContent = false
 
     @State private var reactionsCoordinator = ReactionsCoordinator()
     @State private var newMessageId: UUID?
@@ -70,11 +71,21 @@ struct ChatDetailView: View {
 
     var chatDetailOverlay: some View {
         Group {
-            if isShowingDetail {
+            if isShowingDetailScim {
                 scrimView
                     .onTapGesture {
-                        isShowingDetail = false
-                     }
+                        isShowingDetailContent = false
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            isShowingDetailScim = false
+                        }
+                    }
+            }
+
+            if isShowingDetailContent {
+                //Placeholder for the detail view
+                Circle()
+                    .transition(.opacity.animation(.easeInOut))
             }
         }
     }
@@ -325,8 +336,12 @@ struct ChatDetailView: View {
     }
 
     func tapAvatar() {
-        isShowingDetail = true
+        isShowingDetailScim = true
         //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isShowingDetailContent = true
+        }
     }
 
     // MARK: - Scrolling
