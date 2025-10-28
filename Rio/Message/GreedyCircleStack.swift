@@ -25,19 +25,27 @@ private struct SeededGenerator: RandomNumberGenerator {
 /// - spacing: minimum gap between the primary circle and the rest; secondary circles scale the gap proportionally.
 /// - rimPadding: margin between inner circles and the boundary ring
 /// - startAngle: angle (clockwise) for the primary circle on the rim
-struct GreedyCircleStack: Layout {
+struct GreedyCircleStack: Layout, Animatable {
     private static let logger = Logger.message
 
     var spacing: CGFloat
     var rimPadding: CGFloat
     var startAngle: Angle
 
-    // When true, bypass greedy packing and render a vertical VStack-like layout
+    // When true, indicates target layout is vertical; used to set initial progress
     var isVertical: Bool
     // Spacing between circles when isVertical is enabled
     var verticalSpacing: CGFloat
     // Fixed circle diameter when isVertical is enabled (optional). If nil, fits to bounds.
     var verticalDiameter: CGFloat?
+    // Interpolation progress between greedy (0) and vertical (1)
+    var verticalProgress: CGFloat
+
+    // Animatable conformance
+    var animatableData: CGFloat {
+        get { verticalProgress }
+        set { verticalProgress = max(0, min(1, newValue)) }
+    }
 
     private struct PackedCircle {
         var center: CGPoint
@@ -51,7 +59,8 @@ struct GreedyCircleStack: Layout {
         startAngle: Angle = .degrees(315),
         isVertical: Bool = false,
         verticalSpacing: CGFloat = 8,
-        verticalDiameter: CGFloat? = nil
+        verticalDiameter: CGFloat? = nil,
+        verticalProgress: CGFloat? = nil
     ) {
         self.spacing = max(0, spacing)
         // keep reasonable bounds so nothing collapses or explodes
@@ -60,6 +69,8 @@ struct GreedyCircleStack: Layout {
         self.isVertical = isVertical
         self.verticalSpacing = max(0, verticalSpacing)
         self.verticalDiameter = verticalDiameter
+        // If explicit progress not provided, derive from isVertical
+        self.verticalProgress = max(0, min(1, verticalProgress ?? (isVertical ? 1 : 0)))
     }
 
     func sizeThatFits(
@@ -83,22 +94,6 @@ struct GreedyCircleStack: Layout {
             GreedyCircleStack.logger.debug("CircleStack: no subviews to arrange")
             return
         }
-        
-        // Vertical mode: place equally sized circles top-to-bottom
-        if isVertical {
-            let diameter = verticalDiameter ?? min(bounds.width, bounds.height)
-            let count = subviews.count
-            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
-            var currentY = bounds.midY - totalHeight / 2 + diameter / 2
-            for index in 0..<count where index < subviews.count {
-                let proposal = ProposedViewSize(width: diameter, height: diameter)
-                let placement = CGPoint(x: bounds.midX, y: currentY)
-                subviews[index].place(at: placement, anchor: .center, proposal: proposal)
-                currentY += diameter + verticalSpacing
-            }
-            return
-        }
-
         let containerDiameter = min(bounds.width, bounds.height)
         let parentRadius = max(0, containerDiameter / 2.0 - rimPadding)
 
@@ -122,16 +117,46 @@ struct GreedyCircleStack: Layout {
 
         let origin = CGPoint(x: bounds.midX, y: bounds.midY)
 
-        for (index, circle) in packed.enumerated() where index < subviews.count {
-            let proposal = ProposedViewSize(width: circle.radius * 2, height: circle.radius * 2)
-            let placement = CGPoint(
-                x: origin.x + circle.center.x,
-                y: origin.y - circle.center.y
+        // Prepare vertical layout targets
+        let count = subviews.count
+        let availableHeight = bounds.height - verticalSpacing * CGFloat(max(0, count - 1))
+        let fitDiameter = max(0, availableHeight / CGFloat(max(count, 1)))
+        let computedDiameter = min(bounds.width, fitDiameter)
+        let diameter = max(0, verticalDiameter ?? computedDiameter)
+        let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
+        var currentY = bounds.midY - totalHeight / 2 + diameter / 2
+
+        // Interpolate placement between greedy and vertical
+        let t = max(0, min(1, verticalProgress))
+        for index in 0..<count {
+            // Greedy source
+            let greedyCircle: PackedCircle
+            if index < packed.count {
+                greedyCircle = packed[index]
+            } else {
+                greedyCircle = PackedCircle(center: .zero, radius: 0, isPrimary: false)
+            }
+
+            // Greedy absolute point
+            let greedyPoint = CGPoint(
+                x: origin.x + greedyCircle.center.x,
+                y: origin.y - greedyCircle.center.y
             )
-            subviews[index].place(at: placement, anchor: .center, proposal: proposal)
-            GreedyCircleStack.logger.debug(
-                "CircleStack: placed circle \(index, privacy: .public) radius \(Double(circle.radius), privacy: .public) center (\(Double(circle.center.x), privacy: .public), \(Double(circle.center.y), privacy: .public))"
-            )
+            let greedyRadius = greedyCircle.radius
+
+            // Vertical target point
+            let verticalPoint = CGPoint(x: bounds.midX, y: currentY)
+            let verticalRadius = diameter / 2
+
+            // Blend
+            let blendedX = greedyPoint.x + (verticalPoint.x - greedyPoint.x) * t
+            let blendedY = greedyPoint.y + (verticalPoint.y - greedyPoint.y) * t
+            let blendedRadius = greedyRadius + (verticalRadius - greedyRadius) * t
+
+            let proposal = ProposedViewSize(width: blendedRadius * 2, height: blendedRadius * 2)
+            subviews[index].place(at: CGPoint(x: blendedX, y: blendedY), anchor: .center, proposal: proposal)
+
+            currentY += diameter + verticalSpacing
         }
     }
 
@@ -414,4 +439,5 @@ struct CircleStackPreviewCard<Content: View>: View {
         )
     }
     .padding()
+    .animation(.smooth(duration: 0.35), value: isVertical)
 }
