@@ -288,7 +288,9 @@ struct ChatDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    titleView
+                    ChatTitleView(chat: chat, onTap: {
+                        tapAvatar()
+                    })
                         .padding(.top, 25)
                 }
 
@@ -304,40 +306,7 @@ struct ChatDetailView: View {
         }
     }
 
-    var titleView: some View {
-        GlassEffectContainer {
-            VStack(spacing: 4) {
-                GreedyCircleStack {
-                    ForEach(chat.participants) { participant in
-                        AvatarView(user: participant, avatarSize: nil)
-                    }
-                }
-                .padding(3)
-                .background {
-                    Circle()
-                        .fill(Color.clear)
-                }
-                .glassEffect(.regular.interactive())
-                .frame(width: 60, height: 60)
-                .onTapGesture {
-                    tapAvatar()
-                }
-
-                Text(chat.title)
-                    .padding(.vertical, 3)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Capsule()
-                            .fill(Color.clear)
-                    }
-                    .glassEffect(.regular.interactive())
-                    .offset(y: -10)
-                    .onTapGesture {
-                        tapAvatar()
-                    }
-            }
-        }
-    }
+    
 
     func tapAvatar() {
         //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others

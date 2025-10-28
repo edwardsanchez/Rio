@@ -9,26 +9,41 @@ import SwiftUI
 
 struct ChatTitleView: View {
     let chat: Chat
+    var onTap: (() -> Void)?
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                ForEach(chat.participants) { participant in
-                    AvatarView(user: participant)
+        GlassEffectContainer {
+            VStack(spacing: 4) {
+                GreedyCircleStack {
+                    ForEach(chat.participants) { participant in
+                        AvatarView(user: participant, avatarSize: nil)
+                    }
                 }
-            }
-
-            Text(chat.title)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.center)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 12)
+                .padding(3)
+                .background {
+                    Circle()
+                        .fill(Color.clear)
+                }
                 .glassEffect(.regular.interactive())
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(width: 60, height: 60)
+                .onTapGesture {
+                    onTap?()
+                }
+
+                Text(chat.title)
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 10)
+                    .background {
+                        Capsule()
+                            .fill(Color.clear)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .offset(y: -10)
+                    .onTapGesture {
+                        onTap?()
+                    }
+            }
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
     }
 }
 
