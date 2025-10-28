@@ -58,15 +58,19 @@ struct ChatDetailView: View {
         .environment(reactionsCoordinator)
     }
 
+    var scrimView: some View {
+        Rectangle()
+            .fill(.base.opacity(0.9))
+            .ignoresSafeArea()
+            .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
+    }
+
     //This is the overlay that shows a copy of the message bubble that show the reactions animations.
     var reactionsOverlay: some View {
         Group {
             ZStack {
                 if reactionsCoordinator.isBackgroundDimmerVisible {
-                    Rectangle()
-                        .fill(.base.opacity(0.9))
-                        .ignoresSafeArea()
-                        .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
+                    scrimView
                         .onTapGesture {
                             reactionsCoordinator.closeActiveMenu()
                         }
