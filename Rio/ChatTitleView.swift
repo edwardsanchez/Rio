@@ -38,25 +38,36 @@ struct ChatTitleView: View {
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 4) {
+                if isVertical {
+//                    title
+                }
+
                 avatarContent
                     .onTapGesture {
                         onTap?()
                     }
 
-                Text(chat.title)
-                    .padding(.vertical, 3)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Capsule()
-                            .fill(Color.clear)
-                    }
-                    .glassEffect(.regular.interactive())
-                    .offset(y: -10)
-                    .onTapGesture {
-                        onTap?()
-                    }
+                if !isVertical {
+                    title
+                        .transition(.opacity)
+                }
             }
         }
+    }
+
+    private var title: some View {
+        Text(chat.title)
+            .padding(.vertical, 3)
+            .padding(.horizontal, 10)
+            .background {
+                Capsule()
+                    .fill(Color.clear)
+            }
+            .glassEffect(.regular.interactive())
+            .offset(y: -10)
+            .onTapGesture {
+                onTap?()
+            }
     }
 
     private var avatarBase: some View {
@@ -80,18 +91,21 @@ struct ChatTitleView: View {
 
     @ViewBuilder
     private var avatarContent: some View {
-        if let namespace = avatarNamespace {
-            avatarBase
-                .matchedGeometryEffect(
-                    id: resolvedAvatarGeometryId,
-                    in: namespace,
-                    properties: .frame,
-                    anchor: .center,
-                    isSource: isGeometrySource
-                )
-        } else {
-            avatarBase
+        Group {
+            if let namespace = avatarNamespace {
+                avatarBase
+                    .matchedGeometryEffect(
+                        id: resolvedAvatarGeometryId,
+                        in: namespace,
+                        properties: .frame,
+                        anchor: .center,
+                        isSource: isGeometrySource
+                    )
+            } else {
+                avatarBase
+            }
         }
+        .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
     }
 }
 
@@ -113,7 +127,7 @@ struct ChatTitleView: View {
         chat: .sample(title: "Quartet Chat", participantNames: ["Amy", "Ben", "Cara", "Dan"]),
         isVertical: isVertical,
         onTap: {
-            withAnimation {
+            withAnimation(.smooth(duration: 3)) {
                 isVertical.toggle()
             }
         }
