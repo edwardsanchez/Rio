@@ -309,8 +309,6 @@ enum MessageEmojiService {
             return "Audio message"
         case .file:
             return "File shared"
-        default:
-            return nil
         }
     }
 
