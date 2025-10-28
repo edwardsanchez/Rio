@@ -126,37 +126,100 @@ struct GreedyCircleStack: Layout, Animatable {
         let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
         var currentY = bounds.midY - totalHeight / 2 + diameter / 2
 
-        // Interpolate placement between greedy and vertical
-        let t = max(0, min(1, verticalProgress))
-        for index in 0..<count {
-            // Greedy source
-            let greedyCircle: PackedCircle
-            if index < packed.count {
-                greedyCircle = packed[index]
-            } else {
-                greedyCircle = PackedCircle(center: .zero, radius: 0, isPrimary: false)
-            }
+        // Prepare arrays for interpolation and collision resolution
+        var centers: [CGPoint] = Array(repeating: .zero, count: count)
+        var radii: [CGFloat] = Array(repeating: 0, count: count)
 
-            // Greedy absolute point
+        let t = max(0, min(1, verticalProgress))
+
+        for index in 0..<count {
+            let greedyCircle = index < packed.count ? packed[index] : PackedCircle(center: .zero, radius: 0, isPrimary: false)
+
             let greedyPoint = CGPoint(
                 x: origin.x + greedyCircle.center.x,
                 y: origin.y - greedyCircle.center.y
             )
             let greedyRadius = greedyCircle.radius
 
-            // Vertical target point
             let verticalPoint = CGPoint(x: bounds.midX, y: currentY)
             let verticalRadius = diameter / 2
 
-            // Blend
             let blendedX = greedyPoint.x + (verticalPoint.x - greedyPoint.x) * t
             let blendedY = greedyPoint.y + (verticalPoint.y - greedyPoint.y) * t
-            let blendedRadius = greedyRadius + (verticalRadius - greedyRadius) * t
+            let blendedRadius = max(0, greedyRadius + (verticalRadius - greedyRadius) * t)
 
-            let proposal = ProposedViewSize(width: blendedRadius * 2, height: blendedRadius * 2)
-            subviews[index].place(at: CGPoint(x: blendedX, y: blendedY), anchor: .center, proposal: proposal)
+            centers[index] = CGPoint(x: blendedX, y: blendedY)
+            radii[index] = blendedRadius
 
             currentY += diameter + verticalSpacing
+        }
+
+        // Resolve overlaps to simulate solid-disc behavior
+        resolveCollisions(centers: &centers, radii: radii, bounds: bounds)
+
+        // Place subviews with collision-free positions
+        for index in 0..<count {
+            let r = radii[index]
+            let proposal = ProposedViewSize(width: r * 2, height: r * 2)
+            subviews[index].place(at: centers[index], anchor: .center, proposal: proposal)
+        }
+    }
+
+    // MARK: - Collision resolution
+
+    private func resolveCollisions(
+        centers: inout [CGPoint],
+        radii: [CGFloat],
+        bounds: CGRect
+    ) {
+        let n = centers.count
+        guard n > 1 else { return }
+
+        let iterations = 14
+        let epsilon: CGFloat = 0.0001
+
+        for _ in 0..<iterations {
+            var anyOverlap = false
+
+            // Pairwise resolution
+            for i in 0..<n {
+                for j in (i + 1)..<n {
+                    let dx = centers[j].x - centers[i].x
+                    let dy = centers[j].y - centers[i].y
+                    let distance = hypot(dx, dy)
+                    let minDistance = radii[i] + radii[j] - epsilon
+
+                    if distance < minDistance {
+                        anyOverlap = true
+                        let overlap = max(0, minDistance - distance)
+
+                        // Direction unit vector (fallback to index-based direction if coincident)
+                        let ux: CGFloat
+                        let uy: CGFloat
+                        if distance > 0.0001 {
+                            ux = dx / distance
+                            uy = dy / distance
+                        } else {
+                            // Deterministic slight push based on indices
+                            let angle = (CGFloat(i * 37 + j * 19) .truncatingRemainder(dividingBy: 360)).radians
+                            ux = cos(angle)
+                            uy = sin(angle)
+                        }
+
+                        let move = overlap / 2
+                        centers[i].x -= ux * move
+                        centers[i].y -= uy * move
+                        centers[j].x += ux * move
+                        centers[j].y += uy * move
+                    }
+                }
+
+                // Clamp to bounds to keep circles fully visible
+                centers[i].x = max(bounds.minX + radii[i], min(bounds.maxX - radii[i], centers[i].x))
+                centers[i].y = max(bounds.minY + radii[i], min(bounds.maxY - radii[i], centers[i].y))
+            }
+
+            if !anyOverlap { break }
         }
     }
 
@@ -439,5 +502,5 @@ struct CircleStackPreviewCard<Content: View>: View {
         )
     }
     .padding()
-    .animation(.smooth(duration: 0.35), value: isVertical)
+    .animation(.smooth(duration: 0.6), value: isVertical)
 }
