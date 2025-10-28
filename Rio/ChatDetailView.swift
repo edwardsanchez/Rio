@@ -11,6 +11,8 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
+    @State private var isShowingDetail = false
+
     @State private var reactionsCoordinator = ReactionsCoordinator()
     @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
@@ -67,8 +69,14 @@ struct ChatDetailView: View {
     }
 
     var chatDetailOverlay: some View {
-        scrimView
-            .hidden()
+        Group {
+            if isShowingDetail {
+                scrimView
+                    .onTapGesture {
+                        isShowingDetail = false
+                     }
+            }
+        }
     }
 
     //This is the overlay that shows a copy of the message bubble that show the reactions animations.
@@ -317,6 +325,7 @@ struct ChatDetailView: View {
     }
 
     func tapAvatar() {
+        isShowingDetail = true
         //TODO: Make it so tapping it shows people in group and chat settings, ability to kick someone out or invite others
     }
 
