@@ -51,7 +51,6 @@ struct MessageListView: View {
                         message: message,
                         showTail: showTail,
                         isNew: isNew,
-                        inputFieldFrame: inputFieldFrame,
                         scrollViewFrame: scrollViewFrame,
                         newMessageId: $newMessageId,
                         scrollVelocity: scrollVelocity,
