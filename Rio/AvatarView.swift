@@ -9,7 +9,6 @@ import SwiftUI
 
 struct AvatarView: View {
     let user: User
-    var diameter: CGFloat?
     @State private var renderedDiameter: CGFloat = .zero
 
     var body: some View {
@@ -60,8 +59,7 @@ struct AvatarView: View {
             id: UUID(),
             name: "Luna Park",
             avatar: nil
-        ),
-        diameter: 44
+        )
     )
     .padding(12)
 }
@@ -72,8 +70,7 @@ struct AvatarView: View {
             id: UUID(),
             name: "Maya",
             avatar: .amy
-        ),
-        diameter: 44
+        )
     )
     .padding(12)
 }
