@@ -203,7 +203,7 @@ struct ChatDetailView: View {
                 ToolbarItem(placement: .principal) {
                     ChatTitleView(
                         chat: resolvedChat,
-                        isVertical: isShowingDetailContent,
+                        isVertical: false, //isShowingDetailContent //do not change
                         onTap: {
                             tapAvatar()
                         },

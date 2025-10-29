@@ -72,6 +72,10 @@ struct ChatSettings: View {
                     }
                 }
             }
+            .transition(
+//                .move(edge: .bottom)
+                .opacity
+            )
         }
     }
 
