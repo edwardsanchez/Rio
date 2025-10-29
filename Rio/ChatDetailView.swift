@@ -87,29 +87,43 @@ struct ChatDetailView: View {
             if isShowingDetailContent {
                 NavigationStack {
                     ScrollView {
-                        LazyVGrid(columns: participantGridColumns) {
-                            ForEach(chat.participants) { participant in
-                                VStack(spacing: 3) {
-                                    AvatarView(
-                                        user: participant,
-                                        namespace: avatarNamespace,
-                                        matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                                        isGeometrySource: true
-                                    )
+                        VStack {
+                            LazyVGrid(columns: participantGridColumns) {
+                                ForEach(chat.participants) { participant in
+                                    VStack(spacing: 3) {
+                                        AvatarView(
+                                            user: participant,
+                                            namespace: avatarNamespace,
+                                            matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                                            isGeometrySource: true
+                                        )
 
-                                    Text(participant.name)
-                                        .font(.caption)
-                                        .fixedSize()
-                                        .contextMenu {
-                                            Button("Remove from Group") {
+                                        Text(participant.name)
+                                            .font(.caption)
+                                            .fixedSize()
+                                    }
+                                    .contextMenu {
+                                        Button("Remove from Group") {
 
-                                            }
-                                            //TODO: Implement this, this is a role destructive.
-                                            //Other option will be to start a new chat with this person.
                                         }
+                                        //TODO: Implement this, this is a role destructive.
+                                        //Use the xmark icon for this
+
+                                        Button("Chat 1:1") {
+
+                                        }
+                                        //TODO: Use person.2.fill icon
+                                    }
                                 }
 
-                                //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat.
+                                //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat. It will have plus sf symbol and the label below it should say "Add"
+                            }
+                            Form {
+                                // I want an input field here that lets you change the name of the chat. it can be called chat Name. It updates live as you type. It can be left blank too as there's already fall back for that. The placeholder should show the fallback name, which i think is basically "3 people". By the way, this is only available if you're in a chat with more than 2 participants.
+                                // A way to change the color of the outboundBackgroundColor chat bubble (the theme), it can be called "Color". We dont need an action for now but it'll eventually open a sheet with a set of 12 or so colors. Lets add a TODO: there to implement the color picker. Lets show a color chip with the current chat color for the outboundBackgroundColor color.
+                                //We need a button to Leave Group (but only if it's a group chat (3 of more participants). If it's 2 participants, it should show "Delete Chat". This should remove you from this chat or delete the chat from your chats.
+                                //We need a tottle saying "Hide alerts" which mutes notifications - since we have no notification system yet, we can just add a //TODO: There to implement
+
                             }
                         }
                         .padding(20)
