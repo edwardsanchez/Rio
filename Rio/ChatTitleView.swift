@@ -38,10 +38,6 @@ struct ChatTitleView: View {
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 4) {
-                if isVertical {
-//                    title
-                }
-
                 avatarContent
                     .onTapGesture {
                         onTap?()
@@ -49,7 +45,7 @@ struct ChatTitleView: View {
 
                 if !isVertical {
                     title
-                        .transition(.opacity)
+                        .transition(.identity)
                 }
             }
         }
@@ -63,7 +59,7 @@ struct ChatTitleView: View {
                 Capsule()
                     .fill(Color.clear)
             }
-            .glassEffect(.regular.interactive())
+            .glassEffect(isVertical ? .identity : .regular.interactive())
             .offset(y: -10)
             .onTapGesture {
                 onTap?()
@@ -87,6 +83,7 @@ struct ChatTitleView: View {
         }
         .glassEffect(isVertical ? .identity : .regular.interactive())
         .frame(width: 60, height: 60)
+        .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
     }
 
     @ViewBuilder

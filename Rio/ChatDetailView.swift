@@ -378,7 +378,7 @@ struct ChatDetailView: View {
             isShowingDetailScim = false
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation(.easeInOut(duration: 0.25)) {
                 isShowingDetailContent = false
             }
