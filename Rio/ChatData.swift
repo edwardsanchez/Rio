@@ -174,6 +174,22 @@ class ChatData {
         chats[chatIndex] = updatedChat
     }
 
+    func updateChatTheme(_ theme: ChatTheme, for chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        let chat = chats[chatIndex]
+
+        let updatedChat = Chat(
+            id: chat.id,
+            title: chat.title,
+            participants: chat.participants,
+            messages: chat.messages,
+            theme: theme,
+            currentUser: currentUser
+        )
+
+        chats[chatIndex] = updatedChat
+    }
+
     func removeChat(withId chatId: UUID) {
         chats.removeAll { $0.id == chatId }
         activeTypingIndicators.removeValue(forKey: chatId)

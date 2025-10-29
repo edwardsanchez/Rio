@@ -16,6 +16,8 @@ struct ChatSettings: View {
 
     @Environment(ChatData.self) private var chatData
 
+    @State private var isThemePickerPresented = false
+
     private var isPresented: Bool {
         chatData.isDetailPresented(for: chat.id)
     }
@@ -50,6 +52,11 @@ struct ChatSettings: View {
         )
     }
 
+    private var resolvedThemeColor: Color {
+        chatData.chats.first(where: { $0.id == chat.id })?.theme.outboundBackgroundColor
+            ?? chat.theme.outboundBackgroundColor
+    }
+
     var body: some View {
         if isPresented {
             NavigationStack {
@@ -70,6 +77,18 @@ struct ChatSettings: View {
                         .tint(.primary)
                         .buttonBorderShape(.circle)
                     }
+                }
+                .sheet(isPresented: $isThemePickerPresented) {
+                    ThemePickerView(
+                        selectedColor: resolvedThemeColor
+                    ) { selectedColor in
+                        chatData.updateChatTheme(
+                            ChatTheme(outboundBackgroundColor: selectedColor),
+                            for: chat.id
+                        )
+                        isThemePickerPresented = false
+                    }
+                    .presentationDetents([.height(300)])
                 }
             }
             .transition(
@@ -135,10 +154,10 @@ struct ChatSettings: View {
 
             LabeledContent {
                 Button {
-                    // TODO: Present color picker sheet for outbound bubble color
+                    isThemePickerPresented = true
                 } label: {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(chat.theme.outboundBackgroundColor)
+                        .fill(resolvedThemeColor)
                         .frame(width: 34, height: 34)
                         .overlay {
                             RoundedRectangle(cornerRadius: 8)
