@@ -372,11 +372,11 @@ struct ChatDetailView: View {
     }
 
     func tapAvatar() {
-        withAnimation(.easeInOut(duration: 0.25)) {
+        withAnimation(.smooth(duration: 0.25)) {
             isShowingDetailContent = true
         }
 
-        withAnimation(.easeInOut(duration: 0.25).delay(0.25)) {
+        withAnimation(.easeIn(duration: 0.25).delay(0.25)) {
             isShowingDetailScim = true
         }
     }
