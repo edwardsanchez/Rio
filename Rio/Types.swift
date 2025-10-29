@@ -27,29 +27,35 @@ struct Chat: Identifiable {
         theme: ChatTheme,
         currentUser: User? = nil
     ) {
-        var resolvedTitle = ""
-        
-        // Filter out current user from participants for title generation
-        let otherParticipants = if let currentUser = currentUser {
-            participants.filter { $0.id != currentUser.id }
-        } else {
-            participants
-        }
-        
-        if otherParticipants.count == 1 {
-            resolvedTitle = otherParticipants.first!.name
-        } else if otherParticipants.isEmpty {
-            // Only the current user in the chat (edge case)
-            resolvedTitle = "Note to Self"
-        } else {
-            resolvedTitle = title ?? "\(otherParticipants.count) people"
-        }
+        let fallbackTitle = Chat.fallbackTitle(for: participants, currentUser: currentUser)
+        let trimmedTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let resolvedTitle = trimmedTitle.isEmpty ? fallbackTitle : trimmedTitle
 
         self.id = id
         self.title = resolvedTitle
         self.participants = participants
         self.messages = messages
         self.theme = theme
+    }
+}
+
+extension Chat {
+    static func fallbackTitle(for participants: [User], currentUser: User?) -> String {
+        let otherParticipants: [User]
+        if let currentUser {
+            otherParticipants = participants.filter { $0.id != currentUser.id }
+        } else {
+            otherParticipants = participants
+        }
+
+        switch otherParticipants.count {
+        case 0:
+            return "Note to Self"
+        case 1:
+            return otherParticipants.first?.name ?? ""
+        default:
+            return "\(otherParticipants.count) people"
+        }
     }
 }
 

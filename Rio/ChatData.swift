@@ -10,6 +10,7 @@ import SwiftUI
 @Observable
 class ChatData {
     var chats: [Chat] = []
+    var mutedChatIDs: Set<UUID> = []
     // Track visible thinking bubbles per chat (chatId -> participant IDs)
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
 
@@ -152,6 +153,41 @@ class ChatData {
             theme: updatedChat.theme
         )
         chats[chatIndex] = updatedChat
+    }
+
+    func updateChatTitle(_ title: String?, for chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        let chat = chats[chatIndex]
+        let trimmedTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        let updatedChat = Chat(
+            id: chat.id,
+            title: trimmedTitle.isEmpty ? nil : trimmedTitle,
+            participants: chat.participants,
+            messages: chat.messages,
+            theme: chat.theme,
+            currentUser: currentUser
+        )
+
+        chats[chatIndex] = updatedChat
+    }
+
+    func removeChat(withId chatId: UUID) {
+        chats.removeAll { $0.id == chatId }
+        activeTypingIndicators.removeValue(forKey: chatId)
+        mutedChatIDs.remove(chatId)
+    }
+
+    func isChatMuted(_ chatId: UUID) -> Bool {
+        mutedChatIDs.contains(chatId)
+    }
+
+    func setChatMuted(_ chatId: UUID, isMuted: Bool) {
+        if isMuted {
+            mutedChatIDs.insert(chatId)
+        } else {
+            mutedChatIDs.remove(chatId)
+        }
     }
 
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
