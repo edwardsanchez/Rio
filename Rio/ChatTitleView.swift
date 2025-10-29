@@ -104,11 +104,11 @@ struct ChatTitleView: View {
 
 #Preview("ChatTitleView Samples") {
     VStack(spacing: 24) {
-        ChatTitleView(chat: .sample(title: "Solo Chat", participantNames: ["Amy"]))
-        ChatTitleView(chat: .sample(title: "Pair Chat", participantNames: ["Amy", "Ben"]))
-        ChatTitleView(chat: .sample(title: "Trio Chat", participantNames: ["Amy", "Ben", "Cara"]))
-        ChatTitleView(chat: .sample(title: "Quartet Chat", participantNames: ["Amy", "Ben", "Cara", "Dan"]))
-        ChatTitleView(chat: .sample(title: "Group Hang", participantNames: ["Amy", "Ben", "Cara", "Dan", "Eli", "Fiona", "Gus", "Hana"]))
+        ChatTitleView(chat: .sample(title: "Solo Chat", participantNames: ["Lumen Moss"]))
+        ChatTitleView(chat: .sample(title: "Pair Chat", participantNames: ["Maya Park", "River Slate"]))
+        ChatTitleView(chat: .sample(title: "Trio Chat", participantNames: ["Maya Park", "River Slate", "Scarlet Chen"]))
+        ChatTitleView(chat: .sample(title: "Quartet Chat", participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read"]))
+        ChatTitleView(chat: .sample(title: "Group Hang", participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read", "Eddie Carter", "Sage Hart", "Carta Bloom", "Nova Lin"]))
     }
     .padding()
     .background(Color.base)
@@ -119,7 +119,7 @@ struct ChatTitleView: View {
 
     @Previewable @State var chat = Chat.sample(
         title: "Quartet Chat",
-        participantNames: ["Amy", "Ben", "Cara", "Dan"]
+        participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read"]
     )
 
     ChatTitleView(
@@ -141,9 +141,32 @@ private extension Chat {
         Chat(
             title: title,
             participants: participantNames.map { name in
-                User(id: UUID(), name: name, avatar: nil)
+                User(id: UUID(), name: name, avatar: ChatPreviewAvatars.resource(for: name))
             },
             theme: .defaultTheme
         )
+    }
+}
+
+private enum ChatPreviewAvatars {
+    static func resource(for name: String) -> ImageResource? {
+        let key = name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+
+        switch key {
+        case "amy", "maya", "maya park":
+            return .amy
+        case "joaquin", "joaquin wilde":
+            return .joaquin
+        case "scarlet", "scarlet chen":
+            return .scarlet
+        case "edward", "eddie", "eddie carter":
+            return .edward
+        case "carta", "carta bloom":
+            return .scarlet
+        default:
+            return nil
+        }
     }
 }
