@@ -39,6 +39,10 @@ struct ChatDetailView: View {
     @Namespace private var bubbleNamespace
     @Namespace private var avatarNamespace
 
+    private var participantGridColumns: [GridItem] {
+        [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
+    }
+
     init(chat: Chat) {
         self.chat = chat
     }
@@ -76,32 +80,29 @@ struct ChatDetailView: View {
 
     var chatDetailOverlay: some View {
         ZStack {
-            if isShowingDetailScim {
-                scrimView
-            }
+//            if isShowingDetailScim {
+//                scrimView // Doesnt show up in navigation stack
+//            }
 
             if isShowingDetailContent {
                 NavigationStack {
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 24) {
-                            VStack(spacing: 20) {
-                                ForEach(chat.participants) { participant in
-                                    VStack(spacing: 4) {
-                                        AvatarView(
-                                            user: participant,
-                                            namespace: avatarNamespace,
-                                            matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                                            isGeometrySource: true
-                                        )
-                                        .frame(width: 60, height: 60)
+                        LazyVGrid(columns: participantGridColumns) {
+                            ForEach(chat.participants) { participant in
+                                VStack(spacing: 3) {
+                                    AvatarView(
+                                        user: participant,
+                                        namespace: avatarNamespace,
+                                        matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                                        isGeometrySource: true
+                                    )
 
-                                        Text(participant.name)
-                                            .font(.caption)
-                                    }
+                                    Text(participant.name)
+                                        .font(.caption)
+                                        .fixedSize()
                                 }
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(20)
                     }
                     .navigationBarTitleDisplayMode(.inline)
