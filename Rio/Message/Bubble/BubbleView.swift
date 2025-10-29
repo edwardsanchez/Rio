@@ -133,7 +133,7 @@ struct BubbleView: View {
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
 
     var resolvedColor: Color {
-        messageType.isOutbound ? color : Color.base.mix(with: color, by: 0.2)
+        messageType.isOutbound ? color : Color.base.mix(with: color, by: 0.3).withSaturation(0.02)
     }
 
     var body: some View {
@@ -656,7 +656,7 @@ fileprivate struct BubbleMorphLayout {
             width: width,
             height: height,
             cornerRadius: 26,
-            color: .Default.inboundBubble,
+            color: .gray,
             type: isTalking ? .talking : .thinking,
             showTail: true,
             messageType: .inbound(.talking),

@@ -30,6 +30,23 @@ extension Color {
     static func mixedAccent(with color: Color) -> Color {
         .accent.mix(with: color, by: 0.15)
     }
+
+    /// Returns a copy with the given saturation [0, 1].
+    func withSaturation(_ newSaturation: Double) -> Color {
+        let sat = max(0, min(1, newSaturation))
+        let ui = UIColor(self)
+
+        // Force into sRGB so HSB extraction is reliable.
+        let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
+        if let converted = ui.cgColor.converted(to: sRGB, intent: .defaultIntent, options: nil) {
+            let sRGBColor = UIColor(cgColor: converted)
+            var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            guard sRGBColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a) else { return self }
+            return Color(hue: Double(h), saturation: sat, brightness: Double(b), opacity: Double(a))
+        }
+
+        return self
+    }
 }
 
 // MARK: - Double Extension

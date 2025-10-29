@@ -71,34 +71,21 @@ extension Chat {
 }
 
 struct ChatTheme {
-    let backgroundColor: Color
-    let inboundTextColor: Color
-    let inboundBackgroundColor: Color
-    let outboundTextColor: Color
+    let inboundTextColor: Color = .primary
+    var inboundBackgroundColor: Color { outboundBackgroundColor }
+    let outboundTextColor: Color = .white
     let outboundBackgroundColor: Color
 
     // Predefined themes matching asset catalog
     static let defaultTheme = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Default.inboundBubble,
-        outboundTextColor: .white,
         outboundBackgroundColor: .Default.outboundBubble
     )
 
     static let theme1 = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Theme1.inboundBubble,
-        outboundTextColor: .white,
-        outboundBackgroundColor: .Theme1.outboundBubble
+        outboundBackgroundColor: .green
     )
 
     static let theme2 = ChatTheme(
-        backgroundColor: .base,
-        inboundTextColor: .primary,
-        inboundBackgroundColor: .Theme2.inboundBubble,
-        outboundTextColor: .white,
-        outboundBackgroundColor: .Theme2.outboundBubble
+        outboundBackgroundColor: .purple
     )
 }
