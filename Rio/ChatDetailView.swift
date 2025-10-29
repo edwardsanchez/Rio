@@ -84,23 +84,30 @@ struct ChatDetailView: View {
             }
 
             if isShowingDetailContent {
-                VStack {
-                    ForEach(chat.participants) { participant in
-                        HStack {
-                            AvatarView(
-                                user: participant,
-                                namespace: avatarNamespace,
-                                matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                                isGeometrySource: true
-                            )
-                                .frame(width: 44, height: 44)
-                            //should match this here...
-                            Text(participant.name)
+                ScrollView {
+                    VStack {
+                        Text(chat.title)
+                            .font(.title)
+                        VStack {
+                            ForEach(chat.participants) { participant in
+                                HStack {
+                                    AvatarView(
+                                        user: participant,
+                                        namespace: avatarNamespace,
+                                        matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                                        isGeometrySource: true
+                                    )
+                                        .frame(width: 44, height: 44)
+                                    //should match this here...
+                                    Text(participant.name)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .padding(20)
                 }
-                .padding(20)
             }
         }
     }
