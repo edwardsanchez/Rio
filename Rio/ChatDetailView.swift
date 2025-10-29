@@ -64,9 +64,13 @@ struct ChatDetailView: View {
     }
 
     var scrimView: some View {
-        Rectangle()
-            .fill(.base.opacity(0.9))
-            .ignoresSafeArea()
+        ZStack {
+            Rectangle()
+                .fill(Material.ultraThin)
+            Rectangle()
+                .fill(.base.opacity(0.7))
+        }
+        .ignoresSafeArea()
             .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
     }
 
