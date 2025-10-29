@@ -100,7 +100,16 @@ struct ChatDetailView: View {
                                     Text(participant.name)
                                         .font(.caption)
                                         .fixedSize()
+                                        .contextMenu {
+                                            Button("Remove from Group") {
+
+                                            }
+                                            //TODO: Implement this, this is a role destructive.
+                                            //Other option will be to start a new chat with this person.
+                                        }
                                 }
+
+                                //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat.
                             }
                         }
                         .padding(20)
