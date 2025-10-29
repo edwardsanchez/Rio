@@ -76,17 +76,17 @@ struct ThemeColorOption: Identifiable {
 
 extension ThemeColorOption {
     static let spectrum: [ThemeColorOption] = [
-        ThemeColorOption(id: "systemRed", color: Color(.systemRed), accessibilityLabel: "System Red"),
-        ThemeColorOption(id: "systemOrange", color: Color(.systemOrange), accessibilityLabel: "System Orange"),
-        ThemeColorOption(id: "systemPink", color: Color(.systemPink), accessibilityLabel: "System Pink"),
-        ThemeColorOption(id: "systemBrown", color: Color(.systemBrown), accessibilityLabel: "System Brown"),
-        ThemeColorOption(id: "systemMint", color: Color(.systemMint), accessibilityLabel: "System Mint"),
-        ThemeColorOption(id: "systemGreen", color: Color(.systemGreen), accessibilityLabel: "System Green"),
-        ThemeColorOption(id: "systemTeal", color: Color(.systemTeal), accessibilityLabel: "System Teal"),
-        ThemeColorOption(id: "systemCyan", color: Color(.systemCyan), accessibilityLabel: "System Cyan"),
-        ThemeColorOption(id: "systemBlue", color: Color(.systemBlue), accessibilityLabel: "System Blue"),
-        ThemeColorOption(id: "systemIndigo", color: Color(.systemIndigo), accessibilityLabel: "System Indigo"),
-        ThemeColorOption(id: "systemPurple", color: Color(.systemPurple), accessibilityLabel: "System Purple"),
+        ThemeColorOption(id: "systemRed", color: Color(.systemRed), accessibilityLabel: "Red"),
+        ThemeColorOption(id: "systemOrange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
+        ThemeColorOption(id: "systemPink", color: Color(.systemPink), accessibilityLabel: "Pink"),
+        ThemeColorOption(id: "systemBrown", color: Color(.systemBrown), accessibilityLabel: "Brown"),
+        ThemeColorOption(id: "systemYellow", color: Color(.systemYellow).mix(with: .red, by: 0.1), accessibilityLabel: "Yellow"),
+        ThemeColorOption(id: "systemGreen", color: Color(.systemGreen), accessibilityLabel: "Green"),
+        ThemeColorOption(id: "systemTeal", color: Color(.systemTeal), accessibilityLabel: "Teal"),
+        ThemeColorOption(id: "systemCyan", color: Color(.systemCyan), accessibilityLabel: "Cyan"),
+        ThemeColorOption(id: "systemBlue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
+        ThemeColorOption(id: "systemIndigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
+        ThemeColorOption(id: "systemPurple", color: Color(.systemPurple), accessibilityLabel: "Purple"),
         ThemeColorOption(id: "defaultBubble", color: .defaultBubble, accessibilityLabel: "Default Bubble")
     ]
 
