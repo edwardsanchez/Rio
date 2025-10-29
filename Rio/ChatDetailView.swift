@@ -40,10 +40,6 @@ struct ChatDetailView: View {
 
     private let avatarTransitionAnimation = Animation.smooth(duration: 0.45)
 
-    private var participantGridColumns: [GridItem] {
-        [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
-    }
-
     init(chat: Chat) {
         self.chat = chat
     }
@@ -96,231 +92,28 @@ struct ChatDetailView: View {
                 .tint(resolvedChat.theme.outboundBackgroundColor)
             inputFieldView
             imageOverlay
-            reactionsOverlay
-                .tint(resolvedChat.theme.outboundBackgroundColor)
-            chatDetailOverlay
-        }
-        .environment(reactionsCoordinator)
-    }
-
-    var scrimView: some View {
-        ZStack {
-            Rectangle()
-                .fill(Material.ultraThin)
-            Rectangle()
-                .fill(.base.opacity(0.7))
-        }
-        .ignoresSafeArea()
-            .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
-    }
-
-    var participantGrid: some View {
-        LazyVGrid(columns: participantGridColumns) {
-            ForEach(resolvedChat.participants) { participant in
-                VStack(spacing: 3) {
-                    AvatarView(
-                        user: participant,
-                        namespace: avatarNamespace,
-                        matchedGeometryID: resolvedChat.avatarGeometryKey(for: participant),
-                        isGeometrySource: true,
-                        matchedGeometryAnimation: avatarTransitionAnimation
-                    )
-
-                    Text(participant.name)
-                        .font(.caption)
-                        .fixedSize()
-                }
-                .contextMenu {
-                    Button("Remove from Group") {
-
-                    }
-                    //TODO: Implement this, this is a role destructive.
-                    //Use the xmark icon for this
-
-                    Button("Chat 1:1") {
-
-                    }
-                    //TODO: Use person.2.fill icon
-                }
-            }
-        }
-        .padding(.vertical, 8)
-    }
-
-    var chatDetailOverlay: some View {
-        ZStack {
-//            if isShowingDetailScim {
-//                scrimView // Doesnt show up in navigation stack
-//            }
+            ChatReaction(
+                coordinator: reactionsCoordinator,
+                bubbleNamespace: bubbleNamespace,
+                selectedImageData: $selectedImageData
+            )
+            .tint(resolvedChat.theme.outboundBackgroundColor)
 
             if isShowingDetailContent {
-                NavigationStack {
-                    Form {
-                        Section {
-                            participantGrid
-
-                                //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat. It will have plus sf symbol and the label below it should say "Add"
-
-                        } header: {
-                            Text("Participants")
-                        }
-
-                        Section {
-                            if isGroupChat {
-                                LabeledContent {
-                                    TextField(
-                                        "",
-                                        text: chatNameBinding,
-                                        prompt: Text(fallbackChatTitle)
-                                    )
-                                    .textInputAutocapitalization(.words)
-                                } label: {
-                                    Label("Chat Name", systemImage: "character.bubble")
-                                }
-                            }
-
-                            LabeledContent {
-                                Button {
-                                    // TODO: Present color picker sheet for outbound bubble color
-                                } label: {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(resolvedChat.theme.outboundBackgroundColor)
-                                        .frame(width: 34, height: 34)
-                                        .overlay {
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.primary.opacity(0.15), lineWidth: 1)
-                                        }
-                                        .accessibilityLabel("Current chat color")
-                                }
-                                .buttonStyle(.plain)
-                            } label: {
-                                Label("Color", systemImage: "paintpalette")
-                            }
-
-                            Toggle(isOn: hideAlertsBinding) {
-                                Label("Hide alerts", systemImage: "bell.slash")
-                            }
-
-                        } header: {
-                            Text("Settings")
-                        }
-
-                        Section {
-                            Button(role: .destructive) {
-                                handleDestructiveAction()
-                            } label: {
-                                Text(isGroupChat ? "Leave Group" : "Delete Chat")
-                                    .frame(maxWidth: .infinity)
-                            }
-                        }
-                    }
-                    .navigationBarTitleDisplayMode(.inline)
-                    .navigationTitle(resolvedChat.title)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button(action: closeDetailOverlay) {
-                                Label("Close", systemImage: "xmark")
-                            }
-                            .tint(.primary)
-                            .buttonBorderShape(.circle)
-                        }
-                    }
-                }
+                ChatSettings(
+                    chat: resolvedChat,
+                    fallbackChatTitle: fallbackChatTitle,
+                    isGroupChat: isGroupChat,
+                    avatarNamespace: avatarNamespace,
+                    avatarTransitionAnimation: avatarTransitionAnimation,
+                    hideAlertsBinding: hideAlertsBinding,
+                    chatNameBinding: chatNameBinding,
+                    onClose: closeDetailOverlay,
+                    onDestructiveAction: handleDestructiveAction
+                )
             }
         }
-    }
-
-    //This is the overlay that shows a copy of the message bubble that show the reactions animations.
-    var reactionsOverlay: some View {
-        Group {
-            ZStack {
-                if reactionsCoordinator.isBackgroundDimmerVisible {
-                    scrimView
-                        .onTapGesture {
-                            reactionsCoordinator.closeActiveMenu()
-                        }
-                }
-
-                VStack {
-                    if let context = reactionsCoordinator.reactingMessage {
-                        Spacer()
-
-                        MessageBubbleView(
-                            message: context.message,
-                            showTail: context.showTail,
-                            theme: context.theme,
-                            bubbleNamespace: bubbleNamespace,
-                            activeReactingMessageID: reactionsCoordinator.reactingMessage?.message.id,
-                            geometrySource: reactionsCoordinator.geometrySource,
-                            isReactionsOverlay: true,
-                            selectedImageData: $selectedImageData
-                        )
-                        .padding(.horizontal, 20)
-                        .onAppear {
-                            reactionsCoordinator.promoteGeometrySourceToOverlay(for: context.message.id)
-                        }
-                        .onDisappear {
-                            reactionsCoordinator.resetGeometrySourceToList()
-                        }
-                    }
-
-                    Spacer()
-
-                    if reactionsCoordinator.isBackgroundDimmerVisible {
-                        contextMenu
-                        .transition(.move(edge: .bottom))
-                    } else {
-                        contextMenu //Spacer
-                            .hidden()
-                            .allowsHitTesting(false)
-                    }
-                }
-                .padding(.bottom, 20)
-                .ignoresSafeArea()
-                .animation(.smooth, value: reactionsCoordinator.isBackgroundDimmerVisible)
-            }
-        }
-    }
-
-    var contextMenu: some View {
-        VStack(spacing: 30) {
-            //DO NOT DELETE
-//            Button(action: {
-//
-//            }) {
-//                Label("Reply", systemImage: "arrowshape.turn.up.left")
-//                    .frame(maxWidth: .infinity, alignment: .leading)
-//                    .contentShape(.rect)
-//            }
-
-            Button(action: {
-                if let message = reactionsCoordinator.reactingMessage?.message {
-                    message.copyToClipboard()
-                    // Provide haptic feedback
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
-                    // Close the reactions menu
-                    reactionsCoordinator.closeActiveMenu()
-                }
-            }) {
-                Label("Copy", systemImage: "document.on.document")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(.rect)
-            }
-
-            //TODO: Need to implement save for inbound + outbound images and videos
-
-            //TODO: For outbound, need to eventually implement Undo send
-        }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 40)
-        .buttonSizing(.flexible)
-        .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
-        .glassEffect(.regular, in: .containerRelative)
-        .padding(.top, 60)
-        .padding(.horizontal, 20)
-        .contentShape(.rect)
+        .environment(reactionsCoordinator)
     }
 
     var inputFieldView: some View {

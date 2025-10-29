@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Defaults
 
 @Observable
 class ChatData {
@@ -26,6 +27,7 @@ class ChatData {
 
     init() {
         currentUser = edwardUser //TODO: Make this not set explicitly
+        mutedChatIDs = Set(Defaults[.mutedChatIDs])
         generateSampleChats()
     }
 
@@ -176,6 +178,7 @@ class ChatData {
         chats.removeAll { $0.id == chatId }
         activeTypingIndicators.removeValue(forKey: chatId)
         mutedChatIDs.remove(chatId)
+        persistMutedChatIDs()
     }
 
     func isChatMuted(_ chatId: UUID) -> Bool {
@@ -188,6 +191,7 @@ class ChatData {
         } else {
             mutedChatIDs.remove(chatId)
         }
+        persistMutedChatIDs()
     }
 
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
@@ -213,6 +217,10 @@ class ChatData {
     func getRandomParticipantForReply(in chat: Chat) -> User? {
         let otherParticipants = getOtherParticipants(in: chat)
         return otherParticipants.randomElement()
+    }
+
+    private func persistMutedChatIDs() {
+        Defaults[.mutedChatIDs] = Array(mutedChatIDs)
     }
 
     private func scheduleReactionOptions(for message: Message, in chat: Chat) {

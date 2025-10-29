@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */ = {isa = PBXBuildFile; productRef = 6D3EE8002E7E6D9D00F81D32 /* SVGPath */; };
+		6DCB9F462EAB4A3000891ACE /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 6DCB9F452EAB4A3000891ACE /* Defaults */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DCB9F462EAB4A3000891ACE /* Defaults in Frameworks */,
 				6D0BD6142E851159009A3AEA /* SVGPath in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -100,6 +102,7 @@
 			name = Rio;
 			packageProductDependencies = (
 				6D3EE8002E7E6D9D00F81D32 /* SVGPath */,
+				6DCB9F452EAB4A3000891ACE /* Defaults */,
 			);
 			productName = Rio;
 			productReference = 6D3EE7F02E7E6D9B00F81D31 /* Rio.app */;
@@ -539,6 +542,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6D3EE8012E7E6D9D00F81D33 /* XCRemoteSwiftPackageReference "SVGPath" */;
 			productName = SVGPath;
+		};
+		6DCB9F452EAB4A3000891ACE /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6DCB9F442EAB4A3000891ACE /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
