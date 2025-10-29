@@ -56,3 +56,27 @@ struct AvatarView: View {
         return String(firstCharacter).uppercased()
     }
 }
+
+#Preview("Placeholder") {
+    AvatarView(
+        user: User(
+            id: UUID(),
+            name: "Luna Park",
+            avatar: nil
+        ),
+        avatarSize: 44
+    )
+    .padding(12)
+}
+
+#Preview("With Avatar") {
+    AvatarView(
+        user: User(
+            id: UUID(),
+            name: "Maya",
+            avatar: .amy
+        ),
+        avatarSize: 44
+    )
+    .padding(12)
+}
