@@ -11,7 +11,6 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
-    @State private var isShowingDetailScim = false
     @State private var isShowingDetailContent = false
 
     @State private var reactionsCoordinator = ReactionsCoordinator()
@@ -38,6 +37,8 @@ struct ChatDetailView: View {
     @State private var selectedImageData: ImageData?
     @Namespace private var bubbleNamespace
     @Namespace private var avatarNamespace
+
+    private let avatarTransitionAnimation = Animation.smooth(duration: 0.45)
 
     private var participantGridColumns: [GridItem] {
         [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
@@ -121,7 +122,8 @@ struct ChatDetailView: View {
                         user: participant,
                         namespace: avatarNamespace,
                         matchedGeometryID: resolvedChat.avatarGeometryKey(for: participant),
-                        isGeometrySource: true
+                        isGeometrySource: true,
+                        matchedGeometryAnimation: avatarTransitionAnimation
                     )
 
                     Text(participant.name)
@@ -462,7 +464,8 @@ struct ChatDetailView: View {
                             tapAvatar()
                         },
                         avatarNamespace: avatarNamespace,
-                        isGeometrySource: !isShowingDetailContent
+                        isGeometrySource: !isShowingDetailContent,
+                        matchedGeometryAnimation: avatarTransitionAnimation
                     )
                     .padding(.top, 25)
                 }
@@ -485,12 +488,8 @@ struct ChatDetailView: View {
     }
 
     func tapAvatar() {
-        withAnimation(.smooth(duration: 0.25)) {
+        withAnimation(avatarTransitionAnimation) {
             isShowingDetailContent = true
-        }
-
-        withAnimation(.easeIn(duration: 0.25).delay(0.25)) {
-            isShowingDetailScim = true
         }
     }
 
@@ -512,14 +511,8 @@ struct ChatDetailView: View {
     }
 
     private func closeDetailOverlay() {
-        withAnimation(.easeInOut(duration: 0.15)) {
-            isShowingDetailScim = false
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                isShowingDetailContent = false
-            }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isShowingDetailContent = false
         }
     }
 }

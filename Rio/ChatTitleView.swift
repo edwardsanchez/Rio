@@ -13,19 +13,22 @@ struct ChatTitleView: View {
     var onTap: (() -> Void)?
     var avatarNamespace: Namespace.ID?
     var isGeometrySource: Bool = true
+    var matchedGeometryAnimation: Animation?
 
     init(
         chat: Chat,
         isVertical: Bool = false,
         onTap: (() -> Void)? = nil,
         avatarNamespace: Namespace.ID? = nil,
-        isGeometrySource: Bool = true
+        isGeometrySource: Bool = true,
+        matchedGeometryAnimation: Animation? = nil
     ) {
         self.chat = chat
         self.isVertical = isVertical
         self.onTap = onTap
         self.avatarNamespace = avatarNamespace
         self.isGeometrySource = isGeometrySource
+        self.matchedGeometryAnimation = matchedGeometryAnimation
     }
 
     var body: some View {
@@ -76,7 +79,8 @@ struct ChatTitleView: View {
                     user: participant,
                     namespace: avatarNamespace,
                     matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                    isGeometrySource: isGeometrySource
+                    isGeometrySource: isGeometrySource,
+                    matchedGeometryAnimation: matchedGeometryAnimation
                 )
                     .id(participant.id)
             }

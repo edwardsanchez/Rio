@@ -12,24 +12,32 @@ struct AvatarView: View {
     let namespace: Namespace.ID?
     let matchedGeometryID: AnyHashable?
     let isGeometrySource: Bool
+    let matchedGeometryAnimation: Animation?
     @State private var renderedDiameter: CGFloat = .zero
 
     init(
         user: User,
         namespace: Namespace.ID? = nil,
         matchedGeometryID: AnyHashable? = nil,
-        isGeometrySource: Bool = true
+        isGeometrySource: Bool = true,
+        matchedGeometryAnimation: Animation? = nil
     ) {
         self.user = user
         self.namespace = namespace
         self.matchedGeometryID = matchedGeometryID
         self.isGeometrySource = isGeometrySource
+        self.matchedGeometryAnimation = matchedGeometryAnimation
     }
 
     var body: some View {
         Group {
             if let namespace {
                 avatarBase
+                    .transaction { transaction in
+                        if let matchedGeometryAnimation {
+                            transaction.animation = matchedGeometryAnimation
+                        }
+                    }
                     .matchedGeometryEffect(
                         id: resolvedMatchedGeometryID,
                         in: namespace,
