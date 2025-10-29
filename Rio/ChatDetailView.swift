@@ -78,35 +78,43 @@ struct ChatDetailView: View {
         ZStack {
             if isShowingDetailScim {
                 scrimView
-                    .onTapGesture {
-                        closeDetailOverlay()
-                    }
             }
 
             if isShowingDetailContent {
-                ScrollView {
-                    VStack {
-                        Text(chat.title)
-                            .font(.title)
-                        VStack {
-                            ForEach(chat.participants) { participant in
-                                HStack {
-                                    AvatarView(
-                                        user: participant,
-                                        namespace: avatarNamespace,
-                                        matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                                        isGeometrySource: true
-                                    )
+                NavigationStack {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 24) {
+                            VStack(spacing: 20) {
+                                ForEach(chat.participants) { participant in
+                                    HStack(spacing: 16) {
+                                        AvatarView(
+                                            user: participant,
+                                            namespace: avatarNamespace,
+                                            matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                                            isGeometrySource: true
+                                        )
                                         .frame(width: 44, height: 44)
-                                    //should match this here...
-                                    Text(participant.name)
+
+                                        Text(participant.name)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(20)
                     }
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .padding(20)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle(chat.title)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(action: closeDetailOverlay) {
+                                Label("Close", systemImage: "xmark")
+                            }
+                            .buttonBorderShape(.circle)
+                            //FIXME: Button shouldn't be blue
+                        }
+                    }
                 }
             }
         }
