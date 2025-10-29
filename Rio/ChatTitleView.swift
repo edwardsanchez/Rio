@@ -36,17 +36,19 @@ struct ChatTitleView: View {
     }
 
     var body: some View {
-        GlassEffectContainer {
-            VStack(spacing: 4) {
-                avatarContent
-                    .onTapGesture {
-                        onTap?()
-                    }
-
-                if !isVertical {
-                    title
-                        .transition(.identity)
+        VStack(spacing: 4) {
+            avatarContent
+                .onTapGesture {
+                    onTap?()
                 }
+
+            if !isVertical {
+                title
+                    .transition(.identity)
+                    .transaction { transaction in
+                        transaction.animation = nil
+                        transaction.disablesAnimations = true
+                    }
             }
         }
     }
@@ -59,7 +61,6 @@ struct ChatTitleView: View {
                 Capsule()
                     .fill(Color.clear)
             }
-            .glassEffect(isVertical ? .identity : .regular.interactive())
             .offset(y: -10)
             .onTapGesture {
                 onTap?()
@@ -77,7 +78,6 @@ struct ChatTitleView: View {
                     .id(participant.id)
             }
         }
-        .glassEffect(isVertical ? .identity : .regular.interactive())
         .frame(width: isVertical ? nil : 60, height: isVertical ? nil : 60)
         .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
     }
