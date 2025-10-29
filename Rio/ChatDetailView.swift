@@ -112,8 +112,8 @@ struct ChatDetailView: View {
                             Button(action: closeDetailOverlay) {
                                 Label("Close", systemImage: "xmark")
                             }
+                            .tint(.primary)
                             .buttonBorderShape(.circle)
-                            //FIXME: Button shouldn't be blue
                         }
                     }
                 }
