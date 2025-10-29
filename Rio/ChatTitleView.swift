@@ -74,7 +74,7 @@ struct ChatTitleView: View {
             verticalDiameter: 44
         ) {
             ForEach(chat.participants) { participant in
-                AvatarView(user: participant, avatarSize: nil)
+                AvatarView(user: participant)
                     .id(participant.id)
             }
         }

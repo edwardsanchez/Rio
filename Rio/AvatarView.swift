@@ -9,8 +9,7 @@ import SwiftUI
 
 struct AvatarView: View {
     let user: User
-    var avatarSize: CGFloat? = 80
-    var isVertical: Bool = false
+    var diameter: CGFloat?
     @State private var renderedSize: CGSize = .zero
 
     var body: some View {
@@ -23,7 +22,7 @@ struct AvatarView: View {
                 Circle()
                     .fill(Color.secondary.opacity(0.15))
                     .overlay {
-                        let diameter = max(1, min(renderedSize.width, renderedSize.height, avatarSize ?? 80))
+                        let diameter = max(1, min(renderedSize.width, renderedSize.height, diameter ?? 80))
                         Text(initials(for: user))
                             .font(.system(size: diameter * 0.42, weight: .medium))
                             .minimumScaleFactor(0.4)
@@ -39,7 +38,7 @@ struct AvatarView: View {
                     }
             }
         }
-        .frame(width: avatarSize, height: avatarSize)
+        .frame(width: diameter, height: diameter)
         .clipShape(Circle())
         .overlay(
             Circle()
@@ -64,7 +63,7 @@ struct AvatarView: View {
             name: "Luna Park",
             avatar: nil
         ),
-        avatarSize: 44
+        diameter: 44
     )
     .padding(12)
 }
@@ -76,7 +75,7 @@ struct AvatarView: View {
             name: "Maya",
             avatar: .amy
         ),
-        avatarSize: 44
+        diameter: 44
     )
     .padding(12)
 }

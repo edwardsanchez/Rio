@@ -80,17 +80,11 @@ struct ChatDetailView: View {
             }
 
             if isShowingDetailContent {
-                ChatTitleView(
-                    chat: chat,
-                    isVertical: true,
-                    onTap: {
-                        //Do nothing
-                    },
-                    avatarNamespace: avatarNamespace,
-                    avatarMatchedGeometryId: chat.id,
-                    isGeometrySource: false
-                )
-                .transition(.opacity.animation(.easeInOut))
+                VStack {
+                    ForEach(chat.participants) { participant in
+                        AvatarView(user: participant, diameter: 44)
+                    }
+                }
             }
         }
     }
