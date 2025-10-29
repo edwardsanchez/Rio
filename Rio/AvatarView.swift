@@ -9,9 +9,41 @@ import SwiftUI
 
 struct AvatarView: View {
     let user: User
+    let namespace: Namespace.ID?
+    let matchedGeometryID: AnyHashable?
+    let isGeometrySource: Bool
     @State private var renderedDiameter: CGFloat = .zero
 
+    init(
+        user: User,
+        namespace: Namespace.ID? = nil,
+        matchedGeometryID: AnyHashable? = nil,
+        isGeometrySource: Bool = true
+    ) {
+        self.user = user
+        self.namespace = namespace
+        self.matchedGeometryID = matchedGeometryID
+        self.isGeometrySource = isGeometrySource
+    }
+
     var body: some View {
+        Group {
+            if let namespace {
+                avatarBase
+                    .matchedGeometryEffect(
+                        id: resolvedMatchedGeometryID,
+                        in: namespace,
+                        properties: .frame,
+                        anchor: .center,
+                        isSource: isGeometrySource
+                    )
+            } else {
+                avatarBase
+            }
+        }
+    }
+
+    private var avatarBase: some View {
         Group {
             if let avatar = user.avatar {
                 Image(avatar)
@@ -42,6 +74,10 @@ struct AvatarView: View {
                 .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .accessibilityLabel(user.name)
+    }
+
+    private var resolvedMatchedGeometryID: AnyHashable {
+        matchedGeometryID ?? AnyHashable(user.id)
     }
 
     private func initials(for user: User) -> String {

@@ -83,8 +83,14 @@ struct ChatDetailView: View {
                 VStack {
                     ForEach(chat.participants) { participant in
                         HStack {
-                            AvatarView(user: participant)
+                            AvatarView(
+                                user: participant,
+                                namespace: avatarNamespace,
+                                matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                                isGeometrySource: true
+                            )
                                 .frame(width: 44, height: 44)
+                            //should match this here...
                             Text(participant.name)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -329,7 +335,7 @@ struct ChatDetailView: View {
                             tapAvatar()
                         },
                         avatarNamespace: avatarNamespace,
-                        avatarMatchedGeometryId: chat.id
+                        isGeometrySource: !isShowingDetailContent
                     )
                     .padding(.top, 25)
                 }

@@ -12,26 +12,19 @@ struct ChatTitleView: View {
     var isVertical: Bool
     var onTap: (() -> Void)?
     var avatarNamespace: Namespace.ID?
-    var avatarMatchedGeometryId: AnyHashable?
     var isGeometrySource: Bool = true
-
-    private var resolvedAvatarGeometryId: AnyHashable {
-        avatarMatchedGeometryId ?? AnyHashable("chat-avatar-\(chat.id)")
-    }
 
     init(
         chat: Chat,
         isVertical: Bool = false,
         onTap: (() -> Void)? = nil,
         avatarNamespace: Namespace.ID? = nil,
-        avatarMatchedGeometryId: AnyHashable? = nil,
         isGeometrySource: Bool = true
     ) {
         self.chat = chat
         self.isVertical = isVertical
         self.onTap = onTap
         self.avatarNamespace = avatarNamespace
-        self.avatarMatchedGeometryId = avatarMatchedGeometryId
         self.isGeometrySource = isGeometrySource
     }
 
@@ -74,7 +67,12 @@ struct ChatTitleView: View {
             verticalDiameter: 44
         ) {
             ForEach(chat.participants) { participant in
-                AvatarView(user: participant)
+                AvatarView(
+                    user: participant,
+                    namespace: avatarNamespace,
+                    matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                    isGeometrySource: isGeometrySource
+                )
                     .id(participant.id)
             }
         }
@@ -82,22 +80,8 @@ struct ChatTitleView: View {
         .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
     }
 
-    @ViewBuilder
     private var avatarContent: some View {
-        Group {
-            if let namespace = avatarNamespace {
-                avatarBase
-                    .matchedGeometryEffect(
-                        id: resolvedAvatarGeometryId,
-                        in: namespace,
-                        properties: .frame,
-                        anchor: .center,
-                        isSource: isGeometrySource
-                    )
-            } else {
-                avatarBase
-            }
-        }
+        avatarBase
         .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
     }
 }

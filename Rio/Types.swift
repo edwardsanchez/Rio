@@ -53,6 +53,17 @@ struct Chat: Identifiable {
     }
 }
 
+struct ChatAvatarGeometryKey: Hashable {
+    let chatID: UUID
+    let participantID: UUID
+}
+
+extension Chat {
+    func avatarGeometryKey(for participant: User) -> ChatAvatarGeometryKey {
+        ChatAvatarGeometryKey(chatID: id, participantID: participant.id)
+    }
+}
+
 struct ChatTheme {
     let backgroundColor: Color
     let inboundTextColor: Color
