@@ -33,7 +33,6 @@ struct ChatDetailView: View {
     @State private var scrollVelocity: CGFloat = 0
     @State private var previousScrollY: CGFloat = 0
     @State private var scrollPhase: ScrollPhase = .idle
-    @State private var chatName: String = ""
 
     // Image zoom transition
     @State private var selectedImageData: ImageData?
@@ -78,15 +77,28 @@ struct ChatDetailView: View {
         )
     }
 
+    private var chatNameBinding: Binding<String> {
+        Binding(
+            get: {
+                let currentTitle = resolvedChat.title
+                return currentTitle == fallbackChatTitle ? "" : currentTitle
+            },
+            set: { newValue in
+                chatData.updateChatTitle(newValue, for: resolvedChat.id)
+            }
+        )
+    }
+
     var body: some View {
         ZStack {
             messagesView
+                .tint(resolvedChat.theme.outboundBackgroundColor)
             inputFieldView
             imageOverlay
             reactionsOverlay
+                .tint(resolvedChat.theme.outboundBackgroundColor)
             chatDetailOverlay
         }
-        .tint(resolvedChat.theme.outboundBackgroundColor)
         .environment(reactionsCoordinator)
     }
 
@@ -101,6 +113,38 @@ struct ChatDetailView: View {
             .transition(.asymmetric(insertion: .opacity.animation(.easeIn), removal: .opacity.animation(.easeIn(duration: 0.4).delay(0.5))))
     }
 
+    var participantGrid: some View {
+        LazyVGrid(columns: participantGridColumns) {
+            ForEach(resolvedChat.participants) { participant in
+                VStack(spacing: 3) {
+                    AvatarView(
+                        user: participant,
+                        namespace: avatarNamespace,
+                        matchedGeometryID: resolvedChat.avatarGeometryKey(for: participant),
+                        isGeometrySource: true
+                    )
+
+                    Text(participant.name)
+                        .font(.caption)
+                        .fixedSize()
+                }
+                .contextMenu {
+                    Button("Remove from Group") {
+
+                    }
+                    //TODO: Implement this, this is a role destructive.
+                    //Use the xmark icon for this
+
+                    Button("Chat 1:1") {
+
+                    }
+                    //TODO: Use person.2.fill icon
+                }
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
     var chatDetailOverlay: some View {
         ZStack {
 //            if isShowingDetailScim {
@@ -109,104 +153,64 @@ struct ChatDetailView: View {
 
             if isShowingDetailContent {
                 NavigationStack {
-                    ScrollView {
-                        VStack {
-                            LazyVGrid(columns: participantGridColumns) {
-                                ForEach(resolvedChat.participants) { participant in
-                                    VStack(spacing: 3) {
-                                        AvatarView(
-                                            user: participant,
-                                            namespace: avatarNamespace,
-                                            matchedGeometryID: resolvedChat.avatarGeometryKey(for: participant),
-                                            isGeometrySource: true
-                                        )
-
-                                        Text(participant.name)
-                                            .font(.caption)
-                                            .fixedSize()
-                                    }
-                                    .contextMenu {
-                                        Button("Remove from Group") {
-
-                                        }
-                                        //TODO: Implement this, this is a role destructive.
-                                        //Use the xmark icon for this
-
-                                        Button("Chat 1:1") {
-
-                                        }
-                                        //TODO: Use person.2.fill icon
-                                    }
-                                }
+                    Form {
+                        Section {
+                            participantGrid
 
                                 //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat. It will have plus sf symbol and the label below it should say "Add"
-                            }
-                            Form {
-                                if isGroupChat {
-                                    Section {
-                                        LabeledContent {
-                                            TextField(
-                                                "",
-                                                text: $chatName,
-                                                prompt: Text(fallbackChatTitle)
-                                            )
-                                            .textInputAutocapitalization(.words)
-                                            .disableAutocorrection(true)
-                                            .onChange(of: chatName) { _, newValue in
-                                                chatData.updateChatTitle(newValue, for: resolvedChat.id)
-                                            }
-                                        } label: {
-                                            Label("Chat Name", systemImage: "textformat")
-                                        }
-                                    }
-                                }
 
-                                Section {
-                                    LabeledContent {
-                                        Button {
-                                            // TODO: Present color picker sheet for outbound bubble color
-                                        } label: {
+                        } header: {
+                            Text("Participants")
+                        }
+
+                        Section {
+                            if isGroupChat {
+                                LabeledContent {
+                                    TextField(
+                                        "",
+                                        text: chatNameBinding,
+                                        prompt: Text(fallbackChatTitle)
+                                    )
+                                    .textInputAutocapitalization(.words)
+                                } label: {
+                                    Label("Chat Name", systemImage: "character.bubble")
+                                }
+                            }
+
+                            LabeledContent {
+                                Button {
+                                    // TODO: Present color picker sheet for outbound bubble color
+                                } label: {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(resolvedChat.theme.outboundBackgroundColor)
+                                        .frame(width: 34, height: 34)
+                                        .overlay {
                                             RoundedRectangle(cornerRadius: 8)
-                                                .fill(resolvedChat.theme.outboundBackgroundColor)
-                                                .frame(width: 34, height: 34)
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(Color.primary.opacity(0.15), lineWidth: 1)
-                                                }
-                                                .accessibilityLabel("Current chat color")
+                                                .stroke(Color.primary.opacity(0.15), lineWidth: 1)
                                         }
-                                        .buttonStyle(.plain)
-                                    } label: {
-                                        Label("Color", systemImage: "paintpalette")
-                                    }
+                                        .accessibilityLabel("Current chat color")
                                 }
+                                .buttonStyle(.plain)
+                            } label: {
+                                Label("Color", systemImage: "paintpalette")
+                            }
 
-                                Section {
-                                    Toggle(isOn: hideAlertsBinding) {
-                                        Label("Hide alerts", systemImage: "bell.slash")
-                                    }
-                                }
+                            Toggle(isOn: hideAlertsBinding) {
+                                Label("Hide alerts", systemImage: "bell.slash")
+                            }
 
-                                Section {
-                                    Button(role: .destructive) {
-                                        handleDestructiveAction()
-                                    } label: {
-                                        Text(isGroupChat ? "Leave Group" : "Delete Chat")
-                                            .frame(maxWidth: .infinity)
-                                    }
-                                }
-                            }
-                            .onAppear {
-                                syncChatName()
-                            }
-                            .onChange(of: currentChat?.title) { _, _ in
-                                syncChatName()
-                            }
-                            .onChange(of: currentChat?.participants.count) { _, _ in
-                                syncChatName()
+                        } header: {
+                            Text("Settings")
+                        }
+
+                        Section {
+                            Button(role: .destructive) {
+                                handleDestructiveAction()
+                            } label: {
+                                Text(isGroupChat ? "Leave Group" : "Delete Chat")
+                                    .frame(maxWidth: .infinity)
                             }
                         }
-                        .padding(20)
                     }
                     .navigationBarTitleDisplayMode(.inline)
                     .navigationTitle(resolvedChat.title)
@@ -472,20 +476,6 @@ struct ChatDetailView: View {
                     }
                 }
             }
-        }
-    }
-
-    private func syncChatName() {
-        guard isGroupChat else {
-            chatName = ""
-            return
-        }
-
-        let currentTitle = resolvedChat.title
-        if currentTitle == fallbackChatTitle {
-            chatName = ""
-        } else {
-            chatName = currentTitle
         }
     }
 
