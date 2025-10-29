@@ -78,7 +78,7 @@ struct ChatTheme {
 
     // Predefined themes matching asset catalog
     static let defaultTheme = ChatTheme(
-        outboundBackgroundColor: .Default.outboundBubble
+        outboundBackgroundColor: .defaultBubble
     )
 
     static let theme1 = ChatTheme(
