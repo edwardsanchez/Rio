@@ -82,9 +82,15 @@ struct ChatDetailView: View {
             if isShowingDetailContent {
                 VStack {
                     ForEach(chat.participants) { participant in
-                        AvatarView(user: participant, diameter: 44)
+                        HStack {
+                            AvatarView(user: participant)
+                                .frame(width: 44, height: 44)
+                            Text(participant.name)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
+                .padding(20)
             }
         }
     }
