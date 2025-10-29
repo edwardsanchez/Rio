@@ -11,8 +11,6 @@ struct ChatDetailView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
-    @State private var isShowingDetailContent = false
-
     @State private var reactionsCoordinator = ReactionsCoordinator()
     @State private var newMessageId: UUID?
     @State private var inputFieldFrame: CGRect = .zero
@@ -64,26 +62,8 @@ struct ChatDetailView: View {
         Chat.fallbackTitle(for: resolvedChat.participants, currentUser: chatData.currentUser)
     }
 
-    private var hideAlertsBinding: Binding<Bool> {
-        Binding(
-            get: { chatData.isChatMuted(resolvedChat.id) },
-            set: { isMuted in
-                chatData.setChatMuted(resolvedChat.id, isMuted: isMuted)
-                // TODO: Connect hide alerts toggle to notification preferences
-            }
-        )
-    }
-
-    private var chatNameBinding: Binding<String> {
-        Binding(
-            get: {
-                let currentTitle = resolvedChat.title
-                return currentTitle == fallbackChatTitle ? "" : currentTitle
-            },
-            set: { newValue in
-                chatData.updateChatTitle(newValue, for: resolvedChat.id)
-            }
-        )
+    private var isShowingDetailContent: Bool {
+        chatData.isDetailPresented(for: resolvedChat.id)
     }
 
     var body: some View {
@@ -91,27 +71,19 @@ struct ChatDetailView: View {
             messagesView
                 .tint(resolvedChat.theme.outboundBackgroundColor)
             inputFieldView
-            imageOverlay
+            ChatImageOverlay(selectedImageData: $selectedImageData)
             ChatReaction(
-                coordinator: reactionsCoordinator,
                 bubbleNamespace: bubbleNamespace,
                 selectedImageData: $selectedImageData
             )
             .tint(resolvedChat.theme.outboundBackgroundColor)
-
-            if isShowingDetailContent {
-                ChatSettings(
-                    chat: resolvedChat,
-                    fallbackChatTitle: fallbackChatTitle,
-                    isGroupChat: isGroupChat,
-                    avatarNamespace: avatarNamespace,
-                    avatarTransitionAnimation: avatarTransitionAnimation,
-                    hideAlertsBinding: hideAlertsBinding,
-                    chatNameBinding: chatNameBinding,
-                    onClose: closeDetailOverlay,
-                    onDestructiveAction: handleDestructiveAction
-                )
-            }
+            ChatSettings(
+                chat: resolvedChat,
+                fallbackChatTitle: fallbackChatTitle,
+                avatarNamespace: avatarNamespace,
+                avatarTransitionAnimation: avatarTransitionAnimation,
+                onDestructiveAction: handleDestructiveAction
+            )
         }
         .environment(reactionsCoordinator)
     }
@@ -129,25 +101,6 @@ struct ChatDetailView: View {
             }
     }
 
-    var imageOverlay: some View {
-        Group {
-            if let imageData = selectedImageData {
-                ImageDetailView(
-                    imageData: imageData,
-                    isPresented: Binding(
-                        get: { selectedImageData != nil },
-                        set: { newValue in
-                            if !newValue {
-                                selectedImageData = nil
-                            }
-                        }
-                    )
-                )
-                .zIndex(1)
-            }
-        }
-    }
-
     var messagesView: some View {
         // Main scroll view for messages
         NavigationStack {
@@ -161,9 +114,7 @@ struct ChatDetailView: View {
                     scrollPhase: scrollPhase,
                     theme: resolvedChat.theme,
                     selectedImageData: $selectedImageData,
-                    bubbleNamespace: bubbleNamespace,
-                    reactionsCoordinator: reactionsCoordinator,
-                    geometrySource: reactionsCoordinator.geometrySource
+                    bubbleNamespace: bubbleNamespace
                 )
                 .onGeometryChange(for: CGRect.self) { geometryProxy in
                     geometryProxy.frame(in: .global)
@@ -252,7 +203,7 @@ struct ChatDetailView: View {
                 ToolbarItem(placement: .principal) {
                     ChatTitleView(
                         chat: resolvedChat,
-                        isVertical: false, //isShowingDetailContent
+                        isVertical: isShowingDetailContent,
                         onTap: {
                             tapAvatar()
                         },
@@ -277,12 +228,11 @@ struct ChatDetailView: View {
 
     private func handleDestructiveAction() {
         chatData.removeChat(withId: resolvedChat.id)
-        closeDetailOverlay()
     }
 
     func tapAvatar() {
         withAnimation(avatarTransitionAnimation) {
-            isShowingDetailContent = true
+            chatData.presentDetail(for: resolvedChat.id)
         }
     }
 
@@ -303,11 +253,6 @@ struct ChatDetailView: View {
         scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
     }
 
-    private func closeDetailOverlay() {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            isShowingDetailContent = false
-        }
-    }
 }
 
 #Preview("Chat Detail") {
@@ -377,7 +322,6 @@ private struct OutboundGeometryMatchDebugView: View {
     @State private var scrollViewFrame: CGRect = .zero
     @State private var currentNewMessageId: UUID?
     @State private var selectedImageData: ImageData?
-    @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
     @Namespace private var bubbleNamespace
 
     var body: some View {
@@ -394,9 +338,7 @@ private struct OutboundGeometryMatchDebugView: View {
                         scrollPhase: .idle,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData,
-                        bubbleNamespace: bubbleNamespace,
-                        reactionsCoordinator: reactionsCoordinator,
-                        geometrySource: reactionsCoordinator.geometrySource
+                        bubbleNamespace: bubbleNamespace
                     )
                     .onGeometryChange(for: CGRect.self) { geometryProxy in
                         geometryProxy.frame(in: .global)

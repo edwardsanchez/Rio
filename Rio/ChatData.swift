@@ -11,9 +11,10 @@ import Defaults
 @Observable
 class ChatData {
     var chats: [Chat] = []
-    var mutedChatIDs: Set<UUID> = []
     // Track visible thinking bubbles per chat (chatId -> participant IDs)
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
+    // Tracks which chat detail sheet is currently presented
+    var presentedDetailChatID: UUID?
 
     // Current signed-in user (for adding reactions)
     let currentUser: User
@@ -27,7 +28,6 @@ class ChatData {
 
     init() {
         currentUser = edwardUser //TODO: Make this not set explicitly
-        mutedChatIDs = Set(Defaults[.mutedChatIDs])
         generateSampleChats()
     }
 
@@ -177,21 +177,24 @@ class ChatData {
     func removeChat(withId chatId: UUID) {
         chats.removeAll { $0.id == chatId }
         activeTypingIndicators.removeValue(forKey: chatId)
-        mutedChatIDs.remove(chatId)
-        persistMutedChatIDs()
+        updateMutedChatIDs { $0.remove(chatId) }
+        if presentedDetailChatID == chatId {
+            presentedDetailChatID = nil
+        }
     }
 
     func isChatMuted(_ chatId: UUID) -> Bool {
-        mutedChatIDs.contains(chatId)
+        Defaults[.mutedChatIDs].contains(chatId)
     }
 
     func setChatMuted(_ chatId: UUID, isMuted: Bool) {
-        if isMuted {
-            mutedChatIDs.insert(chatId)
-        } else {
-            mutedChatIDs.remove(chatId)
+        updateMutedChatIDs { mutedChatIDs in
+            if isMuted {
+                mutedChatIDs.insert(chatId)
+            } else {
+                mutedChatIDs.remove(chatId)
+            }
         }
-        persistMutedChatIDs()
     }
 
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
@@ -219,8 +222,23 @@ class ChatData {
         return otherParticipants.randomElement()
     }
 
-    private func persistMutedChatIDs() {
+    private func updateMutedChatIDs(_ modify: (inout Set<UUID>) -> Void) {
+        var mutedChatIDs = Set(Defaults[.mutedChatIDs])
+        modify(&mutedChatIDs)
         Defaults[.mutedChatIDs] = Array(mutedChatIDs)
+    }
+
+    func isDetailPresented(for chatId: UUID) -> Bool {
+        presentedDetailChatID == chatId
+    }
+
+    func presentDetail(for chatId: UUID) {
+        presentedDetailChatID = chatId
+    }
+
+    func dismissDetail(for chatId: UUID) {
+        guard presentedDetailChatID == chatId else { return }
+        presentedDetailChatID = nil
     }
 
     private func scheduleReactionOptions(for message: Message, in chat: Chat) {

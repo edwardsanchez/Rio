@@ -10,36 +10,66 @@ import SwiftUI
 struct ChatSettings: View {
     let chat: Chat
     let fallbackChatTitle: String
-    let isGroupChat: Bool
     let avatarNamespace: Namespace.ID
     let avatarTransitionAnimation: Animation
-    let hideAlertsBinding: Binding<Bool>
-    let chatNameBinding: Binding<String>
-    let onClose: () -> Void
     let onDestructiveAction: () -> Void
+
+    @Environment(ChatData.self) private var chatData
+
+    private var isPresented: Bool {
+        chatData.isDetailPresented(for: chat.id)
+    }
+
+    private var isGroupChat: Bool {
+        chat.participants.count > 2
+    }
 
     private var participantGridColumns: [GridItem] {
         [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
     }
 
-    var body: some View {
-        NavigationStack {
-            Form {
-                participantsSection
-
-                settingsSection
-
-                destructiveSection
+    private var chatNameBinding: Binding<String> {
+        Binding(
+            get: {
+                let currentTitle = chat.title
+                return currentTitle == fallbackChatTitle ? "" : currentTitle
+            },
+            set: { newValue in
+                chatData.updateChatTitle(newValue, for: chat.id)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle(chat.title)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onClose) {
-                        Label("Close", systemImage: "xmark")
+        )
+    }
+
+    private var hideAlertsBinding: Binding<Bool> {
+        Binding(
+            get: { chatData.isChatMuted(chat.id) },
+            set: { isMuted in
+                chatData.setChatMuted(chat.id, isMuted: isMuted)
+                // TODO: Connect hide alerts toggle to notification preferences
+            }
+        )
+    }
+
+    var body: some View {
+        if isPresented {
+            NavigationStack {
+                Form {
+                    participantsSection
+
+                    settingsSection
+
+                    destructiveSection
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle(chat.title)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: close) {
+                            Label("Close", systemImage: "xmark")
+                        }
+                        .tint(.primary)
+                        .buttonBorderShape(.circle)
                     }
-                    .tint(.primary)
-                    .buttonBorderShape(.circle)
                 }
             }
         }
@@ -128,10 +158,21 @@ struct ChatSettings: View {
 
     private var destructiveSection: some View {
         Section {
-            Button(role: .destructive, action: onDestructiveAction) {
+            Button(role: .destructive, action: handleDestructiveAction) {
                 Text(isGroupChat ? "Leave Group" : "Delete Chat")
                     .frame(maxWidth: .infinity)
             }
         }
+    }
+
+    private func close() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            chatData.dismissDetail(for: chat.id)
+        }
+    }
+
+    private func handleDestructiveAction() {
+        close()
+        onDestructiveAction()
     }
 }

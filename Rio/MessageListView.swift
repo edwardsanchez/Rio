@@ -18,17 +18,11 @@ struct MessageListView: View {
     let theme: ChatTheme
     @Binding var selectedImageData: ImageData?
     let bubbleNamespace: Namespace.ID?
-    let reactionsCoordinator: ReactionsCoordinator?
-    let geometrySource: ReactionGeometrySource
     @Environment(ChatData.self) private var chatData
-    @Environment(ReactionsCoordinator.self) private var environmentReactionsCoordinator
-
-    private var resolvedReactionsCoordinator: ReactionsCoordinator {
-        reactionsCoordinator ?? environmentReactionsCoordinator
-    }
+    @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
 
     var body: some View {
-        let activeReactionMessageID = resolvedReactionsCoordinator.reactingMessage?.message.id
+        let activeReactionMessageID = reactionsCoordinator.reactingMessage?.message.id
 
         LazyVStack(spacing: 0) {
             ForEach(Array(zip(messages.indices, messages)), id: \.1.id) { index, message in
@@ -59,7 +53,7 @@ struct MessageListView: View {
                         theme: theme,
                         bubbleNamespace: bubbleNamespace,
                         activeReactingMessageID: activeReactionMessageID,
-                        geometrySource: geometrySource,
+                        geometrySource: reactionsCoordinator.geometrySource,
                         selectedImageData: $selectedImageData
                     )
                     .padding(.bottom, isLastMessageInChat ? 20 : (showTail ? 15 : 5))

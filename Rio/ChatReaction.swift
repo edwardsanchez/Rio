@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 struct ChatReaction: View {
-    @Bindable var coordinator: ReactionsCoordinator
+    @Environment(ReactionsCoordinator.self) private var coordinator
     let bubbleNamespace: Namespace.ID
     @Binding var selectedImageData: ImageData?
 
