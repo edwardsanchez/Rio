@@ -86,17 +86,17 @@ struct ChatDetailView: View {
                         VStack(alignment: .leading, spacing: 24) {
                             VStack(spacing: 20) {
                                 ForEach(chat.participants) { participant in
-                                    HStack(spacing: 16) {
+                                    VStack(spacing: 4) {
                                         AvatarView(
                                             user: participant,
                                             namespace: avatarNamespace,
                                             matchedGeometryID: chat.avatarGeometryKey(for: participant),
                                             isGeometrySource: true
                                         )
-                                        .frame(width: 44, height: 44)
+                                        .frame(width: 60, height: 60)
 
                                         Text(participant.name)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .font(.caption)
                                     }
                                 }
                             }
@@ -349,7 +349,7 @@ struct ChatDetailView: View {
                 ToolbarItem(placement: .principal) {
                     ChatTitleView(
                         chat: chat,
-                        isVertical: isShowingDetailContent,
+                        isVertical: false, //isShowingDetailContent
                         onTap: {
                             tapAvatar()
                         },
