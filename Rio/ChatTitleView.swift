@@ -49,7 +49,6 @@ struct ChatTitleView: View {
                 }
             }
         }
-        .background { Color.red}
     }
 
     private var title: some View {
@@ -75,6 +74,7 @@ struct ChatTitleView: View {
         ) {
             ForEach(chat.participants) { participant in
                 AvatarView(user: participant, avatarSize: nil)
+                    .id(participant.id)
             }
         }
         .glassEffect(isVertical ? .identity : .regular.interactive())
@@ -96,7 +96,6 @@ struct ChatTitleView: View {
                     )
             } else {
                 avatarBase
-                    .background(Color.green)
             }
         }
         .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
@@ -117,8 +116,14 @@ struct ChatTitleView: View {
 
 #Preview("ChatTitleView Single") {
     @Previewable @State var isVertical = true
+
+    @Previewable @State var chat = Chat.sample(
+        title: "Quartet Chat",
+        participantNames: ["Amy", "Ben", "Cara", "Dan"]
+    )
+
     ChatTitleView(
-        chat: .sample(title: "Quartet Chat", participantNames: ["Amy", "Ben", "Cara", "Dan"]),
+        chat: chat,
         isVertical: isVertical,
         onTap: {
             withAnimation(.smooth(duration: 3)) {
