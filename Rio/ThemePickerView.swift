@@ -76,18 +76,18 @@ struct ThemeColorOption: Identifiable {
 
 extension ThemeColorOption {
     static let spectrum: [ThemeColorOption] = [
-        ThemeColorOption(id: "systemRed", color: Color(.systemRed), accessibilityLabel: "Red"),
-        ThemeColorOption(id: "systemOrange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
-        ThemeColorOption(id: "systemPink", color: Color(.systemPink), accessibilityLabel: "Pink"),
-        ThemeColorOption(id: "systemBrown", color: Color(.systemBrown), accessibilityLabel: "Brown"),
-        ThemeColorOption(id: "systemYellow", color: Color(.systemYellow).mix(with: .red, by: 0.1), accessibilityLabel: "Yellow"),
-        ThemeColorOption(id: "systemGreen", color: Color(.systemGreen), accessibilityLabel: "Green"),
-        ThemeColorOption(id: "systemTeal", color: Color(.systemTeal), accessibilityLabel: "Teal"),
-        ThemeColorOption(id: "systemCyan", color: Color(.systemCyan), accessibilityLabel: "Cyan"),
-        ThemeColorOption(id: "systemBlue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
-        ThemeColorOption(id: "systemIndigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
-        ThemeColorOption(id: "systemPurple", color: Color(.systemPurple), accessibilityLabel: "Purple"),
-        ThemeColorOption(id: "defaultBubble", color: .defaultBubble, accessibilityLabel: "Default Bubble")
+        ThemeColorOption(id: "red", color: Color(.systemRed), accessibilityLabel: "Red"),
+        ThemeColorOption(id: "orange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
+        ThemeColorOption(id: "pink", color: Color(.systemPink), accessibilityLabel: "Pink"),
+        ThemeColorOption(id: "brown", color: Color(.systemBrown), accessibilityLabel: "Brown"),
+        ThemeColorOption(id: "yellow", color: Color(.systemYellow).mix(with: .red, by: 0.2), accessibilityLabel: "Yellow"),
+        ThemeColorOption(id: "green", color: Color(.systemGreen), accessibilityLabel: "Green"),
+        ThemeColorOption(id: "teal", color: Color(.systemTeal), accessibilityLabel: "Teal"),
+        ThemeColorOption(id: "cyan", color: Color(.systemCyan), accessibilityLabel: "Cyan"),
+        ThemeColorOption(id: "blue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
+        ThemeColorOption(id: "indigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
+        ThemeColorOption(id: "purple", color: Color(.systemPurple), accessibilityLabel: "Purple"),
+        ThemeColorOption(id: "default", color: .defaultBubble, accessibilityLabel: "Default")
     ]
 
     static let gridColumns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 18, alignment: .center), count: 4)
