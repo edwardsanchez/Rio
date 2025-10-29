@@ -441,22 +441,25 @@ struct GreedyCircleStack: Layout, Animatable {
 
 }
 
-// MARK: - Demo helpers
+// MARK: - Preview helpers
 
-struct DemoAvatar: View {
-    var color: Color
-    var text: String
-
-    var body: some View {
-        ZStack {
-            Circle().fill(color.gradient)
-            Text(text)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(.white)
-        }
-        // Child views can be any content; clip them to circles here for clarity
-        .clipShape(Circle())
+private enum PreviewUsers {
+    private static func make(_ name: String, avatar: ImageResource?) -> User {
+        User(id: UUID(), name: name, avatar: avatar)
     }
+
+    static let mixed: [User] = [
+        make("Lumen Moss", avatar: nil),
+        make("Maya Park", avatar: .amy),
+        make("Nova Lin", avatar: nil),
+        make("Joaquin Wilde", avatar: .joaquin),
+        make("Scarlet Chen", avatar: .scarlet),
+        make("River Slate", avatar: nil),
+        make("Eddie Carter", avatar: .edward),
+        make("Nate Read", avatar: .read),
+        make("Carta Bloom", avatar: .cartouche),
+        make("Sage Hart", avatar: nil)
+    ]
 }
 
 struct CircleStackPreviewCard<Content: View>: View {
@@ -496,51 +499,47 @@ struct CircleStackPreviewCard<Content: View>: View {
         CircleStackPreviewCard(
             title: "1 avatar"
         ) {
-            DemoAvatar(color: .purple, text: "A")
+            ForEach(Array(PreviewUsers.mixed.prefix(1))) { user in
+                AvatarView(user: user)
+            }
         }
 
         CircleStackPreviewCard(
             title: "2 avatars"
         ) {
-            DemoAvatar(color: .purple, text: "A")
-            DemoAvatar(color: .blue, text: "B")
+            ForEach(Array(PreviewUsers.mixed.prefix(2))) { user in
+                AvatarView(user: user)
+            }
         }
 
         CircleStackPreviewCard(
             title: "3 avatars"
         ) {
-            DemoAvatar(color: .purple, text: "A")
-            DemoAvatar(color: .blue, text: "B")
-            DemoAvatar(color: .orange, text: "C")
+            ForEach(Array(PreviewUsers.mixed.prefix(3))) { user in
+                AvatarView(user: user)
+            }
         }
 
         CircleStackPreviewCard(
             title: "4 avatars"
         ) {
-            DemoAvatar(color: .pink, text: "A")
-            DemoAvatar(color: .teal, text: "B")
-            DemoAvatar(color: .indigo, text: "C")
-            DemoAvatar(color: .mint, text: "D")
+            ForEach(Array(PreviewUsers.mixed.prefix(4))) { user in
+                AvatarView(user: user)
+            }
         }
         CircleStackPreviewCard(
             title: "5 avatars"
         ) {
-            ForEach(0..<5, id: \.self) { index in
-                DemoAvatar(
-                    color: [.red, .green, .blue, .orange, .purple][index],
-                    text: "\(index + 1)"
-                )
+            ForEach(Array(PreviewUsers.mixed.prefix(5))) { user in
+                AvatarView(user: user)
             }
         }
 
         CircleStackPreviewCard(
             title: "10 avatars, tight spacing",
         ) {
-            ForEach(0..<10, id: \.self) { index in
-                DemoAvatar(
-                    color: Color(hue: Double(index) / 10.0, saturation: 0.75, brightness: 0.9),
-                    text: "\(index + 1)"
-                )
+            ForEach(PreviewUsers.mixed) { user in
+                AvatarView(user: user)
             }
         }
     }
@@ -572,13 +571,9 @@ struct CircleStackPreviewCard<Content: View>: View {
                 verticalSpacing: vSpacing,
                 verticalDiameter: diameter
             ) {
-                DemoAvatar(color: .pink, text: "A")
-                DemoAvatar(color: .teal, text: "B")
-                DemoAvatar(color: .indigo, text: "C")
-                DemoAvatar(color: .mint, text: "D")
-                DemoAvatar(color: .orange, text: "E")
-//                DemoAvatar(color: .red, text: "F")
-//                DemoAvatar(color: .yellow, text: "G")
+                ForEach(Array(PreviewUsers.mixed.prefix(5))) { user in
+                    AvatarView(user: user)
+                }
             }
             .animation(.smooth(duration: 1), value: isVertical)
         }
