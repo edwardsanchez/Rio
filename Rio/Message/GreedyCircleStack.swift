@@ -127,7 +127,7 @@ struct GreedyCircleStack: Layout, Animatable {
         let count = subviews.count
         let availableHeight = bounds.height - verticalSpacing * CGFloat(max(0, count - 1))
         let fitDiameter = max(0, availableHeight / CGFloat(max(count, 1)))
-        let computedDiameter = min(bounds.width, fitDiameter)
+        let fallbackDiameter = max(0, min(bounds.width, fitDiameter))
         
         // Check if we're animating (progress is between 0 and 1)
         let isAnimating = animationProgress > 0.001 && animationProgress < 0.999
@@ -146,19 +146,21 @@ struct GreedyCircleStack: Layout, Animatable {
             )
             
             // Calculate vertical layout positions (same order as greedy)
-            let diameter = max(0, min(verticalDiameter ?? computedDiameter, computedDiameter))
-            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
+            let diameter = max(0, min(verticalDiameter ?? fallbackDiameter, bounds.width))
             var verticalPacked: [PackedCircle] = []
-            var currentY = totalHeight / 2 - diameter / 2  // Start from top
+            let startX = bounds.minX + diameter / 2
+            let startY = bounds.minY + diameter / 2
             
             for index in 0..<count where index < subviews.count {
-                // Vertical positions are relative to bounds center (origin at 0,0)
+                let desiredX = startX
+                let desiredY = startY + CGFloat(index) * (diameter + verticalSpacing)
+                let relativeX = desiredX - bounds.midX
+                let relativeY = bounds.midY - desiredY
                 verticalPacked.append(PackedCircle(
-                    center: CGPoint(x: 0, y: currentY),
+                    center: CGPoint(x: relativeX, y: relativeY),
                     radius: diameter / 2,
                     isPrimary: false
                 ))
-                currentY -= diameter + verticalSpacing  // Move down (negative Y)
             }
             
             // Interpolate with collision resolution
@@ -182,12 +184,12 @@ struct GreedyCircleStack: Layout, Animatable {
             
         } else if animationProgress >= 0.999 {
             // Fully vertical layout
-            let diameter = max(0, min(verticalDiameter ?? computedDiameter, computedDiameter))
-            let totalHeight = CGFloat(count) * diameter + CGFloat(max(0, count - 1)) * verticalSpacing
-            var currentY = bounds.midY - totalHeight / 2 + diameter / 2
+            let diameter = max(0, min(verticalDiameter ?? fallbackDiameter, bounds.width))
+            var currentY = bounds.minY + diameter / 2
+            let centerX = bounds.minX + diameter / 2
             for index in 0..<count where index < subviews.count {
                 let proposal = ProposedViewSize(width: diameter, height: diameter)
-                let placement = CGPoint(x: bounds.midX, y: currentY)
+                let placement = CGPoint(x: centerX, y: currentY)
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
                 currentY += diameter + verticalSpacing
             }

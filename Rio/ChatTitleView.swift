@@ -49,6 +49,7 @@ struct ChatTitleView: View {
                 }
             }
         }
+        .background { Color.red}
     }
 
     private var title: some View {
@@ -76,13 +77,8 @@ struct ChatTitleView: View {
                 AvatarView(user: participant, avatarSize: nil)
             }
         }
-        .padding(3)
-        .background {
-            Circle()
-                .fill(Color.clear)
-        }
         .glassEffect(isVertical ? .identity : .regular.interactive())
-        .frame(width: 60, height: 60)
+        .frame(width: isVertical ? nil : 60, height: isVertical ? nil : 60)
         .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
     }
 
@@ -100,6 +96,7 @@ struct ChatTitleView: View {
                     )
             } else {
                 avatarBase
+                    .background(Color.green)
             }
         }
         .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
