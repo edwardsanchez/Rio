@@ -60,7 +60,7 @@ enum OpenAIEmojiAPI {
         systemPrompt: String,
         userPrompt: String,
         schema: [String: Any],
-        model: String = defaultModel,
+        model: String? = nil,
         session: URLSession = .shared,
         errorDomain: String
     ) async throws -> String {
@@ -71,9 +71,15 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "OPENAI_API_KEY environment variable not set"]
             )
         }
+        let resolvedModel: String
+        if let model {
+            resolvedModel = model
+        } else {
+            resolvedModel = await MainActor.run { defaultModel }
+        }
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let payload: [String: Any] = [
-            "model": model,
+            "model": resolvedModel,
             "messages": [
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": userPrompt]
