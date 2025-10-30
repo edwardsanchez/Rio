@@ -71,9 +71,9 @@ extension Chat {
 }
 
 struct ChatTheme {
-    let inboundTextColor: Color = .primary
-    var inboundBackgroundColor: Color
-    let outboundTextColor: Color = .white
+    let inboundTextColor: Color
+    let inboundBackgroundColor: Color
+    let outboundTextColor: Color
     let outboundBackgroundColor: Color
 
     init(
@@ -83,6 +83,8 @@ struct ChatTheme {
         outboundTextColor: Color = .white
     ) {
         self.outboundBackgroundColor = outboundBackgroundColor
+        self.outboundTextColor = outboundTextColor
+        self.inboundTextColor = inboundTextColor
         self.inboundBackgroundColor = inboundBackgroundColor
             ?? ChatTheme.resolveInboundBackgroundColor(for: outboundBackgroundColor)
     }
@@ -103,4 +105,61 @@ struct ChatTheme {
     static let theme2 = ChatTheme(
         outboundBackgroundColor: .purple
     )
+}
+
+private struct ChatThemeColorPairRow: View {
+    let option: ThemeColorOption
+
+    private var theme: ChatTheme {
+        ChatTheme(outboundBackgroundColor: option.color)
+    }
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Text(option.accessibilityLabel)
+                .font(.subheadline)
+                .frame(width: 80, alignment: .leading)
+
+            colorChip(theme.outboundBackgroundColor, label: "Outbound")
+            colorChip(theme.inboundBackgroundColor, label: "Inbound")
+        }
+    }
+
+    @ViewBuilder
+    private func colorChip(_ color: Color, label: String) -> some View {
+        VStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(color)
+                .frame(width: 44, height: 36)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                }
+        }
+
+    }
+}
+
+private struct ChatThemeColorsPreview: View {
+    private let options = ThemeColorOption.spectrum
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("ChatTheme Color Pairs")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(options) { option in
+                    ChatThemeColorPairRow(option: option)
+                }
+            }
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.base))
+    }
+}
+
+#Preview("ChatTheme Colors") {
+    ChatThemeColorsPreview()
 }
