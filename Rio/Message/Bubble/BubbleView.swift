@@ -49,7 +49,7 @@ struct BubbleView: View {
     /// Tracks the previous bubbleType to determine animation behavior
     @State private var previousBubbleType: BubbleType?
     /// Tracks the tail position offset for explicit animation control
-    @State private var tailPositionOffset: CGPoint = CGPoint(x: 15, y: -23)
+    @State private var tailPositionOffset: CGPoint = .init(x: 15, y: -23)
     /// Work item for cancelling delayed tail position updates
     @State private var tailPositionWorkItem: DispatchWorkItem?
 
@@ -73,7 +73,7 @@ struct BubbleView: View {
         self.height = height
         self.cornerRadius = cornerRadius
         self.color = color
-        self.bubbleType = type
+        bubbleType = type
         self.showTail = showTail
         self.messageType = messageType
         self.layoutType = layoutType
@@ -84,20 +84,22 @@ struct BubbleView: View {
         let now = Date()
         let config = BubbleConfiguration()
 
-        _animationSeed = State(initialValue: UInt64.random(in: 0...UInt64.max))
+        _animationSeed = State(initialValue: UInt64.random(in: 0 ... UInt64.max))
         _startTime = State(initialValue: now)
 
         // Initialize managers
         _circleManager = State(initialValue: CircleAnimationManager(config: config))
         _transitionCoordinator = State(initialValue: TransitionCoordinator(initialType: type, config: config))
-        _sizeManager = State(initialValue: RectangleSizeManager(initialSize: CGSize(width: width, height: height), config: config))
+        _sizeManager = State(initialValue: RectangleSizeManager(
+            initialSize: CGSize(width: width, height: height),
+            config: config
+        ))
 
         // Initialize tail position based on initial bubble type
-        let initialTailPosition: CGPoint
-        if type.isTalking {
-            initialTailPosition = CGPoint(x: 3, y: -1)  // Talking position
+        let initialTailPosition = if type.isTalking {
+            CGPoint(x: 3, y: -1) // Talking position
         } else {
-            initialTailPosition = CGPoint(x: 15, y: -23)  // Thinking/Read position
+            CGPoint(x: 15, y: -23) // Thinking/Read position
         }
 
         _tailPositionOffset = State(initialValue: initialTailPosition)
@@ -146,7 +148,7 @@ struct BubbleView: View {
                     .fill(resolvedColor)
             } else {
                 TimelineView(.animation) { timeline in
-                    return makeAnimatedBubble(at: timeline.date)
+                    makeAnimatedBubble(at: timeline.date)
                 }
             }
         }
@@ -366,7 +368,10 @@ struct BubbleView: View {
         // Canvas with metaball effect
         return Canvas { context, _ in
             if alphaThresholdMin > 0.001 {
-                context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? resolvedColor : Color.red.opacity(0.5)))
+                context.addFilter(.alphaThreshold(
+                    min: Double(alphaThresholdMin),
+                    color: isValid ? resolvedColor : Color.red.opacity(0.5)
+                ))
             }
 
             if currentBlurRadius > 0.05 {
@@ -466,7 +471,7 @@ struct BubbleView: View {
                 tailPositionOffset = thinkingPosition
 
                 let workItem = DispatchWorkItem {
-                    self.tailPositionOffset = talkingPosition
+                    tailPositionOffset = talkingPosition
                 }
 
                 tailPositionWorkItem = workItem
@@ -541,7 +546,7 @@ struct BubbleView: View {
         if progress < startPoint {
             return 0
         }
-        
+
         let normalizedProgress = (progress - startPoint) / (1 - startPoint)
         let elapsed = normalizedProgress * decorativeCirclesDuration
 
@@ -571,7 +576,7 @@ private struct CircleTargetState {
 }
 
 /// Bundles derived layout values for the metaball canvas and the underlying bubble.
-fileprivate struct BubbleMorphLayout {
+private struct BubbleMorphLayout {
     let morphProgress: CGFloat
     let outwardProgress: CGFloat
     let canvasPadding: CGFloat
@@ -604,17 +609,17 @@ fileprivate struct BubbleMorphLayout {
         self.outwardProgress = outwardProgress
         self.canvasPadding = canvasPadding
         self.blurRadius = blurRadius * outwardProgress
-        self.circleTrackInset = inset
-        self.circleTrackSize = CGSize(width: trackWidth, height: trackHeight)
-        self.circleTrackCornerRadius = trackCornerRadius
-        self.displaySize = circleTrackSize
-        self.displayCornerRadius = trackCornerRadius
-        self.canvasSize = CGSize(
+        circleTrackInset = inset
+        circleTrackSize = CGSize(width: trackWidth, height: trackHeight)
+        circleTrackCornerRadius = trackCornerRadius
+        displaySize = circleTrackSize
+        displayCornerRadius = trackCornerRadius
+        canvasSize = CGSize(
             width: trackWidth + canvasPadding * 2,
             height: trackHeight + canvasPadding * 2
         )
-        
-        self.alphaThreshold = max(0.001, 0.2 * outwardProgress)
+
+        alphaThreshold = max(0.001, 0.2 * outwardProgress)
     }
 
     var circleTrackWidth: CGFloat { circleTrackSize.width }
@@ -630,7 +635,7 @@ fileprivate struct BubbleMorphLayout {
 
 // MARK: - Previews
 
-#Preview("Bubble View"){
+#Preview("Bubble View") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     let chatData = ChatData()
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())

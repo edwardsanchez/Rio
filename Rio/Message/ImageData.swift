@@ -9,7 +9,7 @@ import SwiftUI
 
 /// A data model for passing image information to FlowLink for zoom transitions
 struct ImageData: Hashable, Equatable {
-    let id: String  // Changed from UUID to String for stable IDs
+    let id: String // Changed from UUID to String for stable IDs
     let image: Image
     let label: String?
 

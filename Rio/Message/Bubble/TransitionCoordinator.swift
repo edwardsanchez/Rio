@@ -30,10 +30,10 @@ class TransitionCoordinator {
     private var nativeSwapTask: Task<Void, Never>?
 
     init(initialType: BubbleType, config: BubbleConfiguration) {
-        self.animationState = .idle(initialType)
-        self.displayedType = initialType
+        animationState = .idle(initialType)
+        displayedType = initialType
         self.config = config
-        self.canUseNative = initialType.isTalking
+        canUseNative = initialType.isTalking
     }
 
     // MARK: - Transition Management
@@ -49,10 +49,10 @@ class TransitionCoordinator {
         animationState = BubbleAnimationState.transition(from: oldType, to: newType, at: now)
 
         // Handle delayed type updates for specific transitions
-        if oldType.isThinking && newType.isRead {
+        if oldType.isThinking, newType.isRead {
             // Keep displayedType at .thinking during explosion
             scheduleDelayedTypeUpdate(to: newType, delay: config.explosionDuration)
-        } else if oldType.isRead && newType.isTalking {
+        } else if oldType.isRead, newType.isTalking {
             // Tiny delay for read→talking to let geometry settle
             scheduleDelayedTypeUpdate(to: newType, delay: 0.02)
         } else {
@@ -62,19 +62,19 @@ class TransitionCoordinator {
 
         // Determine native rendering eligibility and schedule swap if needed
         switch animationState {
-        case .morphing(let from, let to, _):
+        case let .morphing(from, to, _):
             // During morphing, stay on Canvas. If Thinking→Talking, arm a tiny post-morph grace.
             canUseNative = false
-            if from.isThinking && to.isTalking {
+            if from.isThinking, to.isTalking {
                 let grace: TimeInterval = 0.8
                 let delay = config.morphDuration + grace
                 nativeSwapTask = Task { @MainActor in
                     try? await Task.sleep(for: .seconds(delay))
                     guard !Task.isCancelled else { return }
                     // Only flip if still targeting talking (no conflicting transition)
-                    if case .idle(let t) = self.animationState, t.isTalking {
+                    if case let .idle(t) = self.animationState, t.isTalking {
                         self.canUseNative = true
-                    } else if case .morphing(_, let toType, _) = self.animationState, toType.isTalking {
+                    } else if case let .morphing(_, toType, _) = self.animationState, toType.isTalking {
                         self.canUseNative = true
                     } else if self.displayedType.isTalking {
                         self.canUseNative = true
@@ -85,7 +85,7 @@ class TransitionCoordinator {
             canUseNative = true
         case .exploding, .scaling:
             canUseNative = false
-        case .idle(let t):
+        case let .idle(t):
             canUseNative = t.isTalking
         }
 
@@ -97,7 +97,7 @@ class TransitionCoordinator {
 
     /// Returns the current animation state, auto-transitioning to idle if complete
     func currentState(at date: Date) -> BubbleAnimationState {
-        if animationState.isAnimating && animationState.isComplete(at: date, config: config) {
+        if animationState.isAnimating, animationState.isComplete(at: date, config: config) {
             animationState = .idle(animationState.targetType)
         }
 
@@ -164,7 +164,7 @@ class TransitionCoordinator {
         if case .quickAppearing = animationState {
             return animationState.animationProgress(at: date, config: config) < 1
         }
-        
+
         return false
     }
 
@@ -197,15 +197,15 @@ class TransitionCoordinator {
     private func animationDuration(for state: BubbleAnimationState) -> TimeInterval {
         switch state {
         case .idle:
-            return 0
+            0
         case .morphing:
-            return config.morphDuration
+            config.morphDuration
         case .exploding:
-            return config.explosionDuration
+            config.explosionDuration
         case .scaling:
-            return config.readToThinkingDuration
+            config.readToThinkingDuration
         case .quickAppearing:
-            return 0.02
+            0.02
         }
     }
 }

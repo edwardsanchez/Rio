@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import SwiftUI
 import FoundationModels
+import SwiftUI
+
 // OpenAI integration helper lives in: OpenAI Example/OpenAI.swift
 
 @MainActor
@@ -31,7 +32,7 @@ class EmojiReactionViewModel {
         Emoji(id: "preview_rocket", character: "🚀", name: "Full Speed", category: .frequentlyUsed),
         Emoji(id: "preview_confetti", character: "🎉", name: "Celebrate", category: .frequentlyUsed)
     ]
-    
+
     private let fastEmojiTargetCount = 6
     private let maxInputLength = 512
     private let enableDebugLogs = true
@@ -45,12 +46,12 @@ class EmojiReactionViewModel {
     }
 
     private static func initializeFastModel() -> SystemLanguageModel? {
-        guard !Self.isRunningInPreview else { return nil }
+        guard !isRunningInPreview else { return nil }
         return SystemLanguageModel()
     }
 
     // MARK: - Main Pipeline
-    
+
     func findEmojis(for text: String) async {
         await findEmojis(for: text, context: nil)
     }
@@ -94,7 +95,7 @@ class EmojiReactionViewModel {
 
     private func runApplePipeline(trimmedText: String, trimmedContext: String?) async {
         log("\n⚙️ Apple fast emoji pipeline requested for input length \(trimmedText.count) characters")
-        guard let fastModel = fastModel else {
+        guard let fastModel else {
             errorMessage = "Emoji reactions require the on-device language model, which isn't available in previews."
             log("ℹ️ Fast model unavailable – likely running inside previews or unsupported platform.")
             return
@@ -113,7 +114,7 @@ class EmojiReactionViewModel {
             let fastEmojis = try await fastSelectFinalists(text: trimmedText, context: trimmedContext, model: fastModel)
             finalists = fastEmojis
             log("✅ Fast pipeline complete! Found \(fastEmojis.count) finalists")
-            log("🎯 Final finalists: \(fastEmojis.map { $0.character }.joined(separator: ", "))")
+            log("🎯 Final finalists: \(fastEmojis.map(\.character).joined(separator: ", "))")
         } catch {
             let tone = detectTone(for: trimmedText)
             let fallback = fallbackFinalists(for: tone)
@@ -134,7 +135,7 @@ class EmojiReactionViewModel {
             let openAIEmojis = try await openAISelectFinalists(text: trimmedText, context: trimmedContext)
             finalists = openAIEmojis
             log("✅ OpenAI pipeline complete! Found \(openAIEmojis.count) finalists")
-            log("🎯 Final finalists: \(openAIEmojis.map { $0.character }.joined(separator: ", "))")
+            log("🎯 Final finalists: \(openAIEmojis.map(\.character).joined(separator: ", "))")
         } catch {
             let tone = detectTone(for: trimmedText)
             let fallback = fallbackFinalists(for: tone)
@@ -155,7 +156,7 @@ class EmojiReactionViewModel {
             let claudeEmojis = try await claudeSelectFinalists(text: trimmedText, context: trimmedContext)
             finalists = claudeEmojis
             log("✅ Claude pipeline complete! Found \(claudeEmojis.count) finalists")
-            log("🎯 Final finalists: \(claudeEmojis.map { $0.character }.joined(separator: ", "))")
+            log("🎯 Final finalists: \(claudeEmojis.map(\.character).joined(separator: ", "))")
         } catch {
             let tone = detectTone(for: trimmedText)
             let fallback = fallbackFinalists(for: tone)
@@ -169,20 +170,24 @@ class EmojiReactionViewModel {
             log("⚠️ Claude pipeline error: \(error)")
         }
     }
-    
+
     // MARK: - Fast Pipeline
-    
+
     private func fastSelectFinalists(text: String, model: SystemLanguageModel) async throws -> [Emoji] {
-        return try await fastSelectFinalists(text: text, context: nil, model: model)
+        try await fastSelectFinalists(text: text, context: nil, model: model)
     }
 
-    private func fastSelectFinalists(text: String, context: String?, model: SystemLanguageModel) async throws -> [Emoji] {
+    private func fastSelectFinalists(
+        text: String,
+        context: String?,
+        model: SystemLanguageModel
+    ) async throws -> [Emoji] {
         let tone = detectTone(for: text)
         var bestResolved: [Emoji] = []
         log("   🧭 Detected tone: \(tone)")
         log("   🎯 Target finalists: \(fastEmojiTargetCount)")
-        
-        for attempt in 0..<3 {
+
+        for attempt in 0 ..< 3 {
             let suggestions = try await requestFastSuggestions(
                 text: text,
                 context: context,
@@ -197,29 +202,29 @@ class EmojiReactionViewModel {
             )
 
             log("   📊 Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
-            
+
             if !resolved.isEmpty {
                 bestResolved = resolved
             }
-            
+
             if resolved.count >= fastEmojiTargetCount {
                 log("   ✅ Attempt \(attempt + 1) met target with \(resolved.count) emoji")
                 let finalists = resolved.count > fastEmojiTargetCount
                     ? Array(resolved.prefix(fastEmojiTargetCount))
                     : resolved
-                log("   🎉 Finalists selected: \(finalists.map { $0.character }.joined(separator: ", "))")
+                log("   🎉 Finalists selected: \(finalists.map(\.character).joined(separator: ", "))")
                 return finalists
             }
         }
-        
+
         if bestResolved.isEmpty {
             log("   ⚠️ Fast pipeline could not obtain valid emoji suggestions")
         } else if bestResolved.count < fastEmojiTargetCount {
             log("   ⚠️ Fast pipeline resolved only \(bestResolved.count) of \(fastEmojiTargetCount) emoji")
         }
-        
+
         let finalists = Array(bestResolved.prefix(fastEmojiTargetCount))
-        log("   🎉 Finalists selected after retries: \(finalists.map { $0.character }.joined(separator: ", "))")
+        log("   🎉 Finalists selected after retries: \(finalists.map(\.character).joined(separator: ", "))")
         return finalists
     }
 
@@ -231,7 +236,7 @@ class EmojiReactionViewModel {
         log("   🧭 (OpenAI) Detected tone: \(tone)")
         log("   🎯 (OpenAI) Target finalists: \(fastEmojiTargetCount)")
 
-        for attempt in 0..<3 {
+        for attempt in 0 ..< 3 {
             let suggestions = try await requestOpenAISuggestions(
                 text: text,
                 context: context,
@@ -244,7 +249,9 @@ class EmojiReactionViewModel {
                 tone: tone
             )
 
-            log("   📊 (OpenAI) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
+            log(
+                "   📊 (OpenAI) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions"
+            )
 
             if !resolved.isEmpty {
                 bestResolved = resolved
@@ -255,7 +262,7 @@ class EmojiReactionViewModel {
                 let finalists = resolved.count > fastEmojiTargetCount
                     ? Array(resolved.prefix(fastEmojiTargetCount))
                     : resolved
-                log("   🎉 (OpenAI) Finalists selected: \(finalists.map { $0.character }.joined(separator: ", "))")
+                log("   🎉 (OpenAI) Finalists selected: \(finalists.map(\.character).joined(separator: ", "))")
                 return finalists
             }
         }
@@ -267,7 +274,7 @@ class EmojiReactionViewModel {
         }
 
         let finalists = Array(bestResolved.prefix(fastEmojiTargetCount))
-        log("   🎉 (OpenAI) Finalists selected after retries: \(finalists.map { $0.character }.joined(separator: ", "))")
+        log("   🎉 (OpenAI) Finalists selected after retries: \(finalists.map(\.character).joined(separator: ", "))")
         return finalists
     }
 
@@ -304,7 +311,11 @@ class EmojiReactionViewModel {
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ (OpenAI) Responded in %.2fs", elapsed))
             guard let data = content.data(using: String.Encoding.utf8) else {
-                throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid OpenAI content encoding"])
+                throw NSError(
+                    domain: "EmojiReactionViewModel",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid OpenAI content encoding"]
+                )
             }
 
             let decoded = try JSONDecoder().decode(OpenAIEmojiReactionResponse.self, from: data)
@@ -328,7 +339,7 @@ class EmojiReactionViewModel {
         log("   🧭 (Claude) Detected tone: \(tone)")
         log("   🎯 (Claude) Target finalists: \(fastEmojiTargetCount)")
 
-        for attempt in 0..<3 {
+        for attempt in 0 ..< 3 {
             let suggestions = try await requestClaudeSuggestions(
                 text: text,
                 context: context,
@@ -341,7 +352,9 @@ class EmojiReactionViewModel {
                 tone: tone
             )
 
-            log("   📊 (Claude) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
+            log(
+                "   📊 (Claude) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions"
+            )
 
             if !resolved.isEmpty {
                 bestResolved = resolved
@@ -352,7 +365,7 @@ class EmojiReactionViewModel {
                 let finalists = resolved.count > fastEmojiTargetCount
                     ? Array(resolved.prefix(fastEmojiTargetCount))
                     : resolved
-                log("   🎉 (Claude) Finalists selected: \(finalists.map { $0.character }.joined(separator: ", "))")
+                log("   🎉 (Claude) Finalists selected: \(finalists.map(\.character).joined(separator: ", "))")
                 return finalists
             }
         }
@@ -364,7 +377,7 @@ class EmojiReactionViewModel {
         }
 
         let finalists = Array(bestResolved.prefix(fastEmojiTargetCount))
-        log("   🎉 (Claude) Finalists selected after retries: \(finalists.map { $0.character }.joined(separator: ", "))")
+        log("   🎉 (Claude) Finalists selected after retries: \(finalists.map(\.character).joined(separator: ", "))")
         return finalists
     }
 
@@ -398,12 +411,16 @@ class EmojiReactionViewModel {
 
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ (Claude) Responded in %.2fs", elapsed))
-            
+
             // Extract JSON from the response (Claude might add extra text)
             let cleanedContent = extractJSON(from: content)
-            
+
             guard let data = cleanedContent.data(using: String.Encoding.utf8) else {
-                throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Claude content encoding"])
+                throw NSError(
+                    domain: "EmojiReactionViewModel",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid Claude content encoding"]
+                )
             }
 
             let decoded = try JSONDecoder().decode(ClaudeEmojiReactionResponse.self, from: data)
@@ -420,20 +437,25 @@ class EmojiReactionViewModel {
     }
 
     // MARK: - Claude HTTP Helper
+
     private func sendClaudeCompletion(
         systemPrompt: String,
         userPrompt: String
     ) async throws -> String {
         guard let apiKey = ProcessInfo.processInfo.environment["CLAUDE_API_KEY"], !apiKey.isEmpty else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -2, userInfo: [NSLocalizedDescriptionKey: "CLAUDE_API_KEY environment variable not set"])
+            throw NSError(
+                domain: "EmojiReactionViewModel",
+                code: -2,
+                userInfo: [NSLocalizedDescriptionKey: "CLAUDE_API_KEY environment variable not set"]
+            )
         }
 
         let url = URL(string: "https://api.anthropic.com/v1/messages")!
-        
+
         // Add JSON formatting instruction to the user prompt
         let jsonFormattedPrompt = """
         \(userPrompt)
-        
+
         IMPORTANT: Return ONLY valid JSON with no additional text, explanation, or commentary before or after. The response must be exactly this structure with nothing else:
         {
           "suggestions": [
@@ -445,10 +467,10 @@ class EmojiReactionViewModel {
             {"character": "emoji6"}
           ]
         }
-        
+
         Do not include markdown code blocks, backticks, or any other formatting. Just the raw JSON object.
         """
-        
+
         let payload: [String: Any] = [
             "model": "claude-3-5-haiku-20241022",
             "max_tokens": 1024,
@@ -467,71 +489,83 @@ class EmojiReactionViewModel {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response from Claude"])
+            throw NSError(
+                domain: "EmojiReactionViewModel",
+                code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid response from Claude"]
+            )
         }
 
         guard httpResponse.statusCode == 200 else {
             let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
-            throw NSError(domain: "EmojiReactionViewModel", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Claude HTTP \(httpResponse.statusCode): \(body)"])
+            throw NSError(
+                domain: "EmojiReactionViewModel",
+                code: httpResponse.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: "Claude HTTP \(httpResponse.statusCode): \(body)"]
+            )
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = json["content"] as? [[String: Any]],
               let firstContent = content.first,
-              let text = firstContent["text"] as? String else {
-            throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Claude content"])
+              let text = firstContent["text"] as? String
+        else {
+            throw NSError(
+                domain: "EmojiReactionViewModel",
+                code: -4,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to parse Claude content"]
+            )
         }
 
         return text
     }
 
     private func fallbackFinalists(for tone: FastFallbackTone) -> [Emoji] {
-        let characters: [String]
-        switch tone {
+        let characters: [String] = switch tone {
         case .grief:
-            characters = ["🤍", "🙏", "🕯️", "💐", "😟"]
+            ["🤍", "🙏", "🕯️", "💐", "😟"]
         case .celebration:
-            characters = ["🎉", "🥳", "🎊", "🎈", "👏", "🎁"]
+            ["🎉", "🥳", "🎊", "🎈", "👏", "🎁"]
         case .question:
-            characters = ["👍", "👎", "🤔", "❓", "💭", "💡"]
+            ["👍", "👎", "🤔", "❓", "💭", "💡"]
         case .sadness:
-            characters = ["😢", "🤗", "💙", "🙏", "💌", "🫂"]
+            ["😢", "🤗", "💙", "🙏", "💌", "🫂"]
         case .anger:
-            characters = ["😡", "😤", "🤬", "💢", "😠", "🙄"]
+            ["😡", "😤", "🤬", "💢", "😠", "🙄"]
         case .love:
-            characters = ["❤️", "🥰", "😘", "😍", "💞", "💘"]
+            ["❤️", "🥰", "😘", "😍", "💞", "💘"]
         case .surprise:
-            characters = ["😮", "🤯", "😲", "😳", "❗", "👀"]
+            ["😮", "🤯", "😲", "😳", "❗", "👀"]
         case .worried:
-            characters = ["😟", "😰", "😥", "😬", "🙏", "🤞"]
+            ["😟", "😰", "😥", "😬", "🙏", "🤞"]
         case .playful:
-            characters = ["😜", "😉", "😆", "🤪", "😂", "🎉"]
+            ["😜", "😉", "😆", "🤪", "😂", "🎉"]
         case .happy:
-            characters = ["😊", "😄", "🥰", "🌟", "👍", "😁"]
+            ["😊", "😄", "🥰", "🌟", "👍", "😁"]
         case .sick:
-            characters = ["🤒", "🤢", "🤧", "😷", "🤕", "🫶"]
+            ["🤒", "🤢", "🤧", "😷", "🤕", "🫶"]
         case .tired:
-            characters = ["😴", "🥱", "😪", "💤", "☕", "😌"]
+            ["😴", "🥱", "😪", "💤", "☕", "😌"]
         case .sexy:
-            characters = ["😏", "🔥", "😉", "😘", "💋", "😍"]
+            ["😏", "🔥", "😉", "😘", "💋", "😍"]
         case .acknowledgement:
-            characters = ["👍", "👎", "✅", "👌", "🤝", "🙏"]
+            ["👍", "👎", "✅", "👌", "🤝", "🙏"]
         case .neutral:
-            characters = ["😊", "👍", "🤝", "🌟", "💡", "🎯"]
+            ["😊", "👍", "🤝", "🌟", "💡", "🎯"]
         }
 
         let catalog = EmojiAIService.getAllEmojis()
         return characters.map { character in
             if let emoji = catalog.first(where: { $0.character == character }) {
-                return emoji
+                emoji
             } else {
-                return makeFallbackEmoji(character: character, name: "")
+                makeFallbackEmoji(character: character, name: "")
             }
         }
     }
-    
+
     let systemPrompt = EmojiReactionPrompt.system
-    
+
     private func requestFastSuggestions(
         text: String,
         context: String?,
@@ -539,7 +573,7 @@ class EmojiReactionViewModel {
         attempt: Int,
         model: SystemLanguageModel
     ) async throws -> [FastEmojiSuggestion] {
-        let temperature: Double = 0.4
+        let temperature = 0.4
         let config = requestConfiguration(for: attempt)
         let toneHint = toneHint(for: tone)
         let promptText = fastUserPrompt(
@@ -550,21 +584,23 @@ class EmojiReactionViewModel {
             attempt: attempt,
             variant: config.variant
         )
-        
+
         logPromptMetrics("System prompt", text: systemPrompt)
         logPromptMetrics("User prompt", text: promptText)
         log("   🎚️ Temperature: \(temperature)")
         log("   📦 includeSchemaInPrompt: \(config.includeSchemaInPrompt)")
-        
+
         let session = LanguageModelSession(
             model: model,
             instructions: Instructions(systemPrompt)
         )
-        
+
         let options = GenerationOptions(temperature: temperature)
         let start = Date()
         do {
-            log("   🚀 Calling fast model (attempt \(attempt + 1)) with includeSchemaInPrompt=\(config.includeSchemaInPrompt)")
+            log(
+                "   🚀 Calling fast model (attempt \(attempt + 1)) with includeSchemaInPrompt=\(config.includeSchemaInPrompt)"
+            )
             let response = try await session.respond(
                 to: Prompt(promptText),
                 generating: FastEmojiReactionResponse.self,
@@ -585,7 +621,9 @@ class EmojiReactionViewModel {
                     return []
                 }
 
-                log("   ⚠️ Received exceededContextWindowSize on attempt \(attempt + 1); retrying with compact prompt and includeSchemaInPrompt=false")
+                log(
+                    "   ⚠️ Received exceededContextWindowSize on attempt \(attempt + 1); retrying with compact prompt and includeSchemaInPrompt=false"
+                )
                 let minimalPrompt = fastUserPrompt(
                     message: text,
                     context: context,
@@ -623,7 +661,7 @@ class EmojiReactionViewModel {
             throw error
         }
     }
-    
+
     private enum FastPromptVariant {
         case standard
         case minimal
@@ -649,23 +687,21 @@ class EmojiReactionViewModel {
         attempt: Int,
         variant: FastPromptVariant
     ) -> String {
-        var prompt: String
-        
-        switch variant {
+        var prompt = switch variant {
         case .standard:
-            prompt = """
+            """
             last_message: "\(message)"
             tone_hint: \(toneHint)
             Return six emoji suggestions as emoji glyphs only (character). Avoid duplicates. Base the reaction primarily on last_message, but consider conversation_context if provided.
             """
         case .minimal:
-            prompt = """
+            """
             last_message: "\(message)"
             tone_hint: \(toneHint)
             Provide six emoji suggestions (emoji glyphs only). Use only emoji glyphs; no text, codes, or repeats. Use last_message and consider conversation_context if present.
             """
         }
-        
+
         if let context, !context.isEmpty {
             let escaped = context
                 .replacingOccurrences(of: "\\", with: "\\\\")
@@ -675,21 +711,21 @@ class EmojiReactionViewModel {
 
         if tone == .question {
             prompt += """
-            
+
             When the message is a question and the tone allows, include both 👍 and 👎 among the six reactions so the receiver can signal agreement or disagreement. Skip them only if they would be very inappropriate for the context.
             """
         } else if tone == .acknowledgement {
             prompt += """
-            
+
             When the message shares a plan or status update, include 👍 to acknowledge it. Offer 👎 only if expressing gentle disagreement would not be insensitive.
             """
         } else if encouragesThumbsUp(for: tone) {
             prompt += """
-            
+
             Include 👍 when it feels like a warm acknowledgement and won't come across as tone-deaf.
             """
         }
-        
+
         switch attempt {
         case 1:
             prompt += "\nReminder: return six unique emoji glyphs only (e.g. 😄 🤰 👶 👍 👎 ❤️)."
@@ -698,7 +734,7 @@ class EmojiReactionViewModel {
         default:
             break
         }
-        
+
         return prompt
     }
 
@@ -722,7 +758,7 @@ class EmojiReactionViewModel {
         var seenCharacters: Set<String> = []
         var results: [Emoji] = []
         log("   🔍 Evaluating \(suggestions.count) suggestions against tone \(tone)")
-        
+
         for (index, suggestion) in suggestions.enumerated() {
             log("     ➡️ Suggestion \(index + 1): '\(suggestion.character)'")
             guard let emoji = normalizedEmoji(
@@ -734,25 +770,25 @@ class EmojiReactionViewModel {
             ) else {
                 continue
             }
-            
+
             results.append(emoji)
-            
+
             if results.count == fastEmojiTargetCount {
                 break
             }
         }
-        
-        log("   🏁 Accepted \(results.count) emoji: \(results.map { $0.character }.joined(separator: ", "))")
+
+        log("   🏁 Accepted \(results.count) emoji: \(results.map(\.character).joined(separator: ", "))")
         return results
     }
-    
+
     private func makeFallbackEmoji(character: String, name: String) -> Emoji {
         let scalarId = character.unicodeScalars
             .map { String(format: "%04X", $0.value) }
             .joined(separator: "_")
         let fallbackId = "fast_\(scalarId)"
         let fallbackName = name.isEmpty ? "" : name
-        
+
         return Emoji(
             id: fallbackId,
             character: character,
@@ -761,7 +797,7 @@ class EmojiReactionViewModel {
             category: .frequentlyUsed
         )
     }
-    
+
     private func normalizedEmoji(
         from suggestion: FastEmojiSuggestion,
         using allEmojis: [Emoji],
@@ -770,7 +806,7 @@ class EmojiReactionViewModel {
         tone: FastFallbackTone
     ) -> Emoji? {
         let trimmedCharacter = suggestion.character.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         // Enforce a single emoji character only; reject anything else
         guard isSingleEmoji(trimmedCharacter) else {
             log("     ❌ Rejecting suggestion \(index + 1) '\(suggestion.character)' – not a single emoji character")
@@ -781,7 +817,7 @@ class EmojiReactionViewModel {
             log("     ❌ Rejecting suggestion \(index + 1) '\(trimmedCharacter)' – blocked for tone \(tone)")
             return nil
         }
-        
+
         if let existing = allEmojis.first(where: { $0.character == trimmedCharacter }) {
             guard !seenCharacters.contains(existing.character) else {
                 log("     ⚠️ Skipping suggestion \(index + 1) '\(trimmedCharacter)' – duplicate of accepted emoji")
@@ -808,12 +844,12 @@ class EmojiReactionViewModel {
             return fallback
         }
     }
-    
+
     private func trimmedInput(for text: String) -> String {
         if text.count <= maxInputLength {
             return text
         }
-        
+
         let trimmed = text.prefix(maxInputLength)
         return String(trimmed)
     }
@@ -839,34 +875,34 @@ class EmojiReactionViewModel {
         if s.count <= maxChars { return s }
         return String(s.suffix(maxChars))
     }
-    
+
     private func containsRenderableEmoji(_ string: String) -> Bool {
         string.unicodeScalars.contains { scalar in
             scalar.properties.isEmojiPresentation || scalar.properties.isEmoji
         }
     }
-    
+
     // Removed name/keyword matching: we only accept explicit emoji characters
-    
+
     // Removed tokenization helpers: not needed when enforcing emoji-only
-    
+
     private func encouragesThumbsUp(for tone: FastFallbackTone) -> Bool {
         switch tone {
         case .question, .acknowledgement:
-            return false // handled by dedicated instructions
+            false // handled by dedicated instructions
         case .grief, .sadness, .anger, .sick, .tired, .worried, .sexy:
-            return false
+            false
         default:
-            return true
+            true
         }
     }
-    
+
     private func shouldRejectSuggestion(
         character: String?,
         tone: FastFallbackTone
     ) -> Bool {
         guard let character else { return false }
-        
+
         switch tone {
         case .grief:
             return [
@@ -894,88 +930,89 @@ class EmojiReactionViewModel {
         // One extended grapheme cluster and it is renderable as emoji
         return string.count == 1 && containsRenderableEmoji(string)
     }
-    
+
     private func extractJSON(from text: String) -> String {
         // Try to find JSON object in the text
         guard let startIndex = text.firstIndex(of: "{"),
-              let endIndex = text.lastIndex(of: "}") else {
+              let endIndex = text.lastIndex(of: "}")
+        else {
             return text
         }
-        
-        let jsonCandidate = String(text[startIndex...endIndex])
-        
+
+        let jsonCandidate = String(text[startIndex ... endIndex])
+
         // Validate it's actually JSON
         if let data = jsonCandidate.data(using: .utf8),
            (try? JSONSerialization.jsonObject(with: data)) != nil {
             return jsonCandidate
         }
-        
+
         return text
     }
-    
+
     private func detectTone(for text: String) -> FastFallbackTone {
         let lowercased = text.lowercased()
         let trimmed = lowercased.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         func containsAny(_ keywords: [String]) -> Bool {
             keywords.contains { lowercased.contains($0) }
         }
-        
+
         let griefKeywords: [String] = [
             "died", "die", "loss", "lost", "passed", "passing", "funeral",
             "condolence", "grief", "heartbroken", "mourning", "sorry for your loss"
         ]
-        
+
         if containsAny(griefKeywords) {
             return .grief
         }
-        
+
         let angerKeywords: [String] = [
             "angry", "mad", "furious", "pissed", "rage", "annoyed", "irritated",
             "frustrated", "livid", "fuming"
         ]
-        
+
         if containsAny(angerKeywords) {
             return .anger
         }
-        
+
         let sadnessKeywords: [String] = [
             "sad", "down", "depressed", "blue", "crying", "cried",
             "lonely", "upset", "miserable", "tearful"
         ]
-        
+
         if containsAny(sadnessKeywords) {
             return .sadness
         }
-        
+
         let worriedKeywords: [String] = [
             "worried", "nervous", "anxious", "concerned", "scared", "afraid",
             "uneasy", "stressed", "panicking", "panicked", "anxiety"
         ]
-        
+
         if containsAny(worriedKeywords) {
             return .worried
         }
-        
+
         let sickKeywords: [String] = [
             "sick", "ill", "illness", "flu", "cold", "fever", "covid",
             "virus", "nauseous", "nausea", "vomit", "vomiting", "doctor",
             "clinic", "medicine"
         ]
-        
+
         if containsAny(sickKeywords) {
             return .sick
         }
-        
+
         let tiredKeywords: [String] = [
             "tired", "exhausted", "sleepy", "worn out", "drained", "beat",
             "fatigued", "burned out", "burnt out"
         ]
-        
+
         if containsAny(tiredKeywords) {
             return .tired
         }
-        
+
         let questionStarts: [String] = [
             "how", "what", "why", "where", "when", "should", "could",
             "would", "is", "are", "did", "do", "can", "will"
@@ -989,7 +1026,7 @@ class EmojiReactionViewModel {
             || questionStarts.contains(where: { trimmed.hasPrefix($0 + " ") }) {
             return .question
         }
-        
+
         let acknowledgementPhrases: [String] = [
             "be right back", "brb", "bbl", "on my way", "omw", "heading out",
             "heading home", "headed home", "headed back", "going home", "go home",
@@ -1007,105 +1044,105 @@ class EmojiReactionViewModel {
             "i'll be back", "i will be back", "i'll be home", "i will be home",
             "i'll be there", "i will be there", "i'll head", "i will head"
         ]
-        
+
         if containsAny(acknowledgementPhrases)
             || acknowledgementPrefixes.contains(where: { lowercased.contains($0) }) {
             return .acknowledgement
         }
-        
+
         let celebrationKeywords: [String] = [
             "congrats", "congratulations", "awesome", "great", "amazing",
             "promotion", "party", "celebrate", "excited", "stoked", "yay",
             "won", "win", "victory", "birthday", "anniversary"
         ]
-        
+
         if containsAny(celebrationKeywords) {
             return .celebration
         }
-        
+
         let happyKeywords: [String] = [
             "happy", "glad", "joyful", "smiling", "smile", "delighted",
             "pleased", "content", "cheerful"
         ]
-        
+
         if containsAny(happyKeywords) {
             return .happy
         }
-        
+
         let loveKeywords: [String] = [
             "love", "loving", "adore", "beloved", "xoxo", "honey", "sweetheart",
             "crush", "babe", "baby"
         ]
-        
+
         if containsAny(loveKeywords) {
             return .love
         }
-        
+
         let sexyKeywords: [String] = [
             "sexy", "hot", "steamy", "spicy", "thirsty", "thirst trap",
             "nsfw", "horny", "kinky", "sultry"
         ]
-        
+
         if containsAny(sexyKeywords) {
             return .sexy
         }
-        
+
         let surpriseKeywords: [String] = [
             "omg", "wow", "whoa", "surprised", "shocked", "no way",
             "can't believe", "cant believe", "wtf", "holy"
         ]
-        
+
         if containsAny(surpriseKeywords) {
             return .surprise
         }
-        
+
         let playfulKeywords: [String] = [
             "lol", "haha", "hehe", "playful", "kidding", "joking", "jk",
             "teasing", "prank", "funny", "lmao", "lmfao"
         ]
-        
+
         if containsAny(playfulKeywords) {
             return .playful
         }
-        
+
         return .neutral
     }
-    
+
     private func toneHint(for tone: FastFallbackTone) -> String {
         switch tone {
         case .grief:
-            return "grief, condolences, comfort, emotional support"
+            "grief, condolences, comfort, emotional support"
         case .celebration:
-            return "celebration, excitement, good news, congratulations"
+            "celebration, excitement, good news, congratulations"
         case .question:
-            return "questions, uncertainty, seeking guidance or help; include thumbs up/down if appropriate"
+            "questions, uncertainty, seeking guidance or help; include thumbs up/down if appropriate"
         case .sadness:
-            return "sadness or feeling low; offer gentle empathy and support"
+            "sadness or feeling low; offer gentle empathy and support"
         case .anger:
-            return "anger or frustration; acknowledge the feeling without escalating"
+            "anger or frustration; acknowledge the feeling without escalating"
         case .love:
-            return "love, affection, romantic energy; respond with warmth"
+            "love, affection, romantic energy; respond with warmth"
         case .surprise:
-            return "surprise or amazement; reflect astonishment or curiosity"
+            "surprise or amazement; reflect astonishment or curiosity"
         case .worried:
-            return "worry, anxiety, nervous energy; favor calming reassurance"
+            "worry, anxiety, nervous energy; favor calming reassurance"
         case .playful:
-            return "playfulness, teasing, light jokes; keep it fun"
+            "playfulness, teasing, light jokes; keep it fun"
         case .happy:
-            return "general happiness or good mood; celebrate with upbeat reactions"
+            "general happiness or good mood; celebrate with upbeat reactions"
         case .sick:
-            return "illness or not feeling well; show care and sympathy"
+            "illness or not feeling well; show care and sympathy"
         case .tired:
-            return "tiredness or exhaustion; respond with rest encouragement"
+            "tiredness or exhaustion; respond with rest encouragement"
         case .sexy:
-            return "flirty or intimate tone; keep reactions tasteful and playful"
+            "flirty or intimate tone; keep reactions tasteful and playful"
         case .acknowledgement:
-            return "status update or plan; include a thumbs up acknowledgement when it fits"
+            "status update or plan; include a thumbs up acknowledgement when it fits"
         case .neutral:
-            return "neutral or mixed tone; pick broadly useful reactions"
+            "neutral or mixed tone; pick broadly useful reactions"
         }
     }
-    
+
     private enum FastFallbackTone {
         case grief
         case celebration

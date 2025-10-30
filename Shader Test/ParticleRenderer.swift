@@ -47,33 +47,34 @@ struct ParticleUniforms {
 class ParticleRenderer: NSObject, MTKViewDelegate {
     let device: MTLDevice
     let commandQueue: MTLCommandQueue
-    
+
     private var particleStartPipeline: MTLComputePipelineState?
     private var particleProcessPipeline: MTLComputePipelineState?
     private var renderPipelineState: MTLRenderPipelineState?
-    
+
     private var particleBuffer: MTLBuffer?
     private var vertexBuffer: MTLBuffer?
     private var spriteTexture: MTLTexture?
-    
+
     private let particleCount = 10000
     var uniforms: ParticleUniforms
-    
+
     var currentTime: Float = 0.0
     var isAnimating: Bool = false
     var lastUpdateTime: Date?
-    
+
     init?(metalView: MTKView) {
         guard let device = MTLCreateSystemDefaultDevice(),
-              let commandQueue = device.makeCommandQueue() else {
+              let commandQueue = device.makeCommandQueue()
+        else {
             return nil
         }
-        
+
         self.device = device
         self.commandQueue = commandQueue
-        
+
         // Initialize uniforms with default values
-        self.uniforms = ParticleUniforms(
+        uniforms = ParticleUniforms(
             spread: 45.0,
             inherit_emitter_velocity_ratio: 0.0,
             initial_linear_velocity_min: 50.0,
@@ -107,60 +108,60 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
             restart_rot_scale: true,
             interpolate_to_end: 0.0
         )
-        
+
         super.init()
-        
+
         metalView.device = device
         metalView.delegate = self
         metalView.clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
-        
+
         setupMetal()
         createBuffers()
         createSpriteTexture()
     }
-    
+
     private func setupMetal() {
         guard let library = device.makeDefaultLibrary() else {
             print("Failed to create Metal library")
             return
         }
-        
+
         // Create compute pipelines
         do {
             if let startFunction = library.makeFunction(name: "particle_start") {
                 particleStartPipeline = try device.makeComputePipelineState(function: startFunction)
             }
-            
+
             if let processFunction = library.makeFunction(name: "particle_process") {
                 particleProcessPipeline = try device.makeComputePipelineState(function: processFunction)
             }
         } catch {
             print("Failed to create compute pipelines: \(error)")
         }
-        
+
         // Create render pipeline with vertex descriptor
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.vertexFunction = library.makeFunction(name: "particle_vertex")
         pipelineDescriptor.fragmentFunction = library.makeFunction(name: "particle_fragment")
         pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        
+
         // Set up vertex descriptor for quad vertices
         let vertexDescriptor = MTLVertexDescriptor()
         // Position attribute (float2) at index 0
         vertexDescriptor.attributes[0].format = .float2
         vertexDescriptor.attributes[0].offset = 0
-        vertexDescriptor.attributes[0].bufferIndex = 2  // Buffer index for vertex data
+        vertexDescriptor.attributes[0].bufferIndex = 2 // Buffer index for vertex data
         // TexCoord attribute (float2) at index 1
         vertexDescriptor.attributes[1].format = .float2
         vertexDescriptor.attributes[1].offset = MemoryLayout<Float>.stride * 2
         vertexDescriptor.attributes[1].bufferIndex = 2
         // Layout for buffer 2 (quad vertices)
-        vertexDescriptor.layouts[2].stride = MemoryLayout<Float>.stride * 4  // 4 floats per vertex
+        vertexDescriptor.layouts[2].stride = MemoryLayout<Float>.stride * 4 // 4 floats per vertex
         vertexDescriptor.layouts[2].stepRate = 1
         vertexDescriptor.layouts[2].stepFunction = .perVertex
-        
+
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
-        
+
         // Enable blending for particle rendering
         pipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
         pipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
@@ -169,37 +170,41 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
         pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
         pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
         pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
-        
+
         do {
             renderPipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         } catch {
             print("Failed to create render pipeline: \(error)")
         }
     }
-    
+
     private func createBuffers() {
         // Create particle buffer (large enough for all particle data)
         // Each particle needs space for position, velocity, color, custom, transform, active, lifetime, seed
         let particleSize = MemoryLayout<SIMD4<Float>>.stride * 6 + // position, velocity, color, custom, transform (4x4)
-                          MemoryLayout<Bool>.stride +
-                          MemoryLayout<Float>.stride +
-                          MemoryLayout<UInt32>.stride
-        
+            MemoryLayout<Bool>.stride +
+            MemoryLayout<Float>.stride +
+            MemoryLayout<UInt32>.stride
+
         particleBuffer = device.makeBuffer(length: particleSize * particleCount, options: .storageModePrivate)
-        
+
         // Create vertex buffer for a quad
         let vertices: [Float] = [
-            -1.0, -1.0, 0.0, 0.0,  // position, texCoord
-             1.0, -1.0, 1.0, 0.0,
-            -1.0,  1.0, 0.0, 1.0,
-             1.0, -1.0, 1.0, 0.0,
-             1.0,  1.0, 1.0, 1.0,
-            -1.0,  1.0, 0.0, 1.0
+            -1.0, -1.0, 0.0, 0.0, // position, texCoord
+            1.0, -1.0, 1.0, 0.0,
+            -1.0, 1.0, 0.0, 1.0,
+            1.0, -1.0, 1.0, 0.0,
+            1.0, 1.0, 1.0, 1.0,
+            -1.0, 1.0, 0.0, 1.0,
         ]
-        
-        vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.stride, options: [])
+
+        vertexBuffer = device.makeBuffer(
+            bytes: vertices,
+            length: vertices.count * MemoryLayout<Float>.stride,
+            options: []
+        )
     }
-    
+
     private func createSpriteTexture() {
         // Create a texture with a circle gradient for particle sprites
         let size = 64
@@ -210,23 +215,23 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
             mipmapped: false
         )
         textureDescriptor.usage = [.shaderRead, .shaderWrite]
-        
+
         guard let texture = device.makeTexture(descriptor: textureDescriptor) else {
             print("Failed to create sprite texture")
             return
         }
-        
+
         // Generate circle data
         var pixelData = [UInt8](repeating: 0, count: size * size * 4)
         let center = Float(size) / 2.0
         let radius = Float(size) / 2.0
-        
-        for y in 0..<size {
-            for x in 0..<size {
+
+        for y in 0 ..< size {
+            for x in 0 ..< size {
                 let dx = Float(x) - center
                 let dy = Float(y) - center
                 let distance = sqrt(dx * dx + dy * dy)
-                
+
                 let alpha: UInt8
                 if distance <= radius {
                     // Smooth edge with antialiasing
@@ -237,105 +242,109 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
                 } else {
                     alpha = 0
                 }
-                
+
                 let index = (y * size + x) * 4
-                pixelData[index] = 255     // R
+                pixelData[index] = 255 // R
                 pixelData[index + 1] = 255 // G
                 pixelData[index + 2] = 255 // B
                 pixelData[index + 3] = alpha // A
             }
         }
-        
+
         let region = MTLRegionMake2D(0, 0, size, size)
         texture.replace(region: region, mipmapLevel: 0, withBytes: pixelData, bytesPerRow: size * 4)
-        
+
         spriteTexture = texture
     }
-    
+
     func initializeParticles() {
         guard let commandBuffer = commandQueue.makeCommandBuffer(),
               let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
               let pipeline = particleStartPipeline,
-              let particleBuffer = particleBuffer,
-              let spriteTexture = spriteTexture else {
+              let particleBuffer,
+              let spriteTexture
+        else {
             return
         }
-        
-        var uniforms = self.uniforms
-        uniforms.random_seed = UInt32.random(in: 0...UInt32.max)
-        
+
+        var uniforms = uniforms
+        uniforms.random_seed = UInt32.random(in: 0 ... UInt32.max)
+
         computeEncoder.setComputePipelineState(pipeline)
         computeEncoder.setBuffer(particleBuffer, offset: 0, index: 0)
         computeEncoder.setBytes(&uniforms, length: MemoryLayout<ParticleUniforms>.stride, index: 1)
         computeEncoder.setTexture(spriteTexture, index: 0)
-        
+
         let threadgroupSize = MTLSize(width: 256, height: 1, depth: 1)
         let threadgroups = MTLSize(
             width: (particleCount + threadgroupSize.width - 1) / threadgroupSize.width,
             height: 1,
             depth: 1
         )
-        
+
         computeEncoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: threadgroupSize)
         computeEncoder.endEncoding()
-        
+
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
     }
-    
+
     func updateParticles() {
         guard let commandBuffer = commandQueue.makeCommandBuffer(),
               let computeEncoder = commandBuffer.makeComputeCommandEncoder(),
               let pipeline = particleProcessPipeline,
-              let particleBuffer = particleBuffer else {
+              let particleBuffer
+        else {
             return
         }
-        
-        var uniforms = self.uniforms
-        
+
+        var uniforms = uniforms
+
         computeEncoder.setComputePipelineState(pipeline)
         computeEncoder.setBuffer(particleBuffer, offset: 0, index: 0)
         computeEncoder.setBytes(&uniforms, length: MemoryLayout<ParticleUniforms>.stride, index: 1)
-        
+
         let threadgroupSize = MTLSize(width: 256, height: 1, depth: 1)
         let threadgroups = MTLSize(
             width: (particleCount + threadgroupSize.width - 1) / threadgroupSize.width,
             height: 1,
             depth: 1
         )
-        
+
         computeEncoder.dispatchThreadgroups(threadgroups, threadsPerThreadgroup: threadgroupSize)
         computeEncoder.endEncoding()
-        
+
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
     }
-    
+
     // MARK: - MTKViewDelegate
-    
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         // Handle resize if needed
     }
-    
+
     func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable,
               let renderPassDescriptor = view.currentRenderPassDescriptor,
-              let commandBuffer = commandQueue.makeCommandBuffer() else {
+              let commandBuffer = commandQueue.makeCommandBuffer()
+        else {
             return
         }
-        
+
         guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
         }
-        
+
         guard let renderPipeline = renderPipelineState,
-              let particleBuffer = particleBuffer,
-              let vertexBuffer = vertexBuffer,
-              let spriteTexture = spriteTexture else {
+              let particleBuffer,
+              let vertexBuffer,
+              let spriteTexture
+        else {
             renderEncoder.endEncoding()
             return
         }
-        
+
         // Update time if animating
         if isAnimating {
             let now = Date()
@@ -347,7 +356,7 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
             }
             lastUpdateTime = now
         }
-        
+
         // Create view projection matrix
         let viewSize = view.drawableSize
         let aspect = Float(viewSize.width / viewSize.height)
@@ -355,25 +364,24 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
         var viewProjection = matrix_identity_float4x4
         viewProjection.columns.0.x = scale / aspect
         viewProjection.columns.1.y = scale
-        
+
         renderEncoder.setRenderPipelineState(renderPipeline)
         renderEncoder.setVertexBuffer(particleBuffer, offset: 0, index: 0)
         renderEncoder.setVertexBytes(&viewProjection, length: MemoryLayout<simd_float4x4>.stride, index: 1)
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 2)
         renderEncoder.setFragmentTexture(spriteTexture, index: 0)
-        
+
         // Draw particles as instanced quads
         renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6, instanceCount: particleCount)
-        
+
         renderEncoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
-    
+
     func reset() {
         currentTime = 0.0
         lastUpdateTime = nil
         initializeParticles()
     }
 }
-

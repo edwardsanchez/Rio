@@ -13,7 +13,7 @@ struct ImageDetailView: View {
     @Binding var isPresented: Bool
 
     @State private var opacity: CGFloat = 1
-    @State private var safeAreaInsets: EdgeInsets = EdgeInsets()
+    @State private var safeAreaInsets: EdgeInsets = .init()
 
     // Zoom and pan state
     @State private var currentZoom: CGFloat = 1.0

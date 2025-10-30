@@ -5,15 +5,15 @@
 //  Created by Edward Sanchez on 10/18/25.
 //
 
-import SwiftUI
-import MapKit
 import AVKit
+import MapKit
+import SwiftUI
 
 /// A view that renders different types of message content based on the ContentType enum
 struct MessageContentView: View {
     let content: ContentType
     let textColor: Color
-    var messageID: UUID?  // Optional message ID for creating unique image identifiers
+    var messageID: UUID? // Optional message ID for creating unique image identifiers
     @Binding var selectedImageData: ImageData?
 
     @State private var contentWidth = CGFloat.zero
@@ -35,37 +35,37 @@ struct MessageContentView: View {
     @ViewBuilder
     private var contentView: some View {
         switch content {
-        case .text(let text):
+        case let .text(text):
             Text(text)
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
 
-        case .color(let rgb):
+        case let .color(rgb):
             colorView(rgb)
 
-        case .image(let image):
+        case let .image(image):
             imageView(image)
                 .onTapGesture {
                     selectedImageData = ImageData(image: image)
                 }
 
-        case .labeledImage(let labeledImage):
+        case let .labeledImage(labeledImage):
             labeledImageView(labeledImage)
                 .onTapGesture {
                     selectedImageData = ImageData(image: labeledImage.image, label: labeledImage.label)
                 }
 
-        case .video(let url):
+        case let .video(url):
             VideoPlayer(player: AVPlayer(url: url))
-                .aspectRatio(16/9, contentMode: .fit)
+                .aspectRatio(16 / 9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
 
-        case .audio(let url):
+        case let .audio(url):
             VideoPlayer(player: AVPlayer(url: url))
-                .aspectRatio(16/9, contentMode: .fit)
+                .aspectRatio(16 / 9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: insetCornerRadius))
 
-        case .date(let date, let granularity):
+        case let .date(date, granularity):
             switch granularity {
             case .dateAndTime:
                 Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
@@ -81,7 +81,7 @@ struct MessageContentView: View {
                     .font(.callout.bold())
             }
 
-        case .dateRange(let range, let granularity):
+        case let .dateRange(range, granularity):
             switch granularity {
             case .dateAndTime:
                 HStack(spacing: 4) {
@@ -118,18 +118,18 @@ struct MessageContentView: View {
                 .foregroundStyle(textColor)
             }
 
-        case .location(let mapItem):
+        case let .location(mapItem):
             locationView(mapItem)
 
-        case .url(let url):
+        case let .url(url):
             URLPreviewCard(url: url, textColor: textColor)
 
-        case .textChoice(let text):
+        case let .textChoice(text):
             Label(text, systemImage: "checkmark.circle.fill")
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
 
-        case .multiChoice(let choices):
+        case let .multiChoice(choices):
             if let first = choices.first {
                 switch first {
                 case .textChoice:
@@ -150,7 +150,10 @@ struct MessageContentView: View {
 
                     HStack(spacing: 0) {
                         LazyVGrid(
-                            columns: Array(repeating: GridItem(.flexible(minimum: minimum, maximum: 120), spacing: 12), count: columns),
+                            columns: Array(
+                                repeating: GridItem(.flexible(minimum: minimum, maximum: 120), spacing: 12),
+                                count: columns
+                            ),
                             alignment: .center,
                             spacing: 12
                         ) {
@@ -163,13 +166,13 @@ struct MessageContentView: View {
                 }
             }
 
-        case .emoji(let emoji):
+        case let .emoji(emoji):
             // Emoji content - larger text
             Text(emoji)
                 .font(.system(size: 60))
                 .padding(.bottom, -30)
 
-        case .code(let code):
+        case let .code(code):
             // Placeholder for code content
             Text(code)
                 .font(.system(.body, design: .monospaced))
@@ -179,26 +182,26 @@ struct MessageContentView: View {
                 .background(Color.primary.opacity(0.15))
                 .cornerRadius(12)
 
-        case .bool(let value):
+        case let .bool(value):
             Label(value ? "YES" : "NO", systemImage: value ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                 .foregroundStyle(textColor)
                 .font(.caption.bold())
 
-        case .rating(let rating):
+        case let .rating(rating):
             HStack(spacing: 2) {
-                ForEach(0..<(rating.rawValue + 1), id: \.self) { _ in
+                ForEach(0 ..< (rating.rawValue + 1), id: \.self) { _ in
                     Image(systemName: "star.fill")
                         .foregroundStyle(.yellow)
                 }
             }
             .font(.title3)
 
-        case .value(let measurement):
+        case let .value(measurement):
             Label(formatMeasurementValue(measurement), systemImage: measurementSymbol(for: measurement.type))
                 .foregroundStyle(textColor)
                 .font(.title3.bold())
 
-        case .valueRange(let range):
+        case let .valueRange(range):
             HStack(spacing: 8) {
                 Image(systemName: measurementSymbol(for: range.lowerBound.type))
                 HStack(spacing: 4) {
@@ -210,12 +213,12 @@ struct MessageContentView: View {
             .font(.caption.bold())
             .foregroundStyle(textColor)
 
-        case .file(let url):
+        case let .file(url):
             Label(url.lastPathComponent, systemImage: "doc.fill")
                 .foregroundStyle(textColor)
                 .font(.caption.bold())
 
-        case .dateFrequency(let frequency):
+        case let .dateFrequency(frequency):
             let dayName = Calendar.current.weekdaySymbols[frequency.dayOfWeek.rawValue]
             let prefix = frequency.interval == 1 ? "Every" : "Every \(frequency.interval)"
             Label("\(prefix) \(dayName)", systemImage: "calendar")
@@ -228,44 +231,44 @@ struct MessageContentView: View {
 
     private func measurementSymbol(for type: ValueType) -> String {
         switch type {
-        case .length: return "ruler.fill"
-        case .percentage: return "percent"
-        case .currency: return "dollarsign.circle.fill"
-        case .mass: return "scalemass.fill"
-        case .volume: return "flask.fill"
-        case .temperature: return "thermometer.medium"
-        case .duration: return "clock.fill"
-        case .speed: return "speedometer"
-        case .area: return "square.fill"
-        case .energy: return "bolt.fill"
-        case .number: return "number"
+        case .length: "ruler.fill"
+        case .percentage: "percent"
+        case .currency: "dollarsign.circle.fill"
+        case .mass: "scalemass.fill"
+        case .volume: "flask.fill"
+        case .temperature: "thermometer.medium"
+        case .duration: "clock.fill"
+        case .speed: "speedometer"
+        case .area: "square.fill"
+        case .energy: "bolt.fill"
+        case .number: "number"
         }
     }
 
     private func formatMeasurementValue(_ measurement: Measurement) -> String {
         switch measurement.type {
-        case .length(let unit):
-            return String(format: "%.2f%@", measurement.value, unit.symbol)
+        case let .length(unit):
+            String(format: "%.2f%@", measurement.value, unit.symbol)
         case .percentage:
-            return String(format: "%.1f%%", measurement.value)
+            String(format: "%.1f%%", measurement.value)
         case .currency:
-            return String(format: "$%.2f", measurement.value)
-        case .mass(let unit):
-            return String(format: "%.2f%@", measurement.value, unit.symbol)
-        case .volume(let unit):
-            return String(format: "%.2f%@", measurement.value, unit.symbol)
-        case .temperature(let unit):
-            return String(format: "%.1f%@", measurement.value, unit.symbol)
-        case .duration(let unit):
-            return String(format: "%.0f%@", measurement.value, unit.symbol)
-        case .speed(let unit):
-            return String(format: "%.1f%@", measurement.value, unit.symbol)
-        case .area(let unit):
-            return String(format: "%.2f%@", measurement.value, unit.symbol)
-        case .energy(let unit):
-            return String(format: "%.2f%@", measurement.value, unit.symbol)
+            String(format: "$%.2f", measurement.value)
+        case let .mass(unit):
+            String(format: "%.2f%@", measurement.value, unit.symbol)
+        case let .volume(unit):
+            String(format: "%.2f%@", measurement.value, unit.symbol)
+        case let .temperature(unit):
+            String(format: "%.1f%@", measurement.value, unit.symbol)
+        case let .duration(unit):
+            String(format: "%.0f%@", measurement.value, unit.symbol)
+        case let .speed(unit):
+            String(format: "%.1f%@", measurement.value, unit.symbol)
+        case let .area(unit):
+            String(format: "%.2f%@", measurement.value, unit.symbol)
+        case let .energy(unit):
+            String(format: "%.2f%@", measurement.value, unit.symbol)
         case .number:
-            return String(format: "%.2f", measurement.value)
+            String(format: "%.2f", measurement.value)
         }
     }
 
@@ -342,21 +345,21 @@ struct MessageContentView: View {
     @ViewBuilder
     private func choiceItemView(_ choice: ChoiceValue, index: Int) -> some View {
         switch choice {
-        case .color(let rgb):
+        case let .color(rgb):
             colorView(rgb, compact: true)
-        case .image(let image):
+        case let .image(image):
             imageView(image, compact: true)
                 .onTapGesture {
                     selectedImageData = ImageData(image: image)
                 }
-        case .labeledImage(let labeledImage):
+        case let .labeledImage(labeledImage):
             labeledImageView(labeledImage, compact: true)
                 .onTapGesture {
                     selectedImageData = ImageData(image: labeledImage.image, label: labeledImage.label)
                 }
-        case .location(let mapItem):
+        case let .location(mapItem):
             locationView(mapItem, compact: true)
-        case .textChoice(let text):
+        case let .textChoice(text):
             Label(text, systemImage: "checkmark.square.fill")
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
@@ -394,9 +397,11 @@ struct MessageContentView: View {
                     Text("Text (Multi-line)").font(.headline)
                     MessageBubbleView(
                         message: Message(
-                            content: .text("This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."),
-                            from: sampleUser,
+                            content: .text(
+                                "This is a longer message that demonstrates text wrapping behavior. It contains multiple lines of text to show how the content view handles longer messages."
                             ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -409,8 +414,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .textChoice("This is a text choice option"),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -427,8 +432,8 @@ struct MessageContentView: View {
                                 .textChoice("Option B"),
                                 .textChoice("Option C")
                             ]),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -449,8 +454,8 @@ struct MessageContentView: View {
                                 .textChoice("Saturday"),
                                 .textChoice("Sunday")
                             ]),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -496,7 +501,10 @@ struct MessageContentView: View {
                         Text("Labeled Image").font(.headline)
                         MessageBubbleView(
                             message: Message(
-                                content: .labeledImage(LabeledImage(label: "A cute cat in the garden", image: Image(.cat))),
+                                content: .labeledImage(LabeledImage(
+                                    label: "A cute cat in the garden",
+                                    image: Image(.cat)
+                                )),
                                 from: sampleUser
                             ),
                             showTail: true,
@@ -565,9 +573,13 @@ struct MessageContentView: View {
                     Text("Video").font(.headline)
                     MessageBubbleView(
                         message: Message(
-                            content: .video(URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")!),
-                            from: sampleUser,
+                            content: .video(
+                                URL(
+                                    string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                                )!
                             ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -579,9 +591,11 @@ struct MessageContentView: View {
                     Text("Audio").font(.headline)
                     MessageBubbleView(
                         message: Message(
-                            content: .audio(URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!),
-                            from: sampleUser,
+                            content: .audio(
+                                URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")!
                             ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -613,8 +627,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .color(RGB(red: 255, green: 100, blue: 50, name: "Coral Orange")),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -628,13 +642,16 @@ struct MessageContentView: View {
                         message: Message(
                             content: .location({
                                 let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
-                                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                let location = CLLocation(
+                                    latitude: coordinate.latitude,
+                                    longitude: coordinate.longitude
+                                )
                                 let mapItem = MKMapItem(location: location, address: nil)
                                 mapItem.name = "Apple Park"
                                 return mapItem
                             }()),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -650,8 +667,8 @@ struct MessageContentView: View {
                                 .color(RGB(red: 255, green: 100, blue: 50, name: "Coral")),
                                 .color(RGB(red: 100, green: 200, blue: 255, name: "Sky Blue"))
                             ]),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -671,8 +688,8 @@ struct MessageContentView: View {
                                 .color(RGB(red: 255, green: 255, blue: 100, name: "Yellow")),
                                 .color(RGB(red: 100, green: 100, blue: 100, name: "Gray"))
                             ]),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -687,21 +704,27 @@ struct MessageContentView: View {
                             content: .multiChoice([
                                 .location({
                                     let coordinate = CLLocationCoordinate2D(latitude: 37.3346, longitude: -122.0090)
-                                    let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                    let location = CLLocation(
+                                        latitude: coordinate.latitude,
+                                        longitude: coordinate.longitude
+                                    )
                                     let mapItem = MKMapItem(location: location, address: nil)
                                     mapItem.name = "Apple Park"
                                     return mapItem
                                 }()),
                                 .location({
                                     let coordinate = CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194)
-                                    let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                                    let location = CLLocation(
+                                        latitude: coordinate.latitude,
+                                        longitude: coordinate.longitude
+                                    )
                                     let mapItem = MKMapItem(location: location, address: nil)
                                     mapItem.name = "San Francisco"
                                     return mapItem
                                 }())
                             ]),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -733,8 +756,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 42.5, type: .length(.meters))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -747,8 +770,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 75.5, type: .percentage(75.5))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -761,8 +784,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 99.99, type: .currency(99.99))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -775,8 +798,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 150.0, type: .mass(.kilograms))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -789,8 +812,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 500.0, type: .volume(.milliliters))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -803,8 +826,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 72.5, type: .temperature(.fahrenheit))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -817,8 +840,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 60, type: .duration(.minutes))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -831,8 +854,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 65.5, type: .speed(.milesPerHour))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -845,8 +868,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 250.0, type: .area(.squareMeters))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -859,8 +882,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 2500.0, type: .energy(.calories))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -873,8 +896,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .value(Measurement(value: 42.0, type: .number(42.0))),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -906,10 +929,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 10.0, type: .length(.meters))...Measurement(value: 50.0, type: .length(.meters))
+                                Measurement(value: 10.0, type: .length(.meters)) ... Measurement(
+                                    value: 50.0,
+                                    type: .length(.meters)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -922,10 +948,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 20.5, type: .percentage(20.5))...Measurement(value: 80.5, type: .percentage(80.5))
+                                Measurement(value: 20.5, type: .percentage(20.5)) ... Measurement(
+                                    value: 80.5,
+                                    type: .percentage(80.5)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -938,10 +967,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 50.0, type: .currency(50.0))...Measurement(value: 100.0, type: .currency(100.0))
+                                Measurement(value: 50.0, type: .currency(50.0)) ... Measurement(
+                                    value: 100.0,
+                                    type: .currency(100.0)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -954,10 +986,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 50.0, type: .mass(.kilograms))...Measurement(value: 150.0, type: .mass(.kilograms))
+                                Measurement(value: 50.0, type: .mass(.kilograms)) ... Measurement(
+                                    value: 150.0,
+                                    type: .mass(.kilograms)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -970,10 +1005,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 100.0, type: .volume(.milliliters))...Measurement(value: 500.0, type: .volume(.milliliters))
+                                Measurement(value: 100.0, type: .volume(.milliliters)) ... Measurement(
+                                    value: 500.0,
+                                    type: .volume(.milliliters)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -986,10 +1024,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 32.0, type: .temperature(.fahrenheit))...Measurement(value: 98.6, type: .temperature(.fahrenheit))
+                                Measurement(value: 32.0, type: .temperature(.fahrenheit)) ... Measurement(
+                                    value: 98.6,
+                                    type: .temperature(.fahrenheit)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1002,10 +1043,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 30, type: .duration(.minutes))...Measurement(value: 120, type: .duration(.minutes))
+                                Measurement(value: 30, type: .duration(.minutes)) ... Measurement(
+                                    value: 120,
+                                    type: .duration(.minutes)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1018,10 +1062,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 30.0, type: .speed(.milesPerHour))...Measurement(value: 70.0, type: .speed(.milesPerHour))
+                                Measurement(value: 30.0, type: .speed(.milesPerHour)) ... Measurement(
+                                    value: 70.0,
+                                    type: .speed(.milesPerHour)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1034,10 +1081,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 100.0, type: .area(.squareMeters))...Measurement(value: 500.0, type: .area(.squareMeters))
+                                Measurement(value: 100.0, type: .area(.squareMeters)) ... Measurement(
+                                    value: 500.0,
+                                    type: .area(.squareMeters)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1050,10 +1100,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 1500.0, type: .energy(.calories))...Measurement(value: 3000.0, type: .energy(.calories))
+                                Measurement(value: 1500.0, type: .energy(.calories)) ... Measurement(
+                                    value: 3000.0,
+                                    type: .energy(.calories)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1066,10 +1119,13 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .valueRange(
-                                Measurement(value: 10.0, type: .number(10.0))...Measurement(value: 100.0, type: .number(100.0))
+                                Measurement(value: 10.0, type: .number(10.0)) ... Measurement(
+                                    value: 100.0,
+                                    type: .number(100.0)
+                                )
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1101,8 +1157,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .dateAndTime),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1115,8 +1171,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .dateOnly),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1129,8 +1185,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .date(Date.now, granularity: .timeOnly),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1149,8 +1205,8 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .dateAndTime
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1169,8 +1225,8 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .dateOnly
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1189,8 +1245,8 @@ struct MessageContentView: View {
                                 ),
                                 granularity: .timeOnly
                             ),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1203,8 +1259,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 1)),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1217,8 +1273,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .dateFrequency(DateFrequency(dayOfWeek: .friday, interval: 2)),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1250,8 +1306,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .url(URL(string: "https://www.apple.com")!),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1264,8 +1320,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .url(URL(string: "https://somefakeURL.com")!),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1278,8 +1334,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .emoji("👋🎉🚀"),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1292,8 +1348,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .code("func hello() {\n    print(\"Hello, World!\")\n    return true\n}"),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1306,8 +1362,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .bool(true),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1320,8 +1376,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .bool(false),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1334,8 +1390,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .rating(.five),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1348,8 +1404,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .rating(.three),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1362,8 +1418,8 @@ struct MessageContentView: View {
                     MessageBubbleView(
                         message: Message(
                             content: .file(URL(fileURLWithPath: "/path/to/document.pdf")),
-                            from: sampleUser,
-                            ),
+                            from: sampleUser
+                        ),
                         showTail: true,
                         theme: .defaultTheme,
                         selectedImageData: $selectedImageData
@@ -1390,12 +1446,12 @@ extension Int {
             if self % i == 0 || self % (i + 2) == 0 { return false }
             i += 6
         }
-        
+
         return true
     }
 
     var gridColumns: Int {
-        if self.isPrime { return 1 }
+        if isPrime { return 1 }
         if self % 5 == 0 { return 5 }
         if self % 3 == 0 { return 3 }
         if self % 2 == 0 { return 2 }
@@ -1407,7 +1463,7 @@ extension Int {
 
 extension View {
     @ViewBuilder
-    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+    func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
         if condition {
             transform(self)
         } else {

@@ -13,7 +13,7 @@ struct Emoji: Identifiable, Hashable {
     let name: String
     let keywords: [String]
     let category: EmojiCategory
-    
+
     init(id: String, character: String, name: String, keywords: [String] = [], category: EmojiCategory) {
         self.id = id
         self.character = character

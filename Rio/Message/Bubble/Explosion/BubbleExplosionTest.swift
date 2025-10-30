@@ -1,5 +1,5 @@
 //
-//  ShaderTest.swift
+//  BubbleExplosionTest.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/15/25.
@@ -18,25 +18,25 @@ struct BubbleExplosionTestView: View {
     @State private var animatedPixelSize: CGFloat = 0.1
     @State private var sliderValue: Double = 0.0
     @State private var bubbleSize: CGSize = .zero
-    @State private var explosionCenterX: CGFloat = 0.5  // 0.0 = left, 1.0 = right
-    @State private var explosionCenterY: CGFloat = 0.5  // 0.0 = top, 1.0 = bottom
-    @State private var speedVariance: CGFloat = 0.5  // 0.0 = uniform speed, 1.0 = max variance
-    @State private var gravity: CGFloat = 1.0  // 0.0 = no gravity, 1.0 = max gravity
-    @State private var turbulence: CGFloat = 0.2  // 0.0 = no turbulence, 1.0 = max turbulence
-    @State private var growth: CGFloat = 0.65  // 0.0 = no growth, 1.0 = double size
-    @State private var growthVariance: CGFloat = 0.65  // 0.0 = uniform growth, 1.0 = max variance
-    @State private var edgeVelocityBoost: CGFloat = 0.8  // 0.0 = uniform velocity, 1.0 = strong edge boost
+    @State private var explosionCenterX: CGFloat = 0.5 // 0.0 = left, 1.0 = right
+    @State private var explosionCenterY: CGFloat = 0.5 // 0.0 = top, 1.0 = bottom
+    @State private var speedVariance: CGFloat = 0.5 // 0.0 = uniform speed, 1.0 = max variance
+    @State private var gravity: CGFloat = 1.0 // 0.0 = no gravity, 1.0 = max gravity
+    @State private var turbulence: CGFloat = 0.2 // 0.0 = no turbulence, 1.0 = max turbulence
+    @State private var growth: CGFloat = 0.65 // 0.0 = no growth, 1.0 = double size
+    @State private var growthVariance: CGFloat = 0.65 // 0.0 = uniform growth, 1.0 = max variance
+    @State private var edgeVelocityBoost: CGFloat = 0.8 // 0.0 = uniform velocity, 1.0 = strong edge boost
     @State private var forceSquarePixels: Bool = false
-    @State private var fadeStart: CGFloat = 0.3  // When particles start fading (0-1)
+    @State private var fadeStart: CGFloat = 0.3 // When particles start fading (0-1)
     @State private var selectedImageData: ImageData?
-    @State private var fadeVariance: CGFloat = 0.85  // Variance in fade timing (0-1)
+    @State private var fadeVariance: CGFloat = 0.85 // Variance in fade timing (0-1)
 
     private let outboundAnimationWidth: CGFloat? = nil
     private let outboundAnimationHeight: CGFloat? = nil
 
     // Controllable parameters
-    private let maxExplosionSpread: CGFloat = 0.4  // How much spacing increases between particles
-    private let pinchDuration: CGFloat = 0.05  // Duration of the initial pinch effect (as % of animation, 0.05 = 5%)
+    private let maxExplosionSpread: CGFloat = 0.4 // How much spacing increases between particles
+    private let pinchDuration: CGFloat = 0.05 // Duration of the initial pinch effect (as % of animation, 0.05 = 5%)
 
     init(message: Message? = nil, showTail: Bool = true) {
         let defaultMessage = Message(
@@ -45,9 +45,9 @@ struct BubbleExplosionTestView: View {
             isTypingIndicator: true,
             bubbleType: .thinking
         )
-        
-        self._message = State(initialValue: message ?? defaultMessage)
-        self._showTail = State(initialValue: showTail)
+
+        _message = State(initialValue: message ?? defaultMessage)
+        _showTail = State(initialValue: showTail)
     }
 
     var body: some View {
@@ -106,7 +106,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $sliderValue, in: 0...1)
+                    Slider(value: $sliderValue, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -114,16 +114,16 @@ struct BubbleExplosionTestView: View {
 //                    Text("Center X: \(String(format: "%.2f", explosionCenterX))")
 //                        .font(.caption)
 //                        .foregroundStyle(.secondary)
-//                    
+//
 //                    Slider(value: $explosionCenterX, in: 0...1)
 //                }
 //                .padding(.horizontal)
-//                
+//
 //                VStack(spacing: 8) {
 //                    Text("Center Y: \(String(format: "%.2f", explosionCenterY))")
 //                        .font(.caption)
 //                        .foregroundStyle(.secondary)
-//                    
+//
 //                    Slider(value: $explosionCenterY, in: 0...1)
 //                }
 //                .padding(.horizontal)
@@ -133,7 +133,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $speedVariance, in: 0...1)
+                    Slider(value: $speedVariance, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -141,7 +141,7 @@ struct BubbleExplosionTestView: View {
 //                    Text("Gravity: \(String(format: "%.2f", gravity))")
 //                        .font(.caption)
 //                        .foregroundStyle(.secondary)
-//                    
+//
 //                    Slider(value: $gravity, in: 0...1)
 //                }
 //                .padding(.horizontal)
@@ -151,7 +151,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $turbulence, in: 0...1)
+                    Slider(value: $turbulence, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -160,7 +160,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $growth, in: 0...1)
+                    Slider(value: $growth, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -169,7 +169,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $growthVariance, in: 0...1)
+                    Slider(value: $growthVariance, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -178,7 +178,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $edgeVelocityBoost, in: 0...1)
+                    Slider(value: $edgeVelocityBoost, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -191,7 +191,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $fadeStart, in: 0...1)
+                    Slider(value: $fadeStart, in: 0 ... 1)
                 }
                 .padding(.horizontal)
 
@@ -200,7 +200,7 @@ struct BubbleExplosionTestView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Slider(value: $fadeVariance, in: 0...1)
+                    Slider(value: $fadeVariance, in: 0 ... 1)
                 }
                 .padding(.horizontal)
             }
@@ -219,7 +219,7 @@ struct BubbleExplosionTestView: View {
 
     private var currentPixelSize: CGFloat {
         // 0.0 - 0.05: transition from 0.1 to 2.0 (pixelate + form circles)
-        let circleFormationEnd: Double = 0.05
+        let circleFormationEnd = 0.05
         if quantizedSliderValue <= circleFormationEnd {
             let progress = quantizedSliderValue / circleFormationEnd
             return 0.1 + (progress * 1.9)
@@ -230,12 +230,12 @@ struct BubbleExplosionTestView: View {
     }
 
     private var currentExplosionAmount: CGFloat {
-        let circleFormationEnd: Double = 0.05
+        let circleFormationEnd = 0.05
         // 0.0 - 0.05: no explosion (forming circles)
         if quantizedSliderValue <= circleFormationEnd {
             return 0.0
         }
-        
+
         // 0.05 - 1.0: particles space out from center
         let explosionProgress = (quantizedSliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
         return CGFloat(explosionProgress) * maxExplosionSpread
@@ -265,7 +265,7 @@ struct BubbleExplosionTestView: View {
         ZStack(alignment: .leading) {
             Circle()
 
-            if hasContent && includeTalkingTextInLayout {
+            if hasContent, includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
                     textColor: textColor,

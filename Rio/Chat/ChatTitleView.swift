@@ -82,7 +82,7 @@ struct ChatTitleView: View {
                     isGeometrySource: isGeometrySource,
                     matchedGeometryAnimation: matchedGeometryAnimation
                 )
-                    .id(participant.id)
+                .id(participant.id)
             }
         }
         .glassEffect(isVertical ? .identity : .regular.interactive())
@@ -92,7 +92,7 @@ struct ChatTitleView: View {
 
     private var avatarContent: some View {
         avatarBase
-        .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
+            .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
     }
 }
 
@@ -101,8 +101,23 @@ struct ChatTitleView: View {
         ChatTitleView(chat: .sample(title: "Solo Chat", participantNames: ["Lumen Moss"]))
         ChatTitleView(chat: .sample(title: "Pair Chat", participantNames: ["Maya Park", "River Slate"]))
         ChatTitleView(chat: .sample(title: "Trio Chat", participantNames: ["Maya Park", "River Slate", "Scarlet Chen"]))
-        ChatTitleView(chat: .sample(title: "Quartet Chat", participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read"]))
-        ChatTitleView(chat: .sample(title: "Group Hang", participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read", "Eddie Carter", "Sage Hart", "Carta Bloom", "Nova Lin"]))
+        ChatTitleView(chat: .sample(
+            title: "Quartet Chat",
+            participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read"]
+        ))
+        ChatTitleView(chat: .sample(
+            title: "Group Hang",
+            participantNames: [
+                "Maya Park",
+                "River Slate",
+                "Scarlet Chen",
+                "Nate Read",
+                "Eddie Carter",
+                "Sage Hart",
+                "Carta Bloom",
+                "Nova Lin"
+            ]
+        ))
     }
     .padding()
     .background(Color.base)

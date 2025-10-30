@@ -40,7 +40,7 @@ struct RadialLayout: Layout {
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         // Container size needs to accommodate the full circle plus item sizes
-        return CGSize(width: radius * 2, height: radius * 2)
+        CGSize(width: radius * 2, height: radius * 2)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -53,7 +53,7 @@ struct RadialLayout: Layout {
             itemSpacing: itemSpacing,
             spacerCenterPercent: spacerCenterPercent
         )
-        
+
         let angles = angleConfiguration.angles
         guard angles.count == count else { return }
 
@@ -89,7 +89,7 @@ struct RadialLayout: Layout {
             let defaultX = center.x + radius * cos(radians)
             let collapsedX: CGFloat
             let collapsedY: CGFloat
-            
+
             if !isShowingReactionMenu {
                 if distributeHorizontally,
                    parentWidth > marginX * 2,
@@ -111,7 +111,7 @@ struct RadialLayout: Layout {
                 collapsedX = center.x
                 collapsedY = center.y
             }
-            
+
             let x = isShowingReactionMenu ? defaultX : collapsedX
             let y = isShowingReactionMenu ? defaultY : collapsedY
 
@@ -158,7 +158,7 @@ struct RadialLayout: Layout {
         let arcStartAngle = spacerCenterAngle + (gapArc / 2)
         let startAngle = arcStartAngle + (angleIncrement / 2)
 
-        let angles = (0..<itemCount).map { index in
+        let angles = (0 ..< itemCount).map { index in
             startAngle + (CGFloat(index) * angleIncrement)
         }
 

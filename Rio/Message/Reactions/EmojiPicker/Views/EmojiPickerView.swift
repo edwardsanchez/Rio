@@ -23,9 +23,9 @@ struct EmojiPickerView: View {
 
     private var displayCategories: [EmojiCategory] {
         if viewModel.frequentlyUsedEmojis.count > 1 {
-            return EmojiCategory.allCases
+            EmojiCategory.allCases
         } else {
-            return EmojiCategory.allCases.filter { $0 != .frequentlyUsed }
+            EmojiCategory.allCases.filter { $0 != .frequentlyUsed }
         }
     }
 
@@ -57,7 +57,7 @@ struct EmojiPickerView: View {
             if current != selectedCategory {
                 selectedCategory = current
             }
-            
+
             if current == lastProgrammaticTarget {
                 lastProgrammaticTarget = nil
             }
@@ -128,7 +128,7 @@ struct EmojiPickerView: View {
         viewModel.trackEmojiUsage(emoji, sourceCategory: category)
         onEmojiSelected(emoji)
     }
-    
+
     private var searchBar: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
@@ -157,7 +157,7 @@ struct EmojiPickerView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
     }
-    
+
     private var emptySearchState: some View {
         VStack(spacing: 8) {
             Text("No results")

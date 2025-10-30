@@ -17,7 +17,7 @@ struct TypingIndicatorView: View {
     var body: some View {
         ZStack {
             HStack(spacing: 5) {
-                ForEach(0..<3) { index in
+                ForEach(0 ..< 3) { index in
                     Circle()
                         .fill(Color.primary.opacity(0.4))
                         .frame(width: 10, height: 10)
@@ -25,8 +25,8 @@ struct TypingIndicatorView: View {
                         .opacity(isAnimating ? 1 : 0.5)
                         .animation(
                             .easeInOut(duration: 0.8)
-                            .repeatForever(autoreverses: true)
-                            .delay(Double(index) * 0.3),
+                                .repeatForever(autoreverses: true)
+                                .delay(Double(index) * 0.3),
                             value: isAnimating
                         )
                         .scaleEffect(isVisible ? 1 : 0)

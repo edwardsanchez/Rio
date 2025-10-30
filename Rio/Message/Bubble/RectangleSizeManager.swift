@@ -23,7 +23,7 @@ class RectangleSizeManager {
 
     init(initialSize: CGSize, config: BubbleConfiguration) {
         let now = Date()
-        self.rectangleTransition = RectangleTransition(
+        rectangleTransition = RectangleTransition(
             startSize: initialSize,
             endSize: initialSize,
             startTime: now,
@@ -48,7 +48,7 @@ class RectangleSizeManager {
         let now = Date()
 
         // For morphing to talking, constrain height during morph
-        if case .morphing(_, let to, _) = animationState, to.isTalking {
+        if case let .morphing(_, to, _) = animationState, to.isTalking {
             let morphProgress = animationState.animationProgress(at: now, config: config)
             if morphProgress < 0.98 {
                 // Keep width constant and constrain height to single-line
@@ -92,15 +92,18 @@ class RectangleSizeManager {
             let currentSize = rectangleTransition.value(at: now, duration: config.resizeCutoffDuration)
 
             // Calculate current velocity for continuity
-            let dt: CGFloat = 0.016  // ~1 frame at 60fps
-            let futureSize = rectangleTransition.value(at: now.addingTimeInterval(dt), duration: config.resizeCutoffDuration)
+            let dt: CGFloat = 0.016 // ~1 frame at 60fps
+            let futureSize = rectangleTransition.value(
+                at: now.addingTimeInterval(dt),
+                duration: config.resizeCutoffDuration
+            )
             let currentVelocity = CGSize(
                 width: (futureSize.width - currentSize.width) / dt,
                 height: (futureSize.height - currentSize.height) / dt
             )
 
             // Add velocity boost for snappier feel
-            let velocityBoost: CGFloat = 200  // points per second
+            let velocityBoost: CGFloat = 200 // points per second
             let widthDirection: CGFloat = size.width > currentSize.width ? 1 : -1
             let heightDirection: CGFloat = size.height > currentSize.height ? 1 : -1
 
@@ -138,7 +141,7 @@ struct RectangleTransition {
     var startSize: CGSize
     var endSize: CGSize
     var startTime: Date
-    var initialVelocity: CGSize  // Initial velocity in points per second
+    var initialVelocity: CGSize // Initial velocity in points per second
 
     // Spring parameters
     static let dampingRatio: CGFloat = 0.6
@@ -160,7 +163,7 @@ struct RectangleTransition {
             delta: widthDelta,
             initialVelocity: initialVelocity.width
         )
-        
+
         let heightProgress = springValue(
             elapsed: elapsed,
             delta: heightDelta,

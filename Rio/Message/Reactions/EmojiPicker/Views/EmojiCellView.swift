@@ -10,7 +10,7 @@ import SwiftUI
 struct EmojiCellView: View {
     let emoji: Emoji
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             Text(emoji.character)
@@ -21,7 +21,13 @@ struct EmojiCellView: View {
 }
 
 #Preview {
-    EmojiCellView(emoji: Emoji(id: "grinningFace", character: "😀", name: "Grinning Face", keywords: [], category: .people(.ageBased))) {
+    EmojiCellView(emoji: Emoji(
+        id: "grinningFace",
+        character: "😀",
+        name: "Grinning Face",
+        keywords: [],
+        category: .people(.ageBased)
+    )) {
         print("Tapped!")
     }
 }

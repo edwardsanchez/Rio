@@ -5,9 +5,9 @@
 //  Created by Edward Sanchez on 9/24/25.
 //
 
-import SwiftUI
-import SVGPath
 import os.log
+import SVGPath
+import SwiftUI
 
 struct CursiveTestView: View {
     // Text input state
@@ -16,25 +16,25 @@ struct CursiveTestView: View {
     @FocusState private var isInputFocused: Bool
 
     // Scanner/drag interaction state
-    @State private var scannerOffset: CGFloat = 50  // Actual offset in points
+    @State private var scannerOffset: CGFloat = 50 // Actual offset in points
     @State private var isDragging = false
-    @State private var dragStartOffset: CGFloat = 0  // Track initial offset when drag starts
+    @State private var dragStartOffset: CGFloat = 0 // Track initial offset when drag starts
 
     // UI toggle state
-    @State private var forwardOnlyMode = false  // Toggle for forward-only pipe movement
-    @State private var showPipe = false  // Toggle to show/hide the progress indicator
-    @State private var staticMode = false  // Toggle for static window effect (window stays in place, text scrolls)
-    @State private var variableSpeed = true  // Toggle for variable speed animation
-    @State private var trackingAccuracy: CGFloat = 0.85  // 0 = smooth drift, 1 = tight tracking
+    @State private var forwardOnlyMode = false // Toggle for forward-only pipe movement
+    @State private var showPipe = false // Toggle to show/hide the progress indicator
+    @State private var staticMode = false // Toggle for static window effect (window stays in place, text scrolls)
+    @State private var variableSpeed = true // Toggle for variable speed animation
+    @State private var trackingAccuracy: CGFloat = 0.85 // 0 = smooth drift, 1 = tight tracking
 
     // Animation restart trigger
     @State private var animationKey = 0
 
     // Configuration constants
-    private let windowWidth: CGFloat = 50  // Width of the visible window in pixels
+    private let windowWidth: CGFloat = 50 // Width of the visible window in pixels
     private let size: Double = 40
     private let wordPadding: CGFloat = 12
-    private let scannerWidth: CGFloat = 50  // Width of the scanning rectangle - narrower for more range
+    private let scannerWidth: CGFloat = 50 // Width of the scanning rectangle - narrower for more range
 
     // Computed properties
     private var fontSizeValue: CGFloat { CGFloat(size) }
@@ -107,11 +107,11 @@ struct CursiveTestView: View {
                     forwardOnlyMode: forwardOnlyMode,
                     variableSpeed: variableSpeed,
                     trackingAccuracy: trackingAccuracy,
-                    cleanup: false,  // Disable cleanup for test view
+                    cleanup: false, // Disable cleanup for test view
                     showProgressIndicator: showPipe
                 )
-                .id(animationKey)  // Force recreation when key changes
-                .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
+                .id(animationKey) // Force recreation when key changes
+                .fixedSize() // Preserve intrinsic width so cropping happens at the trailing edge
             } else {
                 // Progressive mode: use the progressiveText initializer
                 AnimatedCursiveTextView(
@@ -120,8 +120,8 @@ struct CursiveTestView: View {
                     animationDuration: nil,
                     showProgressIndicator: showPipe
                 )
-                .id(animationKey)  // Force recreation when key changes
-                .fixedSize()  // Preserve intrinsic width so cropping happens at the trailing edge
+                .id(animationKey) // Force recreation when key changes
+                .fixedSize() // Preserve intrinsic width so cropping happens at the trailing edge
             }
         }
     }

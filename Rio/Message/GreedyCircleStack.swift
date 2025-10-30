@@ -1,22 +1,22 @@
 //
-//  CircleStack.swift
+//  GreedyCircleStack.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/24/25.
 //
 
-import SwiftUI
 import OSLog
+import SwiftUI
 
 /// Linear congruential generator so the greedy packing stays deterministic.
 private struct SeededGenerator: RandomNumberGenerator {
     private var state: UInt64
 
-    init(seed: UInt64) { self.state = seed }
+    init(seed: UInt64) { state = seed }
 
     mutating func next() -> UInt64 {
         // Parameters from "Numerical Recipes".
-        state = state &* 6364136223846793005 &+ 1
+        state = state &* 6_364_136_223_846_793_005 &+ 1
         return state
     }
 }
@@ -40,7 +40,7 @@ struct GreedyCircleStack: Layout, Animatable {
     var verticalDiameter: CGFloat?
     // Preferred square side when in greedy mode (fallback if proposal doesn't provide size)
     var greedyPreferredSide: CGFloat?
-    
+
     // Animation progress: 0.0 = greedy layout, 1.0 = vertical layout
     var animationProgress: CGFloat
 
@@ -49,7 +49,7 @@ struct GreedyCircleStack: Layout, Animatable {
         var radius: CGFloat
         var isPrimary: Bool
     }
-    
+
     private struct AnimatedCircle {
         var center: CGPoint
         var radius: CGFloat
@@ -73,7 +73,7 @@ struct GreedyCircleStack: Layout, Animatable {
         self.verticalDiameter = verticalDiameter
         self.greedyPreferredSide = greedyPreferredSide
         // Set animation progress based on isVertical
-        self.animationProgress = isVertical ? 1.0 : 0.0
+        animationProgress = isVertical ? 1.0 : 0.0
     }
 
     func sizeThatFits(
@@ -121,7 +121,10 @@ struct GreedyCircleStack: Layout, Animatable {
         let parentRadius = max(0, containerDiameter / 2.0 - rimPadding)
 
         guard parentRadius > 0 else {
-            GreedyCircleStack.logger.error("CircleStack: invalid parent radius \(parentRadius, privacy: .public) for bounds \(bounds.debugDescription, privacy: .public)")
+            GreedyCircleStack.logger
+                .error(
+                    "CircleStack: invalid parent radius \(parentRadius, privacy: .public) for bounds \(bounds.debugDescription, privacy: .public)"
+                )
             return
         }
 
@@ -129,13 +132,13 @@ struct GreedyCircleStack: Layout, Animatable {
         let availableHeight = bounds.height - verticalSpacing * CGFloat(max(0, count - 1))
         let fitDiameter = max(0, availableHeight / CGFloat(max(count, 1)))
         let fallbackDiameter = max(0, min(bounds.width, fitDiameter))
-        
+
         // Check if we're animating (progress is between 0 and 1)
         let isAnimating = animationProgress > 0.001 && animationProgress < 0.999
-        
+
         if isAnimating {
             // During animation, interpolate between greedy and vertical layouts
-            
+
             // Calculate greedy layout
             let angle = startAngle.radians
             let greedyPacked = packCircles(
@@ -145,14 +148,14 @@ struct GreedyCircleStack: Layout, Animatable {
                 spacing: spacing,
                 rimPadding: rimPadding
             )
-            
+
             // Calculate vertical layout positions (same order as greedy)
             let diameter = max(0, min(verticalDiameter ?? fallbackDiameter, bounds.width))
             var verticalPacked: [PackedCircle] = []
             let startX = bounds.minX + diameter / 2
             let startY = bounds.minY + diameter / 2
-            
-            for index in 0..<count where index < subviews.count {
+
+            for index in 0 ..< count where index < subviews.count {
                 let desiredX = startX
                 let desiredY = startY + CGFloat(index) * (diameter + verticalSpacing)
                 let relativeX = desiredX - bounds.midX
@@ -163,7 +166,7 @@ struct GreedyCircleStack: Layout, Animatable {
                     isPrimary: false
                 ))
             }
-            
+
             // Interpolate with collision resolution
             let interpolated = interpolateLayouts(
                 greedyCircles: greedyPacked,
@@ -171,9 +174,9 @@ struct GreedyCircleStack: Layout, Animatable {
                 progress: animationProgress,
                 bounds: bounds
             )
-            
+
             let origin = CGPoint(x: bounds.midX, y: bounds.midY)
-            
+
             for (index, circle) in interpolated.enumerated() where index < subviews.count {
                 let proposal = ProposedViewSize(width: circle.radius * 2, height: circle.radius * 2)
                 let placement = CGPoint(
@@ -188,7 +191,7 @@ struct GreedyCircleStack: Layout, Animatable {
             let diameter = max(0, min(verticalDiameter ?? fallbackDiameter, bounds.width))
             var currentY = bounds.minY + diameter / 2
             let centerX = bounds.minX + diameter / 2
-            for index in 0..<count where index < subviews.count {
+            for index in 0 ..< count where index < subviews.count {
                 let proposal = ProposedViewSize(width: diameter, height: diameter)
                 let placement = CGPoint(x: centerX, y: currentY)
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
@@ -206,7 +209,10 @@ struct GreedyCircleStack: Layout, Animatable {
             )
 
             if packed.count < subviews.count {
-                GreedyCircleStack.logger.warning("CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints")
+                GreedyCircleStack.logger
+                    .warning(
+                        "CircleStack: packed only \(packed.count, privacy: .public)/\(subviews.count, privacy: .public) circles due to space constraints"
+                    )
             }
 
             let origin = CGPoint(x: bounds.midX, y: bounds.midY)
@@ -249,8 +255,14 @@ struct GreedyCircleStack: Layout, Animatable {
 
         GreedyCircleStack.logger.debug(
             """
-            CircleStack: packing \(count, privacy: .public) circles | parentRadius=\(Double(parentRadius), privacy: .public) \
-            primaryRadius=\(Double(primaryRadius), privacy: .public) rimPadding=\(Double(rimPadding), privacy: .public) \
+            CircleStack: packing \(count, privacy: .public) circles | parentRadius=\(
+                Double(parentRadius),
+                privacy: .public
+            ) \
+            primaryRadius=\(Double(primaryRadius), privacy: .public) rimPadding=\(
+                Double(rimPadding),
+                privacy: .public
+            ) \
             spacing=\(Double(spacing), privacy: .public) startAngle=\(pinnedAngle, privacy: .public)
             """
         )
@@ -260,12 +272,12 @@ struct GreedyCircleStack: Layout, Animatable {
         let sampleCount = max(4000, count * 450)
         GreedyCircleStack.logger.debug("CircleStack: greedy sample count \(sampleCount, privacy: .public)")
 
-        var rng = SeededGenerator(seed: 0xC1C1E5EEDBAADF0F)
+        var rng = SeededGenerator(seed: 0xC1C1_E5EE_DBAA_DF0F)
 
-        for index in 1..<count {
+        for index in 1 ..< count {
             var bestCircle = PackedCircle(center: .zero, radius: 0, isPrimary: false)
 
-            for _ in 0..<sampleCount {
+            for _ in 0 ..< sampleCount {
                 let u = Double(rng.next()) / Double(UInt64.max)
                 let v = Double(rng.next()) / Double(UInt64.max)
                 let candidateRadius = parentRadius * CGFloat(sqrt(u))
@@ -289,7 +301,10 @@ struct GreedyCircleStack: Layout, Animatable {
             }
 
             guard bestCircle.radius > .ulpOfOne else {
-                GreedyCircleStack.logger.warning("CircleStack: stopping after \(discs.count, privacy: .public) circles; no space for index \(index, privacy: .public)")
+                GreedyCircleStack.logger
+                    .warning(
+                        "CircleStack: stopping after \(discs.count, privacy: .public) circles; no space for index \(index, privacy: .public)"
+                    )
                 break
             }
 
@@ -319,11 +334,10 @@ struct GreedyCircleStack: Layout, Animatable {
                 return 0
             }
 
-            let limit: CGFloat
-            if disc.isPrimary {
-                limit = distance - disc.radius - spacing
+            let limit: CGFloat = if disc.isPrimary {
+                distance - disc.radius - spacing
             } else {
-                limit = secondarySpacingLimit(
+                secondarySpacingLimit(
                     existingRadius: disc.radius,
                     centerDistance: distance,
                     primaryRadius: primaryRadius,
@@ -360,35 +374,35 @@ struct GreedyCircleStack: Layout, Animatable {
             return max(candidateBeyond, 0)
         }
     }
-    
+
     // MARK: - Simple Collision Avoidance
-    
+
     /// Multi-pass collision resolution - only for small circle counts
     private func resolveCollisions(
         circles: inout [AnimatedCircle],
         spacing: CGFloat
     ) {
         // Only apply collision resolution for small numbers of circles (performance)
-        guard circles.count > 1 && circles.count <= 10 else { return }
-        
+        guard circles.count > 1, circles.count <= 10 else { return }
+
         // Multiple passes to fully resolve overlaps (fewer passes for larger counts)
         let iterations = circles.count <= 5 ? 10 : 2
 
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             // Check each pair and push apart if overlapping
-            for i in 0..<circles.count {
-                for j in (i + 1)..<circles.count {
+            for i in 0 ..< circles.count {
+                for j in (i + 1) ..< circles.count {
                     let dx = circles[j].center.x - circles[i].center.x
                     let dy = circles[j].center.y - circles[i].center.y
                     let distance = hypot(dx, dy)
                     let minDistance = circles[i].radius + circles[j].radius + spacing
-                    
+
                     // If overlapping, push them apart equally
                     if distance < minDistance && distance > .ulpOfOne {
                         let overlap = minDistance - distance
                         let offsetX = (dx / distance) * overlap * 0.5
                         let offsetY = (dy / distance) * overlap * 0.5
-                        
+
                         circles[i].center.x -= offsetX
                         circles[i].center.y -= offsetY
                         circles[j].center.x += offsetX
@@ -398,7 +412,7 @@ struct GreedyCircleStack: Layout, Animatable {
             }
         }
     }
-    
+
     /// Interpolates between greedy and vertical layouts with collision resolution
     private func interpolateLayouts(
         greedyCircles: [PackedCircle],
@@ -408,34 +422,34 @@ struct GreedyCircleStack: Layout, Animatable {
     ) -> [AnimatedCircle] {
         let count = min(greedyCircles.count, verticalCircles.count)
         guard count > 0 else { return [] }
-        
+
         var animated: [AnimatedCircle] = []
-        
-        for i in 0..<count {
+
+        for i in 0 ..< count {
             let greedyPos = greedyCircles[i].center
             let verticalPos = verticalCircles[i].center
             let greedyRadius = greedyCircles[i].radius
             let verticalRadius = verticalCircles[i].radius
-            
+
             // Linear interpolation for target position and radius
             let targetX = greedyPos.x + (verticalPos.x - greedyPos.x) * progress
             let targetY = greedyPos.y + (verticalPos.y - greedyPos.y) * progress
             let targetRadius = greedyRadius + (verticalRadius - greedyRadius) * progress
-            
+
             animated.append(AnimatedCircle(
                 center: CGPoint(x: targetX, y: targetY),
                 radius: targetRadius
             ))
         }
-        
+
         // Apply collision resolution
         resolveCollisions(circles: &animated, spacing: spacing)
-        
+
         return animated
     }
-    
+
     // MARK: - Animatable Conformance
-    
+
     var animatableData: CGFloat {
         get { animationProgress }
         set { animationProgress = newValue }
@@ -528,7 +542,7 @@ struct CircleStackPreviewCard<Content: View>: View {
                 AvatarView(user: user)
             }
         }
-        
+
         CircleStackPreviewCard(
             title: "5 avatars"
         ) {
@@ -538,7 +552,7 @@ struct CircleStackPreviewCard<Content: View>: View {
         }
 
         CircleStackPreviewCard(
-            title: "10 avatars, tight spacing",
+            title: "10 avatars, tight spacing"
         ) {
             ForEach(PreviewUsers.mixed) { user in
                 AvatarView(user: user)

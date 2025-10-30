@@ -8,7 +8,7 @@
 import Foundation
 
 /// Utility for detecting content types in text messages
-struct ContentTypeDetector {
+enum ContentTypeDetector {
     /// Checks if a string contains only emoji characters (1-3 emoji)
     /// - Parameter text: The text to check
     /// - Returns: True if the text contains only 1-3 emoji characters
@@ -49,13 +49,13 @@ struct ContentTypeDetector {
 
         var segments: [(content: String, isURL: Bool)] = []
         var currentIndex = text.startIndex
-        
+
         for match in matches {
             guard let range = Range(match.range, in: text) else { continue }
 
             // Add text before URL (if any)
             if currentIndex < range.lowerBound {
-                let textBeforeURL = String(text[currentIndex..<range.lowerBound])
+                let textBeforeURL = String(text[currentIndex ..< range.lowerBound])
                 if !textBeforeURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     segments.append((content: textBeforeURL, isURL: false))
                 }
@@ -84,9 +84,9 @@ struct ContentTypeDetector {
     /// - Returns: Appropriate ContentType (.emoji for emoji-only 1-3, .text otherwise)
     static func contentType(for text: String) -> ContentType {
         if isEmojiOnly(text) {
-            return .emoji(text.trimmingCharacters(in: .whitespacesAndNewlines))
+            .emoji(text.trimmingCharacters(in: .whitespacesAndNewlines))
         } else {
-            return .text(text)
+            .text(text)
         }
     }
 }
@@ -101,7 +101,7 @@ extension Character {
 
         // Emoji ranges and properties
         return firstScalar.properties.isEmoji &&
-               (firstScalar.properties.isEmojiPresentation ||
+            (firstScalar.properties.isEmojiPresentation ||
                 unicodeScalars.count > 1)
     }
 }

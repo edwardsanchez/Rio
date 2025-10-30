@@ -10,9 +10,9 @@ import SwiftUI
 struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
     @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
-    
+
     let context: ReactingMessageContext
-    
+
     private var menuIsShowing: Bool { reactionsMenuModel.isShowingReactionMenu }
     @State private var viewSize: CGSize = .zero
 
@@ -42,7 +42,7 @@ struct ReactionsModifier: ViewModifier {
         self.context = context
         _ = reactions
         let resolvedReactions = ReactionsModifier.makeReactions(from: context.message)
-        self.availabilityGate = isAvailable
+        availabilityGate = isAvailable
         self.isReactionOverlay = isReactionOverlay
         _reactionsMenuModel = State(
             initialValue: ReactionsMenuModel(
@@ -102,7 +102,8 @@ struct ReactionsModifier: ViewModifier {
                     }
                     .overlay(alignment: .topTrailing) {
                         if let selectedReaction {
-                            //Here only for the purposes of geometry matching as it has the right location to appear as a badge.
+                            //Here only for the purposes of geometry matching as it has the right location to appear as
+                            //a badge.
                             reactionButton(
                                 for: selectedReaction,
                                 isVisible: false,
@@ -113,7 +114,8 @@ struct ReactionsModifier: ViewModifier {
                         }
                     }
                     .background {
-                        //Background version so it animates BEHIND the bubble on open and on close, should disappear as open animation ends, should reappear when close animation starts
+                        //Background version so it animates BEHIND the bubble on open and on close, should disappear as
+                        //open animation ends, should reappear when close animation starts
                         ReactionsMenuView(
                             isOverlay: false,
                             reactionsMenuModel: reactionsMenuModel,
@@ -123,7 +125,8 @@ struct ReactionsModifier: ViewModifier {
                         .allowsHitTesting(false)
                     }
                     .overlay {
-                        //Foreground version so it animates back on top of the bubble. Should be visible especially to show the one that was just selected so it ends up at the top
+                        //Foreground version so it animates back on top of the bubble. Should be visible especially to
+                        //show the one that was just selected so it ends up at the top
                         ReactionsMenuView(
                             isOverlay: true,
                             reactionsMenuModel: reactionsMenuModel,
@@ -162,7 +165,8 @@ struct ReactionsModifier: ViewModifier {
             } else {
                 content
                     .overlay(alignment: .topTrailing) {
-                        //This is the version that shows up when it's just a badge on the corner, if there's a reaction for this message.
+                        //This is the version that shows up when it's just a badge on the corner, if there's a reaction
+                        //for this message.
                         if let selectedReaction {
                             reactionButton(
                                 for: selectedReaction,
@@ -280,13 +284,12 @@ extension View {
 
 private extension ReactionsModifier {
     static func makeReactions(from message: Message) -> [Reaction] {
-        let baseReactions: [Reaction]
-        if message.reactionOptions.isEmpty {
-            baseReactions = (0..<6).map { index in
+        let baseReactions: [Reaction] = if message.reactionOptions.isEmpty {
+            (0 ..< 6).map { index in
                 Reaction.placeholder(id: "placeholder-\(message.id.uuidString)-\(index)")
             }
         } else {
-            baseReactions = message.reactionOptions.enumerated().map { index, value in
+            message.reactionOptions.enumerated().map { index, value in
                 Reaction.emoji(
                     value,
                     id: "emoji-\(message.id.uuidString)-\(index)"
@@ -329,7 +332,7 @@ enum LayoutCase: String, CaseIterable {
     var config: LayoutConfig {
         switch self {
         case .narrowShort:
-            return LayoutConfig(
+            LayoutConfig(
                 radius: 80,
                 spacerCenterPercent: 0.75, // 270° - right side
                 horizontalAnchor: .trailing,
@@ -339,7 +342,7 @@ enum LayoutCase: String, CaseIterable {
                 return CGSize(width: baseX, height: 0)
             }
         case .narrowTall:
-            return LayoutConfig(
+            LayoutConfig(
                 radius: 500,
                 spacerCenterPercent: 0.75, // 270° - right side
                 horizontalAnchor: .trailing,
@@ -348,7 +351,7 @@ enum LayoutCase: String, CaseIterable {
                 CGSize(width: -435, height: 0)
             }
         case .mediumCorner:
-            return LayoutConfig(
+            LayoutConfig(
                 radius: 100,
                 spacerCenterPercent: 0.625, // 135° - top-right corner
                 horizontalAnchor: .trailing,
@@ -357,7 +360,7 @@ enum LayoutCase: String, CaseIterable {
                 CGSize(width: -30, height: 30)
             }
         case .wideTop:
-            return LayoutConfig(
+            LayoutConfig(
                 radius: 600,
                 spacerCenterPercent: 0.51, // 180° - top
                 horizontalAnchor: .leading,
@@ -375,12 +378,12 @@ enum LayoutCase: String, CaseIterable {
         return allCases.first { layoutCase in
             let thresholds = layoutCase.thresholds
             return width >= thresholds.widthMin && width < thresholds.widthMax &&
-            height >= thresholds.heightMin && height < thresholds.heightMax
+                height >= thresholds.heightMin && height < thresholds.heightMax
         } ?? .wideTop
     }
 }
 
-fileprivate struct TapBackTestView: View {
+private struct TapBackTestView: View {
     @State private var demoWidth: Double = 250
     @State private var demoHeight: Double = 150
     @State private var messageID = UUID()
@@ -444,14 +447,14 @@ fileprivate struct TapBackTestView: View {
                     Text("Width: \(Int(demoWidth))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Slider(value: $demoWidth, in: 30...300)
+                    Slider(value: $demoWidth, in: 30 ... 300)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Height: \(Int(demoHeight))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Slider(value: $demoHeight, in: 30...300)
+                    Slider(value: $demoHeight, in: 30 ... 300)
                 }
             }
             .padding(.horizontal)

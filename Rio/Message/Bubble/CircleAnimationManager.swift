@@ -49,7 +49,7 @@ class CircleAnimationManager {
         let sharedCount = min(existing.count, targetDiameters.count)
 
         // Update existing circles to new targets
-        for i in 0..<sharedCount {
+        for i in 0 ..< sharedCount {
             var transition = existing[i]
             let currentValue = transition.value(at: now, duration: config.circleTransitionDuration)
             transition.startValue = currentValue
@@ -62,7 +62,7 @@ class CircleAnimationManager {
 
         // Mark excess circles for removal
         if existing.count > targetDiameters.count {
-            for i in targetDiameters.count..<existing.count {
+            for i in targetDiameters.count ..< existing.count {
                 var transition = existing[i]
                 let currentValue = transition.value(at: now, duration: config.circleTransitionDuration)
                 transition.startValue = currentValue
@@ -77,7 +77,7 @@ class CircleAnimationManager {
 
         // Add new circles
         if targetDiameters.count > existing.count {
-            for i in existing.count..<targetDiameters.count {
+            for i in existing.count ..< targetDiameters.count {
                 let newID = nextCircleID
                 nextCircleID += 1
                 let transition = CircleTransition(
@@ -88,7 +88,7 @@ class CircleAnimationManager {
                     startTime: now,
                     isDisappearing: false
                 )
-                
+
                 updated.append(transition)
             }
         }
@@ -104,7 +104,7 @@ class CircleAnimationManager {
         sortedTransitions()
             .compactMap { transition in
                 let value = transition.value(at: date, duration: config.circleTransitionDuration)
-                if transition.isDisappearing && value <= 0.01 {
+                if transition.isDisappearing, value <= 0.01 {
                     return nil
                 }
 
@@ -127,7 +127,7 @@ class CircleAnimationManager {
         for (l, r) in zip(lhs, rhs) where abs(l - r) > tolerance {
             return false
         }
-        
+
         return true
     }
 

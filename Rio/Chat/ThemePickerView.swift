@@ -80,17 +80,32 @@ extension ThemeColorOption {
         ThemeColorOption(id: "pink", color: Color.customPink, accessibilityLabel: "Pink"),
         ThemeColorOption(id: "red", color: Color(.systemRed), accessibilityLabel: "Red"),
         ThemeColorOption(id: "orange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
-        ThemeColorOption(id: "yellow", color: Color(.systemYellow).mix(with: .red, by: 0.3), accessibilityLabel: "Yellow"),
+        ThemeColorOption(
+            id: "yellow",
+            color: Color(.systemYellow).mix(with: .red, by: 0.3),
+            accessibilityLabel: "Yellow"
+        ),
         ThemeColorOption(id: "brown", color: Color.customLime, accessibilityLabel: "Brown"),
-        ThemeColorOption(id: "green", color: Color(.systemGreen).mix(with: .black, by: 0.05), accessibilityLabel: "Green"),
-        ThemeColorOption(id: "teal", color: Color(.systemTeal).mix(with: .black, by: 0.04).mix(with: .green, by: 0.02), accessibilityLabel: "Teal"),
+        ThemeColorOption(
+            id: "green",
+            color: Color(.systemGreen).mix(with: .black, by: 0.05),
+            accessibilityLabel: "Green"
+        ),
+        ThemeColorOption(
+            id: "teal",
+            color: Color(.systemTeal).mix(with: .black, by: 0.04).mix(with: .green, by: 0.02),
+            accessibilityLabel: "Teal"
+        ),
         ThemeColorOption(id: "cyan", color: Color(.systemCyan).mix(with: .black, by: 0.04), accessibilityLabel: "Cyan"),
         ThemeColorOption(id: "blue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
         ThemeColorOption(id: "indigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
         ThemeColorOption(id: "purple", color: Color(.systemPurple), accessibilityLabel: "Purple")
     ]
 
-    static let gridColumns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 20, alignment: .center), count: 4)
+    static let gridColumns: [GridItem] = Array(
+        repeating: GridItem(.flexible(), spacing: 20, alignment: .center),
+        count: 4
+    )
 }
 
 #Preview {
@@ -120,7 +135,7 @@ struct ChatTheme {
         self.outboundTextColor = outboundTextColor
         self.inboundTextColor = inboundTextColor
         self.inboundBackgroundColor = inboundBackgroundColor
-        ?? ChatTheme.resolveInboundBackgroundColor(for: outboundBackgroundColor)
+            ?? ChatTheme.resolveInboundBackgroundColor(for: outboundBackgroundColor)
     }
 
     private static func resolveInboundBackgroundColor(for outboundColor: Color) -> Color {

@@ -248,7 +248,7 @@ struct ChatSettings: View {
             return
         }
 
-        chatNameSelection = TextSelection(range: currentText.startIndex..<currentText.endIndex)
+        chatNameSelection = TextSelection(range: currentText.startIndex ..< currentText.endIndex)
     }
 
     private func close() {

@@ -11,20 +11,20 @@ import SwiftUI
 
 enum EmojiReactionPrompt {
     static let system = """
-        You are a conversation-aware emoji curator specializing in expressive yet thoughtful reactions for chat platforms.
-        Your task is to return six emoji suggestions, each with:
-        •    character: one emoji glyph (no emoji names, codes, or placeholders)
-        
-        Organize the reactions from most to least fitting based on the original message. Avoid repeating emojis and ensure reactions respond to the message rather than just mirror the sender’s tone.
-        
-        Key behavior requirements:
-        1.    Be context-sensitive: Avoid 👍/👎 in serious/sensitive moments (e.g., grief, illness).
-        2.    Use 👍 and or 👎 when a question is asked, and when doing so would not feel tone-deaf or insensitive.
-        3.    If a humorous attempt is detected, include 1–2 laughing emojis near the top of the list.
-        4.    Never duplicate emojis within the same list.
-        5.    Responses should consider tone_hint (if provided) to guide overall mood and relevance.
-        6.    Out of the 6, at least 4 should be a face, hand or in appropriate cases, a heart type emoji. These types are most common as reactions.
-        """
+    You are a conversation-aware emoji curator specializing in expressive yet thoughtful reactions for chat platforms.
+    Your task is to return six emoji suggestions, each with:
+    •    character: one emoji glyph (no emoji names, codes, or placeholders)
+
+    Organize the reactions from most to least fitting based on the original message. Avoid repeating emojis and ensure reactions respond to the message rather than just mirror the sender’s tone.
+
+    Key behavior requirements:
+    1.    Be context-sensitive: Avoid 👍/👎 in serious/sensitive moments (e.g., grief, illness).
+    2.    Use 👍 and or 👎 when a question is asked, and when doing so would not feel tone-deaf or insensitive.
+    3.    If a humorous attempt is detected, include 1–2 laughing emojis near the top of the list.
+    4.    Never duplicate emojis within the same list.
+    5.    Responses should consider tone_hint (if provided) to guide overall mood and relevance.
+    6.    Out of the 6, at least 4 should be a face, hand or in appropriate cases, a heart type emoji. These types are most common as reactions.
+    """
 }
 
 enum EmojiReactionSchema {
@@ -71,12 +71,11 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "OPENAI_API_KEY environment variable not set"]
             )
         }
-        
-        let resolvedModel: String
-        if let model {
-            resolvedModel = model
+
+        let resolvedModel: String = if let model {
+            model
         } else {
-            resolvedModel = await MainActor.run { defaultModel }
+            await MainActor.run { defaultModel }
         }
 
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
@@ -119,7 +118,8 @@ enum OpenAIEmojiAPI {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let choices = json["choices"] as? [[String: Any]],
               let message = choices.first?["message"] as? [String: Any],
-              let content = message["content"] as? String else {
+              let content = message["content"] as? String
+        else {
             throw NSError(
                 domain: errorDomain,
                 code: -4,
@@ -137,9 +137,9 @@ enum MessageEmojiService {
     static var isEnabled = true
     /// Debug helper to hold results before returning (seconds). Set to 0 to disable.
     #if DEBUG
-    static var artificialDelay: TimeInterval = 4
+        static var artificialDelay: TimeInterval = 4
     #else
-    static var artificialDelay: TimeInterval = 0
+        static var artificialDelay: TimeInterval = 0
     #endif
 
     private static let fallbackEmojis: [String] = {
@@ -152,7 +152,8 @@ enum MessageEmojiService {
 
         return reactions
     }()
-    private static let maxContextCharacters = 10_000
+
+    private static let maxContextCharacters = 10000
     private static let timeoutNanoseconds: UInt64 = 2_000_000_000
 
     static func fallbackReactionOptions() -> [String] {
@@ -213,7 +214,7 @@ enum MessageEmojiService {
             schema: EmojiReactionSchema.openAI,
             errorDomain: "MessageEmojiService"
         )
-        
+
         guard let data = rawContent.data(using: .utf8) else {
             throw NSError(
                 domain: "MessageEmojiService",
@@ -238,11 +239,10 @@ enum MessageEmojiService {
             return nil
         }
 
-        let trimmedContext: String
-        if context.count > maxContextCharacters {
-            trimmedContext = String(context.suffix(maxContextCharacters))
+        let trimmedContext: String = if context.count > maxContextCharacters {
+            String(context.suffix(maxContextCharacters))
         } else {
-            trimmedContext = context
+            context
         }
 
         return """
@@ -263,7 +263,7 @@ enum MessageEmojiService {
         }
 
         let lowerBound = max(0, messageIndex - 5)
-        let relevantMessages = messages[lowerBound...messageIndex]
+        let relevantMessages = messages[lowerBound ... messageIndex]
 
         let lines = relevantMessages.compactMap { entry -> String? in
             guard let text = contentDescription(for: entry) else { return nil }
@@ -280,17 +280,17 @@ enum MessageEmojiService {
 
     private static func contentDescription(for message: Message) -> String? {
         switch message.content {
-        case .text(let text):
+        case let .text(text):
             return text
-        case .emoji(let emoji):
+        case let .emoji(emoji):
             return emoji
-        case .code(let snippet):
+        case let .code(snippet):
             return snippet
-        case .url(let url):
+        case let .url(url):
             return url.absoluteString
-        case .bool(let value):
+        case let .bool(value):
             return value ? "True" : "False"
-        case .rating(let rating):
+        case let .rating(rating):
             return "Rating: \(rating.rawValue + 1)/\(Rating.allCases.count)"
         case .date(let date, granularity: _):
             return DateFormatter.shortDateFormatter.string(from: date)
@@ -300,21 +300,21 @@ enum MessageEmojiService {
             return "\(start) – \(end)"
         case .dateFrequency:
             return "Repeating event"
-        case .location(let item):
+        case let .location(item):
             return item.name ?? "Location shared"
-        case .value(let measurement):
+        case let .value(measurement):
             return "\(measurement.value)"
-        case .valueRange(let measurementRange):
+        case let .valueRange(measurementRange):
             return "\(measurementRange.lowerBound.value) – \(measurementRange.upperBound.value)"
-        case .textChoice(let choice):
+        case let .textChoice(choice):
             return choice
-        case .multiChoice(let choices):
+        case let .multiChoice(choices):
             return choices.map { describeChoiceValue($0) }.joined(separator: ", ")
         case .color:
             return "Color shared"
         case .image:
             return "Image shared"
-        case .labeledImage(let labeled):
+        case let .labeledImage(labeled):
             return labeled.label
         case .video:
             return "Video shared"
@@ -327,20 +327,20 @@ enum MessageEmojiService {
 
     private static func describeChoiceValue(_ choice: ChoiceValue) -> String {
         switch choice {
-        case .color(let rgb):
+        case let .color(rgb):
             if let name = rgb.name {
-                return "Color \(name)"
+                "Color \(name)"
             } else {
-                return "Color"
+                "Color"
             }
         case .image:
-            return "Image option"
-        case .labeledImage(let labeled):
-            return labeled.label
-        case .location(let item):
-            return item.name ?? "Location option"
-        case .textChoice(let text):
-            return text
+            "Image option"
+        case let .labeledImage(labeled):
+            labeled.label
+        case let .location(item):
+            item.name ?? "Location option"
+        case let .textChoice(text):
+            text
         }
     }
 }

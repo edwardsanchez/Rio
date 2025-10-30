@@ -5,8 +5,8 @@
 //  Created by Edward Sanchez on 10/18/25.
 //
 
-import SwiftUI
 import LinkPresentation
+import SwiftUI
 
 /// A view that displays a URL preview card using LinkPresentation framework
 struct URLPreviewCard: View {
@@ -21,7 +21,7 @@ struct URLPreviewCard: View {
         Group {
             if isLoading {
                 loadingPlaceholder
-            } else if let metadata = metadata, !hasFailed {
+            } else if let metadata, !hasFailed {
                 LinkPreviewView(metadata: metadata)
             } else {
                 fallbackView
@@ -51,7 +51,7 @@ struct URLPreviewCard: View {
                 .lineLimit(2)
                 .redacted(reason: .placeholder)
         }
-        .aspectRatio(472/326, contentMode: .fit)
+        .aspectRatio(472 / 326, contentMode: .fit)
     }
 
     // Fallback view when metadata fetch fails
@@ -72,11 +72,11 @@ struct URLPreviewCard: View {
         provider.startFetchingMetadata(for: url) { fetchedMetadata, error in
             DispatchQueue.main.async {
                 isLoading = false
-                if let fetchedMetadata = fetchedMetadata, error == nil {
-                    self.metadata = fetchedMetadata
-                    self.hasFailed = false
+                if let fetchedMetadata, error == nil {
+                    metadata = fetchedMetadata
+                    hasFailed = false
                 } else {
-                    self.hasFailed = true
+                    hasFailed = true
                 }
             }
         }

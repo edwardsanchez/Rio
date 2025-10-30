@@ -5,9 +5,9 @@
 //  Created by Edward Sanchez on 9/25/25.
 //
 
-import SwiftUI
-import SVGPath
 import OSLog
+import SVGPath
+import SwiftUI
 
 /**
  * CursiveLetter represents a single character in cursive handwriting style for the typing indicator system.
@@ -53,7 +53,7 @@ struct CursiveLetter {
 
         // Load uppercase letters A-Z (files are prefixed with "Capital-")
         // This prefix avoids case-insensitive filesystem conflicts on macOS/iOS
-        for ascii in 65...90 { // A-Z
+        for ascii in 65 ... 90 { // A-Z
             if let scalar = UnicodeScalar(ascii) {
                 let char = String(scalar)
                 if let letter = loadLetter(character: char, filename: "Capital-\(char)") {
@@ -66,7 +66,7 @@ struct CursiveLetter {
         }
 
         // Load lowercase letters a-z
-        for ascii in 97...122 { // a-z
+        for ascii in 97 ... 122 { // a-z
             if let scalar = UnicodeScalar(ascii) {
                 let char = String(scalar)
                 if let letter = loadLetter(character: char) {
@@ -79,7 +79,7 @@ struct CursiveLetter {
         }
 
         // Load numbers 0-9
-        for ascii in 48...57 {
+        for ascii in 48 ... 57 {
             if let character = UnicodeScalar(ascii) {
                 let char = String(character)
                 if let letter = loadLetter(character: char) {
@@ -228,7 +228,11 @@ struct CursiveLetter {
         func attr(_ name: String) -> CGFloat? {
             let pattern = name + #"\=\"([^\"]+)\""#
             guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
-            guard let match = regex.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)) else { return nil }
+            guard let match = regex.firstMatch(
+                in: svgString,
+                options: [],
+                range: NSRange(location: 0, length: svgString.count)
+            ) else { return nil }
             guard let range = Range(match.range(at: 1), in: svgString) else { return nil }
             return CGFloat(Double(svgString[range]) ?? .nan)
         }
@@ -247,10 +251,17 @@ struct CursiveLetter {
 
         // Fallback: parse viewBox="0 0 width height" and estimate metrics
         // This provides basic dimensions when custom attributes are missing
-        if let viewBoxMatch = try? NSRegularExpression(pattern: #"viewBox\=\"0\s+0\s+([0-9\.\-]+)\s+([0-9\.\-]+)\""#, options: []) {
-            if let m = viewBoxMatch.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)),
-               let wRange = Range(m.range(at: 1), in: svgString),
-               let hRange = Range(m.range(at: 2), in: svgString) {
+        if let viewBoxMatch = try? NSRegularExpression(
+            pattern: #"viewBox\=\"0\s+0\s+([0-9\.\-]+)\s+([0-9\.\-]+)\""#,
+            options: []
+        ) {
+            if let m = viewBoxMatch.firstMatch(
+                in: svgString,
+                options: [],
+                range: NSRange(location: 0, length: svgString.count)
+            ),
+                let wRange = Range(m.range(at: 1), in: svgString),
+                let hRange = Range(m.range(at: 2), in: svgString) {
                 let width = CGFloat(Double(svgString[wRange]) ?? 0)
                 let height = CGFloat(Double(svgString[hRange]) ?? 0)
                 // Use explicit width attribute if available, otherwise use viewBox width
@@ -279,14 +290,18 @@ struct CursiveLetter {
         // Try multiple regex patterns to handle different SVG formatting styles
         // Ordered from most specific to most general for better matching accuracy
         let patterns = [
-            #"<path\s+[^>]*d="([^"]*)"[^>]*>"#,  // Path with whitespace and other attributes
-            #"<path[^>]*d="([^"]*)"[^>]*>"#,     // Path with any attributes
-            #"d="([^"]*)"#                       // Just the d attribute (most permissive)
+            #"<path\s+[^>]*d="([^"]*)"[^>]*>"#, // Path with whitespace and other attributes
+            #"<path[^>]*d="([^"]*)"[^>]*>"#, // Path with any attributes
+            #"d="([^"]*)"# // Just the d attribute (most permissive)
         ]
 
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: []),
-               let match = regex.firstMatch(in: svgString, options: [], range: NSRange(location: 0, length: svgString.count)),
+               let match = regex.firstMatch(
+                   in: svgString,
+                   options: [],
+                   range: NSRange(location: 0, length: svgString.count)
+               ),
                let range = Range(match.range(at: 1), in: svgString) {
                 let pathData = String(svgString[range])
                 Logger.cursiveLetter.debug("Extracted path data: \(pathData.prefix(50))...")
@@ -313,7 +328,7 @@ struct CursiveLetter {
         if let exact = allLetters.first(where: { $0.character == character }) {
             return exact
         }
-        
+
         // Fallback to case-insensitive match for user convenience
         return allLetters.first { $0.character.caseInsensitiveCompare(character) == .orderedSame }
     }
@@ -468,11 +483,11 @@ struct CursiveWordShape: Shape {
      * the individual letters, spacing metrics, and scaling factors.
      */
     private struct Layout {
-        let letters: [CursiveLetter]      // Individual letter instances
-        let totalAdvance: CGFloat         // Total horizontal space needed
-        let ascent: CGFloat               // Distance from baseline to top
-        let verticalExtent: CGFloat       // Total vertical space needed
-        let baseScale: CGFloat            // Scale factor from font units to points
+        let letters: [CursiveLetter] // Individual letter instances
+        let totalAdvance: CGFloat // Total horizontal space needed
+        let ascent: CGFloat // Distance from baseline to top
+        let verticalExtent: CGFloat // Total vertical space needed
+        let baseScale: CGFloat // Scale factor from font units to points
     }
 
     /**
@@ -496,13 +511,13 @@ struct CursiveWordShape: Shape {
         // Convert each character to a CursiveLetter and accumulate advance widths
         for ch in text {
             let s = String(ch)
-            
+
             if let letter = CursiveLetter.letter(for: s) {
                 letters.append(letter)
                 totalAdvance += letter.advance
             }
         }
-        
+
         guard !letters.isEmpty else { return nil }
 
         // Calculate vertical metrics by taking the maximum/minimum across all letters

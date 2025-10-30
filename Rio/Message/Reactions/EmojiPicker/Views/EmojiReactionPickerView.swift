@@ -13,7 +13,7 @@ struct EmojiReactionPickerView: View {
     @State private var textSelection: TextSelection?
     @State private var conversationText: String = ""
     @State private var lastMessage: String = ""
-    
+
     var body: some View {
         VStack(spacing: 24) {
             // Provider toggle
@@ -42,7 +42,7 @@ struct EmojiReactionPickerView: View {
                 .fontWeight(.bold)
 
             // Fast/OpenAI toggle above
-            
+
             // Preset conversations
             VStack(alignment: .leading, spacing: 12) {
                 Text("Test conversations")
@@ -118,27 +118,30 @@ struct EmojiReactionPickerView: View {
                 Text("Enter your message:")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                
+
                 TextField(
                     "e.g., Let's go to Cancun",
                     text: $viewModel.inputText,
                     selection: $textSelection
                 )
-                    .textFieldStyle(.roundedBorder)
-                    .focused($isInputFocused)
-                    .onSubmit {
-                        Task {
-                            await viewModel.findEmojis(for: viewModel.inputText, context: conversationText.isEmpty ? nil : conversationText)
-                        }
+                .textFieldStyle(.roundedBorder)
+                .focused($isInputFocused)
+                .onSubmit {
+                    Task {
+                        await viewModel.findEmojis(
+                            for: viewModel.inputText,
+                            context: conversationText.isEmpty ? nil : conversationText
+                        )
                     }
-                    .disabled(viewModel.isLoading)
+                }
+                .disabled(viewModel.isLoading)
 
                 Text("Press Return to find emoji reactions")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
             .padding(.horizontal)
-            
+
             // Loading indicator
             if viewModel.isLoading {
                 VStack(spacing: 12) {
@@ -150,7 +153,7 @@ struct EmojiReactionPickerView: View {
                 }
                 .padding()
             }
-            
+
             // Error message
             if let errorMessage = viewModel.errorMessage {
                 HStack {
@@ -165,7 +168,7 @@ struct EmojiReactionPickerView: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
             }
-            
+
             // Compact results under buttons
             if !viewModel.finalists.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
@@ -204,13 +207,13 @@ struct EmojiReactionPickerView: View {
                     .padding(.horizontal)
                 }
             }
-            
+
             Spacer()
         }
         .padding()
         .frame(maxWidth: 600)
     }
-    
+
     private func selectAllText(isFocused: Bool) {
         guard isFocused else {
             textSelection = nil
@@ -221,22 +224,22 @@ struct EmojiReactionPickerView: View {
             textSelection = nil
             return
         }
-        
-        let range = viewModel.inputText.startIndex..<viewModel.inputText.endIndex
+
+        let range = viewModel.inputText.startIndex ..< viewModel.inputText.endIndex
         DispatchQueue.main.async {
-            self.textSelection = TextSelection(range: range)
+            textSelection = TextSelection(range: range)
         }
     }
 }
 
 struct EmojiResultCard: View {
     let emoji: Emoji
-    
+
     var body: some View {
         VStack(spacing: 8) {
             Text(emoji.character)
                 .font(.system(size: 60))
-            
+
             Text(emoji.name)
                 .font(.caption)
                 .foregroundStyle(.secondary)

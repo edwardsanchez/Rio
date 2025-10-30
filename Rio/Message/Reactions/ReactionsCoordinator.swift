@@ -39,7 +39,7 @@ final class ReactionsCoordinator {
     ) {
         cancelCloseTimer(for: context.message.id)
         cancelOverlayRemoval(for: context.message.id)
-        self.registerMenuModel(menuModel, for: context.message.id)
+        registerMenuModel(menuModel, for: context.message.id)
         geometrySource = .list
         reactingMessage = context
 
@@ -91,7 +91,7 @@ final class ReactionsCoordinator {
     func promoteGeometrySourceToOverlay(for messageID: UUID, after delay: TimeInterval = 0.18) {
         guard geometrySource != .overlay else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-            guard let self, self.reactingMessage?.message.id == messageID else { return }
+            guard let self, reactingMessage?.message.id == messageID else { return }
             withAnimation(.smooth(duration: 0.35)) {
                 self.geometrySource = .overlay
             }
@@ -132,7 +132,7 @@ final class ReactionsCoordinator {
             closeWorkItems.removeValue(forKey: messageID)
         }
     }
-    
+
     private func cancelOverlayRemoval(for messageID: UUID) {
         if let workItem = overlayRemovalWorkItems[messageID] {
             workItem.cancel()
@@ -152,11 +152,11 @@ final class ReactionsCoordinator {
 
         let removalWorkItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            if self.reactingMessage?.message.id == messageID {
-                self.reactingMessage = nil
+            if reactingMessage?.message.id == messageID {
+                reactingMessage = nil
             }
-            
-            self.overlayRemovalWorkItems.removeValue(forKey: messageID)
+
+            overlayRemovalWorkItems.removeValue(forKey: messageID)
         }
 
         overlayRemovalWorkItems[messageID] = removalWorkItem

@@ -76,11 +76,11 @@ struct ReactionButton: View {
     private var isInteractable: Bool {
         switch reaction.display {
         case let .emoji(value, _):
-            return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .systemImage:
-            return true
+            true
         case .placeholder:
-            return false
+            false
         }
     }
 }

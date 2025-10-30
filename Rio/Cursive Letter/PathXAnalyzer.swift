@@ -5,8 +5,8 @@
 //  Created by Edward Sanchez on 9/25/25.
 //
 
-import SwiftUI
 import SVGPath
+import SwiftUI
 
 /**
  * PathXAnalyzer provides sophisticated analysis and measurement capabilities for CGPath objects.
@@ -42,18 +42,18 @@ struct PathXAnalyzer {
      * needed for animation calculations and coordinate transformations.
      */
     struct Sample {
-        let u: CGFloat                    /// Path parameter [0,1] - position along the complete path
-        let point: CGPoint                /// Actual (x,y) coordinates at this path position
-        let cumulativeX: CGFloat          /// Total horizontal distance traveled from path start
-        let cumulativeLength: CGFloat     /// Total Euclidean path length from path start
+        let u: CGFloat /// Path parameter [0,1] - position along the complete path
+        let point: CGPoint /// Actual (x,y) coordinates at this path position
+        let cumulativeX: CGFloat /// Total horizontal distance traveled from path start
+        let cumulativeLength: CGFloat /// Total Euclidean path length from path start
     }
 
     // MARK: - Core Data
 
-    let samples: [Sample]           /// Array of uniformly-spaced path samples for analysis
-    let totalXDistance: CGFloat     /// Total horizontal distance covered by the entire path
-    let totalPathLength: CGFloat    /// Total Euclidean length of the entire path
-    let bounds: CGRect              /// Bounding rectangle of the original path
+    let samples: [Sample] /// Array of uniformly-spaced path samples for analysis
+    let totalXDistance: CGFloat /// Total horizontal distance covered by the entire path
+    let totalPathLength: CGFloat /// Total Euclidean length of the entire path
+    let bounds: CGRect /// Bounding rectangle of the original path
 
     /**
      * Initializes a PathXAnalyzer for the given CGPath with specified sampling resolution.
@@ -74,10 +74,10 @@ struct PathXAnalyzer {
             sampleCount: max(sampleCount, 1)
         )
 
-        self.samples = result.samples
-        self.totalXDistance = result.totalXDistance
-        self.totalPathLength = result.totalPathLength
-        self.bounds = path.boundingBox
+        samples = result.samples
+        totalXDistance = result.totalXDistance
+        totalPathLength = result.totalPathLength
+        bounds = path.boundingBox
     }
 
     /**
@@ -88,11 +88,11 @@ struct PathXAnalyzer {
      * uniform path-length spacing).
      */
     private struct PolylineData {
-        let points: [CGPoint]           /// Tessellated points approximating the path
+        let points: [CGPoint] /// Tessellated points approximating the path
         let cumulativeLengths: [CGFloat] /// Running total of Euclidean distances
-        let cumulativeX: [CGFloat]      /// Running total of horizontal distances
-        let totalLength: CGFloat        /// Final total Euclidean path length
-        let totalX: CGFloat             /// Final total horizontal distance
+        let cumulativeX: [CGFloat] /// Running total of horizontal distances
+        let totalLength: CGFloat /// Final total Euclidean path length
+        let totalX: CGFloat /// Final total horizontal distance
     }
 
     /**
@@ -113,7 +113,10 @@ struct PathXAnalyzer {
      *   - sampleCount: Number of samples to generate
      * - Returns: Tuple containing samples array and total distance measurements
      */
-    private static func prepareSamples(for path: CGPath, sampleCount: Int) -> (samples: [Sample], totalXDistance: CGFloat, totalPathLength: CGFloat) {
+    private static func prepareSamples(
+        for path: CGPath,
+        sampleCount: Int
+    ) -> (samples: [Sample], totalXDistance: CGFloat, totalPathLength: CGFloat) {
         let divisions = max(sampleCount, 1)
         // Adaptive tessellation: more steps for higher sample counts, but capped for performance
         let stepsPerCurve = min(200, max(24, sampleCount / 4))
@@ -130,9 +133,9 @@ struct PathXAnalyzer {
         samples.reserveCapacity(divisions + 1)
 
         // Create samples at uniform path-length intervals
-        for index in 0...divisions {
-            let fraction = CGFloat(index) / CGFloat(divisions)  // Parameter from 0 to 1
-            let targetLength = fraction * polyline.totalLength  // Corresponding path length
+        for index in 0 ... divisions {
+            let fraction = CGFloat(index) / CGFloat(divisions) // Parameter from 0 to 1
+            let targetLength = fraction * polyline.totalLength // Corresponding path length
             let (point, cumulativeX) = point(on: polyline, atLength: targetLength)
 
             samples.append(Sample(
@@ -199,7 +202,7 @@ struct PathXAnalyzer {
                 let control = element.pointee.points[0]
                 let end = element.pointee.points[1]
                 let steps = max(2, stepsPerCurve)
-                for step in 1...steps {
+                for step in 1 ... steps {
                     let t = CGFloat(step) / CGFloat(steps)
                     appendPoint(quadPoint(p0: currentPoint, p1: control, p2: end, t: t))
                 }
@@ -211,11 +214,11 @@ struct PathXAnalyzer {
                 let control2 = element.pointee.points[1]
                 let end = element.pointee.points[2]
                 let steps = max(3, stepsPerCurve * 2)
-                for step in 1...steps {
+                for step in 1 ... steps {
                     let t = CGFloat(step) / CGFloat(steps)
                     appendPoint(cubicPoint(p0: currentPoint, p1: control1, p2: control2, p3: end, t: t))
                 }
-                
+
                 currentPoint = end
             case .closeSubpath:
                 appendPoint(subpathStart)
@@ -240,7 +243,7 @@ struct PathXAnalyzer {
         var totalX: CGFloat = 0
 
         // Process each segment to build cumulative distance arrays
-        for index in 1..<points.count {
+        for index in 1 ..< points.count {
             let start = points[index - 1]
             let end = points[index]
 
@@ -327,7 +330,7 @@ struct PathXAnalyzer {
             x: startPoint.x + (endPoint.x - startPoint.x) * t,
             y: startPoint.y + (endPoint.y - startPoint.y) * t
         )
-        
+
         let interpolatedX = startX + (endX - startX) * t
 
         return (interpolatedPoint, interpolatedX)
@@ -380,10 +383,10 @@ struct PathXAnalyzer {
         let tSquared = t * t
 
         // Bernstein polynomial coefficients for cubic Bézier
-        let a = oneMinusTSquared * oneMinusT  // (1-t)³
-        let b = 3 * oneMinusTSquared * t       // 3(1-t)²t
-        let c = 3 * oneMinusT * tSquared       // 3(1-t)t²
-        let d = tSquared * t                   // t³
+        let a = oneMinusTSquared * oneMinusT // (1-t)³
+        let b = 3 * oneMinusTSquared * t // 3(1-t)²t
+        let c = 3 * oneMinusT * tSquared // 3(1-t)t²
+        let d = tSquared * t // t³
 
         let x = a * p0.x + b * p1.x + c * p2.x + d * p3.x
         let y = a * p0.y + b * p1.y + c * p2.y + d * p3.y
@@ -617,7 +620,7 @@ struct PathXAnalyzer {
         if let lower = lowerSample {
             return lower.u
         }
-        
+
         if let upper = upperSample {
             return upper.u
         }

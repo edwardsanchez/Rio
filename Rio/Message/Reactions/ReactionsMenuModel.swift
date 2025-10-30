@@ -11,9 +11,9 @@ import SwiftUI
 
 enum MenuState {
     case closed
-    case opening           // Background menu visible, reactions animating out
-    case open              // Fully expanded, background hidden, overlay visible
-    case selectedClosing   // User tapped reaction, animating back
+    case opening // Background menu visible, reactions animating out
+    case open // Fully expanded, background hidden, overlay visible
+    case selectedClosing // User tapped reaction, animating back
 
     var isShowingMenu: Bool {
         self != .closed
@@ -35,7 +35,7 @@ final class ReactionsMenuModel {
     var showBackgroundMenu = false
 
     private let reactionSpacing: CGFloat = 50
-    fileprivate var orchestrator: AnimationOrchestrator!
+    private var orchestrator: AnimationOrchestrator!
     fileprivate var customEmojiManager: CustomEmojiManager!
 
     private enum Constants {
@@ -45,11 +45,12 @@ final class ReactionsMenuModel {
     init(messageID: UUID, reactions: [Reaction]) {
         self.messageID = messageID
         self.reactions = reactions
-        self.orchestrator = AnimationOrchestrator(model: self)
-        self.customEmojiManager = CustomEmojiManager(model: self)
+        orchestrator = AnimationOrchestrator(model: self)
+        customEmojiManager = CustomEmojiManager(model: self)
     }
 
     // MARK: - Derived State
+
     var isShowingReactionMenu: Bool { state == .open }
 
     var selectedReaction: Reaction? {
@@ -92,6 +93,7 @@ final class ReactionsMenuModel {
     var calculatedReactionSpacing: CGFloat { reactionSpacing }
 
     // MARK: - Intents
+
     func openReactionsMenu() {
         orchestrator.transitionToOpening()
     }
@@ -153,7 +155,7 @@ final class AnimationOrchestrator {
         guard let model else { return }
 
         model.customEmojiManager.showPlaceholder()
-        
+
         // Immediately set state and show background
         model.state = .opening
         setBackgroundMenuVisible(true, includeShowDelay: false)
@@ -164,8 +166,8 @@ final class AnimationOrchestrator {
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
                 model.state = .open
             }
-            
-            self.scheduleBackgroundMenuHide()
+
+            scheduleBackgroundMenuHide()
         }
 
         fanOutWorkItem = workItem
@@ -184,12 +186,12 @@ final class AnimationOrchestrator {
 
         let collapseWorkItem = DispatchWorkItem { [weak self, weak model] in
             guard let self, let model else { return }
-            
+
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
                 model.state = .selectedClosing
             }
 
-            self.scheduleBackgroundMenuHideAfterClose()
+            scheduleBackgroundMenuHideAfterClose()
         }
 
         if delay == 0 {
@@ -219,7 +221,7 @@ final class AnimationOrchestrator {
             additionalDelay: delay,
             includeShowDelay: includeShowDelay
         )
-        
+
         withAnimation(animation) {
             model.showBackgroundMenu = value
         }
@@ -228,13 +230,13 @@ final class AnimationOrchestrator {
     private func scheduleBackgroundMenuHide() {
         backgroundHideWorkItem?.cancel()
         guard let model else { return }
-        
+
         let workItem = DispatchWorkItem { [weak self, weak model] in
             guard let model else { return }
             guard model.isShowingReactionMenu else { return }
             self?.setBackgroundMenuVisible(false)
         }
-        
+
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
             deadline: .now() + ReactionsAnimationTiming.baseDuration,
@@ -244,7 +246,7 @@ final class AnimationOrchestrator {
 
     private func scheduleBackgroundMenuHideAfterClose() {
         backgroundHideWorkItem?.cancel()
-        
+
         let workItem = DispatchWorkItem { [weak self, weak model] in
             guard let model else { return }
             self?.setBackgroundMenuVisible(false)
@@ -253,7 +255,7 @@ final class AnimationOrchestrator {
                 model.state = .closed
             }
         }
-        
+
         backgroundHideWorkItem = workItem
         DispatchQueue.main.asyncAfter(
             deadline: .now() + ReactionsAnimationTiming.baseDuration + ReactionsAnimationTiming.overlayHoldDuration,
@@ -336,7 +338,8 @@ final class CustomEmojiManager {
 
     private func updateReactionsList(showingEmoji: Bool) {
         guard let model,
-              let index = model.reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID }) else { return }
+              let index = model.reactions.firstIndex(where: { $0.id == Constants.customEmojiReactionID })
+        else { return }
 
         if showingEmoji, let emoji = selection {
             model.reactions[index] = Reaction(
@@ -403,6 +406,7 @@ struct Reaction: Identifiable, Equatable {
 }
 
 // MARK: - Animation Timing
+
 enum ReactionsAnimationTiming {
     static let baseDuration: TimeInterval = 0.4
     static let matchedGeometryReturnDuration: TimeInterval = 0.35
@@ -461,11 +465,11 @@ enum HorizontalAnchor {
     func xOffset(for size: CGSize) -> CGFloat {
         switch self {
         case .center:
-            return 0
+            0
         case .leading:
-            return -size.width / 2
+            -size.width / 2
         case .trailing:
-            return size.width / 2
+            size.width / 2
         }
     }
 }
@@ -478,11 +482,11 @@ enum VerticalAnchor {
     func yOffset(for size: CGSize) -> CGFloat {
         switch self {
         case .center:
-            return 0
+            0
         case .top:
-            return -size.height / 2
+            -size.height / 2
         case .bottom:
-            return size.height / 2
+            size.height / 2
         }
     }
 }

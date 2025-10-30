@@ -29,16 +29,16 @@ enum BubbleAnimationState: Equatable {
     /// The target bubble type this state is transitioning to (or is at)
     var targetType: BubbleType {
         switch self {
-        case .idle(let type):
-            return type
-        case .morphing(_, let to, _):
-            return to
+        case let .idle(type):
+            type
+        case let .morphing(_, to, _):
+            to
         case .exploding:
-            return .read
+            .read
         case .scaling:
-            return .thinking
+            .thinking
         case .quickAppearing:
-            return .talking
+            .talking
         }
     }
 
@@ -46,26 +46,26 @@ enum BubbleAnimationState: Equatable {
     var isAnimating: Bool {
         switch self {
         case .idle:
-            return false
+            false
         case .morphing, .exploding, .scaling, .quickAppearing:
-            return true
+            true
         }
     }
 
     /// The morph progress (0 = thinking/read, 1 = talking) for layout calculations
     func morphProgress(at date: Date, config: BubbleConfiguration) -> CGFloat {
         switch self {
-        case .idle(let type):
+        case let .idle(type):
             return type.isTalking ? 1.0 : 0.0
 
-        case .morphing(let from, let to, let startTime):
+        case let .morphing(from, to, startTime):
             let elapsed = date.timeIntervalSince(startTime)
             let duration = config.morphDuration
 
             if elapsed <= 0 {
                 return from.isTalking ? 1.0 : 0.0
             }
-            
+
             if elapsed >= duration {
                 return to.isTalking ? 1.0 : 0.0
             }
@@ -98,22 +98,22 @@ enum BubbleAnimationState: Equatable {
         case .idle:
             return 1.0
 
-        case .morphing(_, _, let startTime):
+        case let .morphing(_, _, startTime):
             let elapsed = date.timeIntervalSince(startTime)
             let duration = config.morphDuration
             return min(max(CGFloat(elapsed / duration), 0), 1)
 
-        case .exploding(let startTime):
+        case let .exploding(startTime):
             let elapsed = date.timeIntervalSince(startTime)
             let duration = config.explosionDuration
             return min(max(CGFloat(elapsed / duration), 0), 1)
 
-        case .scaling(let startTime):
+        case let .scaling(startTime):
             let elapsed = date.timeIntervalSince(startTime)
             let duration = config.readToThinkingDuration
             return min(max(CGFloat(elapsed / duration), 0), 1)
 
-        case .quickAppearing(let startTime):
+        case let .quickAppearing(startTime):
             let elapsed = date.timeIntervalSince(startTime)
             let duration: TimeInterval = 0.02
             return min(max(CGFloat(elapsed / duration), 0), 1)
@@ -135,32 +135,32 @@ enum BubbleAnimationState: Equatable {
         }
 
         // Thinking → Talking: morph animation
-        if oldType.isThinking && newType.isTalking {
+        if oldType.isThinking, newType.isTalking {
             return .morphing(from: oldType, to: newType, startTime: date)
         }
 
         // Talking → Thinking: morph animation
-        if oldType.isTalking && newType.isThinking {
+        if oldType.isTalking, newType.isThinking {
             return .morphing(from: oldType, to: newType, startTime: date)
         }
 
         // Thinking → Read: explosion animation
-        if oldType.isThinking && newType.isRead {
+        if oldType.isThinking, newType.isRead {
             return .exploding(startTime: date)
         }
 
         // Read → Thinking: scale-up animation
-        if oldType.isRead && newType.isThinking {
+        if oldType.isRead, newType.isThinking {
             return .scaling(startTime: date)
         }
 
         // Read → Talking: quick appearance (no morph)
-        if oldType.isRead && newType.isTalking {
+        if oldType.isRead, newType.isTalking {
             return .quickAppearing(startTime: date)
         }
 
         // Talking → Read: direct transition
-        if oldType.isTalking && newType.isRead {
+        if oldType.isTalking, newType.isRead {
             return .idle(newType)
         }
 

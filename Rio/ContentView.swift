@@ -5,8 +5,8 @@
 //  Created by Edward Sanchez on 9/19/25.
 //
 
-import SwiftUI
 import SVGPath
+import SwiftUI
 
 struct ContentView: View {
     @State private var chatData = ChatData()

@@ -7,116 +7,759 @@
 
 import Foundation
 
-struct EmojiData {
+enum EmojiData {
     // MARK: - People Emojis
+
     static let peopleEmojisBase: [Emoji] = [
-        Emoji(id: "grinningFace", character: "😀", name: "Grinning Face", keywords: ["happy", "smile", "joy", "cheerful"], category: .people(.happy)),
-        Emoji(id: "grinningFaceWithBigEyes", character: "😃", name: "Grinning Face With Big Eyes", keywords: ["happy", "excited", "smile", "joy"], category: .people(.happy)),
-        Emoji(id: "grinningFaceWithSmilingEyes", character: "😄", name: "Grinning Face With Smiling Eyes", keywords: ["happy", "joy", "laugh", "pleased"], category: .people(.happy)),
-        Emoji(id: "beamingFaceWithSmilingEyes", character: "😁", name: "Beaming Face With Smiling Eyes", keywords: ["happy", "grin", "excited", "joy"], category: .people(.happy)),
-        Emoji(id: "grinningSquintingFace", character: "😆", name: "Grinning Squinting Face", keywords: ["laugh", "happy", "giggle", "haha"], category: .people(.happy)),
-        Emoji(id: "grinningFaceWithSweat", character: "😅", name: "Grinning Face With Sweat", keywords: ["relief", "phew", "nervous", "laugh"], category: .people(.happy)),
-        Emoji(id: "rollingOnTheFloorLaughing", character: "🤣", name: "Rolling On The Floor Laughing", keywords: ["rofl", "lol", "hilarious", "laugh", "dead"], category: .people(.happy)),
-        Emoji(id: "faceWithTearsOfJoy", character: "😂", name: "Face With Tears Of Joy", keywords: ["lol", "laugh", "rofl", "haha", "funny", "cry"], category: .people(.happy)),
-        Emoji(id: "slightlySmilingFace", character: "🙂", name: "Slightly Smiling Face", keywords: ["happy", "content", "pleasant", "okay"], category: .people(.happy)),
-        Emoji(id: "upsideDownFace", character: "🙃", name: "Upside Down Face", keywords: ["sarcasm", "irony", "silly", "playful"], category: .people(.playful)),
-        Emoji(id: "meltingFace", character: "🫠", name: "Melting Face", keywords: ["hot", "embarrassed", "dissolve", "awkward"], category: .people(.worried)),
-        Emoji(id: "winkingFace", character: "😉", name: "Winking Face", keywords: ["flirt", "playful", "joke", "cheeky"], category: .people(.playful)),
-        Emoji(id: "smilingFaceWithSmilingEyes", character: "😊", name: "Smiling Face With Smiling Eyes", keywords: ["happy", "blush", "pleased", "warm"], category: .people(.happy)),
-        Emoji(id: "smilingFaceWithHalo", character: "😇", name: "Smiling Face With Halo", keywords: ["angel", "innocent", "saint", "good", "pure"], category: .people(.happy)),
-        Emoji(id: "smilingFaceWithHearts", character: "🥰", name: "Smiling Face With Hearts", keywords: ["love", "adore", "crush", "affection", "infatuated"], category: .people(.love)),
-        Emoji(id: "smilingFaceWithHeartEyes", character: "😍", name: "Smiling Face With Heart Eyes", keywords: ["love", "adore", "crush", "infatuated", "smitten"], category: .people(.love)),
-        Emoji(id: "starStruck", character: "🤩", name: "Star Struck", keywords: ["amazed", "wow", "impressed", "celebrity", "awesome"], category: .people(.surprised)),
-        Emoji(id: "faceBlowingAKiss", character: "😘", name: "Face Blowing A Kiss", keywords: ["love", "mwah", "romance", "flirt", "smooch"], category: .people(.love)),
-        Emoji(id: "kissingFace", character: "😗", name: "Kissing Face", keywords: ["love", "pucker", "smooch", "mwah"], category: .people(.love)),
-        Emoji(id: "smilingFace", character: "☺️", name: "Smiling Face", keywords: ["happy", "blush", "content", "pleased"], category: .people(.happy)),
-        Emoji(id: "kissingFaceWithClosedEyes", character: "😚", name: "Kissing Face With Closed Eyes", keywords: ["love", "romance", "smooch", "mwah"], category: .people(.love)),
-        Emoji(id: "kissingFaceWithSmilingEyes", character: "😙", name: "Kissing Face With Smiling Eyes", keywords: ["love", "affection", "sweet", "mwah"], category: .people(.love)),
-        Emoji(id: "smilingFaceWithTear", character: "🥲", name: "Smiling Face With Tear", keywords: ["grateful", "touched", "proud", "bittersweet", "emotional"], category: .people(.sad)),
-        Emoji(id: "faceSavoringFood", character: "😋", name: "Face Savoring Food", keywords: ["yum", "delicious", "tasty", "hungry", "yummy"], category: .people(.happy)),
-        Emoji(id: "faceWithTongue", character: "😛", name: "Face With Tongue", keywords: ["playful", "silly", "tease", "bleh"], category: .people(.playful)),
-        Emoji(id: "winkingFaceWithTongue", character: "😜", name: "Winking Face With Tongue", keywords: ["crazy", "silly", "playful", "joke", "fun"], category: .people(.playful)),
-        Emoji(id: "zanyFace", character: "🤪", name: "Zany Face", keywords: ["crazy", "wild", "goofy", "silly", "wacky"], category: .people(.playful)),
-        Emoji(id: "squintingFaceWithTongue", character: "😝", name: "Squinting Face With Tongue", keywords: ["ew", "gross", "disgusted", "yuck", "bleh"], category: .people(.playful)),
-        Emoji(id: "moneyMouthFace", character: "🤑", name: "Money Mouth Face", keywords: ["rich", "dollar", "greedy", "cash", "wealthy"], category: .people(.happy)),
-        Emoji(id: "smilingFaceWithOpenHands", character: "🤗", name: "Smiling Face With Open Hands", keywords: ["hug", "embrace", "welcome", "jazz hands"], category: .people(.happy)),
-        Emoji(id: "faceWithHandOverMouth", character: "🤭", name: "Face With Hand Over Mouth", keywords: ["giggle", "oops", "surprise", "secret", "tee-hee"], category: .people(.playful)),
-        Emoji(id: "faceWithOpenEyesAndHandOverMouth", character: "🫢", name: "Face With Open Eyes And Hand Over Mouth", keywords: ["gasp", "surprise", "shocked", "oops", "omg"], category: .people(.surprised)),
-        Emoji(id: "faceWithPeekingEye", character: "🫣", name: "Face With Peeking Eye", keywords: ["shy", "scared", "peek", "hiding", "nervous"], category: .people(.worried)),
-        Emoji(id: "shushingFace", character: "🤫", name: "Shushing Face", keywords: ["quiet", "shh", "silence", "secret", "hush"], category: .people(.neutral)),
-        Emoji(id: "thinkingFace", character: "🤔", name: "Thinking Face", keywords: ["hmm", "pondering", "consider", "wonder", "curious"], category: .people(.neutral)),
-        Emoji(id: "salutingFace", character: "🫡", name: "Saluting Face", keywords: ["respect", "military", "yes sir", "honor", "aye aye"], category: .people(.neutral)),
-        Emoji(id: "zipperMouthFace", character: "🤐", name: "Zipper Mouth Face", keywords: ["secret", "sealed", "quiet", "silent", "shh"], category: .people(.neutral)),
-        Emoji(id: "faceWithRaisedEyebrow", character: "🤨", name: "Face With Raised Eyebrow", keywords: ["skeptical", "suspicious", "doubt", "hmm", "really"], category: .people(.neutral)),
-        Emoji(id: "neutralFace", character: "😐", name: "Neutral Face", keywords: ["meh", "indifferent", "blank", "whatever"], category: .people(.neutral)),
-        Emoji(id: "expressionlessFace", character: "😑", name: "Expressionless Face", keywords: ["deadpan", "blank", "meh", "unimpressed"], category: .people(.neutral)),
-        Emoji(id: "faceWithoutMouth", character: "😶", name: "Face Without Mouth", keywords: ["silent", "speechless", "quiet", "mute"], category: .people(.neutral)),
-        Emoji(id: "dottedLineFace", character: "🫥", name: "Dotted Line Face", keywords: ["invisible", "disappear", "fade", "hidden"], category: .people(.neutral)),
-        Emoji(id: "faceInClouds", character: "😶‍🌫️", name: "Face In Clouds", keywords: ["foggy", "dazed", "confused", "spacey"], category: .people(.worried)),
-        Emoji(id: "smirkingFace", character: "😏", name: "Smirking Face", keywords: ["smug", "sly", "flirt", "confident", "cocky"], category: .people(.playful)),
-        Emoji(id: "unamusedFace", character: "😒", name: "Unamused Face", keywords: ["unimpressed", "bored", "meh", "dissatisfied"], category: .people(.neutral)),
-        Emoji(id: "faceWithRollingEyes", character: "🙄", name: "Face With Rolling Eyes", keywords: ["whatever", "annoyed", "ugh", "seriously"], category: .people(.neutral)),
-        Emoji(id: "grimacingFace", character: "😬", name: "Grimacing Face", keywords: ["awkward", "eek", "cringe", "yikes", "oops"], category: .people(.worried)),
-        Emoji(id: "faceExhaling", character: "😮‍💨", name: "Face Exhaling", keywords: ["sigh", "relief", "phew", "tired", "done"], category: .people(.tired)),
-        Emoji(id: "lyingFace", character: "🤥", name: "Lying Face", keywords: ["pinocchio", "liar", "dishonest", "fib"], category: .people(.playful)),
-        Emoji(id: "shakingFace", character: "🫨", name: "Shaking Face", keywords: ["earthquake", "vibrate", "scared", "nervous", "shook"], category: .people(.worried)),
-        Emoji(id: "relievedFace", character: "😌", name: "Relieved Face", keywords: ["content", "calm", "peaceful", "phew"], category: .people(.happy)),
-        Emoji(id: "pensiveFace", character: "😔", name: "Pensive Face", keywords: ["sad", "thoughtful", "down", "disappointed"], category: .people(.sad)),
-        Emoji(id: "sleepyFace", character: "😪", name: "Sleepy Face", keywords: ["tired", "exhausted", "drowsy", "sleepy"], category: .people(.tired)),
-        Emoji(id: "droolingFace", character: "🤤", name: "Drooling Face", keywords: ["desire", "hungry", "sleepy", "want"], category: .people(.tired)),
-        Emoji(id: "sleepingFace", character: "😴", name: "Sleeping Face", keywords: ["zzz", "tired", "asleep", "snooze", "bedtime"], category: .people(.tired)),
-        Emoji(id: "faceWithMedicalMask", character: "😷", name: "Face With Medical Mask", keywords: ["sick", "covid", "ill", "doctor", "hospital"], category: .people(.sick)),
-        Emoji(id: "faceWithThermometer", character: "🤒", name: "Face With Thermometer", keywords: ["sick", "ill", "fever", "temperature", "unwell"], category: .people(.sick)),
-        Emoji(id: "faceWithHeadBandage", character: "🤕", name: "Face With Head Bandage", keywords: ["hurt", "injured", "accident", "ouch", "clumsy"], category: .people(.sick)),
-        Emoji(id: "nauseatedFace", character: "🤢", name: "Nauseated Face", keywords: ["sick", "queasy", "disgusted", "green", "gross"], category: .people(.sick)),
-        Emoji(id: "faceVomiting", character: "🤮", name: "Face Vomiting", keywords: ["sick", "puke", "throw up", "disgusting", "ill"], category: .people(.sick)),
-        Emoji(id: "sneezingFace", character: "🤧", name: "Sneezing Face", keywords: ["sick", "achoo", "cold", "allergies", "ill"], category: .people(.sick)),
-        Emoji(id: "hotFace", character: "🥵", name: "Hot Face", keywords: ["sweating", "heat", "summer", "fever", "burning"], category: .people(.sick)),
-        Emoji(id: "coldFace", character: "🥶", name: "Cold Face", keywords: ["freezing", "frozen", "winter", "chilly", "ice"], category: .people(.sick)),
-        Emoji(id: "woozyFace", character: "🥴", name: "Woozy Face", keywords: ["drunk", "dizzy", "intoxicated", "tipsy", "unsteady"], category: .people(.sick)),
-        Emoji(id: "faceWithCrossedOutEyes", character: "😵", name: "Face With Crossed Out Eyes", keywords: ["dead", "knocked out", "dizzy", "ko"], category: .people(.sick)),
-        Emoji(id: "faceWithSpiralEyes", character: "😵‍💫", name: "Face With Spiral Eyes", keywords: ["dizzy", "hypnotized", "confused", "dazed"], category: .people(.sick)),
-        Emoji(id: "explodingHead", character: "🤯", name: "Exploding Head", keywords: ["mind blown", "amazed", "wow", "shocked", "whoa"], category: .people(.surprised)),
-        Emoji(id: "cowboyHatFace", character: "🤠", name: "Cowboy Hat Face", keywords: ["western", "howdy", "yeehaw", "country"], category: .people(.happy)),
-        Emoji(id: "partyingFace", character: "🥳", name: "Partying Face", keywords: ["celebration", "birthday", "festive", "fun", "woohoo"], category: .people(.happy)),
-        Emoji(id: "disguisedFace", character: "🥸", name: "Disguised Face", keywords: ["incognito", "spy", "groucho", "undercover", "secret"], category: .people(.playful)),
-        Emoji(id: "smilingFaceWithSunglasses", character: "😎", name: "Smiling Face With Sunglasses", keywords: ["cool", "awesome", "confident", "swagger"], category: .people(.happy)),
-        Emoji(id: "nerdFace", character: "🤓", name: "Nerd Face", keywords: ["geek", "smart", "clever", "studious", "brainy"], category: .people(.happy)),
-        Emoji(id: "faceWithMonocle", character: "🧐", name: "Face With Monocle", keywords: ["curious", "inspect", "fancy", "posh", "hmm"], category: .people(.neutral)),
-        Emoji(id: "confusedFace", character: "😕", name: "Confused Face", keywords: ["puzzled", "uncertain", "huh", "perplexed"], category: .people(.worried)),
-        Emoji(id: "faceWithDiagonalMouth", character: "🫤", name: "Face With Diagonal Mouth", keywords: ["unsure", "skeptical", "meh", "hesitant"], category: .people(.worried)),
-        Emoji(id: "worriedFace", character: "😟", name: "Worried Face", keywords: ["anxious", "nervous", "concerned", "uneasy"], category: .people(.worried)),
-        Emoji(id: "slightlyFrowningFace", character: "🙁", name: "Slightly Frowning Face", keywords: ["sad", "disappointed", "unhappy"], category: .people(.sad)),
-        Emoji(id: "frowningFace", character: "☹️", name: "Frowning Face", keywords: ["sad", "unhappy", "upset", "down"], category: .people(.sad)),
-        Emoji(id: "faceWithOpenMouth", character: "😮", name: "Face With Open Mouth", keywords: ["surprised", "wow", "amazed", "gasp"], category: .people(.surprised)),
-        Emoji(id: "hushedFace", character: "😯", name: "Hushed Face", keywords: ["surprised", "quiet", "stunned", "wow"], category: .people(.surprised)),
-        Emoji(id: "astonishedFace", character: "😲", name: "Astonished Face", keywords: ["shocked", "surprised", "amazed", "wow"], category: .people(.surprised)),
-        Emoji(id: "flushedFace", character: "😳", name: "Flushed Face", keywords: ["embarrassed", "blushing", "shy", "awkward"], category: .people(.worried)),
-        Emoji(id: "pleadingFace", character: "🥺", name: "Pleading Face", keywords: ["puppy eyes", "please", "beg", "cute", "mercy"], category: .people(.sad)),
-        Emoji(id: "faceHoldingBackTears", character: "🥹", name: "Face Holding Back Tears", keywords: ["emotional", "touched", "grateful", "proud", "moved"], category: .people(.sad)),
-        Emoji(id: "frowningFaceWithOpenMouth", character: "😦", name: "Frowning Face With Open Mouth", keywords: ["shocked", "surprised", "dismayed", "oh no"], category: .people(.surprised)),
-        Emoji(id: "anguishedFace", character: "😧", name: "Anguished Face", keywords: ["distressed", "anxious", "worried", "upset"], category: .people(.worried)),
-        Emoji(id: "fearfulFace", character: "😨", name: "Fearful Face", keywords: ["scared", "afraid", "terror", "anxious"], category: .people(.worried)),
-        Emoji(id: "anxiousFaceWithSweat", character: "😰", name: "Anxious Face With Sweat", keywords: ["nervous", "stressed", "worried", "panic"], category: .people(.worried)),
-        Emoji(id: "sadButRelievedFace", character: "😥", name: "Sad But Relieved Face", keywords: ["bittersweet", "phew", "disappointed", "mixed"], category: .people(.sad)),
-        Emoji(id: "cryingFace", character: "😢", name: "Crying Face", keywords: ["sad", "tear", "upset", "hurt", "sob"], category: .people(.sad)),
-        Emoji(id: "loudlyCryingFace", character: "😭", name: "Loudly Crying Face", keywords: ["sob", "bawling", "devastated", "heartbroken", "wail"], category: .people(.sad)),
-        Emoji(id: "faceScreamingInFear", character: "😱", name: "Face Screaming In Fear", keywords: ["scream", "horror", "terrified", "omg", "panic"], category: .people(.worried)),
-        Emoji(id: "confoundedFace", character: "😖", name: "Confounded Face", keywords: ["frustrated", "confused", "upset", "exasperated"], category: .people(.angry)),
-        Emoji(id: "perseveringFace", character: "😣", name: "Persevering Face", keywords: ["struggling", "determined", "effort", "stressed"], category: .people(.worried)),
-        Emoji(id: "disappointedFace", character: "😞", name: "Disappointed Face", keywords: ["sad", "let down", "upset", "dejected"], category: .people(.sad)),
-        Emoji(id: "downcastFaceWithSweat", character: "😓", name: "Downcast Face With Sweat", keywords: ["sad", "hard work", "stressed", "difficult"], category: .people(.sad)),
-        Emoji(id: "wearyFace", character: "😩", name: "Weary Face", keywords: ["exhausted", "frustrated", "distraught", "fed up"], category: .people(.tired)),
-        Emoji(id: "tiredFace", character: "😫", name: "Tired Face", keywords: ["exhausted", "frustrated", "done", "over it"], category: .people(.tired)),
-        Emoji(id: "yawningFace", character: "🥱", name: "Yawning Face", keywords: ["bored", "tired", "sleepy", "exhausted"], category: .people(.tired)),
-        Emoji(id: "faceWithSteamFromNose", character: "😤", name: "Face With Steam From Nose", keywords: ["frustrated", "triumph", "proud", "huffing", "annoyed"], category: .people(.angry)),
-        Emoji(id: "enragedFace", character: "😡", name: "Enraged Face", keywords: ["furious", "mad", "livid", "rage"], category: .people(.angry)),
-        Emoji(id: "angryFace", character: "😠", name: "Angry Face", keywords: ["mad", "annoyed", "upset", "grumpy"], category: .people(.angry)),
-        Emoji(id: "faceWithSymbolsOnMouth", character: "🤬", name: "Face With Symbols On Mouth", keywords: ["cursing", "swearing", "mad", "furious", "censored"], category: .people(.angry)),
-        Emoji(id: "smilingFaceWithHorns", character: "😈", name: "Smiling Face With Horns", keywords: ["devil", "evil", "mischievous", "naughty", "devilish"], category: .people(.playful)),
-        Emoji(id: "angryFaceWithHorns", character: "👿", name: "Angry Face With Horns", keywords: ["devil", "demon", "evil", "wicked", "villain"], category: .people(.angry)),
-        Emoji(id: "skull", character: "💀", name: "Skull", keywords: ["death", "dead", "dying", "skeleton", "spooky"], category: .people(.playful)),
-        Emoji(id: "skullAndCrossbones", character: "☠️", name: "Skull And Crossbones", keywords: ["death", "poison", "danger", "pirate", "warning"], category: .people(.playful))
+        Emoji(
+            id: "grinningFace",
+            character: "😀",
+            name: "Grinning Face",
+            keywords: ["happy", "smile", "joy", "cheerful"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "grinningFaceWithBigEyes",
+            character: "😃",
+            name: "Grinning Face With Big Eyes",
+            keywords: ["happy", "excited", "smile", "joy"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "grinningFaceWithSmilingEyes",
+            character: "😄",
+            name: "Grinning Face With Smiling Eyes",
+            keywords: ["happy", "joy", "laugh", "pleased"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "beamingFaceWithSmilingEyes",
+            character: "😁",
+            name: "Beaming Face With Smiling Eyes",
+            keywords: ["happy", "grin", "excited", "joy"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "grinningSquintingFace",
+            character: "😆",
+            name: "Grinning Squinting Face",
+            keywords: ["laugh", "happy", "giggle", "haha"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "grinningFaceWithSweat",
+            character: "😅",
+            name: "Grinning Face With Sweat",
+            keywords: ["relief", "phew", "nervous", "laugh"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "rollingOnTheFloorLaughing",
+            character: "🤣",
+            name: "Rolling On The Floor Laughing",
+            keywords: ["rofl", "lol", "hilarious", "laugh", "dead"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "faceWithTearsOfJoy",
+            character: "😂",
+            name: "Face With Tears Of Joy",
+            keywords: ["lol", "laugh", "rofl", "haha", "funny", "cry"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "slightlySmilingFace",
+            character: "🙂",
+            name: "Slightly Smiling Face",
+            keywords: ["happy", "content", "pleasant", "okay"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "upsideDownFace",
+            character: "🙃",
+            name: "Upside Down Face",
+            keywords: ["sarcasm", "irony", "silly", "playful"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "meltingFace",
+            character: "🫠",
+            name: "Melting Face",
+            keywords: ["hot", "embarrassed", "dissolve", "awkward"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "winkingFace",
+            character: "😉",
+            name: "Winking Face",
+            keywords: ["flirt", "playful", "joke", "cheeky"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "smilingFaceWithSmilingEyes",
+            character: "😊",
+            name: "Smiling Face With Smiling Eyes",
+            keywords: ["happy", "blush", "pleased", "warm"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "smilingFaceWithHalo",
+            character: "😇",
+            name: "Smiling Face With Halo",
+            keywords: ["angel", "innocent", "saint", "good", "pure"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "smilingFaceWithHearts",
+            character: "🥰",
+            name: "Smiling Face With Hearts",
+            keywords: ["love", "adore", "crush", "affection", "infatuated"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "smilingFaceWithHeartEyes",
+            character: "😍",
+            name: "Smiling Face With Heart Eyes",
+            keywords: ["love", "adore", "crush", "infatuated", "smitten"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "starStruck",
+            character: "🤩",
+            name: "Star Struck",
+            keywords: ["amazed", "wow", "impressed", "celebrity", "awesome"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "faceBlowingAKiss",
+            character: "😘",
+            name: "Face Blowing A Kiss",
+            keywords: ["love", "mwah", "romance", "flirt", "smooch"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "kissingFace",
+            character: "😗",
+            name: "Kissing Face",
+            keywords: ["love", "pucker", "smooch", "mwah"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "smilingFace",
+            character: "☺️",
+            name: "Smiling Face",
+            keywords: ["happy", "blush", "content", "pleased"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "kissingFaceWithClosedEyes",
+            character: "😚",
+            name: "Kissing Face With Closed Eyes",
+            keywords: ["love", "romance", "smooch", "mwah"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "kissingFaceWithSmilingEyes",
+            character: "😙",
+            name: "Kissing Face With Smiling Eyes",
+            keywords: ["love", "affection", "sweet", "mwah"],
+            category: .people(.love)
+        ),
+        Emoji(
+            id: "smilingFaceWithTear",
+            character: "🥲",
+            name: "Smiling Face With Tear",
+            keywords: ["grateful", "touched", "proud", "bittersweet", "emotional"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "faceSavoringFood",
+            character: "😋",
+            name: "Face Savoring Food",
+            keywords: ["yum", "delicious", "tasty", "hungry", "yummy"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "faceWithTongue",
+            character: "😛",
+            name: "Face With Tongue",
+            keywords: ["playful", "silly", "tease", "bleh"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "winkingFaceWithTongue",
+            character: "😜",
+            name: "Winking Face With Tongue",
+            keywords: ["crazy", "silly", "playful", "joke", "fun"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "zanyFace",
+            character: "🤪",
+            name: "Zany Face",
+            keywords: ["crazy", "wild", "goofy", "silly", "wacky"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "squintingFaceWithTongue",
+            character: "😝",
+            name: "Squinting Face With Tongue",
+            keywords: ["ew", "gross", "disgusted", "yuck", "bleh"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "moneyMouthFace",
+            character: "🤑",
+            name: "Money Mouth Face",
+            keywords: ["rich", "dollar", "greedy", "cash", "wealthy"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "smilingFaceWithOpenHands",
+            character: "🤗",
+            name: "Smiling Face With Open Hands",
+            keywords: ["hug", "embrace", "welcome", "jazz hands"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "faceWithHandOverMouth",
+            character: "🤭",
+            name: "Face With Hand Over Mouth",
+            keywords: ["giggle", "oops", "surprise", "secret", "tee-hee"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "faceWithOpenEyesAndHandOverMouth",
+            character: "🫢",
+            name: "Face With Open Eyes And Hand Over Mouth",
+            keywords: ["gasp", "surprise", "shocked", "oops", "omg"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "faceWithPeekingEye",
+            character: "🫣",
+            name: "Face With Peeking Eye",
+            keywords: ["shy", "scared", "peek", "hiding", "nervous"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "shushingFace",
+            character: "🤫",
+            name: "Shushing Face",
+            keywords: ["quiet", "shh", "silence", "secret", "hush"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "thinkingFace",
+            character: "🤔",
+            name: "Thinking Face",
+            keywords: ["hmm", "pondering", "consider", "wonder", "curious"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "salutingFace",
+            character: "🫡",
+            name: "Saluting Face",
+            keywords: ["respect", "military", "yes sir", "honor", "aye aye"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "zipperMouthFace",
+            character: "🤐",
+            name: "Zipper Mouth Face",
+            keywords: ["secret", "sealed", "quiet", "silent", "shh"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "faceWithRaisedEyebrow",
+            character: "🤨",
+            name: "Face With Raised Eyebrow",
+            keywords: ["skeptical", "suspicious", "doubt", "hmm", "really"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "neutralFace",
+            character: "😐",
+            name: "Neutral Face",
+            keywords: ["meh", "indifferent", "blank", "whatever"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "expressionlessFace",
+            character: "😑",
+            name: "Expressionless Face",
+            keywords: ["deadpan", "blank", "meh", "unimpressed"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "faceWithoutMouth",
+            character: "😶",
+            name: "Face Without Mouth",
+            keywords: ["silent", "speechless", "quiet", "mute"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "dottedLineFace",
+            character: "🫥",
+            name: "Dotted Line Face",
+            keywords: ["invisible", "disappear", "fade", "hidden"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "faceInClouds",
+            character: "😶‍🌫️",
+            name: "Face In Clouds",
+            keywords: ["foggy", "dazed", "confused", "spacey"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "smirkingFace",
+            character: "😏",
+            name: "Smirking Face",
+            keywords: ["smug", "sly", "flirt", "confident", "cocky"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "unamusedFace",
+            character: "😒",
+            name: "Unamused Face",
+            keywords: ["unimpressed", "bored", "meh", "dissatisfied"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "faceWithRollingEyes",
+            character: "🙄",
+            name: "Face With Rolling Eyes",
+            keywords: ["whatever", "annoyed", "ugh", "seriously"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "grimacingFace",
+            character: "😬",
+            name: "Grimacing Face",
+            keywords: ["awkward", "eek", "cringe", "yikes", "oops"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "faceExhaling",
+            character: "😮‍💨",
+            name: "Face Exhaling",
+            keywords: ["sigh", "relief", "phew", "tired", "done"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "lyingFace",
+            character: "🤥",
+            name: "Lying Face",
+            keywords: ["pinocchio", "liar", "dishonest", "fib"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "shakingFace",
+            character: "🫨",
+            name: "Shaking Face",
+            keywords: ["earthquake", "vibrate", "scared", "nervous", "shook"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "relievedFace",
+            character: "😌",
+            name: "Relieved Face",
+            keywords: ["content", "calm", "peaceful", "phew"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "pensiveFace",
+            character: "😔",
+            name: "Pensive Face",
+            keywords: ["sad", "thoughtful", "down", "disappointed"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "sleepyFace",
+            character: "😪",
+            name: "Sleepy Face",
+            keywords: ["tired", "exhausted", "drowsy", "sleepy"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "droolingFace",
+            character: "🤤",
+            name: "Drooling Face",
+            keywords: ["desire", "hungry", "sleepy", "want"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "sleepingFace",
+            character: "😴",
+            name: "Sleeping Face",
+            keywords: ["zzz", "tired", "asleep", "snooze", "bedtime"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "faceWithMedicalMask",
+            character: "😷",
+            name: "Face With Medical Mask",
+            keywords: ["sick", "covid", "ill", "doctor", "hospital"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "faceWithThermometer",
+            character: "🤒",
+            name: "Face With Thermometer",
+            keywords: ["sick", "ill", "fever", "temperature", "unwell"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "faceWithHeadBandage",
+            character: "🤕",
+            name: "Face With Head Bandage",
+            keywords: ["hurt", "injured", "accident", "ouch", "clumsy"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "nauseatedFace",
+            character: "🤢",
+            name: "Nauseated Face",
+            keywords: ["sick", "queasy", "disgusted", "green", "gross"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "faceVomiting",
+            character: "🤮",
+            name: "Face Vomiting",
+            keywords: ["sick", "puke", "throw up", "disgusting", "ill"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "sneezingFace",
+            character: "🤧",
+            name: "Sneezing Face",
+            keywords: ["sick", "achoo", "cold", "allergies", "ill"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "hotFace",
+            character: "🥵",
+            name: "Hot Face",
+            keywords: ["sweating", "heat", "summer", "fever", "burning"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "coldFace",
+            character: "🥶",
+            name: "Cold Face",
+            keywords: ["freezing", "frozen", "winter", "chilly", "ice"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "woozyFace",
+            character: "🥴",
+            name: "Woozy Face",
+            keywords: ["drunk", "dizzy", "intoxicated", "tipsy", "unsteady"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "faceWithCrossedOutEyes",
+            character: "😵",
+            name: "Face With Crossed Out Eyes",
+            keywords: ["dead", "knocked out", "dizzy", "ko"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "faceWithSpiralEyes",
+            character: "😵‍💫",
+            name: "Face With Spiral Eyes",
+            keywords: ["dizzy", "hypnotized", "confused", "dazed"],
+            category: .people(.sick)
+        ),
+        Emoji(
+            id: "explodingHead",
+            character: "🤯",
+            name: "Exploding Head",
+            keywords: ["mind blown", "amazed", "wow", "shocked", "whoa"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "cowboyHatFace",
+            character: "🤠",
+            name: "Cowboy Hat Face",
+            keywords: ["western", "howdy", "yeehaw", "country"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "partyingFace",
+            character: "🥳",
+            name: "Partying Face",
+            keywords: ["celebration", "birthday", "festive", "fun", "woohoo"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "disguisedFace",
+            character: "🥸",
+            name: "Disguised Face",
+            keywords: ["incognito", "spy", "groucho", "undercover", "secret"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "smilingFaceWithSunglasses",
+            character: "😎",
+            name: "Smiling Face With Sunglasses",
+            keywords: ["cool", "awesome", "confident", "swagger"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "nerdFace",
+            character: "🤓",
+            name: "Nerd Face",
+            keywords: ["geek", "smart", "clever", "studious", "brainy"],
+            category: .people(.happy)
+        ),
+        Emoji(
+            id: "faceWithMonocle",
+            character: "🧐",
+            name: "Face With Monocle",
+            keywords: ["curious", "inspect", "fancy", "posh", "hmm"],
+            category: .people(.neutral)
+        ),
+        Emoji(
+            id: "confusedFace",
+            character: "😕",
+            name: "Confused Face",
+            keywords: ["puzzled", "uncertain", "huh", "perplexed"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "faceWithDiagonalMouth",
+            character: "🫤",
+            name: "Face With Diagonal Mouth",
+            keywords: ["unsure", "skeptical", "meh", "hesitant"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "worriedFace",
+            character: "😟",
+            name: "Worried Face",
+            keywords: ["anxious", "nervous", "concerned", "uneasy"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "slightlyFrowningFace",
+            character: "🙁",
+            name: "Slightly Frowning Face",
+            keywords: ["sad", "disappointed", "unhappy"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "frowningFace",
+            character: "☹️",
+            name: "Frowning Face",
+            keywords: ["sad", "unhappy", "upset", "down"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "faceWithOpenMouth",
+            character: "😮",
+            name: "Face With Open Mouth",
+            keywords: ["surprised", "wow", "amazed", "gasp"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "hushedFace",
+            character: "😯",
+            name: "Hushed Face",
+            keywords: ["surprised", "quiet", "stunned", "wow"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "astonishedFace",
+            character: "😲",
+            name: "Astonished Face",
+            keywords: ["shocked", "surprised", "amazed", "wow"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "flushedFace",
+            character: "😳",
+            name: "Flushed Face",
+            keywords: ["embarrassed", "blushing", "shy", "awkward"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "pleadingFace",
+            character: "🥺",
+            name: "Pleading Face",
+            keywords: ["puppy eyes", "please", "beg", "cute", "mercy"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "faceHoldingBackTears",
+            character: "🥹",
+            name: "Face Holding Back Tears",
+            keywords: ["emotional", "touched", "grateful", "proud", "moved"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "frowningFaceWithOpenMouth",
+            character: "😦",
+            name: "Frowning Face With Open Mouth",
+            keywords: ["shocked", "surprised", "dismayed", "oh no"],
+            category: .people(.surprised)
+        ),
+        Emoji(
+            id: "anguishedFace",
+            character: "😧",
+            name: "Anguished Face",
+            keywords: ["distressed", "anxious", "worried", "upset"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "fearfulFace",
+            character: "😨",
+            name: "Fearful Face",
+            keywords: ["scared", "afraid", "terror", "anxious"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "anxiousFaceWithSweat",
+            character: "😰",
+            name: "Anxious Face With Sweat",
+            keywords: ["nervous", "stressed", "worried", "panic"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "sadButRelievedFace",
+            character: "😥",
+            name: "Sad But Relieved Face",
+            keywords: ["bittersweet", "phew", "disappointed", "mixed"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "cryingFace",
+            character: "😢",
+            name: "Crying Face",
+            keywords: ["sad", "tear", "upset", "hurt", "sob"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "loudlyCryingFace",
+            character: "😭",
+            name: "Loudly Crying Face",
+            keywords: ["sob", "bawling", "devastated", "heartbroken", "wail"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "faceScreamingInFear",
+            character: "😱",
+            name: "Face Screaming In Fear",
+            keywords: ["scream", "horror", "terrified", "omg", "panic"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "confoundedFace",
+            character: "😖",
+            name: "Confounded Face",
+            keywords: ["frustrated", "confused", "upset", "exasperated"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "perseveringFace",
+            character: "😣",
+            name: "Persevering Face",
+            keywords: ["struggling", "determined", "effort", "stressed"],
+            category: .people(.worried)
+        ),
+        Emoji(
+            id: "disappointedFace",
+            character: "😞",
+            name: "Disappointed Face",
+            keywords: ["sad", "let down", "upset", "dejected"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "downcastFaceWithSweat",
+            character: "😓",
+            name: "Downcast Face With Sweat",
+            keywords: ["sad", "hard work", "stressed", "difficult"],
+            category: .people(.sad)
+        ),
+        Emoji(
+            id: "wearyFace",
+            character: "😩",
+            name: "Weary Face",
+            keywords: ["exhausted", "frustrated", "distraught", "fed up"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "tiredFace",
+            character: "😫",
+            name: "Tired Face",
+            keywords: ["exhausted", "frustrated", "done", "over it"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "yawningFace",
+            character: "🥱",
+            name: "Yawning Face",
+            keywords: ["bored", "tired", "sleepy", "exhausted"],
+            category: .people(.tired)
+        ),
+        Emoji(
+            id: "faceWithSteamFromNose",
+            character: "😤",
+            name: "Face With Steam From Nose",
+            keywords: ["frustrated", "triumph", "proud", "huffing", "annoyed"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "enragedFace",
+            character: "😡",
+            name: "Enraged Face",
+            keywords: ["furious", "mad", "livid", "rage"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "angryFace",
+            character: "😠",
+            name: "Angry Face",
+            keywords: ["mad", "annoyed", "upset", "grumpy"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "faceWithSymbolsOnMouth",
+            character: "🤬",
+            name: "Face With Symbols On Mouth",
+            keywords: ["cursing", "swearing", "mad", "furious", "censored"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "smilingFaceWithHorns",
+            character: "😈",
+            name: "Smiling Face With Horns",
+            keywords: ["devil", "evil", "mischievous", "naughty", "devilish"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "angryFaceWithHorns",
+            character: "👿",
+            name: "Angry Face With Horns",
+            keywords: ["devil", "demon", "evil", "wicked", "villain"],
+            category: .people(.angry)
+        ),
+        Emoji(
+            id: "skull",
+            character: "💀",
+            name: "Skull",
+            keywords: ["death", "dead", "dying", "skeleton", "spooky"],
+            category: .people(.playful)
+        ),
+        Emoji(
+            id: "skullAndCrossbones",
+            character: "☠️",
+            name: "Skull And Crossbones",
+            keywords: ["death", "poison", "danger", "pirate", "warning"],
+            category: .people(.playful)
+        )
     ]
 
     static var peopleEmojis: [Emoji] {
@@ -132,33 +775,39 @@ struct EmojiData {
         let extra = interjectionsForPeople(subcategory: subcategory)
         if extra.isEmpty { return emoji }
         let merged = uniqueLowercasedKeywords(emoji.keywords + extra)
-        return Emoji(id: emoji.id, character: emoji.character, name: emoji.name, keywords: merged, category: emoji.category)
+        return Emoji(
+            id: emoji.id,
+            character: emoji.character,
+            name: emoji.name,
+            keywords: merged,
+            category: emoji.category
+        )
     }
 
     private static func interjectionsForPeople(subcategory: PeopleSubcategories) -> [String] {
         switch subcategory {
         case .happy:
-            return ["yay", "haha", "lol", "hehe", "woohoo", "omg", "aww"]
+            ["yay", "haha", "lol", "hehe", "woohoo", "omg", "aww"]
         case .love:
-            return ["aww", "xoxo", "ily", "mwah", "so cute", "heart eyes"]
+            ["aww", "xoxo", "ily", "mwah", "so cute", "heart eyes"]
         case .playful:
-            return ["lol", "haha", "hehe", "jk", "teehee", "gotcha", "sike"]
+            ["lol", "haha", "hehe", "jk", "teehee", "gotcha", "sike"]
         case .sad:
-            return ["sigh", "aw", "aww", "rip", "sob", "sadge", "ugh"]
+            ["sigh", "aw", "aww", "rip", "sob", "sadge", "ugh"]
         case .angry:
-            return ["grr", "ugh", "argh", "wtf", "ffs", "so mad"]
+            ["grr", "ugh", "argh", "wtf", "ffs", "so mad"]
         case .surprised:
-            return ["omg", "wow", "whoa", "gasp", "no way", "what"]
+            ["omg", "wow", "whoa", "gasp", "no way", "what"]
         case .tired:
-            return ["sigh", "yawn", "zzz", "ugh", "so tired"]
+            ["sigh", "yawn", "zzz", "ugh", "so tired"]
         case .sick:
-            return ["ew", "yuck", "bleh", "ick", "ugh", "gross"]
+            ["ew", "yuck", "bleh", "ick", "ugh", "gross"]
         case .worried:
-            return ["uh", "uhh", "umm", "yikes", "eek", "hmm", "oh no"]
+            ["uh", "uhh", "umm", "yikes", "eek", "hmm", "oh no"]
         case .neutral:
-            return ["meh", "ok", "okay", "hmm", "shrug"]
+            ["meh", "ok", "okay", "hmm", "shrug"]
         default:
-            return []
+            []
         }
     }
 
@@ -167,1809 +816,11925 @@ struct EmojiData {
         var result: [String] = []
         for word in keywords {
             let lower = word.lowercased()
-            
+
             if !seen.contains(lower) {
                 seen.insert(lower)
                 result.append(lower)
             }
         }
-        
+
         return result
     }
 
     static let expressiveEmojis: [Emoji] = [
-        Emoji(id: "pileOfPoo", character: "💩", name: "Pile Of Poo", keywords: ["poop", "crap", "shit", "💩"], category: .expressive(.creature)),
-        Emoji(id: "clownFace", character: "🤡", name: "Clown Face", keywords: ["joker", "circus", "funny", "fool"], category: .expressive(.creature)),
-        Emoji(id: "ogre", character: "👹", name: "Ogre", keywords: ["monster", "demon", "japanese", "oni", "scary"], category: .expressive(.creature)),
-        Emoji(id: "goblin", character: "👺", name: "Goblin", keywords: ["tengu", "monster", "japanese", "creature", "angry"], category: .expressive(.creature)),
-        Emoji(id: "ghost", character: "👻", name: "Ghost", keywords: ["boo", "spooky", "halloween", "phantom", "spirit"], category: .expressive(.creature)),
-        Emoji(id: "alien", character: "👽", name: "Alien", keywords: ["ufo", "extraterrestrial", "et", "space", "martian"], category: .expressive(.creature)),
-        Emoji(id: "alienMonster", character: "👾", name: "Alien Monster", keywords: ["space invader", "retro", "game", "video game", "8-bit"], category: .expressive(.creature)),
-        Emoji(id: "robot", character: "🤖", name: "Robot", keywords: ["ai", "bot", "android", "machine", "artificial"], category: .expressive(.creature)),
-        Emoji(id: "grinningCat", character: "😺", name: "Grinning Cat", keywords: ["happy", "kitty", "feline", "smile"], category: .expressive(.creature)),
-        Emoji(id: "grinningCatWithSmilingEyes", character: "😸", name: "Grinning Cat With Smiling Eyes", keywords: ["happy", "kitty", "feline", "joy"], category: .expressive(.creature)),
-        Emoji(id: "catWithTearsOfJoy", character: "😹", name: "Cat With Tears Of Joy", keywords: ["lol", "kitty", "laugh", "funny"], category: .expressive(.creature)),
-        Emoji(id: "smilingCatWithHeartEyes", character: "😻", name: "Smiling Cat With Heart Eyes", keywords: ["love", "kitty", "adore", "feline"], category: .expressive(.creature)),
-        Emoji(id: "catWithWrySmile", character: "😼", name: "Cat With Wry Smile", keywords: ["smirk", "kitty", "smug", "sly"], category: .expressive(.creature)),
-        Emoji(id: "kissingCat", character: "😽", name: "Kissing Cat", keywords: ["love", "kitty", "affection", "feline"], category: .expressive(.creature)),
-        Emoji(id: "wearyCat", character: "🙀", name: "Weary Cat", keywords: ["shocked", "scared", "kitty", "surprised"], category: .expressive(.creature)),
-        Emoji(id: "cryingCat", character: "😿", name: "Crying Cat", keywords: ["sad", "kitty", "tear", "upset"], category: .expressive(.creature)),
-        Emoji(id: "poutingCat", character: "😾", name: "Pouting Cat", keywords: ["grumpy", "annoyed", "kitty", "mad"], category: .expressive(.creature)),
-        Emoji(id: "seeNoEvilMonkey", character: "🙈", name: "See No Evil Monkey", keywords: ["mizaru", "hide", "embarrassed", "shy"], category: .expressive(.gesture)),
-        Emoji(id: "hearNoEvilMonkey", character: "🙉", name: "Hear No Evil Monkey", keywords: ["kikazaru", "ignore", "deaf", "avoid"], category: .expressive(.gesture)),
-        Emoji(id: "speakNoEvilMonkey", character: "🙊", name: "Speak No Evil Monkey", keywords: ["iwazaru", "quiet", "silence", "secret"], category: .expressive(.gesture)),
-        Emoji(id: "loveLetter", character: "💌", name: "Love Letter", keywords: ["romance", "mail", "valentine", "note"], category: .expressive(.heart)),
-        Emoji(id: "heartWithArrow", character: "💘", name: "Heart With Arrow", keywords: ["cupid", "love", "romance", "struck"], category: .expressive(.heart)),
-        Emoji(id: "heartWithRibbon", character: "💝", name: "Heart With Ribbon", keywords: ["gift", "love", "present", "valentine"], category: .expressive(.heart)),
-        Emoji(id: "sparklingHeart", character: "💖", name: "Sparkling Heart", keywords: ["love", "shine", "excited", "affection"], category: .expressive(.heart)),
-        Emoji(id: "growingHeart", character: "💗", name: "Growing Heart", keywords: ["love", "expanding", "increasing", "affection"], category: .expressive(.heart)),
-        Emoji(id: "beatingHeart", character: "💓", name: "Beating Heart", keywords: ["love", "pulse", "alive", "affection"], category: .expressive(.heart)),
-        Emoji(id: "revolvingHearts", character: "💞", name: "Revolving Hearts", keywords: ["love", "spinning", "romance", "affection"], category: .expressive(.heart)),
-        Emoji(id: "twoHearts", character: "💕", name: "Two Hearts", keywords: ["love", "romance", "couple", "affection"], category: .expressive(.heart)),
-        Emoji(id: "heartDecoration", character: "💟", name: "Heart Decoration", keywords: ["love", "ornament", "purple", "affection"], category: .expressive(.heart)),
-        Emoji(id: "heartExclamation", character: "❣️", name: "Heart Exclamation", keywords: ["love", "emphasis", "punctuation", "affection"], category: .expressive(.heart)),
-        Emoji(id: "brokenHeart", character: "💔", name: "Broken Heart", keywords: ["heartbreak", "sad", "breakup", "hurt", "pain"], category: .expressive(.heart)),
-        Emoji(id: "heartOnFire", character: "❤️‍🔥", name: "Heart On Fire", keywords: ["passion", "burning", "desire", "intense", "love"], category: .expressive(.heart)),
-        Emoji(id: "mendingHeart", character: "❤️‍🩹", name: "Mending Heart", keywords: ["healing", "recovery", "bandage", "getting better"], category: .expressive(.heart)),
-        Emoji(id: "redHeart", character: "❤️", name: "Red Heart", keywords: ["love", "romance", "classic", "valentine"], category: .expressive(.heart)),
-        Emoji(id: "pinkHeart", character: "🩷", name: "Pink Heart", keywords: ["love", "cute", "sweet", "affection"], category: .expressive(.heart)),
-        Emoji(id: "orangeHeart", character: "🧡", name: "Orange Heart", keywords: ["love", "warm", "friendship", "affection"], category: .expressive(.heart)),
-        Emoji(id: "yellowHeart", character: "💛", name: "Yellow Heart", keywords: ["love", "friendship", "happy", "gold"], category: .expressive(.heart)),
-        Emoji(id: "greenHeart", character: "💚", name: "Green Heart", keywords: ["love", "nature", "jealous", "envy"], category: .expressive(.heart)),
-        Emoji(id: "blueHeart", character: "💙", name: "Blue Heart", keywords: ["love", "trust", "loyalty", "calm"], category: .expressive(.heart)),
-        Emoji(id: "lightBlueHeart", character: "🩵", name: "Light Blue Heart", keywords: ["love", "calm", "peaceful", "aqua"], category: .expressive(.heart)),
-        Emoji(id: "purpleHeart", character: "💜", name: "Purple Heart", keywords: ["love", "compassion", "bts", "kpop"], category: .expressive(.heart)),
-        Emoji(id: "brownHeart", character: "🤎", name: "Brown Heart", keywords: ["love", "earth", "natural", "chocolate"], category: .expressive(.heart)),
-        Emoji(id: "blackHeart", character: "🖤", name: "Black Heart", keywords: ["love", "dark", "evil", "goth"], category: .expressive(.heart)),
-        Emoji(id: "greyHeart", character: "🩶", name: "Grey Heart", keywords: ["love", "neutral", "compromise", "dull"], category: .expressive(.heart)),
-        Emoji(id: "whiteHeart", character: "🤍", name: "White Heart", keywords: ["love", "pure", "clean", "innocent"], category: .expressive(.heart)),
-        Emoji(id: "kissMark", character: "💋", name: "Kiss Mark", keywords: ["lipstick", "lips", "smooch", "mwah"], category: .expressive(.heart)),
-        Emoji(id: "hundredPoints", character: "💯", name: "Hundred Points", keywords: ["perfect", "score", "full", "complete", "100"], category: .expressive(.gesture)),
-        Emoji(id: "angerSymbol", character: "💢", name: "Anger Symbol", keywords: ["mad", "vein", "furious", "annoyed"], category: .expressive(.gesture)),
-        Emoji(id: "collision", character: "💥", name: "Collision", keywords: ["boom", "explosion", "bang", "crash", "pow"], category: .expressive(.gesture)),
-        Emoji(id: "dizzy", character: "💫", name: "Dizzy", keywords: ["star", "sparkle", "confused", "dazed"], category: .expressive(.gesture)),
-        Emoji(id: "sweatDroplets", character: "💦", name: "Sweat Droplets", keywords: ["water", "splash", "drops", "wet"], category: .expressive(.gesture)),
-        Emoji(id: "dashingAway", character: "💨", name: "Dashing Away", keywords: ["fast", "speed", "wind", "smoke", "gone"], category: .expressive(.gesture)),
-        Emoji(id: "hole", character: "🕳️", name: "Hole", keywords: ["pit", "void", "empty", "dark"], category: .expressive(.gesture)),
-        Emoji(id: "speechBalloon", character: "💬", name: "Speech Balloon", keywords: ["chat", "talk", "dialogue", "comment"], category: .expressive(.gesture)),
-        Emoji(id: "eyeInSpeechBubble", character: "👁️‍🗨️", name: "Eye In Speech Bubble", keywords: ["witness", "anti-bullying", "watching"], category: .expressive(.gesture)),
-        Emoji(id: "leftSpeechBubble", character: "🗨️", name: "Left Speech Bubble", keywords: ["chat", "talk", "dialogue", "comment"], category: .expressive(.gesture)),
-        Emoji(id: "rightAngerBubble", character: "🗯️", name: "Right Anger Bubble", keywords: ["mad", "yell", "shout", "argue"], category: .expressive(.gesture)),
-        Emoji(id: "thoughtBalloon", character: "💭", name: "Thought Balloon", keywords: ["thinking", "pondering", "cloud", "wonder"], category: .expressive(.gesture)),
-        Emoji(id: "zZZ", character: "💤", name: "Z Z Z", keywords: ["sleep", "tired", "snore", "zzz", "nap"], category: .expressive(.gesture)),
-        Emoji(id: "wavingHand", character: "👋", name: "Waving Hand", keywords: ["hello", "hi", "goodbye", "bye", "wave"], category: .expressive(.gesture)),
-        Emoji(id: "raisedBackOfHand", character: "🤚", name: "Raised Back Of Hand", keywords: ["stop", "halt", "high five"], category: .expressive(.gesture)),
-    Emoji(id: "handWithFingersSplayed", character: "🖐️", name: "Hand With Fingers Splayed", keywords: ["stop", "high five", "open palm"], category: .expressive(.gesture)),
-        Emoji(id: "raisedHand", character: "✋", name: "Raised Hand", keywords: ["stop", "high five", "halt"], category: .expressive(.gesture)),
-        Emoji(id: "vulcanSalute", character: "🖖", name: "Vulcan Salute", keywords: ["spock", "star trek", "live long prosper"], category: .expressive(.gesture)),
-        Emoji(id: "rightwardsHand", character: "🫱", name: "Rightwards Hand", keywords: ["point", "offer", "reach"], category: .expressive(.gesture)),
-        Emoji(id: "leftwardsHand", character: "🫲", name: "Leftwards Hand", keywords: ["point", "offer", "reach"], category: .expressive(.gesture)),
-        Emoji(id: "palmDownHand", character: "🫳", name: "Palm Down Hand", keywords: ["drop", "give", "dismiss"], category: .expressive(.gesture)),
-        Emoji(id: "palmUpHand", character: "🫴", name: "Palm Up Hand", keywords: ["offer", "receive", "ask"], category: .expressive(.gesture)),
-        Emoji(id: "leftwardsPushingHand", character: "🫷", name: "Leftwards Pushing Hand", keywords: ["stop", "push", "refuse"], category: .expressive(.gesture)),
-        Emoji(id: "rightwardsPushingHand", character: "🫸", name: "Rightwards Pushing Hand", keywords: ["stop", "push", "refuse"], category: .expressive(.gesture)),
-        Emoji(id: "oKHand", character: "👌", name: "O K Hand", keywords: ["okay", "fine", "good", "perfect"], category: .expressive(.gesture)),
-        Emoji(id: "pinchedFingers", character: "🤌", name: "Pinched Fingers", keywords: ["italian", "chef kiss", "ma che vuoi", "perfection"], category: .expressive(.gesture)),
-        Emoji(id: "pinchingHand", character: "🤏", name: "Pinching Hand", keywords: ["small", "tiny", "little", "bit"], category: .expressive(.gesture)),
-        Emoji(id: "victoryHand", character: "✌️", name: "Victory Hand", keywords: ["peace", "v sign", "two", "win"], category: .expressive(.gesture)),
-        Emoji(id: "crossedFingers", character: "🤞", name: "Crossed Fingers", keywords: ["luck", "hope", "wish", "fingers crossed"], category: .expressive(.gesture)),
-        Emoji(id: "handWithIndexFingerAndThumbCrossed", character: "🫰", name: "Hand With Index Finger And expressivemb Crossed", keywords: ["money", "snap", "expensive"], category: .expressive(.gesture)),
-        Emoji(id: "loveYouGesture", character: "🤟", name: "Love You Gesture", keywords: ["ily", "sign language", "love"], category: .expressive(.gesture)),
-        Emoji(id: "signOfTheHorns", character: "🤘", name: "Sign Of The Horns", keywords: ["rock", "metal", "devil horns"], category: .expressive(.gesture)),
-        Emoji(id: "callMeHand", character: "🤙", name: "Call Me Hand", keywords: ["shaka", "hang loose", "phone"], category: .expressive(.gesture)),
-        Emoji(id: "backhandIndexPointingLeft", character: "👈", name: "Backhand Index Pointing Left", keywords: ["point", "direction", "here", "this"], category: .expressive(.gesture)),
-        Emoji(id: "backhandIndexPointingRight", character: "👉", name: "Backhand Index Pointing Right", keywords: ["point", "direction", "there", "that"], category: .expressive(.gesture)),
-        Emoji(id: "backhandIndexPointingUp", character: "👆", name: "Backhand Index Pointing Up", keywords: ["point", "direction", "above", "look"], category: .expressive(.gesture)),
-        Emoji(id: "middleFinger", character: "🖕", name: "Middle Finger", keywords: ["rude", "offensive", "flip off", "fk"], category: .expressive(.gesture)),
-        Emoji(id: "backhandIndexPointingDown", character: "👇", name: "Backhand Index Pointing Down", keywords: ["point", "direction", "below", "look"], category: .expressive(.gesture)),
-        Emoji(id: "indexPointingUp", character: "☝️", name: "Index Pointing Up", keywords: ["point", "idea", "number one", "wait"], category: .expressive(.gesture)),
-        Emoji(id: "indexPointingAtTheViewer", character: "🫵", name: "Index Pointing At The Viewer", keywords: ["you", "point", "accusation"], category: .expressive(.gesture)),
-        Emoji(id: "thumbsUp", character: "👍", name: "Thumbs Up", keywords: ["like", "good", "yes", "agree", "approve"], category: .expressive(.gesture)),
-        Emoji(id: "thumbsDown", character: "👎", name: "Thumbs Down", keywords: ["dislike", "bad", "no", "disagree", "disapprove"], category: .expressive(.gesture)),
-        Emoji(id: "raisedFist", character: "✊", name: "Raised Fist", keywords: ["power", "solidarity", "resistance", "strength"], category: .expressive(.gesture)),
-        Emoji(id: "oncomingFist", character: "👊", name: "Oncoming Fist", keywords: ["punch", "bump", "fist bump", "bro"], category: .expressive(.gesture)),
-        Emoji(id: "leftFacingFist", character: "🤛", name: "Left Facing Fist", keywords: ["punch", "bump", "fist bump"], category: .expressive(.gesture)),
-        Emoji(id: "rightFacingFist", character: "🤜", name: "Right Facing Fist", keywords: ["punch", "bump", "fist bump"], category: .expressive(.gesture)),
-        Emoji(id: "clappingHands", character: "👏", name: "Clapping Hands", keywords: ["applause", "congrats", "praise", "bravo"], category: .expressive(.gesture)),
-        Emoji(id: "raisingHands", character: "🙌", name: "Raising Hands", keywords: ["celebration", "hooray", "yay", "praise", "hallelujah"], category: .expressive(.gesture)),
-        Emoji(id: "heartHands", character: "🫶", name: "Heart Hands", keywords: ["love", "support", "care", "affection"], category: .expressive(.gesture)),
-        Emoji(id: "openHands", character: "👐", name: "Open Hands", keywords: ["hug", "jazz hands", "celebration"], category: .expressive(.gesture)),
-        Emoji(id: "palmsUpTogether", character: "🤲", name: "Palms Up Together", keywords: ["pray", "dua", "request", "plea"], category: .expressive(.gesture)),
-        Emoji(id: "handshake", character: "🤝", name: "Handshake", keywords: ["deal", "agreement", "meet", "partnership"], category: .expressive(.gesture)),
-        Emoji(id: "foldedHands", character: "🙏", name: "Folded Hands", keywords: ["pray", "thank you", "please", "namaste", "bless"], category: .expressive(.gesture)),
-        Emoji(id: "writingHand", character: "✍️", name: "Writing Hand", keywords: ["write", "signature", "author", "note"], category: .expressive(.gesture)),
-        Emoji(id: "nailPolish", character: "💅", name: "Nail Polish", keywords: ["sassy", "fabulous", "glamorous", "beauty", "manicure"], category: .expressive(.gesture)),
-        Emoji(id: "selfie", character: "🤳", name: "Selfie", keywords: ["photo", "camera", "picture", "instagram"], category: .expressive(.gesture)),
-        Emoji(id: "flexedBiceps", character: "💪", name: "Flexed Biceps", keywords: ["strong", "muscle", "strength", "workout", "gym"], category: .expressive(.gesture)),
-        Emoji(id: "mechanicalArm", character: "🦾", name: "Mechanical Arm", keywords: ["prosthetic", "cyborg", "robot", "bionic"], category: .expressive(.bodyPart)),
-        Emoji(id: "mechanicalLeg", character: "🦿", name: "Mechanical Leg", keywords: ["prosthetic", "cyborg", "robot", "bionic"], category: .expressive(.bodyPart)),
-        Emoji(id: "leg", character: "🦵", name: "Leg", keywords: ["kick", "limb", "walk"], category: .expressive(.bodyPart)),
-        Emoji(id: "foot", character: "🦶", name: "Foot", keywords: ["kick", "toe", "step"], category: .expressive(.bodyPart)),
-        Emoji(id: "ear", character: "👂", name: "Ear", keywords: ["listen", "hear", "sound"], category: .expressive(.bodyPart)),
-        Emoji(id: "earWithHearingAid", character: "🦻", name: "Ear With Hearing Aid", keywords: ["deaf", "accessibility", "listen"], category: .expressive(.bodyPart)),
-        Emoji(id: "nose", character: "👃", name: "Nose", keywords: ["smell", "sniff", "scent"], category: .expressive(.bodyPart)),
-        Emoji(id: "brain", character: "🧠", name: "Brain", keywords: ["smart", "intelligent", "think", "mind"], category: .expressive(.bodyPart)),
-        Emoji(id: "anatomicalHeart", character: "🫀", name: "Anatomical Heart", keywords: ["organ", "medical", "cardio", "pulse"], category: .expressive(.bodyPart)),
-        Emoji(id: "lungs", character: "🫁", name: "Lungs", keywords: ["breathe", "organ", "medical", "respiratory"], category: .expressive(.bodyPart)),
-        Emoji(id: "tooth", character: "🦷", name: "Tooth", keywords: ["dentist", "dental", "smile", "molar"], category: .expressive(.bodyPart)),
-        Emoji(id: "bone", character: "🦴", name: "Bone", keywords: ["skeleton", "dog", "fossil"], category: .expressive(.bodyPart)),
-        Emoji(id: "eyes", character: "👀", name: "Eyes", keywords: ["look", "watching", "see", "peek"], category: .expressive(.bodyPart)),
-        Emoji(id: "eye", character: "👁️", name: "Eye", keywords: ["see", "look", "watch", "vision"], category: .expressive(.bodyPart)),
-        Emoji(id: "tongue", character: "👅", name: "Tongue", keywords: ["taste", "lick", "playful"], category: .expressive(.bodyPart)),
-        Emoji(id: "mouth", character: "👄", name: "Mouth", keywords: ["lips", "kiss", "talk", "speak"], category: .expressive(.bodyPart)),
-        Emoji(id: "bitingLip", character: "🫦", name: "Biting Lip", keywords: ["nervous", "anxious", "flirt", "anticipation"], category: .expressive(.bodyPart)),
-        Emoji(id: "baby", character: "👶", name: "Baby", keywords: ["infant", "newborn", "toddler", "cute"], category: .people(.ageBased)),
-        Emoji(id: "child", character: "🧒", name: "Child", keywords: ["kid", "young", "youth"], category: .people(.ageBased)),
-        Emoji(id: "boy", character: "👦", name: "Boy", keywords: ["kid", "son", "youth", "male"], category: .people(.ageBased)),
-        Emoji(id: "girl", character: "👧", name: "Girl", keywords: ["kid", "daughter", "youth", "female"], category: .people(.ageBased)),
-        Emoji(id: "person", character: "🧑", name: "Person", keywords: ["human", "adult", "individual"], category: .people(.ageBased)),
-        Emoji(id: "personBlondHair", character: "👱", name: "Person Blond Hair", keywords: ["blonde", "yellow"], category: .people(.ageBased)),
-        Emoji(id: "man", character: "👨", name: "Man", keywords: ["male", "guy", "dude", "adult"], category: .people(.ageBased)),
-        Emoji(id: "personBeard", character: "🧔", name: "Person Beard", keywords: ["facial hair", "hipster"], category: .people(.ageBased)),
-        Emoji(id: "manBeard", character: "🧔‍♂️", name: "Man Beard", keywords: ["facial hair", "hipster"], category: .people(.ageBased)),
-        Emoji(id: "womanBeard", character: "🧔‍♀️", name: "Woman Beard", keywords: ["facial hair"], category: .people(.ageBased)),
-        Emoji(id: "manRedHair", character: "👨‍🦰", name: "Man Red Hair", keywords: ["ginger", "auburn"], category: .people(.ageBased)),
-        Emoji(id: "manCurlyHair", character: "👨‍🦱", name: "Man Curly Hair", keywords: ["wavy", "afro"], category: .people(.ageBased)),
-        Emoji(id: "manWhiteHair", character: "👨‍🦳", name: "Man White Hair", keywords: ["gray", "grey", "elderly", "silver"], category: .people(.ageBased)),
-        Emoji(id: "manBald", character: "👨‍🦲", name: "Man Bald", keywords: ["hairless", "shaved"], category: .people(.ageBased)),
-        Emoji(id: "woman", character: "👩", name: "Woman", keywords: ["female", "lady", "adult"], category: .people(.ageBased)),
-        Emoji(id: "womanRedHair", character: "👩‍🦰", name: "Woman Red Hair", keywords: ["ginger", "auburn"], category: .people(.ageBased)),
-        Emoji(id: "personRedHair", character: "🧑‍🦰", name: "Person Red Hair", keywords: ["ginger", "auburn"], category: .people(.ageBased)),
-        Emoji(id: "womanCurlyHair", character: "👩‍🦱", name: "Woman Curly Hair", keywords: ["wavy", "afro"], category: .people(.ageBased)),
-        Emoji(id: "personCurlyHair", character: "🧑‍🦱", name: "Person Curly Hair", keywords: ["wavy", "afro"], category: .people(.ageBased)),
-        Emoji(id: "womanWhiteHair", character: "👩‍🦳", name: "Woman White Hair", keywords: ["gray", "grey", "elderly", "silver"], category: .people(.ageBased)),
-        Emoji(id: "personWhiteHair", character: "🧑‍🦳", name: "Person White Hair", keywords: ["gray", "grey", "elderly", "silver"], category: .people(.ageBased)),
-        Emoji(id: "womanBald", character: "👩‍🦲", name: "Woman Bald", keywords: ["hairless", "shaved"], category: .people(.ageBased)),
-        Emoji(id: "personBald", character: "🧑‍🦲", name: "Person Bald", keywords: ["hairless", "shaved"], category: .people(.ageBased)),
-        Emoji(id: "womanBlondHair", character: "👱‍♀️", name: "Woman Blond Hair", keywords: ["blonde", "yellow"], category: .people(.ageBased)),
-        Emoji(id: "manBlondHair", character: "👱‍♂️", name: "Man Blond Hair", keywords: ["blonde", "yellow"], category: .people(.ageBased)),
-        Emoji(id: "olderPerson", character: "🧓", name: "Older Person", keywords: ["elderly", "senior", "grandparent"], category: .people(.ageBased)),
-        Emoji(id: "oldMan", character: "👴", name: "Old Man", keywords: ["elderly", "senior", "grandfather", "grandpa"], category: .people(.ageBased)),
-        Emoji(id: "oldWoman", character: "👵", name: "Old Woman", keywords: ["elderly", "senior", "grandmother", "grandma"], category: .people(.ageBased)),
-        Emoji(id: "personFrowning", character: "🙍", name: "Person Frowning", keywords: ["sad", "unhappy"], category: .people(.reactions)),
-        Emoji(id: "manFrowning", character: "🙍‍♂️", name: "Man Frowning", keywords: ["sad", "unhappy"], category: .people(.reactions)),
-        Emoji(id: "womanFrowning", character: "🙍‍♀️", name: "Woman Frowning", keywords: ["sad", "unhappy"], category: .people(.reactions)),
-        Emoji(id: "personPouting", character: "🙎", name: "Person Pouting", keywords: ["sulk", "grumpy", "annoyed"], category: .people(.reactions)),
-        Emoji(id: "manPouting", character: "🙎‍♂️", name: "Man Pouting", keywords: ["sulk", "grumpy", "annoyed"], category: .people(.reactions)),
-        Emoji(id: "womanPouting", character: "🙎‍♀️", name: "Woman Pouting", keywords: ["sulk", "grumpy", "annoyed"], category: .people(.reactions)),
-        Emoji(id: "personGesturingNO", character: "🙅", name: "Person Gesturing N O", keywords: ["stop", "nope", "forbidden", "refuse"], category: .people(.reactions)),
-        Emoji(id: "manGesturingNO", character: "🙅‍♂️", name: "Man Gesturing N O", keywords: ["stop", "nope", "forbidden", "refuse"], category: .people(.reactions)),
-        Emoji(id: "womanGesturingNO", character: "🙅‍♀️", name: "Woman Gesturing N O", keywords: ["stop", "nope", "forbidden", "refuse"], category: .people(.reactions)),
-        Emoji(id: "personGesturingOK", character: "🙆", name: "Person Gesturing O K", keywords: ["yes", "okay", "agree", "approve"], category: .people(.reactions)),
-        Emoji(id: "manGesturingOK", character: "🙆‍♂️", name: "Man Gesturing O K", keywords: ["yes", "okay", "agree", "approve"], category: .people(.reactions)),
-        Emoji(id: "womanGesturingOK", character: "🙆‍♀️", name: "Woman Gesturing O K", keywords: ["yes", "okay", "agree", "approve"], category: .people(.reactions)),
-        Emoji(id: "personTippingHand", character: "💁", name: "Person Tipping Hand", keywords: ["sassy", "help desk", "information"], category: .people(.reactions)),
-        Emoji(id: "manTippingHand", character: "💁‍♂️", name: "Man Tipping Hand", keywords: ["sassy", "help desk", "information"], category: .people(.reactions)),
-        Emoji(id: "womanTippingHand", character: "💁‍♀️", name: "Woman Tipping Hand", keywords: ["sassy", "help desk", "information"], category: .people(.reactions)),
-        Emoji(id: "personRaisingHand", character: "🙋", name: "Person Raising Hand", keywords: ["question", "volunteer", "pick me"], category: .people(.reactions)),
-        Emoji(id: "manRaisingHand", character: "🙋‍♂️", name: "Man Raising Hand", keywords: ["question", "volunteer", "pick me"], category: .people(.reactions)),
-        Emoji(id: "womanRaisingHand", character: "🙋‍♀️", name: "Woman Raising Hand", keywords: ["question", "volunteer", "pick me"], category: .people(.reactions)),
-        Emoji(id: "deafPerson", character: "🧏", name: "Deaf Person", keywords: ["hearing", "accessibility", "sign language"], category: .people(.reactions)),
-        Emoji(id: "deafMan", character: "🧏‍♂️", name: "Deaf Man", keywords: ["hearing", "accessibility", "sign language"], category: .people(.reactions)),
-        Emoji(id: "deafWoman", character: "🧏‍♀️", name: "Deaf Woman", keywords: ["hearing", "accessibility", "sign language"], category: .people(.reactions)),
-        Emoji(id: "personBowing", character: "🙇", name: "Person Bowing", keywords: ["respect", "sorry", "apologize", "thank"], category: .people(.reactions)),
-        Emoji(id: "manBowing", character: "🙇‍♂️", name: "Man Bowing", keywords: ["respect", "sorry", "apologize", "thank"], category: .people(.reactions)),
-        Emoji(id: "womanBowing", character: "🙇‍♀️", name: "Woman Bowing", keywords: ["respect", "sorry", "apologize", "thank"], category: .people(.reactions)),
-        Emoji(id: "personFacepalming", character: "🤦", name: "Person Facepalming", keywords: ["frustrated", "disappointed", "ugh", "smh"], category: .people(.ageBased)),
-        Emoji(id: "manFacepalming", character: "🤦‍♂️", name: "Man Facepalming", keywords: ["frustrated", "disappointed", "ugh", "smh"], category: .people(.ageBased)),
-        Emoji(id: "womanFacepalming", character: "🤦‍♀️", name: "Woman Facepalming", keywords: ["frustrated", "disappointed", "ugh", "smh"], category: .people(.ageBased)),
-        Emoji(id: "personShrugging", character: "🤷", name: "Person Shrugging", keywords: ["idk", "dunno", "whatever", "don't know"], category: .people(.reactions)),
-        Emoji(id: "manShrugging", character: "🤷‍♂️", name: "Man Shrugging", keywords: ["idk", "dunno", "whatever", "don't know"], category: .people(.reactions)),
-        Emoji(id: "womanShrugging", character: "🤷‍♀️", name: "Woman Shrugging", keywords: ["idk", "dunno", "whatever", "don't know"], category: .people(.reactions)),
-        Emoji(id: "healthWorker", character: "🧑‍⚕️", name: "Health Worker", keywords: ["doctor", "nurse", "medical", "hospital"], category: .people(.jobs)),
-        Emoji(id: "manHealthWorker", character: "👨‍⚕️", name: "Man Health Worker", keywords: ["doctor", "nurse", "medical", "hospital"], category: .people(.jobs)),
-        Emoji(id: "womanHealthWorker", character: "👩‍⚕️", name: "Woman Health Worker", keywords: ["doctor", "nurse", "medical", "hospital"], category: .people(.jobs)),
-        Emoji(id: "student", character: "🧑‍🎓", name: "Student", keywords: ["school", "graduate", "university", "college"], category: .people(.jobs)),
-        Emoji(id: "manStudent", character: "👨‍🎓", name: "Man Student", keywords: ["school", "graduate", "university", "college"], category: .people(.jobs)),
-        Emoji(id: "womanStudent", character: "👩‍🎓", name: "Woman Student", keywords: ["school", "graduate", "university", "college"], category: .people(.jobs)),
-        Emoji(id: "teacher", character: "🧑‍🏫", name: "Teacher", keywords: ["professor", "instructor", "educator", "school"], category: .people(.jobs)),
-        Emoji(id: "manTeacher", character: "👨‍🏫", name: "Man Teacher", keywords: ["professor", "instructor", "educator", "school"], category: .people(.jobs)),
-        Emoji(id: "womanTeacher", character: "👩‍🏫", name: "Woman Teacher", keywords: ["professor", "instructor", "educator", "school"], category: .people(.jobs)),
-        Emoji(id: "judge", character: "🧑‍⚖️", name: "Judge", keywords: ["law", "court", "justice", "lawyer"], category: .people(.jobs)),
-        Emoji(id: "manJudge", character: "👨‍⚖️", name: "Man Judge", keywords: ["law", "court", "justice", "lawyer"], category: .people(.jobs)),
-        Emoji(id: "womanJudge", character: "👩‍⚖️", name: "Woman Judge", keywords: ["law", "court", "justice", "lawyer"], category: .people(.jobs)),
-        Emoji(id: "farmer", character: "🧑‍🌾", name: "Farmer", keywords: ["agriculture", "crops", "field", "farming"], category: .people(.jobs)),
-        Emoji(id: "manFarmer", character: "👨‍🌾", name: "Man Farmer", keywords: ["agriculture", "crops", "field", "farming"], category: .people(.jobs)),
-        Emoji(id: "womanFarmer", character: "👩‍🌾", name: "Woman Farmer", keywords: ["agriculture", "crops", "field", "farming"], category: .people(.jobs)),
-        Emoji(id: "cook", character: "🧑‍🍳", name: "Cook", keywords: ["chef", "kitchen", "food", "culinary"], category: .people(.jobs)),
-        Emoji(id: "manCook", character: "👨‍🍳", name: "Man Cook", keywords: ["chef", "kitchen", "food", "culinary"], category: .people(.jobs)),
-        Emoji(id: "womanCook", character: "👩‍🍳", name: "Woman Cook", keywords: ["chef", "kitchen", "food", "culinary"], category: .people(.jobs)),
-        Emoji(id: "mechanic", character: "🧑‍🔧", name: "Mechanic", keywords: ["repair", "car", "fix", "engineer"], category: .people(.jobs)),
-        Emoji(id: "manMechanic", character: "👨‍🔧", name: "Man Mechanic", keywords: ["repair", "car", "fix", "engineer"], category: .people(.jobs)),
-        Emoji(id: "womanMechanic", character: "👩‍🔧", name: "Woman Mechanic", keywords: ["repair", "car", "fix", "engineer"], category: .people(.jobs)),
-        Emoji(id: "factoryWorker", character: "🧑‍🏭", name: "Factory Worker", keywords: ["industrial", "manufacturing", "labor"], category: .people(.jobs)),
-        Emoji(id: "manFactoryWorker", character: "👨‍🏭", name: "Man Factory Worker", keywords: ["industrial", "manufacturing", "labor"], category: .people(.jobs)),
-        Emoji(id: "womanFactoryWorker", character: "👩‍🏭", name: "Woman Factory Worker", keywords: ["industrial", "manufacturing", "labor"], category: .people(.jobs)),
-        Emoji(id: "officeWorker", character: "🧑‍💼", name: "Office Worker", keywords: ["business", "corporate", "desk job"], category: .people(.jobs)),
-        Emoji(id: "manOfficeWorker", character: "👨‍💼", name: "Man Office Worker", keywords: ["business", "corporate", "desk job"], category: .people(.jobs)),
-        Emoji(id: "womanOfficeWorker", character: "👩‍💼", name: "Woman Office Worker", keywords: ["business", "corporate", "desk job"], category: .people(.jobs)),
-        Emoji(id: "scientist", character: "🧑‍🔬", name: "Scientist", keywords: ["lab", "research", "chemistry", "biologist"], category: .people(.jobs)),
-        Emoji(id: "manScientist", character: "👨‍🔬", name: "Man Scientist", keywords: ["lab", "research", "chemistry", "biologist"], category: .people(.jobs)),
-        Emoji(id: "womanScientist", character: "👩‍🔬", name: "Woman Scientist", keywords: ["lab", "research", "chemistry", "biologist"], category: .people(.jobs)),
-        Emoji(id: "technologist", character: "🧑‍💻", name: "Technologist", keywords: ["programmer", "developer", "coder", "computer", "software"], category: .people(.jobs)),
-        Emoji(id: "manTechnologist", character: "👨‍💻", name: "Man Technologist", keywords: ["programmer", "developer", "coder", "computer", "software"], category: .people(.jobs)),
-        Emoji(id: "womanTechnologist", character: "👩‍💻", name: "Woman Technologist", keywords: ["programmer", "developer", "coder", "computer", "software"], category: .people(.jobs)),
-        Emoji(id: "singer", character: "🧑‍🎤", name: "Singer", keywords: ["music", "performer", "vocalist", "rockstar"], category: .people(.jobs)),
-        Emoji(id: "manSinger", character: "👨‍🎤", name: "Man Singer", keywords: ["music", "performer", "vocalist", "rockstar"], category: .people(.jobs)),
-        Emoji(id: "womanSinger", character: "👩‍🎤", name: "Woman Singer", keywords: ["music", "performer", "vocalist", "rockstar"], category: .people(.jobs)),
-        Emoji(id: "artist", character: "🧑‍🎨", name: "Artist", keywords: ["painter", "creative", "art", "designer"], category: .people(.jobs)),
-        Emoji(id: "manArtist", character: "👨‍🎨", name: "Man Artist", keywords: ["painter", "creative", "art", "designer"], category: .people(.jobs)),
-        Emoji(id: "womanArtist", character: "👩‍🎨", name: "Woman Artist", keywords: ["painter", "creative", "art", "designer"], category: .people(.jobs)),
-        Emoji(id: "pilot", character: "🧑‍✈️", name: "Pilot", keywords: ["airplane", "captain", "aviation", "flight"], category: .people(.jobs)),
-        Emoji(id: "manPilot", character: "👨‍✈️", name: "Man Pilot", keywords: ["airplane", "captain", "aviation", "flight"], category: .people(.jobs)),
-        Emoji(id: "womanPilot", character: "👩‍✈️", name: "Woman Pilot", keywords: ["airplane", "captain", "aviation", "flight"], category: .people(.jobs)),
-        Emoji(id: "astronaut", character: "🧑‍🚀", name: "Astronaut", keywords: ["space", "rocket", "cosmonaut", "nasa"], category: .people(.jobs)),
-        Emoji(id: "manAstronaut", character: "👨‍🚀", name: "Man Astronaut", keywords: ["space", "rocket", "cosmonaut", "nasa"], category: .people(.jobs)),
-        Emoji(id: "womanAstronaut", character: "👩‍🚀", name: "Woman Astronaut", keywords: ["space", "rocket", "cosmonaut", "nasa"], category: .people(.jobs)),
-        Emoji(id: "firefighter", character: "🧑‍🚒", name: "Firefighter", keywords: ["fire", "rescue", "emergency", "hero"], category: .people(.jobs)),
-        Emoji(id: "manFirefighter", character: "👨‍🚒", name: "Man Firefighter", keywords: ["fire", "rescue", "emergency", "hero"], category: .people(.jobs)),
-        Emoji(id: "womanFirefighter", character: "👩‍🚒", name: "Woman Firefighter", keywords: ["fire", "rescue", "emergency", "hero"], category: .people(.jobs)),
-        Emoji(id: "policeOfficer", character: "👮", name: "Police Officer", keywords: ["cop", "law", "enforcement", "security"], category: .people(.jobs)),
-        Emoji(id: "manPoliceOfficer", character: "👮‍♂️", name: "Man Police Officer", keywords: ["cop", "law", "enforcement", "security"], category: .people(.jobs)),
-        Emoji(id: "womanPoliceOfficer", character: "👮‍♀️", name: "Woman Police Officer", keywords: ["cop", "law", "enforcement", "security"], category: .people(.jobs)),
-        Emoji(id: "detective", character: "🕵️", name: "Detective", keywords: ["spy", "investigate", "sleuth", "sherlock"], category: .people(.jobs)),
-        Emoji(id: "manDetective", character: "🕵‍♂️", name: "Man Detective", keywords: ["spy", "investigate", "sleuth", "sherlock"], category: .people(.jobs)),
-        Emoji(id: "womanDetective", character: "🕵‍♀️", name: "Woman Detective", keywords: ["spy", "investigate", "sleuth", "sherlock"], category: .people(.jobs)),
-        Emoji(id: "guard", character: "💂", name: "Guard", keywords: ["soldier", "british", "royal", "security"], category: .people(.jobs)),
-        Emoji(id: "manGuard", character: "💂‍♂️", name: "Man Guard", keywords: ["soldier", "british", "royal", "security"], category: .people(.jobs)),
-        Emoji(id: "womanGuard", character: "💂‍♀️", name: "Woman Guard", keywords: ["soldier", "british", "royal", "security"], category: .people(.jobs)),
-        Emoji(id: "ninja", character: "🥷", name: "Ninja", keywords: ["stealth", "warrior", "japanese", "assassin"], category: .people(.jobs)),
-        Emoji(id: "constructionWorker", character: "👷", name: "Construction Worker", keywords: ["builder", "hardhat", "build", "labor"], category: .people(.jobs)),
-        Emoji(id: "manConstructionWorker", character: "👷‍♂️", name: "Man Construction Worker", keywords: ["builder", "hardhat", "build", "labor"], category: .people(.jobs)),
-        Emoji(id: "womanConstructionWorker", character: "👷‍♀️", name: "Woman Construction Worker", keywords: ["builder", "hardhat", "build", "labor"], category: .people(.jobs)),
-        Emoji(id: "personWithCrown", character: "🫅", name: "Person With Crown", keywords: ["royalty", "king", "queen", "monarch"], category: .people(.royalty)),
-        Emoji(id: "prince", character: "🤴", name: "Prince", keywords: ["royalty", "royal", "charming"], category: .people(.royalty)),
-        Emoji(id: "princess", character: "👸", name: "Princess", keywords: ["royalty", "royal", "disney"], category: .people(.royalty)),
-        Emoji(id: "personWearingTurban", character: "👳", name: "Person Wearing Turban", keywords: ["sikh", "punjabi", "indian"], category: .people(.ageBased)),
-        Emoji(id: "manWearingTurban", character: "👳‍♂️", name: "Man Wearing Turban", keywords: ["sikh", "punjabi", "indian"], category: .people(.ageBased)),
-        Emoji(id: "womanWearingTurban", character: "👳‍♀️", name: "Woman Wearing Turban", keywords: ["sikh", "punjabi", "indian"], category: .people(.ageBased)),
-        Emoji(id: "personWithSkullcap", character: "👲", name: "Person With Skullcap", keywords: ["hat", "chinese", "asian"], category: .people(.ageBased)),
-        Emoji(id: "womanWithHeadscarf", character: "🧕", name: "Woman With Headscarf", keywords: ["hijab", "muslim", "islam"], category: .people(.ageBased)),
-        Emoji(id: "personInTuxedo", character: "🤵", name: "Person In Tuxedo", keywords: ["wedding", "groom", "formal", "suit"], category: .people(.matrimony)),
-        Emoji(id: "manInTuxedo", character: "🤵‍♂️", name: "Man In Tuxedo", keywords: ["wedding", "groom", "formal", "suit"], category: .people(.matrimony)),
-        Emoji(id: "womanInTuxedo", character: "🤵‍♀️", name: "Woman In Tuxedo", keywords: ["wedding", "formal", "suit"], category: .people(.matrimony)),
-        Emoji(id: "personWithVeil", character: "👰", name: "Person With Veil", keywords: ["wedding", "bride", "marriage"], category: .people(.matrimony)),
-        Emoji(id: "manWithVeil", character: "👰‍♂️", name: "Man With Veil", keywords: ["wedding", "marriage"], category: .people(.matrimony)),
-        Emoji(id: "womanWithVeil", character: "👰‍♀️", name: "Woman With Veil", keywords: ["wedding", "bride", "marriage"], category: .people(.matrimony)),
-        Emoji(id: "pregnantWoman", character: "🤰", name: "Pregnant Woman", keywords: ["expecting", "maternity", "mother"], category: .people(.ageBased)),
-        Emoji(id: "pregnantMan", character: "🫃", name: "Pregnant Man", keywords: ["expecting", "trans"], category: .people(.ageBased)),
-        Emoji(id: "pregnantPerson", character: "🫄", name: "Pregnant Person", keywords: ["expecting", "maternity"], category: .people(.ageBased)),
-        Emoji(id: "breastFeeding", character: "🤱", name: "Breast Feeding", keywords: ["nursing", "mother", "infant"], category: .people(.other)),
-        Emoji(id: "womanFeedingBaby", character: "👩‍🍼", name: "Woman Feeding Baby", keywords: ["bottle", "mother", "infant"], category: .people(.ageBased)),
-        Emoji(id: "manFeedingBaby", character: "👨‍🍼", name: "Man Feeding Baby", keywords: ["bottle", "father", "infant"], category: .people(.ageBased)),
-        Emoji(id: "personFeedingBaby", character: "🧑‍🍼", name: "Person Feeding Baby", keywords: ["bottle", "parent", "infant"], category: .people(.ageBased)),
-        Emoji(id: "babyAngel", character: "👼", name: "Baby Angel", keywords: ["cherub", "heaven", "innocent", "cupid"], category: .people(.fantasy)),
-        Emoji(id: "santaClaus", character: "🎅", name: "Santa Claus", keywords: ["christmas", "father christmas", "xmas", "holiday"], category: .people(.other)),
-        Emoji(id: "mrsClaus", character: "🤶", name: "Mrs Claus", keywords: ["christmas", "xmas", "holiday"], category: .people(.other)),
-        Emoji(id: "mxClaus", character: "🧑‍🎄", name: "Mx Claus", keywords: ["christmas", "xmas", "holiday"], category: .people(.other)),
-        Emoji(id: "superhero", character: "🦸", name: "Superhero", keywords: ["power", "hero", "cape", "super"], category: .people(.fantasy)),
-        Emoji(id: "manSuperhero", character: "🦸‍♂️", name: "Man Superhero", keywords: ["power", "hero", "cape", "super"], category: .people(.fantasy)),
-        Emoji(id: "womanSuperhero", character: "🦸‍♀️", name: "Woman Superhero", keywords: ["power", "hero", "cape", "super"], category: .people(.fantasy)),
-        Emoji(id: "supervillain", character: "🦹", name: "Supervillain", keywords: ["villain", "evil", "bad guy"], category: .people(.fantasy)),
-        Emoji(id: "manSupervillain", character: "🦹‍♂️", name: "Man Supervillain", keywords: ["villain", "evil", "bad guy"], category: .people(.fantasy)),
-        Emoji(id: "womanSupervillain", character: "🦹‍♀️", name: "Woman Supervillain", keywords: ["villain", "evil", "bad guy"], category: .people(.fantasy)),
-        Emoji(id: "mage", character: "🧙", name: "Mage", keywords: ["wizard", "sorcerer", "magic", "witch"], category: .people(.fantasy)),
-        Emoji(id: "manMage", character: "🧙‍♂️", name: "Man Mage", keywords: ["wizard", "sorcerer", "magic", "gandalf"], category: .people(.fantasy)),
-        Emoji(id: "womanMage", character: "🧙‍♀️", name: "Woman Mage", keywords: ["witch", "sorcerer", "magic", "sorceress"], category: .people(.fantasy)),
-        Emoji(id: "fairy", character: "🧚", name: "Fairy", keywords: ["magic", "fantasy", "pixie", "tinkerbell"], category: .people(.fantasy)),
-        Emoji(id: "manFairy", character: "🧚‍♂️", name: "Man Fairy", keywords: ["magic", "fantasy", "pixie"], category: .people(.fantasy)),
-        Emoji(id: "womanFairy", character: "🧚‍♀️", name: "Woman Fairy", keywords: ["magic", "fantasy", "pixie", "tinkerbell"], category: .people(.fantasy)),
-        Emoji(id: "vampire", character: "🧛", name: "Vampire", keywords: ["dracula", "blood", "undead", "halloween"], category: .people(.fantasy)),
-        Emoji(id: "manVampire", character: "🧛‍♂️", name: "Man Vampire", keywords: ["dracula", "blood", "undead", "halloween"], category: .people(.fantasy)),
-        Emoji(id: "womanVampire", character: "🧛‍♀️", name: "Woman Vampire", keywords: ["dracula", "blood", "undead", "halloween"], category: .people(.fantasy)),
-        Emoji(id: "merperson", character: "🧜", name: "Merperson", keywords: ["ocean", "sea", "mythical"], category: .people(.fantasy)),
-        Emoji(id: "merman", character: "🧜‍♂️", name: "Merman", keywords: ["ocean", "sea", "mythical", "triton"], category: .people(.other)),
-        Emoji(id: "mermaid", character: "🧜‍♀️", name: "Mermaid", keywords: ["ocean", "sea", "mythical", "ariel"], category: .people(.fantasy)),
-        Emoji(id: "elf", character: "🧝", name: "Elf", keywords: ["fantasy", "magical", "christmas", "legolas"], category: .people(.fantasy)),
-        Emoji(id: "manElf", character: "🧝‍♂️", name: "Man Elf", keywords: ["fantasy", "magical", "christmas", "legolas"], category: .people(.fantasy)),
-        Emoji(id: "womanElf", character: "🧝‍♀️", name: "Woman Elf", keywords: ["fantasy", "magical", "christmas"], category: .people(.fantasy)),
-        Emoji(id: "genie", character: "🧞", name: "Genie", keywords: ["wish", "lamp", "aladdin", "magic"], category: .people(.fantasy)),
-        Emoji(id: "manGenie", character: "🧞‍♂️", name: "Man Genie", keywords: ["wish", "lamp", "aladdin", "magic"], category: .people(.fantasy)),
-        Emoji(id: "womanGenie", character: "🧞‍♀️", name: "Woman Genie", keywords: ["wish", "lamp", "magic"], category: .people(.fantasy)),
-        Emoji(id: "zombie", character: "🧟", name: "Zombie", keywords: ["undead", "horror", "halloween", "brain"], category: .people(.fantasy)),
-        Emoji(id: "manZombie", character: "🧟‍♂️", name: "Man Zombie", keywords: ["undead", "horror", "halloween", "brain"], category: .people(.fantasy)),
-        Emoji(id: "womanZombie", character: "🧟‍♀️", name: "Woman Zombie", keywords: ["undead", "horror", "halloween", "brain"], category: .people(.fantasy)),
-        Emoji(id: "troll", character: "🧌", name: "Troll", keywords: ["monster", "internet", "mythical", "grumpy"], category: .people(.other)),
-        Emoji(id: "personGettingMassage", character: "💆", name: "Person Getting Massage", keywords: ["spa", "relax", "pamper"], category: .people(.reactions)),
-        Emoji(id: "manGettingMassage", character: "💆‍♂️", name: "Man Getting Massage", keywords: ["spa", "relax", "pamper"], category: .people(.reactions)),
-        Emoji(id: "womanGettingMassage", character: "💆‍♀️", name: "Woman Getting Massage", keywords: ["spa", "relax", "pamper"], category: .people(.reactions)),
-        Emoji(id: "personGettingHaircut", character: "💇", name: "Person Getting Haircut", keywords: ["salon", "barber", "trim"], category: .people(.reactions)),
-        Emoji(id: "manGettingHaircut", character: "💇‍♂️", name: "Man Getting Haircut", keywords: ["salon", "barber", "trim"], category: .people(.reactions)),
-        Emoji(id: "womanGettingHaircut", character: "💇‍♀️", name: "Woman Getting Haircut", keywords: ["salon", "barber", "trim"], category: .people(.reactions)),
-        Emoji(id: "personWalking", character: "🚶", name: "Person Walking", keywords: ["stroll", "hike", "pedestrian"], category: .people(.reactions)),
-        Emoji(id: "manWalking", character: "🚶‍♂️", name: "Man Walking", keywords: ["stroll", "hike", "pedestrian"], category: .people(.reactions)),
-        Emoji(id: "womanWalking", character: "🚶‍♀️", name: "Woman Walking", keywords: ["stroll", "hike", "pedestrian"], category: .people(.reactions)),
-        Emoji(id: "personStanding", character: "🧍", name: "Person Standing", keywords: ["still", "waiting"], category: .people(.reactions)),
-        Emoji(id: "manStanding", character: "🧍‍♂️", name: "Man Standing", keywords: ["still", "waiting"], category: .people(.reactions)),
-        Emoji(id: "womanStanding", character: "🧍‍♀️", name: "Woman Standing", keywords: ["still", "waiting"], category: .people(.reactions)),
-        Emoji(id: "personKneeling", character: "🧎", name: "Person Kneeling", keywords: ["pray", "propose", "kneel"], category: .people(.reactions)),
-        Emoji(id: "manKneeling", character: "🧎‍♂️", name: "Man Kneeling", keywords: ["pray", "propose", "kneel"], category: .people(.reactions)),
-        Emoji(id: "womanKneeling", character: "🧎‍♀️", name: "Woman Kneeling", keywords: ["pray", "propose", "kneel"], category: .people(.reactions)),
-        Emoji(id: "personWithWhiteCane", character: "🧑‍🦯", name: "Person With White Cane", keywords: ["blind", "accessibility", "vision"], category: .people(.ageBased)),
-        Emoji(id: "manWithWhiteCane", character: "👨‍🦯", name: "Man With White Cane", keywords: ["blind", "accessibility", "vision"], category: .people(.ageBased)),
-        Emoji(id: "womanWithWhiteCane", character: "👩‍🦯", name: "Woman With White Cane", keywords: ["blind", "accessibility", "vision"], category: .people(.ageBased)),
-        Emoji(id: "personInMotorizedWheelchair", character: "🧑‍🦼", name: "Person In Motorized Wheelchair", keywords: ["accessibility", "disability", "electric"], category: .people(.ageBased)),
-        Emoji(id: "manInMotorizedWheelchair", character: "👨‍🦼", name: "Man In Motorized Wheelchair", keywords: ["accessibility", "disability", "electric"], category: .people(.ageBased)),
-        Emoji(id: "womanInMotorizedWheelchair", character: "👩‍🦼", name: "Woman In Motorized Wheelchair", keywords: ["accessibility", "disability", "electric"], category: .people(.ageBased)),
-        Emoji(id: "personInManualWheelchair", character: "🧑‍🦽", name: "Person In Manual Wheelchair", keywords: ["accessibility", "disability"], category: .people(.ageBased)),
-        Emoji(id: "manInManualWheelchair", character: "👨‍🦽", name: "Man In Manual Wheelchair", keywords: ["accessibility", "disability"], category: .people(.ageBased)),
-        Emoji(id: "womanInManualWheelchair", character: "👩‍🦽", name: "Woman In Manual Wheelchair", keywords: ["accessibility", "disability"], category: .people(.ageBased)),
-        Emoji(id: "personRunning", character: "🏃", name: "Person Running", keywords: ["jog", "exercise", "sprint", "race"], category: .people(.sports)),
-        Emoji(id: "manRunning", character: "🏃‍♂️", name: "Man Running", keywords: ["jog", "exercise", "sprint", "race"], category: .people(.sports)),
-        Emoji(id: "womanRunning", character: "🏃‍♀️", name: "Woman Running", keywords: ["jog", "exercise", "sprint", "race"], category: .people(.sports)),
-        Emoji(id: "womanDancing", character: "💃", name: "Woman Dancing", keywords: ["party", "salsa", "dance"], category: .people(.reactions)),
-        Emoji(id: "manDancing", character: "🕺", name: "Man Dancing", keywords: ["party", "disco", "dance"], category: .people(.reactions)),
-        Emoji(id: "personInSuitLevitating", character: "🕴️", name: "Person In Suit Levitating", keywords: ["hover", "floating", "business"], category: .people(.ageBased)),
-        Emoji(id: "peopleWithBunnyEars", character: "👯", name: "People With Bunny Ears", keywords: ["party", "dancers", "playboy"], category: .people(.ageBased)),
-        Emoji(id: "menWithBunnyEars", character: "👯‍♂️", name: "Men With Bunny Ears", keywords: ["party", "dancers"], category: .people(.other)),
-        Emoji(id: "womenWithBunnyEars", character: "👯‍♀️", name: "Women With Bunny Ears", keywords: ["party", "dancers"], category: .people(.other)),
-        Emoji(id: "personInSteamyRoom", character: "🧖", name: "Person In Steamy Room", keywords: ["sauna", "spa", "relax", "steam"], category: .people(.reactions)),
-        Emoji(id: "manInSteamyRoom", character: "🧖‍♂️", name: "Man In Steamy Room", keywords: ["sauna", "spa", "relax", "steam"], category: .people(.reactions)),
-        Emoji(id: "womanInSteamyRoom", character: "🧖‍♀️", name: "Woman In Steamy Room", keywords: ["sauna", "spa", "relax", "steam"], category: .people(.reactions)),
-        Emoji(id: "personClimbing", character: "🧗", name: "Person Climbing", keywords: ["rock", "mountain", "sport"], category: .people(.sports)),
-        Emoji(id: "manClimbing", character: "🧗‍♂️", name: "Man Climbing", keywords: ["rock", "mountain", "sport"], category: .people(.sports)),
-        Emoji(id: "womanClimbing", character: "🧗‍♀️", name: "Woman Climbing", keywords: ["rock", "mountain", "sport"], category: .people(.sports)),
-        Emoji(id: "personFencing", character: "🤺", name: "Person Fencing", keywords: ["sword", "sport", "duel"], category: .people(.sports)),
-        Emoji(id: "horseRacing", character: "🏇", name: "Horse Racing", keywords: ["jockey", "derby", "equestrian"], category: .people(.sports)),
-        Emoji(id: "skier", character: "⛷️", name: "Skier", keywords: ["snow", "winter", "sport", "ski"], category: .people(.sports)),
-        Emoji(id: "snowboarder", character: "🏂", name: "Snowboarder", keywords: ["snow", "winter", "sport", "board"], category: .people(.other)),
-        Emoji(id: "personGolfing", character: "🏌️", name: "Person Golfing", keywords: ["sport", "club", "putt"], category: .people(.sports)),
-        Emoji(id: "manGolfing", character: "🏌‍♂️", name: "Man Golfing", keywords: ["sport", "club", "putt"], category: .people(.sports)),
-        Emoji(id: "womanGolfing", character: "🏌‍♀️", name: "Woman Golfing", keywords: ["sport", "club", "putt"], category: .people(.sports)),
-        Emoji(id: "personSurfing", character: "🏄", name: "Person Surfing", keywords: ["wave", "ocean", "beach", "sport"], category: .people(.sports)),
-        Emoji(id: "manSurfing", character: "🏄‍♂️", name: "Man Surfing", keywords: ["wave", "ocean", "beach", "sport"], category: .people(.sports)),
-        Emoji(id: "womanSurfing", character: "🏄‍♀️", name: "Woman Surfing", keywords: ["wave", "ocean", "beach", "sport"], category: .people(.sports)),
-        Emoji(id: "personRowingBoat", character: "🚣", name: "Person Rowing Boat", keywords: ["paddle", "canoe", "kayak", "water"], category: .people(.sports)),
-        Emoji(id: "manRowingBoat", character: "🚣‍♂️", name: "Man Rowing Boat", keywords: ["paddle", "canoe", "kayak", "water"], category: .people(.sports)),
-        Emoji(id: "womanRowingBoat", character: "🚣‍♀️", name: "Woman Rowing Boat", keywords: ["paddle", "canoe", "kayak", "water"], category: .people(.sports)),
-        Emoji(id: "personSwimming", character: "🏊", name: "Person Swimming", keywords: ["pool", "water", "sport", "dive"], category: .people(.sports)),
-        Emoji(id: "manSwimming", character: "🏊‍♂️", name: "Man Swimming", keywords: ["pool", "water", "sport", "dive"], category: .people(.sports)),
-        Emoji(id: "womanSwimming", character: "🏊‍♀️", name: "Woman Swimming", keywords: ["pool", "water", "sport", "dive"], category: .people(.sports)),
-        Emoji(id: "personBouncingBall", character: "⛹️", name: "Person Bouncing Ball", keywords: ["basketball", "sport", "dribble"], category: .people(.ageBased)),
-        Emoji(id: "manBouncingBall", character: "⛹‍♂️", name: "Man Bouncing Ball", keywords: ["basketball", "sport", "dribble"], category: .people(.ageBased)),
-        Emoji(id: "womanBouncingBall", character: "⛹‍♀️", name: "Woman Bouncing Ball", keywords: ["basketball", "sport", "dribble"], category: .people(.ageBased)),
-        Emoji(id: "personLiftingWeights", character: "🏋️", name: "Person Lifting Weights", keywords: ["gym", "workout", "barbell", "strong"], category: .people(.sports)),
-        Emoji(id: "manLiftingWeights", character: "🏋‍♂️", name: "Man Lifting Weights", keywords: ["gym", "workout", "barbell", "strong"], category: .people(.sports)),
-        Emoji(id: "womanLiftingWeights", character: "🏋‍♀️", name: "Woman Lifting Weights", keywords: ["gym", "workout", "barbell", "strong"], category: .people(.sports)),
-        Emoji(id: "personBiking", character: "🚴", name: "Person Biking", keywords: ["bicycle", "cycle", "sport", "ride"], category: .people(.sports)),
-        Emoji(id: "manBiking", character: "🚴‍♂️", name: "Man Biking", keywords: ["bicycle", "cycle", "sport", "ride"], category: .people(.sports)),
-        Emoji(id: "womanBiking", character: "🚴‍♀️", name: "Woman Biking", keywords: ["bicycle", "cycle", "sport", "ride"], category: .people(.sports)),
-        Emoji(id: "personMountainBiking", character: "🚵", name: "Person Mountain Biking", keywords: ["bicycle", "offroad", "sport", "mtb"], category: .people(.sports)),
-        Emoji(id: "manMountainBiking", character: "🚵‍♂️", name: "Man Mountain Biking", keywords: ["bicycle", "offroad", "sport", "mtb"], category: .people(.sports)),
-        Emoji(id: "womanMountainBiking", character: "🚵‍♀️", name: "Woman Mountain Biking", keywords: ["bicycle", "offroad", "sport", "mtb"], category: .people(.sports)),
-        Emoji(id: "personCartwheeling", character: "🤸", name: "Person Cartwheeling", keywords: ["gymnastics", "acrobat", "sport", "flip"], category: .people(.ageBased)),
-        Emoji(id: "manCartwheeling", character: "🤸‍♂️", name: "Man Cartwheeling", keywords: ["gymnastics", "acrobat", "sport", "flip"], category: .people(.ageBased)),
-        Emoji(id: "womanCartwheeling", character: "🤸‍♀️", name: "Woman Cartwheeling", keywords: ["gymnastics", "acrobat", "sport", "flip"], category: .people(.ageBased)),
-        Emoji(id: "peopleWrestling", character: "🤼", name: "People Wrestling", keywords: ["sport", "fight", "grapple"], category: .people(.sports)),
-        Emoji(id: "menWrestling", character: "🤼‍♂️", name: "Men Wrestling", keywords: ["sport", "fight", "grapple"], category: .people(.sports)),
-        Emoji(id: "womenWrestling", character: "🤼‍♀️", name: "Women Wrestling", keywords: ["sport", "fight", "grapple"], category: .people(.sports)),
-        Emoji(id: "personPlayingWaterPolo", character: "🤽", name: "Person Playing Water Polo", keywords: ["sport", "pool", "water"], category: .people(.sports)),
-        Emoji(id: "manPlayingWaterPolo", character: "🤽‍♂️", name: "Man Playing Water Polo", keywords: ["sport", "pool", "water"], category: .people(.sports)),
-        Emoji(id: "womanPlayingWaterPolo", character: "🤽‍♀️", name: "Woman Playing Water Polo", keywords: ["sport", "pool", "water"], category: .people(.sports)),
-        Emoji(id: "personPlayingHandball", character: "🤾", name: "Person Playing Handball", keywords: ["sport", "ball", "throw"], category: .people(.sports)),
-        Emoji(id: "manPlayingHandball", character: "🤾‍♂️", name: "Man Playing Handball", keywords: ["sport", "ball", "throw"], category: .people(.sports)),
-        Emoji(id: "womanPlayingHandball", character: "🤾‍♀️", name: "Woman Playing Handball", keywords: ["sport", "ball", "throw"], category: .people(.sports)),
-        Emoji(id: "personJuggling", character: "🤹", name: "Person Juggling", keywords: ["circus", "balls", "skill", "performer"], category: .people(.sports)),
-        Emoji(id: "manJuggling", character: "🤹‍♂️", name: "Man Juggling", keywords: ["circus", "balls", "skill", "performer"], category: .people(.sports)),
-        Emoji(id: "womanJuggling", character: "🤹‍♀️", name: "Woman Juggling", keywords: ["circus", "balls", "skill", "performer"], category: .people(.sports)),
-        Emoji(id: "personInLotusPosition", character: "🧘", name: "Person In Lotus Position", keywords: ["yoga", "meditation", "zen", "calm"], category: .people(.sports)),
-        Emoji(id: "manInLotusPosition", character: "🧘‍♂️", name: "Man In Lotus Position", keywords: ["yoga", "meditation", "zen", "calm"], category: .people(.sports)),
-        Emoji(id: "womanInLotusPosition", character: "🧘‍♀️", name: "Woman In Lotus Position", keywords: ["yoga", "meditation", "zen", "calm"], category: .people(.sports)),
-        Emoji(id: "personTakingBath", character: "🛀", name: "Person Taking Bath", keywords: ["bathtub", "relax", "clean", "soak"], category: .people(.ageBased)),
-        Emoji(id: "personInBed", character: "🛌", name: "Person In Bed", keywords: ["sleep", "tired", "rest", "zzz"], category: .people(.ageBased)),
-        Emoji(id: "peopleHoldingHands", character: "🧑‍🤝‍🧑", name: "People Holding Hands", keywords: ["friends", "together", "unity"], category: .people(.other)),
-        Emoji(id: "womenHoldingHands", character: "👭", name: "Women Holding Hands", keywords: ["friends", "together", "sisters"], category: .people(.other)),
-        Emoji(id: "womanAndManHoldingHands", character: "👫", name: "Woman And Man Holding Hands", keywords: ["couple", "together", "romance"], category: .people(.ageBased)),
-        Emoji(id: "menHoldingHands", character: "👬", name: "Men Holding Hands", keywords: ["friends", "together", "brothers"], category: .people(.other)),
-        Emoji(id: "kiss", character: "💏", name: "Kiss", keywords: ["love", "romance", "smooch"], category: .people(.other)),
-        Emoji(id: "kissWomanMan", character: "👩‍❤️‍💋‍👨", name: "Kiss Woman Man", keywords: ["love", "romance", "couple"], category: .people(.ageBased)),
-        Emoji(id: "kissManMan", character: "👨‍❤️‍💋‍👨", name: "Kiss Man Man", keywords: ["love", "romance", "couple", "gay"], category: .people(.ageBased)),
-        Emoji(id: "kissWomanWoman", character: "👩‍❤️‍💋‍👩", name: "Kiss Woman Woman", keywords: ["love", "romance", "couple", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "coupleWithHeart", character: "💑", name: "Couple With Heart", keywords: ["love", "romance", "relationship"], category: .people(.other)),
-        Emoji(id: "coupleWithHeartWomanMan", character: "👩‍❤️‍👨", name: "Couple With Heart Woman Man", keywords: ["love", "romance", "relationship"], category: .people(.ageBased)),
-        Emoji(id: "coupleWithHeartManMan", character: "👨‍❤️‍👨", name: "Couple With Heart Man Man", keywords: ["love", "romance", "relationship", "gay"], category: .people(.ageBased)),
-        Emoji(id: "coupleWithHeartWomanWoman", character: "👩‍❤️‍👩", name: "Couple With Heart Woman Woman", keywords: ["love", "romance", "relationship", "lesbian"], category: .people(.ageBased)),
-        Emoji(id: "speakingHead", character: "🗣️", name: "Speaking Head", keywords: ["talk", "speak", "voice"], category: .people(.other)),
-        Emoji(id: "bustInSilhouette", character: "👤", name: "Bust In Silhouette", keywords: ["profile", "user", "person", "avatar"], category: .people(.ageBased)),
-        Emoji(id: "bustsInSilhouette", character: "👥", name: "Busts In Silhouette", keywords: ["people", "users", "group"], category: .people(.other)),
-        Emoji(id: "peopleHugging", character: "🫂", name: "People Hugging", keywords: ["embrace", "comfort", "love", "support"], category: .people(.other)),
-        Emoji(id: "footprints", character: "👣", name: "Footprints", keywords: ["steps", "tracks", "walking", "trail"], category: .people(.reactions))
+        Emoji(
+            id: "pileOfPoo",
+            character: "💩",
+            name: "Pile Of Poo",
+            keywords: ["poop", "crap", "shit", "💩"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "clownFace",
+            character: "🤡",
+            name: "Clown Face",
+            keywords: ["joker", "circus", "funny", "fool"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "ogre",
+            character: "👹",
+            name: "Ogre",
+            keywords: ["monster", "demon", "japanese", "oni", "scary"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "goblin",
+            character: "👺",
+            name: "Goblin",
+            keywords: ["tengu", "monster", "japanese", "creature", "angry"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "ghost",
+            character: "👻",
+            name: "Ghost",
+            keywords: ["boo", "spooky", "halloween", "phantom", "spirit"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "alien",
+            character: "👽",
+            name: "Alien",
+            keywords: ["ufo", "extraterrestrial", "et", "space", "martian"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "alienMonster",
+            character: "👾",
+            name: "Alien Monster",
+            keywords: ["space invader", "retro", "game", "video game", "8-bit"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "robot",
+            character: "🤖",
+            name: "Robot",
+            keywords: ["ai", "bot", "android", "machine", "artificial"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "grinningCat",
+            character: "😺",
+            name: "Grinning Cat",
+            keywords: ["happy", "kitty", "feline", "smile"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "grinningCatWithSmilingEyes",
+            character: "😸",
+            name: "Grinning Cat With Smiling Eyes",
+            keywords: ["happy", "kitty", "feline", "joy"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "catWithTearsOfJoy",
+            character: "😹",
+            name: "Cat With Tears Of Joy",
+            keywords: ["lol", "kitty", "laugh", "funny"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "smilingCatWithHeartEyes",
+            character: "😻",
+            name: "Smiling Cat With Heart Eyes",
+            keywords: ["love", "kitty", "adore", "feline"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "catWithWrySmile",
+            character: "😼",
+            name: "Cat With Wry Smile",
+            keywords: ["smirk", "kitty", "smug", "sly"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "kissingCat",
+            character: "😽",
+            name: "Kissing Cat",
+            keywords: ["love", "kitty", "affection", "feline"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "wearyCat",
+            character: "🙀",
+            name: "Weary Cat",
+            keywords: ["shocked", "scared", "kitty", "surprised"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "cryingCat",
+            character: "😿",
+            name: "Crying Cat",
+            keywords: ["sad", "kitty", "tear", "upset"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "poutingCat",
+            character: "😾",
+            name: "Pouting Cat",
+            keywords: ["grumpy", "annoyed", "kitty", "mad"],
+            category: .expressive(.creature)
+        ),
+        Emoji(
+            id: "seeNoEvilMonkey",
+            character: "🙈",
+            name: "See No Evil Monkey",
+            keywords: ["mizaru", "hide", "embarrassed", "shy"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "hearNoEvilMonkey",
+            character: "🙉",
+            name: "Hear No Evil Monkey",
+            keywords: ["kikazaru", "ignore", "deaf", "avoid"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "speakNoEvilMonkey",
+            character: "🙊",
+            name: "Speak No Evil Monkey",
+            keywords: ["iwazaru", "quiet", "silence", "secret"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "loveLetter",
+            character: "💌",
+            name: "Love Letter",
+            keywords: ["romance", "mail", "valentine", "note"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "heartWithArrow",
+            character: "💘",
+            name: "Heart With Arrow",
+            keywords: ["cupid", "love", "romance", "struck"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "heartWithRibbon",
+            character: "💝",
+            name: "Heart With Ribbon",
+            keywords: ["gift", "love", "present", "valentine"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "sparklingHeart",
+            character: "💖",
+            name: "Sparkling Heart",
+            keywords: ["love", "shine", "excited", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "growingHeart",
+            character: "💗",
+            name: "Growing Heart",
+            keywords: ["love", "expanding", "increasing", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "beatingHeart",
+            character: "💓",
+            name: "Beating Heart",
+            keywords: ["love", "pulse", "alive", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "revolvingHearts",
+            character: "💞",
+            name: "Revolving Hearts",
+            keywords: ["love", "spinning", "romance", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "twoHearts",
+            character: "💕",
+            name: "Two Hearts",
+            keywords: ["love", "romance", "couple", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "heartDecoration",
+            character: "💟",
+            name: "Heart Decoration",
+            keywords: ["love", "ornament", "purple", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "heartExclamation",
+            character: "❣️",
+            name: "Heart Exclamation",
+            keywords: ["love", "emphasis", "punctuation", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "brokenHeart",
+            character: "💔",
+            name: "Broken Heart",
+            keywords: ["heartbreak", "sad", "breakup", "hurt", "pain"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "heartOnFire",
+            character: "❤️‍🔥",
+            name: "Heart On Fire",
+            keywords: ["passion", "burning", "desire", "intense", "love"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "mendingHeart",
+            character: "❤️‍🩹",
+            name: "Mending Heart",
+            keywords: ["healing", "recovery", "bandage", "getting better"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "redHeart",
+            character: "❤️",
+            name: "Red Heart",
+            keywords: ["love", "romance", "classic", "valentine"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "pinkHeart",
+            character: "🩷",
+            name: "Pink Heart",
+            keywords: ["love", "cute", "sweet", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "orangeHeart",
+            character: "🧡",
+            name: "Orange Heart",
+            keywords: ["love", "warm", "friendship", "affection"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "yellowHeart",
+            character: "💛",
+            name: "Yellow Heart",
+            keywords: ["love", "friendship", "happy", "gold"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "greenHeart",
+            character: "💚",
+            name: "Green Heart",
+            keywords: ["love", "nature", "jealous", "envy"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "blueHeart",
+            character: "💙",
+            name: "Blue Heart",
+            keywords: ["love", "trust", "loyalty", "calm"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "lightBlueHeart",
+            character: "🩵",
+            name: "Light Blue Heart",
+            keywords: ["love", "calm", "peaceful", "aqua"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "purpleHeart",
+            character: "💜",
+            name: "Purple Heart",
+            keywords: ["love", "compassion", "bts", "kpop"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "brownHeart",
+            character: "🤎",
+            name: "Brown Heart",
+            keywords: ["love", "earth", "natural", "chocolate"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "blackHeart",
+            character: "🖤",
+            name: "Black Heart",
+            keywords: ["love", "dark", "evil", "goth"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "greyHeart",
+            character: "🩶",
+            name: "Grey Heart",
+            keywords: ["love", "neutral", "compromise", "dull"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "whiteHeart",
+            character: "🤍",
+            name: "White Heart",
+            keywords: ["love", "pure", "clean", "innocent"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "kissMark",
+            character: "💋",
+            name: "Kiss Mark",
+            keywords: ["lipstick", "lips", "smooch", "mwah"],
+            category: .expressive(.heart)
+        ),
+        Emoji(
+            id: "hundredPoints",
+            character: "💯",
+            name: "Hundred Points",
+            keywords: ["perfect", "score", "full", "complete", "100"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "angerSymbol",
+            character: "💢",
+            name: "Anger Symbol",
+            keywords: ["mad", "vein", "furious", "annoyed"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "collision",
+            character: "💥",
+            name: "Collision",
+            keywords: ["boom", "explosion", "bang", "crash", "pow"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "dizzy",
+            character: "💫",
+            name: "Dizzy",
+            keywords: ["star", "sparkle", "confused", "dazed"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "sweatDroplets",
+            character: "💦",
+            name: "Sweat Droplets",
+            keywords: ["water", "splash", "drops", "wet"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "dashingAway",
+            character: "💨",
+            name: "Dashing Away",
+            keywords: ["fast", "speed", "wind", "smoke", "gone"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "hole",
+            character: "🕳️",
+            name: "Hole",
+            keywords: ["pit", "void", "empty", "dark"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "speechBalloon",
+            character: "💬",
+            name: "Speech Balloon",
+            keywords: ["chat", "talk", "dialogue", "comment"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "eyeInSpeechBubble",
+            character: "👁️‍🗨️",
+            name: "Eye In Speech Bubble",
+            keywords: ["witness", "anti-bullying", "watching"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "leftSpeechBubble",
+            character: "🗨️",
+            name: "Left Speech Bubble",
+            keywords: ["chat", "talk", "dialogue", "comment"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "rightAngerBubble",
+            character: "🗯️",
+            name: "Right Anger Bubble",
+            keywords: ["mad", "yell", "shout", "argue"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "thoughtBalloon",
+            character: "💭",
+            name: "Thought Balloon",
+            keywords: ["thinking", "pondering", "cloud", "wonder"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "zZZ",
+            character: "💤",
+            name: "Z Z Z",
+            keywords: ["sleep", "tired", "snore", "zzz", "nap"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "wavingHand",
+            character: "👋",
+            name: "Waving Hand",
+            keywords: ["hello", "hi", "goodbye", "bye", "wave"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "raisedBackOfHand",
+            character: "🤚",
+            name: "Raised Back Of Hand",
+            keywords: ["stop", "halt", "high five"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "handWithFingersSplayed",
+            character: "🖐️",
+            name: "Hand With Fingers Splayed",
+            keywords: ["stop", "high five", "open palm"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "raisedHand",
+            character: "✋",
+            name: "Raised Hand",
+            keywords: ["stop", "high five", "halt"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "vulcanSalute",
+            character: "🖖",
+            name: "Vulcan Salute",
+            keywords: ["spock", "star trek", "live long prosper"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "rightwardsHand",
+            character: "🫱",
+            name: "Rightwards Hand",
+            keywords: ["point", "offer", "reach"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "leftwardsHand",
+            character: "🫲",
+            name: "Leftwards Hand",
+            keywords: ["point", "offer", "reach"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "palmDownHand",
+            character: "🫳",
+            name: "Palm Down Hand",
+            keywords: ["drop", "give", "dismiss"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "palmUpHand",
+            character: "🫴",
+            name: "Palm Up Hand",
+            keywords: ["offer", "receive", "ask"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "leftwardsPushingHand",
+            character: "🫷",
+            name: "Leftwards Pushing Hand",
+            keywords: ["stop", "push", "refuse"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "rightwardsPushingHand",
+            character: "🫸",
+            name: "Rightwards Pushing Hand",
+            keywords: ["stop", "push", "refuse"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "oKHand",
+            character: "👌",
+            name: "O K Hand",
+            keywords: ["okay", "fine", "good", "perfect"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "pinchedFingers",
+            character: "🤌",
+            name: "Pinched Fingers",
+            keywords: ["italian", "chef kiss", "ma che vuoi", "perfection"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "pinchingHand",
+            character: "🤏",
+            name: "Pinching Hand",
+            keywords: ["small", "tiny", "little", "bit"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "victoryHand",
+            character: "✌️",
+            name: "Victory Hand",
+            keywords: ["peace", "v sign", "two", "win"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "crossedFingers",
+            character: "🤞",
+            name: "Crossed Fingers",
+            keywords: ["luck", "hope", "wish", "fingers crossed"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "handWithIndexFingerAndThumbCrossed",
+            character: "🫰",
+            name: "Hand With Index Finger And expressivemb Crossed",
+            keywords: ["money", "snap", "expensive"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "loveYouGesture",
+            character: "🤟",
+            name: "Love You Gesture",
+            keywords: ["ily", "sign language", "love"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "signOfTheHorns",
+            character: "🤘",
+            name: "Sign Of The Horns",
+            keywords: ["rock", "metal", "devil horns"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "callMeHand",
+            character: "🤙",
+            name: "Call Me Hand",
+            keywords: ["shaka", "hang loose", "phone"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "backhandIndexPointingLeft",
+            character: "👈",
+            name: "Backhand Index Pointing Left",
+            keywords: ["point", "direction", "here", "this"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "backhandIndexPointingRight",
+            character: "👉",
+            name: "Backhand Index Pointing Right",
+            keywords: ["point", "direction", "there", "that"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "backhandIndexPointingUp",
+            character: "👆",
+            name: "Backhand Index Pointing Up",
+            keywords: ["point", "direction", "above", "look"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "middleFinger",
+            character: "🖕",
+            name: "Middle Finger",
+            keywords: ["rude", "offensive", "flip off", "fk"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "backhandIndexPointingDown",
+            character: "👇",
+            name: "Backhand Index Pointing Down",
+            keywords: ["point", "direction", "below", "look"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "indexPointingUp",
+            character: "☝️",
+            name: "Index Pointing Up",
+            keywords: ["point", "idea", "number one", "wait"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "indexPointingAtTheViewer",
+            character: "🫵",
+            name: "Index Pointing At The Viewer",
+            keywords: ["you", "point", "accusation"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "thumbsUp",
+            character: "👍",
+            name: "Thumbs Up",
+            keywords: ["like", "good", "yes", "agree", "approve"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "thumbsDown",
+            character: "👎",
+            name: "Thumbs Down",
+            keywords: ["dislike", "bad", "no", "disagree", "disapprove"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "raisedFist",
+            character: "✊",
+            name: "Raised Fist",
+            keywords: ["power", "solidarity", "resistance", "strength"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "oncomingFist",
+            character: "👊",
+            name: "Oncoming Fist",
+            keywords: ["punch", "bump", "fist bump", "bro"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "leftFacingFist",
+            character: "🤛",
+            name: "Left Facing Fist",
+            keywords: ["punch", "bump", "fist bump"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "rightFacingFist",
+            character: "🤜",
+            name: "Right Facing Fist",
+            keywords: ["punch", "bump", "fist bump"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "clappingHands",
+            character: "👏",
+            name: "Clapping Hands",
+            keywords: ["applause", "congrats", "praise", "bravo"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "raisingHands",
+            character: "🙌",
+            name: "Raising Hands",
+            keywords: ["celebration", "hooray", "yay", "praise", "hallelujah"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "heartHands",
+            character: "🫶",
+            name: "Heart Hands",
+            keywords: ["love", "support", "care", "affection"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "openHands",
+            character: "👐",
+            name: "Open Hands",
+            keywords: ["hug", "jazz hands", "celebration"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "palmsUpTogether",
+            character: "🤲",
+            name: "Palms Up Together",
+            keywords: ["pray", "dua", "request", "plea"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "handshake",
+            character: "🤝",
+            name: "Handshake",
+            keywords: ["deal", "agreement", "meet", "partnership"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "foldedHands",
+            character: "🙏",
+            name: "Folded Hands",
+            keywords: ["pray", "thank you", "please", "namaste", "bless"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "writingHand",
+            character: "✍️",
+            name: "Writing Hand",
+            keywords: ["write", "signature", "author", "note"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "nailPolish",
+            character: "💅",
+            name: "Nail Polish",
+            keywords: ["sassy", "fabulous", "glamorous", "beauty", "manicure"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "selfie",
+            character: "🤳",
+            name: "Selfie",
+            keywords: ["photo", "camera", "picture", "instagram"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "flexedBiceps",
+            character: "💪",
+            name: "Flexed Biceps",
+            keywords: ["strong", "muscle", "strength", "workout", "gym"],
+            category: .expressive(.gesture)
+        ),
+        Emoji(
+            id: "mechanicalArm",
+            character: "🦾",
+            name: "Mechanical Arm",
+            keywords: ["prosthetic", "cyborg", "robot", "bionic"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "mechanicalLeg",
+            character: "🦿",
+            name: "Mechanical Leg",
+            keywords: ["prosthetic", "cyborg", "robot", "bionic"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "leg",
+            character: "🦵",
+            name: "Leg",
+            keywords: ["kick", "limb", "walk"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "foot",
+            character: "🦶",
+            name: "Foot",
+            keywords: ["kick", "toe", "step"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "ear",
+            character: "👂",
+            name: "Ear",
+            keywords: ["listen", "hear", "sound"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "earWithHearingAid",
+            character: "🦻",
+            name: "Ear With Hearing Aid",
+            keywords: ["deaf", "accessibility", "listen"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "nose",
+            character: "👃",
+            name: "Nose",
+            keywords: ["smell", "sniff", "scent"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "brain",
+            character: "🧠",
+            name: "Brain",
+            keywords: ["smart", "intelligent", "think", "mind"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "anatomicalHeart",
+            character: "🫀",
+            name: "Anatomical Heart",
+            keywords: ["organ", "medical", "cardio", "pulse"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "lungs",
+            character: "🫁",
+            name: "Lungs",
+            keywords: ["breathe", "organ", "medical", "respiratory"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "tooth",
+            character: "🦷",
+            name: "Tooth",
+            keywords: ["dentist", "dental", "smile", "molar"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "bone",
+            character: "🦴",
+            name: "Bone",
+            keywords: ["skeleton", "dog", "fossil"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "eyes",
+            character: "👀",
+            name: "Eyes",
+            keywords: ["look", "watching", "see", "peek"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "eye",
+            character: "👁️",
+            name: "Eye",
+            keywords: ["see", "look", "watch", "vision"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "tongue",
+            character: "👅",
+            name: "Tongue",
+            keywords: ["taste", "lick", "playful"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "mouth",
+            character: "👄",
+            name: "Mouth",
+            keywords: ["lips", "kiss", "talk", "speak"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "bitingLip",
+            character: "🫦",
+            name: "Biting Lip",
+            keywords: ["nervous", "anxious", "flirt", "anticipation"],
+            category: .expressive(.bodyPart)
+        ),
+        Emoji(
+            id: "baby",
+            character: "👶",
+            name: "Baby",
+            keywords: ["infant", "newborn", "toddler", "cute"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "child",
+            character: "🧒",
+            name: "Child",
+            keywords: ["kid", "young", "youth"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "boy",
+            character: "👦",
+            name: "Boy",
+            keywords: ["kid", "son", "youth", "male"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "girl",
+            character: "👧",
+            name: "Girl",
+            keywords: ["kid", "daughter", "youth", "female"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "person",
+            character: "🧑",
+            name: "Person",
+            keywords: ["human", "adult", "individual"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personBlondHair",
+            character: "👱",
+            name: "Person Blond Hair",
+            keywords: ["blonde", "yellow"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "man",
+            character: "👨",
+            name: "Man",
+            keywords: ["male", "guy", "dude", "adult"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personBeard",
+            character: "🧔",
+            name: "Person Beard",
+            keywords: ["facial hair", "hipster"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manBeard",
+            character: "🧔‍♂️",
+            name: "Man Beard",
+            keywords: ["facial hair", "hipster"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanBeard",
+            character: "🧔‍♀️",
+            name: "Woman Beard",
+            keywords: ["facial hair"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manRedHair",
+            character: "👨‍🦰",
+            name: "Man Red Hair",
+            keywords: ["ginger", "auburn"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manCurlyHair",
+            character: "👨‍🦱",
+            name: "Man Curly Hair",
+            keywords: ["wavy", "afro"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manWhiteHair",
+            character: "👨‍🦳",
+            name: "Man White Hair",
+            keywords: ["gray", "grey", "elderly", "silver"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manBald",
+            character: "👨‍🦲",
+            name: "Man Bald",
+            keywords: ["hairless", "shaved"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "woman",
+            character: "👩",
+            name: "Woman",
+            keywords: ["female", "lady", "adult"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanRedHair",
+            character: "👩‍🦰",
+            name: "Woman Red Hair",
+            keywords: ["ginger", "auburn"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personRedHair",
+            character: "🧑‍🦰",
+            name: "Person Red Hair",
+            keywords: ["ginger", "auburn"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanCurlyHair",
+            character: "👩‍🦱",
+            name: "Woman Curly Hair",
+            keywords: ["wavy", "afro"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personCurlyHair",
+            character: "🧑‍🦱",
+            name: "Person Curly Hair",
+            keywords: ["wavy", "afro"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanWhiteHair",
+            character: "👩‍🦳",
+            name: "Woman White Hair",
+            keywords: ["gray", "grey", "elderly", "silver"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personWhiteHair",
+            character: "🧑‍🦳",
+            name: "Person White Hair",
+            keywords: ["gray", "grey", "elderly", "silver"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanBald",
+            character: "👩‍🦲",
+            name: "Woman Bald",
+            keywords: ["hairless", "shaved"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personBald",
+            character: "🧑‍🦲",
+            name: "Person Bald",
+            keywords: ["hairless", "shaved"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanBlondHair",
+            character: "👱‍♀️",
+            name: "Woman Blond Hair",
+            keywords: ["blonde", "yellow"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manBlondHair",
+            character: "👱‍♂️",
+            name: "Man Blond Hair",
+            keywords: ["blonde", "yellow"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "olderPerson",
+            character: "🧓",
+            name: "Older Person",
+            keywords: ["elderly", "senior", "grandparent"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "oldMan",
+            character: "👴",
+            name: "Old Man",
+            keywords: ["elderly", "senior", "grandfather", "grandpa"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "oldWoman",
+            character: "👵",
+            name: "Old Woman",
+            keywords: ["elderly", "senior", "grandmother", "grandma"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personFrowning",
+            character: "🙍",
+            name: "Person Frowning",
+            keywords: ["sad", "unhappy"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manFrowning",
+            character: "🙍‍♂️",
+            name: "Man Frowning",
+            keywords: ["sad", "unhappy"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanFrowning",
+            character: "🙍‍♀️",
+            name: "Woman Frowning",
+            keywords: ["sad", "unhappy"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personPouting",
+            character: "🙎",
+            name: "Person Pouting",
+            keywords: ["sulk", "grumpy", "annoyed"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manPouting",
+            character: "🙎‍♂️",
+            name: "Man Pouting",
+            keywords: ["sulk", "grumpy", "annoyed"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanPouting",
+            character: "🙎‍♀️",
+            name: "Woman Pouting",
+            keywords: ["sulk", "grumpy", "annoyed"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personGesturingNO",
+            character: "🙅",
+            name: "Person Gesturing N O",
+            keywords: ["stop", "nope", "forbidden", "refuse"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manGesturingNO",
+            character: "🙅‍♂️",
+            name: "Man Gesturing N O",
+            keywords: ["stop", "nope", "forbidden", "refuse"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanGesturingNO",
+            character: "🙅‍♀️",
+            name: "Woman Gesturing N O",
+            keywords: ["stop", "nope", "forbidden", "refuse"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personGesturingOK",
+            character: "🙆",
+            name: "Person Gesturing O K",
+            keywords: ["yes", "okay", "agree", "approve"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manGesturingOK",
+            character: "🙆‍♂️",
+            name: "Man Gesturing O K",
+            keywords: ["yes", "okay", "agree", "approve"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanGesturingOK",
+            character: "🙆‍♀️",
+            name: "Woman Gesturing O K",
+            keywords: ["yes", "okay", "agree", "approve"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personTippingHand",
+            character: "💁",
+            name: "Person Tipping Hand",
+            keywords: ["sassy", "help desk", "information"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manTippingHand",
+            character: "💁‍♂️",
+            name: "Man Tipping Hand",
+            keywords: ["sassy", "help desk", "information"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanTippingHand",
+            character: "💁‍♀️",
+            name: "Woman Tipping Hand",
+            keywords: ["sassy", "help desk", "information"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personRaisingHand",
+            character: "🙋",
+            name: "Person Raising Hand",
+            keywords: ["question", "volunteer", "pick me"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manRaisingHand",
+            character: "🙋‍♂️",
+            name: "Man Raising Hand",
+            keywords: ["question", "volunteer", "pick me"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanRaisingHand",
+            character: "🙋‍♀️",
+            name: "Woman Raising Hand",
+            keywords: ["question", "volunteer", "pick me"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "deafPerson",
+            character: "🧏",
+            name: "Deaf Person",
+            keywords: ["hearing", "accessibility", "sign language"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "deafMan",
+            character: "🧏‍♂️",
+            name: "Deaf Man",
+            keywords: ["hearing", "accessibility", "sign language"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "deafWoman",
+            character: "🧏‍♀️",
+            name: "Deaf Woman",
+            keywords: ["hearing", "accessibility", "sign language"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personBowing",
+            character: "🙇",
+            name: "Person Bowing",
+            keywords: ["respect", "sorry", "apologize", "thank"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manBowing",
+            character: "🙇‍♂️",
+            name: "Man Bowing",
+            keywords: ["respect", "sorry", "apologize", "thank"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanBowing",
+            character: "🙇‍♀️",
+            name: "Woman Bowing",
+            keywords: ["respect", "sorry", "apologize", "thank"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personFacepalming",
+            character: "🤦",
+            name: "Person Facepalming",
+            keywords: ["frustrated", "disappointed", "ugh", "smh"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manFacepalming",
+            character: "🤦‍♂️",
+            name: "Man Facepalming",
+            keywords: ["frustrated", "disappointed", "ugh", "smh"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanFacepalming",
+            character: "🤦‍♀️",
+            name: "Woman Facepalming",
+            keywords: ["frustrated", "disappointed", "ugh", "smh"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personShrugging",
+            character: "🤷",
+            name: "Person Shrugging",
+            keywords: ["idk", "dunno", "whatever", "don't know"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manShrugging",
+            character: "🤷‍♂️",
+            name: "Man Shrugging",
+            keywords: ["idk", "dunno", "whatever", "don't know"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanShrugging",
+            character: "🤷‍♀️",
+            name: "Woman Shrugging",
+            keywords: ["idk", "dunno", "whatever", "don't know"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "healthWorker",
+            character: "🧑‍⚕️",
+            name: "Health Worker",
+            keywords: ["doctor", "nurse", "medical", "hospital"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manHealthWorker",
+            character: "👨‍⚕️",
+            name: "Man Health Worker",
+            keywords: ["doctor", "nurse", "medical", "hospital"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanHealthWorker",
+            character: "👩‍⚕️",
+            name: "Woman Health Worker",
+            keywords: ["doctor", "nurse", "medical", "hospital"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "student",
+            character: "🧑‍🎓",
+            name: "Student",
+            keywords: ["school", "graduate", "university", "college"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manStudent",
+            character: "👨‍🎓",
+            name: "Man Student",
+            keywords: ["school", "graduate", "university", "college"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanStudent",
+            character: "👩‍🎓",
+            name: "Woman Student",
+            keywords: ["school", "graduate", "university", "college"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "teacher",
+            character: "🧑‍🏫",
+            name: "Teacher",
+            keywords: ["professor", "instructor", "educator", "school"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manTeacher",
+            character: "👨‍🏫",
+            name: "Man Teacher",
+            keywords: ["professor", "instructor", "educator", "school"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanTeacher",
+            character: "👩‍🏫",
+            name: "Woman Teacher",
+            keywords: ["professor", "instructor", "educator", "school"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "judge",
+            character: "🧑‍⚖️",
+            name: "Judge",
+            keywords: ["law", "court", "justice", "lawyer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manJudge",
+            character: "👨‍⚖️",
+            name: "Man Judge",
+            keywords: ["law", "court", "justice", "lawyer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanJudge",
+            character: "👩‍⚖️",
+            name: "Woman Judge",
+            keywords: ["law", "court", "justice", "lawyer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "farmer",
+            character: "🧑‍🌾",
+            name: "Farmer",
+            keywords: ["agriculture", "crops", "field", "farming"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manFarmer",
+            character: "👨‍🌾",
+            name: "Man Farmer",
+            keywords: ["agriculture", "crops", "field", "farming"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanFarmer",
+            character: "👩‍🌾",
+            name: "Woman Farmer",
+            keywords: ["agriculture", "crops", "field", "farming"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "cook",
+            character: "🧑‍🍳",
+            name: "Cook",
+            keywords: ["chef", "kitchen", "food", "culinary"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manCook",
+            character: "👨‍🍳",
+            name: "Man Cook",
+            keywords: ["chef", "kitchen", "food", "culinary"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanCook",
+            character: "👩‍🍳",
+            name: "Woman Cook",
+            keywords: ["chef", "kitchen", "food", "culinary"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "mechanic",
+            character: "🧑‍🔧",
+            name: "Mechanic",
+            keywords: ["repair", "car", "fix", "engineer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manMechanic",
+            character: "👨‍🔧",
+            name: "Man Mechanic",
+            keywords: ["repair", "car", "fix", "engineer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanMechanic",
+            character: "👩‍🔧",
+            name: "Woman Mechanic",
+            keywords: ["repair", "car", "fix", "engineer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "factoryWorker",
+            character: "🧑‍🏭",
+            name: "Factory Worker",
+            keywords: ["industrial", "manufacturing", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manFactoryWorker",
+            character: "👨‍🏭",
+            name: "Man Factory Worker",
+            keywords: ["industrial", "manufacturing", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanFactoryWorker",
+            character: "👩‍🏭",
+            name: "Woman Factory Worker",
+            keywords: ["industrial", "manufacturing", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "officeWorker",
+            character: "🧑‍💼",
+            name: "Office Worker",
+            keywords: ["business", "corporate", "desk job"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manOfficeWorker",
+            character: "👨‍💼",
+            name: "Man Office Worker",
+            keywords: ["business", "corporate", "desk job"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanOfficeWorker",
+            character: "👩‍💼",
+            name: "Woman Office Worker",
+            keywords: ["business", "corporate", "desk job"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "scientist",
+            character: "🧑‍🔬",
+            name: "Scientist",
+            keywords: ["lab", "research", "chemistry", "biologist"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manScientist",
+            character: "👨‍🔬",
+            name: "Man Scientist",
+            keywords: ["lab", "research", "chemistry", "biologist"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanScientist",
+            character: "👩‍🔬",
+            name: "Woman Scientist",
+            keywords: ["lab", "research", "chemistry", "biologist"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "technologist",
+            character: "🧑‍💻",
+            name: "Technologist",
+            keywords: ["programmer", "developer", "coder", "computer", "software"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manTechnologist",
+            character: "👨‍💻",
+            name: "Man Technologist",
+            keywords: ["programmer", "developer", "coder", "computer", "software"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanTechnologist",
+            character: "👩‍💻",
+            name: "Woman Technologist",
+            keywords: ["programmer", "developer", "coder", "computer", "software"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "singer",
+            character: "🧑‍🎤",
+            name: "Singer",
+            keywords: ["music", "performer", "vocalist", "rockstar"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manSinger",
+            character: "👨‍🎤",
+            name: "Man Singer",
+            keywords: ["music", "performer", "vocalist", "rockstar"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanSinger",
+            character: "👩‍🎤",
+            name: "Woman Singer",
+            keywords: ["music", "performer", "vocalist", "rockstar"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "artist",
+            character: "🧑‍🎨",
+            name: "Artist",
+            keywords: ["painter", "creative", "art", "designer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manArtist",
+            character: "👨‍🎨",
+            name: "Man Artist",
+            keywords: ["painter", "creative", "art", "designer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanArtist",
+            character: "👩‍🎨",
+            name: "Woman Artist",
+            keywords: ["painter", "creative", "art", "designer"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "pilot",
+            character: "🧑‍✈️",
+            name: "Pilot",
+            keywords: ["airplane", "captain", "aviation", "flight"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manPilot",
+            character: "👨‍✈️",
+            name: "Man Pilot",
+            keywords: ["airplane", "captain", "aviation", "flight"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanPilot",
+            character: "👩‍✈️",
+            name: "Woman Pilot",
+            keywords: ["airplane", "captain", "aviation", "flight"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "astronaut",
+            character: "🧑‍🚀",
+            name: "Astronaut",
+            keywords: ["space", "rocket", "cosmonaut", "nasa"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manAstronaut",
+            character: "👨‍🚀",
+            name: "Man Astronaut",
+            keywords: ["space", "rocket", "cosmonaut", "nasa"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanAstronaut",
+            character: "👩‍🚀",
+            name: "Woman Astronaut",
+            keywords: ["space", "rocket", "cosmonaut", "nasa"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "firefighter",
+            character: "🧑‍🚒",
+            name: "Firefighter",
+            keywords: ["fire", "rescue", "emergency", "hero"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manFirefighter",
+            character: "👨‍🚒",
+            name: "Man Firefighter",
+            keywords: ["fire", "rescue", "emergency", "hero"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanFirefighter",
+            character: "👩‍🚒",
+            name: "Woman Firefighter",
+            keywords: ["fire", "rescue", "emergency", "hero"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "policeOfficer",
+            character: "👮",
+            name: "Police Officer",
+            keywords: ["cop", "law", "enforcement", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manPoliceOfficer",
+            character: "👮‍♂️",
+            name: "Man Police Officer",
+            keywords: ["cop", "law", "enforcement", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanPoliceOfficer",
+            character: "👮‍♀️",
+            name: "Woman Police Officer",
+            keywords: ["cop", "law", "enforcement", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "detective",
+            character: "🕵️",
+            name: "Detective",
+            keywords: ["spy", "investigate", "sleuth", "sherlock"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manDetective",
+            character: "🕵‍♂️",
+            name: "Man Detective",
+            keywords: ["spy", "investigate", "sleuth", "sherlock"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanDetective",
+            character: "🕵‍♀️",
+            name: "Woman Detective",
+            keywords: ["spy", "investigate", "sleuth", "sherlock"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "guard",
+            character: "💂",
+            name: "Guard",
+            keywords: ["soldier", "british", "royal", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manGuard",
+            character: "💂‍♂️",
+            name: "Man Guard",
+            keywords: ["soldier", "british", "royal", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanGuard",
+            character: "💂‍♀️",
+            name: "Woman Guard",
+            keywords: ["soldier", "british", "royal", "security"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "ninja",
+            character: "🥷",
+            name: "Ninja",
+            keywords: ["stealth", "warrior", "japanese", "assassin"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "constructionWorker",
+            character: "👷",
+            name: "Construction Worker",
+            keywords: ["builder", "hardhat", "build", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "manConstructionWorker",
+            character: "👷‍♂️",
+            name: "Man Construction Worker",
+            keywords: ["builder", "hardhat", "build", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "womanConstructionWorker",
+            character: "👷‍♀️",
+            name: "Woman Construction Worker",
+            keywords: ["builder", "hardhat", "build", "labor"],
+            category: .people(.jobs)
+        ),
+        Emoji(
+            id: "personWithCrown",
+            character: "🫅",
+            name: "Person With Crown",
+            keywords: ["royalty", "king", "queen", "monarch"],
+            category: .people(.royalty)
+        ),
+        Emoji(
+            id: "prince",
+            character: "🤴",
+            name: "Prince",
+            keywords: ["royalty", "royal", "charming"],
+            category: .people(.royalty)
+        ),
+        Emoji(
+            id: "princess",
+            character: "👸",
+            name: "Princess",
+            keywords: ["royalty", "royal", "disney"],
+            category: .people(.royalty)
+        ),
+        Emoji(
+            id: "personWearingTurban",
+            character: "👳",
+            name: "Person Wearing Turban",
+            keywords: ["sikh", "punjabi", "indian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manWearingTurban",
+            character: "👳‍♂️",
+            name: "Man Wearing Turban",
+            keywords: ["sikh", "punjabi", "indian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanWearingTurban",
+            character: "👳‍♀️",
+            name: "Woman Wearing Turban",
+            keywords: ["sikh", "punjabi", "indian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personWithSkullcap",
+            character: "👲",
+            name: "Person With Skullcap",
+            keywords: ["hat", "chinese", "asian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanWithHeadscarf",
+            character: "🧕",
+            name: "Woman With Headscarf",
+            keywords: ["hijab", "muslim", "islam"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personInTuxedo",
+            character: "🤵",
+            name: "Person In Tuxedo",
+            keywords: ["wedding", "groom", "formal", "suit"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "manInTuxedo",
+            character: "🤵‍♂️",
+            name: "Man In Tuxedo",
+            keywords: ["wedding", "groom", "formal", "suit"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "womanInTuxedo",
+            character: "🤵‍♀️",
+            name: "Woman In Tuxedo",
+            keywords: ["wedding", "formal", "suit"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "personWithVeil",
+            character: "👰",
+            name: "Person With Veil",
+            keywords: ["wedding", "bride", "marriage"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "manWithVeil",
+            character: "👰‍♂️",
+            name: "Man With Veil",
+            keywords: ["wedding", "marriage"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "womanWithVeil",
+            character: "👰‍♀️",
+            name: "Woman With Veil",
+            keywords: ["wedding", "bride", "marriage"],
+            category: .people(.matrimony)
+        ),
+        Emoji(
+            id: "pregnantWoman",
+            character: "🤰",
+            name: "Pregnant Woman",
+            keywords: ["expecting", "maternity", "mother"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "pregnantMan",
+            character: "🫃",
+            name: "Pregnant Man",
+            keywords: ["expecting", "trans"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "pregnantPerson",
+            character: "🫄",
+            name: "Pregnant Person",
+            keywords: ["expecting", "maternity"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "breastFeeding",
+            character: "🤱",
+            name: "Breast Feeding",
+            keywords: ["nursing", "mother", "infant"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "womanFeedingBaby",
+            character: "👩‍🍼",
+            name: "Woman Feeding Baby",
+            keywords: ["bottle", "mother", "infant"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manFeedingBaby",
+            character: "👨‍🍼",
+            name: "Man Feeding Baby",
+            keywords: ["bottle", "father", "infant"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personFeedingBaby",
+            character: "🧑‍🍼",
+            name: "Person Feeding Baby",
+            keywords: ["bottle", "parent", "infant"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "babyAngel",
+            character: "👼",
+            name: "Baby Angel",
+            keywords: ["cherub", "heaven", "innocent", "cupid"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "santaClaus",
+            character: "🎅",
+            name: "Santa Claus",
+            keywords: ["christmas", "father christmas", "xmas", "holiday"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "mrsClaus",
+            character: "🤶",
+            name: "Mrs Claus",
+            keywords: ["christmas", "xmas", "holiday"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "mxClaus",
+            character: "🧑‍🎄",
+            name: "Mx Claus",
+            keywords: ["christmas", "xmas", "holiday"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "superhero",
+            character: "🦸",
+            name: "Superhero",
+            keywords: ["power", "hero", "cape", "super"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manSuperhero",
+            character: "🦸‍♂️",
+            name: "Man Superhero",
+            keywords: ["power", "hero", "cape", "super"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanSuperhero",
+            character: "🦸‍♀️",
+            name: "Woman Superhero",
+            keywords: ["power", "hero", "cape", "super"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "supervillain",
+            character: "🦹",
+            name: "Supervillain",
+            keywords: ["villain", "evil", "bad guy"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manSupervillain",
+            character: "🦹‍♂️",
+            name: "Man Supervillain",
+            keywords: ["villain", "evil", "bad guy"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanSupervillain",
+            character: "🦹‍♀️",
+            name: "Woman Supervillain",
+            keywords: ["villain", "evil", "bad guy"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "mage",
+            character: "🧙",
+            name: "Mage",
+            keywords: ["wizard", "sorcerer", "magic", "witch"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manMage",
+            character: "🧙‍♂️",
+            name: "Man Mage",
+            keywords: ["wizard", "sorcerer", "magic", "gandalf"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanMage",
+            character: "🧙‍♀️",
+            name: "Woman Mage",
+            keywords: ["witch", "sorcerer", "magic", "sorceress"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "fairy",
+            character: "🧚",
+            name: "Fairy",
+            keywords: ["magic", "fantasy", "pixie", "tinkerbell"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manFairy",
+            character: "🧚‍♂️",
+            name: "Man Fairy",
+            keywords: ["magic", "fantasy", "pixie"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanFairy",
+            character: "🧚‍♀️",
+            name: "Woman Fairy",
+            keywords: ["magic", "fantasy", "pixie", "tinkerbell"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "vampire",
+            character: "🧛",
+            name: "Vampire",
+            keywords: ["dracula", "blood", "undead", "halloween"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manVampire",
+            character: "🧛‍♂️",
+            name: "Man Vampire",
+            keywords: ["dracula", "blood", "undead", "halloween"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanVampire",
+            character: "🧛‍♀️",
+            name: "Woman Vampire",
+            keywords: ["dracula", "blood", "undead", "halloween"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "merperson",
+            character: "🧜",
+            name: "Merperson",
+            keywords: ["ocean", "sea", "mythical"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "merman",
+            character: "🧜‍♂️",
+            name: "Merman",
+            keywords: ["ocean", "sea", "mythical", "triton"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "mermaid",
+            character: "🧜‍♀️",
+            name: "Mermaid",
+            keywords: ["ocean", "sea", "mythical", "ariel"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "elf",
+            character: "🧝",
+            name: "Elf",
+            keywords: ["fantasy", "magical", "christmas", "legolas"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manElf",
+            character: "🧝‍♂️",
+            name: "Man Elf",
+            keywords: ["fantasy", "magical", "christmas", "legolas"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanElf",
+            character: "🧝‍♀️",
+            name: "Woman Elf",
+            keywords: ["fantasy", "magical", "christmas"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "genie",
+            character: "🧞",
+            name: "Genie",
+            keywords: ["wish", "lamp", "aladdin", "magic"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manGenie",
+            character: "🧞‍♂️",
+            name: "Man Genie",
+            keywords: ["wish", "lamp", "aladdin", "magic"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanGenie",
+            character: "🧞‍♀️",
+            name: "Woman Genie",
+            keywords: ["wish", "lamp", "magic"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "zombie",
+            character: "🧟",
+            name: "Zombie",
+            keywords: ["undead", "horror", "halloween", "brain"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "manZombie",
+            character: "🧟‍♂️",
+            name: "Man Zombie",
+            keywords: ["undead", "horror", "halloween", "brain"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "womanZombie",
+            character: "🧟‍♀️",
+            name: "Woman Zombie",
+            keywords: ["undead", "horror", "halloween", "brain"],
+            category: .people(.fantasy)
+        ),
+        Emoji(
+            id: "troll",
+            character: "🧌",
+            name: "Troll",
+            keywords: ["monster", "internet", "mythical", "grumpy"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "personGettingMassage",
+            character: "💆",
+            name: "Person Getting Massage",
+            keywords: ["spa", "relax", "pamper"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manGettingMassage",
+            character: "💆‍♂️",
+            name: "Man Getting Massage",
+            keywords: ["spa", "relax", "pamper"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanGettingMassage",
+            character: "💆‍♀️",
+            name: "Woman Getting Massage",
+            keywords: ["spa", "relax", "pamper"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personGettingHaircut",
+            character: "💇",
+            name: "Person Getting Haircut",
+            keywords: ["salon", "barber", "trim"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manGettingHaircut",
+            character: "💇‍♂️",
+            name: "Man Getting Haircut",
+            keywords: ["salon", "barber", "trim"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanGettingHaircut",
+            character: "💇‍♀️",
+            name: "Woman Getting Haircut",
+            keywords: ["salon", "barber", "trim"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personWalking",
+            character: "🚶",
+            name: "Person Walking",
+            keywords: ["stroll", "hike", "pedestrian"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manWalking",
+            character: "🚶‍♂️",
+            name: "Man Walking",
+            keywords: ["stroll", "hike", "pedestrian"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanWalking",
+            character: "🚶‍♀️",
+            name: "Woman Walking",
+            keywords: ["stroll", "hike", "pedestrian"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personStanding",
+            character: "🧍",
+            name: "Person Standing",
+            keywords: ["still", "waiting"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manStanding",
+            character: "🧍‍♂️",
+            name: "Man Standing",
+            keywords: ["still", "waiting"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanStanding",
+            character: "🧍‍♀️",
+            name: "Woman Standing",
+            keywords: ["still", "waiting"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personKneeling",
+            character: "🧎",
+            name: "Person Kneeling",
+            keywords: ["pray", "propose", "kneel"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manKneeling",
+            character: "🧎‍♂️",
+            name: "Man Kneeling",
+            keywords: ["pray", "propose", "kneel"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanKneeling",
+            character: "🧎‍♀️",
+            name: "Woman Kneeling",
+            keywords: ["pray", "propose", "kneel"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personWithWhiteCane",
+            character: "🧑‍🦯",
+            name: "Person With White Cane",
+            keywords: ["blind", "accessibility", "vision"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manWithWhiteCane",
+            character: "👨‍🦯",
+            name: "Man With White Cane",
+            keywords: ["blind", "accessibility", "vision"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanWithWhiteCane",
+            character: "👩‍🦯",
+            name: "Woman With White Cane",
+            keywords: ["blind", "accessibility", "vision"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personInMotorizedWheelchair",
+            character: "🧑‍🦼",
+            name: "Person In Motorized Wheelchair",
+            keywords: ["accessibility", "disability", "electric"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manInMotorizedWheelchair",
+            character: "👨‍🦼",
+            name: "Man In Motorized Wheelchair",
+            keywords: ["accessibility", "disability", "electric"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanInMotorizedWheelchair",
+            character: "👩‍🦼",
+            name: "Woman In Motorized Wheelchair",
+            keywords: ["accessibility", "disability", "electric"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personInManualWheelchair",
+            character: "🧑‍🦽",
+            name: "Person In Manual Wheelchair",
+            keywords: ["accessibility", "disability"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manInManualWheelchair",
+            character: "👨‍🦽",
+            name: "Man In Manual Wheelchair",
+            keywords: ["accessibility", "disability"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanInManualWheelchair",
+            character: "👩‍🦽",
+            name: "Woman In Manual Wheelchair",
+            keywords: ["accessibility", "disability"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personRunning",
+            character: "🏃",
+            name: "Person Running",
+            keywords: ["jog", "exercise", "sprint", "race"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manRunning",
+            character: "🏃‍♂️",
+            name: "Man Running",
+            keywords: ["jog", "exercise", "sprint", "race"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanRunning",
+            character: "🏃‍♀️",
+            name: "Woman Running",
+            keywords: ["jog", "exercise", "sprint", "race"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanDancing",
+            character: "💃",
+            name: "Woman Dancing",
+            keywords: ["party", "salsa", "dance"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manDancing",
+            character: "🕺",
+            name: "Man Dancing",
+            keywords: ["party", "disco", "dance"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personInSuitLevitating",
+            character: "🕴️",
+            name: "Person In Suit Levitating",
+            keywords: ["hover", "floating", "business"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "peopleWithBunnyEars",
+            character: "👯",
+            name: "People With Bunny Ears",
+            keywords: ["party", "dancers", "playboy"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "menWithBunnyEars",
+            character: "👯‍♂️",
+            name: "Men With Bunny Ears",
+            keywords: ["party", "dancers"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "womenWithBunnyEars",
+            character: "👯‍♀️",
+            name: "Women With Bunny Ears",
+            keywords: ["party", "dancers"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "personInSteamyRoom",
+            character: "🧖",
+            name: "Person In Steamy Room",
+            keywords: ["sauna", "spa", "relax", "steam"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "manInSteamyRoom",
+            character: "🧖‍♂️",
+            name: "Man In Steamy Room",
+            keywords: ["sauna", "spa", "relax", "steam"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "womanInSteamyRoom",
+            character: "🧖‍♀️",
+            name: "Woman In Steamy Room",
+            keywords: ["sauna", "spa", "relax", "steam"],
+            category: .people(.reactions)
+        ),
+        Emoji(
+            id: "personClimbing",
+            character: "🧗",
+            name: "Person Climbing",
+            keywords: ["rock", "mountain", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manClimbing",
+            character: "🧗‍♂️",
+            name: "Man Climbing",
+            keywords: ["rock", "mountain", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanClimbing",
+            character: "🧗‍♀️",
+            name: "Woman Climbing",
+            keywords: ["rock", "mountain", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personFencing",
+            character: "🤺",
+            name: "Person Fencing",
+            keywords: ["sword", "sport", "duel"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "horseRacing",
+            character: "🏇",
+            name: "Horse Racing",
+            keywords: ["jockey", "derby", "equestrian"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "skier",
+            character: "⛷️",
+            name: "Skier",
+            keywords: ["snow", "winter", "sport", "ski"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "snowboarder",
+            character: "🏂",
+            name: "Snowboarder",
+            keywords: ["snow", "winter", "sport", "board"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "personGolfing",
+            character: "🏌️",
+            name: "Person Golfing",
+            keywords: ["sport", "club", "putt"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manGolfing",
+            character: "🏌‍♂️",
+            name: "Man Golfing",
+            keywords: ["sport", "club", "putt"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanGolfing",
+            character: "🏌‍♀️",
+            name: "Woman Golfing",
+            keywords: ["sport", "club", "putt"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personSurfing",
+            character: "🏄",
+            name: "Person Surfing",
+            keywords: ["wave", "ocean", "beach", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manSurfing",
+            character: "🏄‍♂️",
+            name: "Man Surfing",
+            keywords: ["wave", "ocean", "beach", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanSurfing",
+            character: "🏄‍♀️",
+            name: "Woman Surfing",
+            keywords: ["wave", "ocean", "beach", "sport"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personRowingBoat",
+            character: "🚣",
+            name: "Person Rowing Boat",
+            keywords: ["paddle", "canoe", "kayak", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manRowingBoat",
+            character: "🚣‍♂️",
+            name: "Man Rowing Boat",
+            keywords: ["paddle", "canoe", "kayak", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanRowingBoat",
+            character: "🚣‍♀️",
+            name: "Woman Rowing Boat",
+            keywords: ["paddle", "canoe", "kayak", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personSwimming",
+            character: "🏊",
+            name: "Person Swimming",
+            keywords: ["pool", "water", "sport", "dive"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manSwimming",
+            character: "🏊‍♂️",
+            name: "Man Swimming",
+            keywords: ["pool", "water", "sport", "dive"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanSwimming",
+            character: "🏊‍♀️",
+            name: "Woman Swimming",
+            keywords: ["pool", "water", "sport", "dive"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personBouncingBall",
+            character: "⛹️",
+            name: "Person Bouncing Ball",
+            keywords: ["basketball", "sport", "dribble"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manBouncingBall",
+            character: "⛹‍♂️",
+            name: "Man Bouncing Ball",
+            keywords: ["basketball", "sport", "dribble"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanBouncingBall",
+            character: "⛹‍♀️",
+            name: "Woman Bouncing Ball",
+            keywords: ["basketball", "sport", "dribble"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personLiftingWeights",
+            character: "🏋️",
+            name: "Person Lifting Weights",
+            keywords: ["gym", "workout", "barbell", "strong"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manLiftingWeights",
+            character: "🏋‍♂️",
+            name: "Man Lifting Weights",
+            keywords: ["gym", "workout", "barbell", "strong"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanLiftingWeights",
+            character: "🏋‍♀️",
+            name: "Woman Lifting Weights",
+            keywords: ["gym", "workout", "barbell", "strong"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personBiking",
+            character: "🚴",
+            name: "Person Biking",
+            keywords: ["bicycle", "cycle", "sport", "ride"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manBiking",
+            character: "🚴‍♂️",
+            name: "Man Biking",
+            keywords: ["bicycle", "cycle", "sport", "ride"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanBiking",
+            character: "🚴‍♀️",
+            name: "Woman Biking",
+            keywords: ["bicycle", "cycle", "sport", "ride"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personMountainBiking",
+            character: "🚵",
+            name: "Person Mountain Biking",
+            keywords: ["bicycle", "offroad", "sport", "mtb"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manMountainBiking",
+            character: "🚵‍♂️",
+            name: "Man Mountain Biking",
+            keywords: ["bicycle", "offroad", "sport", "mtb"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanMountainBiking",
+            character: "🚵‍♀️",
+            name: "Woman Mountain Biking",
+            keywords: ["bicycle", "offroad", "sport", "mtb"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personCartwheeling",
+            character: "🤸",
+            name: "Person Cartwheeling",
+            keywords: ["gymnastics", "acrobat", "sport", "flip"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "manCartwheeling",
+            character: "🤸‍♂️",
+            name: "Man Cartwheeling",
+            keywords: ["gymnastics", "acrobat", "sport", "flip"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "womanCartwheeling",
+            character: "🤸‍♀️",
+            name: "Woman Cartwheeling",
+            keywords: ["gymnastics", "acrobat", "sport", "flip"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "peopleWrestling",
+            character: "🤼",
+            name: "People Wrestling",
+            keywords: ["sport", "fight", "grapple"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "menWrestling",
+            character: "🤼‍♂️",
+            name: "Men Wrestling",
+            keywords: ["sport", "fight", "grapple"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womenWrestling",
+            character: "🤼‍♀️",
+            name: "Women Wrestling",
+            keywords: ["sport", "fight", "grapple"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personPlayingWaterPolo",
+            character: "🤽",
+            name: "Person Playing Water Polo",
+            keywords: ["sport", "pool", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manPlayingWaterPolo",
+            character: "🤽‍♂️",
+            name: "Man Playing Water Polo",
+            keywords: ["sport", "pool", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanPlayingWaterPolo",
+            character: "🤽‍♀️",
+            name: "Woman Playing Water Polo",
+            keywords: ["sport", "pool", "water"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personPlayingHandball",
+            character: "🤾",
+            name: "Person Playing Handball",
+            keywords: ["sport", "ball", "throw"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manPlayingHandball",
+            character: "🤾‍♂️",
+            name: "Man Playing Handball",
+            keywords: ["sport", "ball", "throw"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanPlayingHandball",
+            character: "🤾‍♀️",
+            name: "Woman Playing Handball",
+            keywords: ["sport", "ball", "throw"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personJuggling",
+            character: "🤹",
+            name: "Person Juggling",
+            keywords: ["circus", "balls", "skill", "performer"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manJuggling",
+            character: "🤹‍♂️",
+            name: "Man Juggling",
+            keywords: ["circus", "balls", "skill", "performer"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanJuggling",
+            character: "🤹‍♀️",
+            name: "Woman Juggling",
+            keywords: ["circus", "balls", "skill", "performer"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personInLotusPosition",
+            character: "🧘",
+            name: "Person In Lotus Position",
+            keywords: ["yoga", "meditation", "zen", "calm"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "manInLotusPosition",
+            character: "🧘‍♂️",
+            name: "Man In Lotus Position",
+            keywords: ["yoga", "meditation", "zen", "calm"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "womanInLotusPosition",
+            character: "🧘‍♀️",
+            name: "Woman In Lotus Position",
+            keywords: ["yoga", "meditation", "zen", "calm"],
+            category: .people(.sports)
+        ),
+        Emoji(
+            id: "personTakingBath",
+            character: "🛀",
+            name: "Person Taking Bath",
+            keywords: ["bathtub", "relax", "clean", "soak"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "personInBed",
+            character: "🛌",
+            name: "Person In Bed",
+            keywords: ["sleep", "tired", "rest", "zzz"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "peopleHoldingHands",
+            character: "🧑‍🤝‍🧑",
+            name: "People Holding Hands",
+            keywords: ["friends", "together", "unity"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "womenHoldingHands",
+            character: "👭",
+            name: "Women Holding Hands",
+            keywords: ["friends", "together", "sisters"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "womanAndManHoldingHands",
+            character: "👫",
+            name: "Woman And Man Holding Hands",
+            keywords: ["couple", "together", "romance"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "menHoldingHands",
+            character: "👬",
+            name: "Men Holding Hands",
+            keywords: ["friends", "together", "brothers"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "kiss",
+            character: "💏",
+            name: "Kiss",
+            keywords: ["love", "romance", "smooch"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "kissWomanMan",
+            character: "👩‍❤️‍💋‍👨",
+            name: "Kiss Woman Man",
+            keywords: ["love", "romance", "couple"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "kissManMan",
+            character: "👨‍❤️‍💋‍👨",
+            name: "Kiss Man Man",
+            keywords: ["love", "romance", "couple", "gay"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "kissWomanWoman",
+            character: "👩‍❤️‍💋‍👩",
+            name: "Kiss Woman Woman",
+            keywords: ["love", "romance", "couple", "lesbian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "coupleWithHeart",
+            character: "💑",
+            name: "Couple With Heart",
+            keywords: ["love", "romance", "relationship"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "coupleWithHeartWomanMan",
+            character: "👩‍❤️‍👨",
+            name: "Couple With Heart Woman Man",
+            keywords: ["love", "romance", "relationship"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "coupleWithHeartManMan",
+            character: "👨‍❤️‍👨",
+            name: "Couple With Heart Man Man",
+            keywords: ["love", "romance", "relationship", "gay"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "coupleWithHeartWomanWoman",
+            character: "👩‍❤️‍👩",
+            name: "Couple With Heart Woman Woman",
+            keywords: ["love", "romance", "relationship", "lesbian"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "speakingHead",
+            character: "🗣️",
+            name: "Speaking Head",
+            keywords: ["talk", "speak", "voice"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "bustInSilhouette",
+            character: "👤",
+            name: "Bust In Silhouette",
+            keywords: ["profile", "user", "person", "avatar"],
+            category: .people(.ageBased)
+        ),
+        Emoji(
+            id: "bustsInSilhouette",
+            character: "👥",
+            name: "Busts In Silhouette",
+            keywords: ["people", "users", "group"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "peopleHugging",
+            character: "🫂",
+            name: "People Hugging",
+            keywords: ["embrace", "comfort", "love", "support"],
+            category: .people(.other)
+        ),
+        Emoji(
+            id: "footprints",
+            character: "👣",
+            name: "Footprints",
+            keywords: ["steps", "tracks", "walking", "trail"],
+            category: .people(.reactions)
+        )
     ]
 
     static let familyEmojisBase: [Emoji] = [
-        Emoji(id: "family", character: "👪", name: "Family", keywords: ["parents", "children", "home"], category: .people(.family)),
-        Emoji(id: "familyManWomanBoy", character: "👨‍👩‍👦", name: "Family Man Woman Boy", keywords: ["parents", "son"], category: .people(.family)),
-        Emoji(id: "familyManWomanGirl", character: "👨‍👩‍👧", name: "Family Man Woman Girl", keywords: ["parents", "daughter"], category: .people(.family)),
-        Emoji(id: "familyManWomanGirlBoy", character: "👨‍👩‍👧‍👦", name: "Family Man Woman Girl Boy", keywords: ["parents", "children"], category: .people(.family)),
-        Emoji(id: "familyManWomanBoyBoy", character: "👨‍👩‍👦‍👦", name: "Family Man Woman Boy Boy", keywords: ["parents", "sons"], category: .people(.family)),
-        Emoji(id: "familyManWomanGirlGirl", character: "👨‍👩‍👧‍👧", name: "Family Man Woman Girl Girl", keywords: ["parents", "daughters"], category: .people(.family)),
-        Emoji(id: "familyManManBoy", character: "👨‍👨‍👦", name: "Family Man Man Boy", keywords: ["parents", "son", "gay"], category: .people(.family)),
-        Emoji(id: "familyManManGirl", character: "👨‍👨‍👧", name: "Family Man Man Girl", keywords: ["parents", "daughter", "gay"], category: .people(.family)),
-        Emoji(id: "familyManManGirlBoy", character: "👨‍👨‍👧‍👦", name: "Family Man Man Girl Boy", keywords: ["parents", "children", "gay"], category: .people(.family)),
-        Emoji(id: "familyManManBoyBoy", character: "👨‍👨‍👦‍👦", name: "Family Man Man Boy Boy", keywords: ["parents", "sons", "gay"], category: .people(.family)),
-        Emoji(id: "familyManManGirlGirl", character: "👨‍👨‍👧‍👧", name: "Family Man Man Girl Girl", keywords: ["parents", "daughters", "gay"], category: .people(.family)),
-        Emoji(id: "familyWomanWomanBoy", character: "👩‍👩‍👦", name: "Family Woman Woman Boy", keywords: ["parents", "son", "lesbian"], category: .people(.family)),
-        Emoji(id: "familyWomanWomanGirl", character: "👩‍👩‍👧", name: "Family Woman Woman Girl", keywords: ["parents", "daughter", "lesbian"], category: .people(.family)),
-        Emoji(id: "familyWomanWomanGirlBoy", character: "👩‍👩‍👧‍👦", name: "Family Woman Woman Girl Boy", keywords: ["parents", "children", "lesbian"], category: .people(.family)),
-        Emoji(id: "familyWomanWomanBoyBoy", character: "👩‍👩‍👦‍👦", name: "Family Woman Woman Boy Boy", keywords: ["parents", "sons", "lesbian"], category: .people(.family)),
-        Emoji(id: "familyWomanWomanGirlGirl", character: "👩‍👩‍👧‍👧", name: "Family Woman Woman Girl Girl", keywords: ["parents", "daughters", "lesbian"], category: .people(.family)),
-        Emoji(id: "familyManBoy", character: "👨‍👦", name: "Family Man Boy", keywords: ["father", "son", "single parent"], category: .people(.family)),
-        Emoji(id: "familyManBoyBoy", character: "👨‍👦‍👦", name: "Family Man Boy Boy", keywords: ["father", "sons", "single parent"], category: .people(.family)),
-        Emoji(id: "familyManGirl", character: "👨‍👧", name: "Family Man Girl", keywords: ["father", "daughter", "single parent"], category: .people(.family)),
-        Emoji(id: "familyManGirlBoy", character: "👨‍👧‍👦", name: "Family Man Girl Boy", keywords: ["father", "children", "single parent"], category: .people(.family)),
-        Emoji(id: "familyManGirlGirl", character: "👨‍👧‍👧", name: "Family Man Girl Girl", keywords: ["father", "daughters", "single parent"], category: .people(.family)),
-        Emoji(id: "familyWomanBoy", character: "👩‍👦", name: "Family Woman Boy", keywords: ["mother", "son", "single parent"], category: .people(.family)),
-        Emoji(id: "familyWomanBoyBoy", character: "👩‍👦‍👦", name: "Family Woman Boy Boy", keywords: ["mother", "sons", "single parent"], category: .people(.family)),
-        Emoji(id: "familyWomanGirl", character: "👩‍👧", name: "Family Woman Girl", keywords: ["mother", "daughter", "single parent"], category: .people(.family)),
-        Emoji(id: "familyWomanGirlBoy", character: "👩‍👧‍👦", name: "Family Woman Girl Boy", keywords: ["mother", "children", "single parent"], category: .people(.family)),
-        Emoji(id: "familyWomanGirlGirl", character: "👩‍👧‍👧", name: "Family Woman Girl Girl", keywords: ["mother", "daughters", "single parent"], category: .people(.family))
+        Emoji(
+            id: "family",
+            character: "👪",
+            name: "Family",
+            keywords: ["parents", "children", "home"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManWomanBoy",
+            character: "👨‍👩‍👦",
+            name: "Family Man Woman Boy",
+            keywords: ["parents", "son"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManWomanGirl",
+            character: "👨‍👩‍👧",
+            name: "Family Man Woman Girl",
+            keywords: ["parents", "daughter"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManWomanGirlBoy",
+            character: "👨‍👩‍👧‍👦",
+            name: "Family Man Woman Girl Boy",
+            keywords: ["parents", "children"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManWomanBoyBoy",
+            character: "👨‍👩‍👦‍👦",
+            name: "Family Man Woman Boy Boy",
+            keywords: ["parents", "sons"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManWomanGirlGirl",
+            character: "👨‍👩‍👧‍👧",
+            name: "Family Man Woman Girl Girl",
+            keywords: ["parents", "daughters"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManManBoy",
+            character: "👨‍👨‍👦",
+            name: "Family Man Man Boy",
+            keywords: ["parents", "son", "gay"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManManGirl",
+            character: "👨‍👨‍👧",
+            name: "Family Man Man Girl",
+            keywords: ["parents", "daughter", "gay"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManManGirlBoy",
+            character: "👨‍👨‍👧‍👦",
+            name: "Family Man Man Girl Boy",
+            keywords: ["parents", "children", "gay"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManManBoyBoy",
+            character: "👨‍👨‍👦‍👦",
+            name: "Family Man Man Boy Boy",
+            keywords: ["parents", "sons", "gay"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManManGirlGirl",
+            character: "👨‍👨‍👧‍👧",
+            name: "Family Man Man Girl Girl",
+            keywords: ["parents", "daughters", "gay"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanWomanBoy",
+            character: "👩‍👩‍👦",
+            name: "Family Woman Woman Boy",
+            keywords: ["parents", "son", "lesbian"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanWomanGirl",
+            character: "👩‍👩‍👧",
+            name: "Family Woman Woman Girl",
+            keywords: ["parents", "daughter", "lesbian"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanWomanGirlBoy",
+            character: "👩‍👩‍👧‍👦",
+            name: "Family Woman Woman Girl Boy",
+            keywords: ["parents", "children", "lesbian"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanWomanBoyBoy",
+            character: "👩‍👩‍👦‍👦",
+            name: "Family Woman Woman Boy Boy",
+            keywords: ["parents", "sons", "lesbian"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanWomanGirlGirl",
+            character: "👩‍👩‍👧‍👧",
+            name: "Family Woman Woman Girl Girl",
+            keywords: ["parents", "daughters", "lesbian"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManBoy",
+            character: "👨‍👦",
+            name: "Family Man Boy",
+            keywords: ["father", "son", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManBoyBoy",
+            character: "👨‍👦‍👦",
+            name: "Family Man Boy Boy",
+            keywords: ["father", "sons", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManGirl",
+            character: "👨‍👧",
+            name: "Family Man Girl",
+            keywords: ["father", "daughter", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManGirlBoy",
+            character: "👨‍👧‍👦",
+            name: "Family Man Girl Boy",
+            keywords: ["father", "children", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyManGirlGirl",
+            character: "👨‍👧‍👧",
+            name: "Family Man Girl Girl",
+            keywords: ["father", "daughters", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanBoy",
+            character: "👩‍👦",
+            name: "Family Woman Boy",
+            keywords: ["mother", "son", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanBoyBoy",
+            character: "👩‍👦‍👦",
+            name: "Family Woman Boy Boy",
+            keywords: ["mother", "sons", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanGirl",
+            character: "👩‍👧",
+            name: "Family Woman Girl",
+            keywords: ["mother", "daughter", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanGirlBoy",
+            character: "👩‍👧‍👦",
+            name: "Family Woman Girl Boy",
+            keywords: ["mother", "children", "single parent"],
+            category: .people(.family)
+        ),
+        Emoji(
+            id: "familyWomanGirlGirl",
+            character: "👩‍👧‍👧",
+            name: "Family Woman Girl Girl",
+            keywords: ["mother", "daughters", "single parent"],
+            category: .people(.family)
+        )
     ]
 
     // MARK: - Nature Emojis
+
     static let natureEmojis: [Emoji] = [
-        Emoji(id: "monkeyFace", character: "🐵", name: "Monkey Face", keywords: ["primate", "ape", "animal"], category: .nature(.mammal)),
-        Emoji(id: "monkey", character: "🐒", name: "Monkey", keywords: ["primate", "ape", "animal", "wild"], category: .nature(.mammal)),
-        Emoji(id: "gorilla", character: "🦍", name: "Gorilla", keywords: ["primate", "ape", "kong", "strong"], category: .nature(.mammal)),
-        Emoji(id: "orangutan", character: "🦧", name: "Orangutan", keywords: ["primate", "ape", "jungle"], category: .nature(.mammal)),
-        Emoji(id: "dogFace", character: "🐶", name: "Dog Face", keywords: ["puppy", "pet", "woof", "cute"], category: .nature(.mammal)),
-        Emoji(id: "dog", character: "🐕", name: "Dog", keywords: ["puppy", "pet", "woof", "loyal"], category: .nature(.mammal)),
-        Emoji(id: "guideDog", character: "🦮", name: "Guide Dog", keywords: ["blind", "service", "accessibility"], category: .nature(.mammal)),
-        Emoji(id: "serviceDog", character: "🐕‍🦺", name: "Service Dog", keywords: ["assistance", "working", "vest"], category: .nature(.mammal)),
-        Emoji(id: "poodle", character: "🐩", name: "Poodle", keywords: ["fancy", "curly", "breed"], category: .nature(.mammal)),
-        Emoji(id: "wolf", character: "🐺", name: "Wolf", keywords: ["wild", "howl", "pack", "canine"], category: .nature(.mammal)),
-        Emoji(id: "fox", character: "🦊", name: "Fox", keywords: ["sly", "clever", "orange", "wild"], category: .nature(.mammal)),
-        Emoji(id: "raccoon", character: "🦝", name: "Raccoon", keywords: ["trash panda", "bandit", "cute"], category: .nature(.mammal)),
-        Emoji(id: "catFace", character: "🐱", name: "Cat Face", keywords: ["kitty", "meow", "pet", "cute"], category: .nature(.mammal)),
-        Emoji(id: "cat", character: "🐈", name: "Cat", keywords: ["kitty", "meow", "pet", "feline"], category: .nature(.mammal)),
-        Emoji(id: "blackCat", character: "🐈‍⬛", name: "Black Cat", keywords: ["halloween", "spooky", "superstition"], category: .nature(.mammal)),
-        Emoji(id: "lion", character: "🦁", name: "Lion", keywords: ["king", "jungle", "roar", "mane", "safari"], category: .nature(.mammal)),
-        Emoji(id: "tigerFace", character: "🐯", name: "Tiger Face", keywords: ["stripes", "wild", "roar"], category: .nature(.mammal)),
-        Emoji(id: "tiger", character: "🐅", name: "Tiger", keywords: ["stripes", "wild", "roar", "jungle"], category: .nature(.mammal)),
-        Emoji(id: "leopard", character: "🐆", name: "Leopard", keywords: ["spots", "wild", "cheetah", "fast"], category: .nature(.mammal)),
-        Emoji(id: "horseFace", character: "🐴", name: "Horse Face", keywords: ["pony", "neigh", "animal"], category: .nature(.mammal)),
-        Emoji(id: "moose", character: "🫎", name: "Moose", keywords: ["antlers", "canada", "elk"], category: .nature(.mammal)),
-        Emoji(id: "donkey", character: "🫏", name: "Donkey", keywords: ["mule", "stubborn", "burro"], category: .nature(.mammal)),
-        Emoji(id: "horse", character: "🐎", name: "Horse", keywords: ["pony", "neigh", "equestrian", "racing"], category: .nature(.mammal)),
-        Emoji(id: "unicorn", character: "🦄", name: "Unicorn", keywords: ["magical", "fantasy", "rainbow", "mythical"], category: .nature(.mammal)),
-        Emoji(id: "zebra", character: "🦓", name: "Zebra", keywords: ["stripes", "africa", "safari"], category: .nature(.mammal)),
-        Emoji(id: "deer", character: "🦌", name: "Deer", keywords: ["antlers", "bambi", "forest", "doe"], category: .nature(.mammal)),
-        Emoji(id: "bison", character: "🦬", name: "Bison", keywords: ["buffalo", "america", "wild"], category: .nature(.mammal)),
-        Emoji(id: "cowFace", character: "🐮", name: "Cow Face", keywords: ["moo", "cattle", "farm"], category: .nature(.mammal)),
+        Emoji(
+            id: "monkeyFace",
+            character: "🐵",
+            name: "Monkey Face",
+            keywords: ["primate", "ape", "animal"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "monkey",
+            character: "🐒",
+            name: "Monkey",
+            keywords: ["primate", "ape", "animal", "wild"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "gorilla",
+            character: "🦍",
+            name: "Gorilla",
+            keywords: ["primate", "ape", "kong", "strong"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "orangutan",
+            character: "🦧",
+            name: "Orangutan",
+            keywords: ["primate", "ape", "jungle"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "dogFace",
+            character: "🐶",
+            name: "Dog Face",
+            keywords: ["puppy", "pet", "woof", "cute"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "dog",
+            character: "🐕",
+            name: "Dog",
+            keywords: ["puppy", "pet", "woof", "loyal"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "guideDog",
+            character: "🦮",
+            name: "Guide Dog",
+            keywords: ["blind", "service", "accessibility"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "serviceDog",
+            character: "🐕‍🦺",
+            name: "Service Dog",
+            keywords: ["assistance", "working", "vest"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "poodle",
+            character: "🐩",
+            name: "Poodle",
+            keywords: ["fancy", "curly", "breed"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "wolf",
+            character: "🐺",
+            name: "Wolf",
+            keywords: ["wild", "howl", "pack", "canine"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "fox",
+            character: "🦊",
+            name: "Fox",
+            keywords: ["sly", "clever", "orange", "wild"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "raccoon",
+            character: "🦝",
+            name: "Raccoon",
+            keywords: ["trash panda", "bandit", "cute"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "catFace",
+            character: "🐱",
+            name: "Cat Face",
+            keywords: ["kitty", "meow", "pet", "cute"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "cat",
+            character: "🐈",
+            name: "Cat",
+            keywords: ["kitty", "meow", "pet", "feline"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "blackCat",
+            character: "🐈‍⬛",
+            name: "Black Cat",
+            keywords: ["halloween", "spooky", "superstition"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "lion",
+            character: "🦁",
+            name: "Lion",
+            keywords: ["king", "jungle", "roar", "mane", "safari"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "tigerFace",
+            character: "🐯",
+            name: "Tiger Face",
+            keywords: ["stripes", "wild", "roar"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "tiger",
+            character: "🐅",
+            name: "Tiger",
+            keywords: ["stripes", "wild", "roar", "jungle"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "leopard",
+            character: "🐆",
+            name: "Leopard",
+            keywords: ["spots", "wild", "cheetah", "fast"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "horseFace",
+            character: "🐴",
+            name: "Horse Face",
+            keywords: ["pony", "neigh", "animal"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "moose",
+            character: "🫎",
+            name: "Moose",
+            keywords: ["antlers", "canada", "elk"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "donkey",
+            character: "🫏",
+            name: "Donkey",
+            keywords: ["mule", "stubborn", "burro"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "horse",
+            character: "🐎",
+            name: "Horse",
+            keywords: ["pony", "neigh", "equestrian", "racing"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "unicorn",
+            character: "🦄",
+            name: "Unicorn",
+            keywords: ["magical", "fantasy", "rainbow", "mythical"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "zebra",
+            character: "🦓",
+            name: "Zebra",
+            keywords: ["stripes", "africa", "safari"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "deer",
+            character: "🦌",
+            name: "Deer",
+            keywords: ["antlers", "bambi", "forest", "doe"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "bison",
+            character: "🦬",
+            name: "Bison",
+            keywords: ["buffalo", "america", "wild"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "cowFace",
+            character: "🐮",
+            name: "Cow Face",
+            keywords: ["moo", "cattle", "farm"],
+            category: .nature(.mammal)
+        ),
         Emoji(id: "ox", character: "🐂", name: "Ox", keywords: ["bull", "strong", "cattle"], category: .nature(.mammal)),
-        Emoji(id: "waterBuffalo", character: "🐃", name: "Water Buffalo", keywords: ["asia", "strong", "cattle"], category: .nature(.mammal)),
-        Emoji(id: "cow", character: "🐄", name: "Cow", keywords: ["moo", "milk", "farm", "cattle"], category: .nature(.mammal)),
-        Emoji(id: "pigFace", character: "🐷", name: "Pig Face", keywords: ["oink", "farm", "cute"], category: .nature(.mammal)),
+        Emoji(
+            id: "waterBuffalo",
+            character: "🐃",
+            name: "Water Buffalo",
+            keywords: ["asia", "strong", "cattle"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "cow",
+            character: "🐄",
+            name: "Cow",
+            keywords: ["moo", "milk", "farm", "cattle"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "pigFace",
+            character: "🐷",
+            name: "Pig Face",
+            keywords: ["oink", "farm", "cute"],
+            category: .nature(.mammal)
+        ),
         Emoji(id: "pig", character: "🐖", name: "Pig", keywords: ["oink", "farm", "pork"], category: .nature(.mammal)),
         Emoji(id: "boar", character: "🐗", name: "Boar", keywords: ["wild", "tusks", "hog"], category: .nature(.mammal)),
         Emoji(id: "pigNose", character: "🐽", name: "Pig Nose", keywords: ["snout", "oink"], category: .nature(.mammal)),
         Emoji(id: "ram", character: "🐏", name: "Ram", keywords: ["sheep", "horns", "male"], category: .nature(.mammal)),
-        Emoji(id: "ewe", character: "🐑", name: "Ewe", keywords: ["sheep", "wool", "lamb", "fluffy"], category: .nature(.mammal)),
-        Emoji(id: "goat", character: "🐐", name: "Goat", keywords: ["greatest", "farm", "billy"], category: .nature(.mammal)),
-        Emoji(id: "camel", character: "🐪", name: "Camel", keywords: ["desert", "dromedary", "hump"], category: .nature(.mammal)),
-        Emoji(id: "twoHumpCamel", character: "🐫", name: "Two Hump Camel", keywords: ["desert", "bactrian", "humps"], category: .nature(.mammal)),
-        Emoji(id: "llama", character: "🦙", name: "Llama", keywords: ["alpaca", "fluffy", "spit"], category: .nature(.mammal)),
-        Emoji(id: "giraffe", character: "🦒", name: "Giraffe", keywords: ["tall", "neck", "safari", "africa"], category: .nature(.mammal)),
-        Emoji(id: "elephant", character: "🐘", name: "Elephant", keywords: ["trunk", "tusks", "safari", "big"], category: .nature(.mammal)),
-        Emoji(id: "mammoth", character: "🦣", name: "Mammoth", keywords: ["extinct", "prehistoric", "ice age"], category: .nature(.mammal)),
-        Emoji(id: "rhinoceros", character: "🦏", name: "Rhinoceros", keywords: ["rhino", "horn", "safari"], category: .nature(.mammal)),
-        Emoji(id: "hippopotamus", character: "🦛", name: "Hippopotamus", keywords: ["hippo", "water", "africa"], category: .nature(.mammal)),
-        Emoji(id: "mouseFace", character: "🐭", name: "Mouse Face", keywords: ["rodent", "squeak", "mickey", "cute"], category: .nature(.mammal)),
-        Emoji(id: "mouse", character: "🐁", name: "Mouse", keywords: ["rodent", "squeak", "tiny"], category: .nature(.mammal)),
-        Emoji(id: "rat", character: "🐀", name: "Rat", keywords: ["rodent", "sewer", "vermin"], category: .nature(.mammal)),
-        Emoji(id: "hamster", character: "🐹", name: "Hamster", keywords: ["rodent", "pet", "cute", "cheeks"], category: .nature(.mammal)),
-        Emoji(id: "rabbitFace", character: "🐰", name: "Rabbit Face", keywords: ["bunny", "hop", "cute", "easter"], category: .nature(.mammal)),
-        Emoji(id: "rabbit", character: "🐇", name: "Rabbit", keywords: ["bunny", "hop", "fast", "easter"], category: .nature(.mammal)),
-        Emoji(id: "chipmunk", character: "🐿️", name: "Chipmunk", keywords: ["squirrel", "nuts", "cute"], category: .nature(.mammal)),
-        Emoji(id: "beaver", character: "🦫", name: "Beaver", keywords: ["dam", "teeth", "canada"], category: .nature(.mammal)),
-        Emoji(id: "hedgehog", character: "🦔", name: "Hedgehog", keywords: ["spikes", "sonic", "cute", "prickly"], category: .nature(.mammal)),
-        Emoji(id: "bat", character: "🦇", name: "Bat", keywords: ["vampire", "night", "halloween", "fly"], category: .nature(.insect)),
-        Emoji(id: "bear", character: "🐻", name: "Bear", keywords: ["grizzly", "teddy", "wild", "roar"], category: .nature(.mammal)),
-        Emoji(id: "polarBear", character: "🐻‍❄️", name: "Polar Bear", keywords: ["arctic", "ice", "white"], category: .nature(.mammal)),
-        Emoji(id: "koala", character: "🐨", name: "Koala", keywords: ["australia", "eucalyptus", "cute", "marsupial"], category: .nature(.mammal)),
-        Emoji(id: "panda", character: "🐼", name: "Panda", keywords: ["bamboo", "china", "cute", "endangered"], category: .nature(.mammal)),
-        Emoji(id: "sloth", character: "🦥", name: "Sloth", keywords: ["slow", "lazy", "tree", "cute"], category: .nature(.plant)),
-        Emoji(id: "otter", character: "🦦", name: "Otter", keywords: ["water", "cute", "playful"], category: .nature(.mammal)),
-        Emoji(id: "skunk", character: "🦨", name: "Skunk", keywords: ["smell", "stink", "stripe"], category: .nature(.mammal)),
-        Emoji(id: "kangaroo", character: "🦘", name: "Kangaroo", keywords: ["australia", "hop", "joey", "marsupial"], category: .nature(.mammal)),
-        Emoji(id: "badger", character: "🦡", name: "Badger", keywords: ["burrow", "stripe", "wild"], category: .nature(.mammal)),
-        Emoji(id: "pawPrints", character: "🐾", name: "Paw Prints", keywords: ["tracks", "animal", "footprint"], category: .nature(.mammal)),
-        Emoji(id: "turkey", character: "🦃", name: "Turkey", keywords: ["thanksgiving", "gobble", "bird"], category: .nature(.bird)),
-        Emoji(id: "chicken", character: "🐔", name: "Chicken", keywords: ["hen", "farm", "egg", "poultry"], category: .nature(.bird)),
-        Emoji(id: "rooster", character: "🐓", name: "Rooster", keywords: ["cockerel", "morning", "crow", "farm"], category: .nature(.bird)),
-        Emoji(id: "hatchingChick", character: "🐣", name: "Hatching Chick", keywords: ["egg", "baby", "birth"], category: .nature(.bird)),
-        Emoji(id: "babyChick", character: "🐤", name: "Baby Chick", keywords: ["cute", "yellow", "bird"], category: .nature(.bird)),
-        Emoji(id: "frontFacingBabyChick", character: "🐥", name: "Front Facing Baby Chick", keywords: ["cute", "yellow", "bird"], category: .nature(.bird)),
-        Emoji(id: "bird", character: "🐦", name: "Bird", keywords: ["fly", "tweet", "feather"], category: .nature(.bird)),
-        Emoji(id: "penguin", character: "🐧", name: "Penguin", keywords: ["antarctica", "waddle", "cute", "tux"], category: .nature(.bird)),
+        Emoji(
+            id: "ewe",
+            character: "🐑",
+            name: "Ewe",
+            keywords: ["sheep", "wool", "lamb", "fluffy"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "goat",
+            character: "🐐",
+            name: "Goat",
+            keywords: ["greatest", "farm", "billy"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "camel",
+            character: "🐪",
+            name: "Camel",
+            keywords: ["desert", "dromedary", "hump"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "twoHumpCamel",
+            character: "🐫",
+            name: "Two Hump Camel",
+            keywords: ["desert", "bactrian", "humps"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "llama",
+            character: "🦙",
+            name: "Llama",
+            keywords: ["alpaca", "fluffy", "spit"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "giraffe",
+            character: "🦒",
+            name: "Giraffe",
+            keywords: ["tall", "neck", "safari", "africa"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "elephant",
+            character: "🐘",
+            name: "Elephant",
+            keywords: ["trunk", "tusks", "safari", "big"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "mammoth",
+            character: "🦣",
+            name: "Mammoth",
+            keywords: ["extinct", "prehistoric", "ice age"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "rhinoceros",
+            character: "🦏",
+            name: "Rhinoceros",
+            keywords: ["rhino", "horn", "safari"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "hippopotamus",
+            character: "🦛",
+            name: "Hippopotamus",
+            keywords: ["hippo", "water", "africa"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "mouseFace",
+            character: "🐭",
+            name: "Mouse Face",
+            keywords: ["rodent", "squeak", "mickey", "cute"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "mouse",
+            character: "🐁",
+            name: "Mouse",
+            keywords: ["rodent", "squeak", "tiny"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "rat",
+            character: "🐀",
+            name: "Rat",
+            keywords: ["rodent", "sewer", "vermin"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "hamster",
+            character: "🐹",
+            name: "Hamster",
+            keywords: ["rodent", "pet", "cute", "cheeks"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "rabbitFace",
+            character: "🐰",
+            name: "Rabbit Face",
+            keywords: ["bunny", "hop", "cute", "easter"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "rabbit",
+            character: "🐇",
+            name: "Rabbit",
+            keywords: ["bunny", "hop", "fast", "easter"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "chipmunk",
+            character: "🐿️",
+            name: "Chipmunk",
+            keywords: ["squirrel", "nuts", "cute"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "beaver",
+            character: "🦫",
+            name: "Beaver",
+            keywords: ["dam", "teeth", "canada"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "hedgehog",
+            character: "🦔",
+            name: "Hedgehog",
+            keywords: ["spikes", "sonic", "cute", "prickly"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "bat",
+            character: "🦇",
+            name: "Bat",
+            keywords: ["vampire", "night", "halloween", "fly"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "bear",
+            character: "🐻",
+            name: "Bear",
+            keywords: ["grizzly", "teddy", "wild", "roar"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "polarBear",
+            character: "🐻‍❄️",
+            name: "Polar Bear",
+            keywords: ["arctic", "ice", "white"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "koala",
+            character: "🐨",
+            name: "Koala",
+            keywords: ["australia", "eucalyptus", "cute", "marsupial"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "panda",
+            character: "🐼",
+            name: "Panda",
+            keywords: ["bamboo", "china", "cute", "endangered"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "sloth",
+            character: "🦥",
+            name: "Sloth",
+            keywords: ["slow", "lazy", "tree", "cute"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "otter",
+            character: "🦦",
+            name: "Otter",
+            keywords: ["water", "cute", "playful"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "skunk",
+            character: "🦨",
+            name: "Skunk",
+            keywords: ["smell", "stink", "stripe"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "kangaroo",
+            character: "🦘",
+            name: "Kangaroo",
+            keywords: ["australia", "hop", "joey", "marsupial"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "badger",
+            character: "🦡",
+            name: "Badger",
+            keywords: ["burrow", "stripe", "wild"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "pawPrints",
+            character: "🐾",
+            name: "Paw Prints",
+            keywords: ["tracks", "animal", "footprint"],
+            category: .nature(.mammal)
+        ),
+        Emoji(
+            id: "turkey",
+            character: "🦃",
+            name: "Turkey",
+            keywords: ["thanksgiving", "gobble", "bird"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "chicken",
+            character: "🐔",
+            name: "Chicken",
+            keywords: ["hen", "farm", "egg", "poultry"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "rooster",
+            character: "🐓",
+            name: "Rooster",
+            keywords: ["cockerel", "morning", "crow", "farm"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "hatchingChick",
+            character: "🐣",
+            name: "Hatching Chick",
+            keywords: ["egg", "baby", "birth"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "babyChick",
+            character: "🐤",
+            name: "Baby Chick",
+            keywords: ["cute", "yellow", "bird"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "frontFacingBabyChick",
+            character: "🐥",
+            name: "Front Facing Baby Chick",
+            keywords: ["cute", "yellow", "bird"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "bird",
+            character: "🐦",
+            name: "Bird",
+            keywords: ["fly", "tweet", "feather"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "penguin",
+            character: "🐧",
+            name: "Penguin",
+            keywords: ["antarctica", "waddle", "cute", "tux"],
+            category: .nature(.bird)
+        ),
         Emoji(id: "dove", character: "🕊️", name: "Dove", keywords: ["peace", "white", "fly"], category: .nature(.bird)),
-        Emoji(id: "eagle", character: "🦅", name: "Eagle", keywords: ["america", "freedom", "soar", "bald"], category: .nature(.bird)),
-        Emoji(id: "duck", character: "🦆", name: "Duck", keywords: ["quack", "pond", "waddle"], category: .nature(.bird)),
-        Emoji(id: "swan", character: "🦢", name: "Swan", keywords: ["elegant", "white", "graceful", "lake"], category: .nature(.bird)),
-        Emoji(id: "owl", character: "🦉", name: "Owl", keywords: ["wise", "hoot", "night", "nocturnal"], category: .nature(.bird)),
-        Emoji(id: "dodo", character: "🦤", name: "Dodo", keywords: ["extinct", "bird", "dead"], category: .nature(.bird)),
-        Emoji(id: "feather", character: "🪶", name: "Feather", keywords: ["bird", "light", "soft"], category: .nature(.bird)),
-        Emoji(id: "flamingo", character: "🦩", name: "Flamingo", keywords: ["pink", "tropical", "elegant"], category: .nature(.bird)),
-        Emoji(id: "peacock", character: "🦚", name: "Peacock", keywords: ["colorful", "feathers", "proud", "beautiful"], category: .nature(.bird)),
-        Emoji(id: "parrot", character: "🦜", name: "Parrot", keywords: ["tropical", "colorful", "talk", "pirate"], category: .nature(.bird)),
+        Emoji(
+            id: "eagle",
+            character: "🦅",
+            name: "Eagle",
+            keywords: ["america", "freedom", "soar", "bald"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "duck",
+            character: "🦆",
+            name: "Duck",
+            keywords: ["quack", "pond", "waddle"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "swan",
+            character: "🦢",
+            name: "Swan",
+            keywords: ["elegant", "white", "graceful", "lake"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "owl",
+            character: "🦉",
+            name: "Owl",
+            keywords: ["wise", "hoot", "night", "nocturnal"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "dodo",
+            character: "🦤",
+            name: "Dodo",
+            keywords: ["extinct", "bird", "dead"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "feather",
+            character: "🪶",
+            name: "Feather",
+            keywords: ["bird", "light", "soft"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "flamingo",
+            character: "🦩",
+            name: "Flamingo",
+            keywords: ["pink", "tropical", "elegant"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "peacock",
+            character: "🦚",
+            name: "Peacock",
+            keywords: ["colorful", "feathers", "proud", "beautiful"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "parrot",
+            character: "🦜",
+            name: "Parrot",
+            keywords: ["tropical", "colorful", "talk", "pirate"],
+            category: .nature(.bird)
+        ),
         Emoji(id: "wing", character: "🪽", name: "Wing", keywords: ["bird", "fly", "angel"], category: .nature(.bird)),
-        Emoji(id: "blackBird", character: "🐦‍⬛", name: "Black Bird", keywords: ["crow", "raven", "dark"], category: .nature(.bird)),
-        Emoji(id: "goose", character: "🪿", name: "Goose", keywords: ["honk", "waterfowl", "gaggle"], category: .nature(.bird)),
-        Emoji(id: "frog", character: "🐸", name: "Frog", keywords: ["ribbit", "toad", "amphibian", "hop"], category: .nature(.reptile)),
-        Emoji(id: "crocodile", character: "🐊", name: "Crocodile", keywords: ["alligator", "reptile", "dangerous", "swamp"], category: .nature(.reptile)),
-        Emoji(id: "turtle", character: "🐢", name: "Turtle", keywords: ["slow", "shell", "reptile", "tortoise"], category: .nature(.aquatic)),
-        Emoji(id: "lizard", character: "🦎", name: "Lizard", keywords: ["reptile", "gecko", "salamander"], category: .nature(.reptile)),
-        Emoji(id: "snake", character: "🐍", name: "Snake", keywords: ["reptile", "slither", "python", "viper"], category: .nature(.reptile)),
-        Emoji(id: "dragonFace", character: "🐲", name: "Dragon Face", keywords: ["mythical", "fantasy", "fire"], category: .nature(.reptile)),
-        Emoji(id: "dragon", character: "🐉", name: "Dragon", keywords: ["mythical", "fantasy", "fire", "chinese"], category: .nature(.reptile)),
-        Emoji(id: "sauropod", character: "🦕", name: "Sauropod", keywords: ["dinosaur", "long neck", "extinct", "prehistoric"], category: .nature(.reptile)),
-        Emoji(id: "tRex", character: "🦖", name: "T Rex", keywords: ["dinosaur", "tyrannosaurus", "extinct", "prehistoric"], category: .nature(.reptile)),
-        Emoji(id: "spoutingWhale", character: "🐳", name: "Spouting Whale", keywords: ["ocean", "big", "mammal", "splash"], category: .nature(.aquatic)),
-        Emoji(id: "whale", character: "🐋", name: "Whale", keywords: ["ocean", "big", "mammal", "blue"], category: .nature(.aquatic)),
-        Emoji(id: "dolphin", character: "🐬", name: "Dolphin", keywords: ["ocean", "smart", "playful", "flipper"], category: .nature(.aquatic)),
-        Emoji(id: "seal", character: "🦭", name: "Seal", keywords: ["ocean", "cute", "clap", "arctic"], category: .nature(.aquatic)),
-        Emoji(id: "fish", character: "🐟", name: "Fish", keywords: ["swim", "ocean", "aquarium"], category: .nature(.aquatic)),
-        Emoji(id: "tropicalFish", character: "🐠", name: "Tropical Fish", keywords: ["colorful", "ocean", "nemo", "reef"], category: .nature(.aquatic)),
-        Emoji(id: "blowfish", character: "🐡", name: "Blowfish", keywords: ["puffer", "spiky", "inflate"], category: .nature(.aquatic)),
-        Emoji(id: "shark", character: "🦈", name: "Shark", keywords: ["dangerous", "jaws", "ocean", "predator"], category: .nature(.aquatic)),
-        Emoji(id: "octopus", character: "🐙", name: "Octopus", keywords: ["tentacles", "ocean", "squid", "ink"], category: .nature(.aquatic)),
-        Emoji(id: "spiralShell", character: "🐚", name: "Spiral Shell", keywords: ["beach", "ocean", "conch", "seashell"], category: .nature(.aquatic)),
-        Emoji(id: "coral", character: "🪸", name: "Coral", keywords: ["reef", "ocean", "underwater"], category: .nature(.aquatic)),
-        Emoji(id: "jellyfish", character: "🪼", name: "Jellyfish", keywords: ["ocean", "sting", "transparent", "float"], category: .nature(.aquatic)),
-        Emoji(id: "snail", character: "🐌", name: "Snail", keywords: ["slow", "shell", "slimy"], category: .nature(.aquatic)),
-        Emoji(id: "butterfly", character: "🦋", name: "Butterfly", keywords: ["beautiful", "flutter", "blue", "insect"], category: .nature(.insect)),
-        Emoji(id: "bug", character: "🐛", name: "Bug", keywords: ["caterpillar", "worm", "insect"], category: .nature(.insect)),
-        Emoji(id: "ant", character: "🐜", name: "Ant", keywords: ["insect", "colony", "tiny", "work"], category: .nature(.insect)),
-        Emoji(id: "honeybee", character: "🐝", name: "Honeybee", keywords: ["buzz", "sting", "honey", "pollinate"], category: .nature(.insect)),
-        Emoji(id: "beetle", character: "🪲", name: "Beetle", keywords: ["insect", "bug", "hard shell"], category: .nature(.aquatic)),
-        Emoji(id: "ladyBeetle", character: "🐞", name: "Lady Beetle", keywords: ["ladybug", "red", "spots", "cute"], category: .nature(.insect)),
-        Emoji(id: "cricket", character: "🦗", name: "Cricket", keywords: ["insect", "chirp", "grasshopper"], category: .nature(.insect)),
-        Emoji(id: "cockroach", character: "🪳", name: "Cockroach", keywords: ["insect", "pest", "disgusting"], category: .nature(.insect)),
-        Emoji(id: "spider", character: "🕷️", name: "Spider", keywords: ["web", "eight legs", "scary", "arachnid"], category: .nature(.insect)),
-        Emoji(id: "spiderWeb", character: "🕸️", name: "Spider Web", keywords: ["cobweb", "silk", "trap"], category: .nature(.insect)),
-        Emoji(id: "scorpion", character: "🦂", name: "Scorpion", keywords: ["sting", "tail", "desert", "poison"], category: .nature(.insect)),
-        Emoji(id: "mosquito", character: "🦟", name: "Mosquito", keywords: ["bite", "itch", "pest", "buzzing"], category: .nature(.insect)),
-        Emoji(id: "fly", character: "🪰", name: "Fly", keywords: ["insect", "pest", "annoying", "buzz"], category: .nature(.insect)),
-        Emoji(id: "worm", character: "🪱", name: "Worm", keywords: ["earthworm", "soil", "fishing", "slimy"], category: .nature(.insect)),
-        Emoji(id: "microbe", character: "🦠", name: "Microbe", keywords: ["germ", "virus", "bacteria", "sick"], category: .nature(.insect)),
-        Emoji(id: "bouquet", character: "💐", name: "Bouquet", keywords: ["flowers", "gift", "romantic", "beautiful"], category: .nature(.flower)),
-        Emoji(id: "cherryBlossom", character: "🌸", name: "Cherry Blossom", keywords: ["pink", "spring", "japan", "sakura"], category: .nature(.flower)),
-        Emoji(id: "whiteFlower", character: "💮", name: "White Flower", keywords: ["pure", "simple", "elegant"], category: .nature(.flower)),
-        Emoji(id: "lotus", character: "🪷", name: "Lotus", keywords: ["meditation", "zen", "buddhism", "peaceful"], category: .nature(.flower)),
-        Emoji(id: "rosette", character: "🏵️", name: "Rosette", keywords: ["award", "ribbon", "decoration"], category: .nature(.flower)),
-        Emoji(id: "rose", character: "🌹", name: "Rose", keywords: ["romantic", "love", "valentine", "red"], category: .nature(.flower)),
-        Emoji(id: "wiltedFlower", character: "🥀", name: "Wilted Flower", keywords: ["dead", "sad", "dying", "dry"], category: .nature(.flower)),
-        Emoji(id: "hibiscus", character: "🌺", name: "Hibiscus", keywords: ["tropical", "hawaii", "colorful"], category: .nature(.flower)),
-        Emoji(id: "sunflower", character: "🌻", name: "Sunflower", keywords: ["yellow", "summer", "happy", "bright"], category: .nature(.flower)),
-        Emoji(id: "blossom", character: "🌼", name: "Blossom", keywords: ["spring", "daisy", "yellow", "cheerful"], category: .nature(.flower)),
-        Emoji(id: "tulip", character: "🌷", name: "Tulip", keywords: ["spring", "netherlands", "colorful"], category: .nature(.flower)),
-        Emoji(id: "hyacinth", character: "🪻", name: "Hyacinth", keywords: ["purple", "fragrant", "spring"], category: .nature(.flower)),
-        Emoji(id: "seedling", character: "🌱", name: "Seedling", keywords: ["sprout", "grow", "new", "plant"], category: .nature(.plant)),
-        Emoji(id: "pottedPlant", character: "🪴", name: "Potted Plant", keywords: ["houseplant", "indoor", "decor"], category: .nature(.plant)),
-        Emoji(id: "evergreenTree", character: "🌲", name: "Evergreen Tree", keywords: ["pine", "christmas", "forest", "green"], category: .nature(.plant)),
-        Emoji(id: "deciduousTree", character: "🌳", name: "Deciduous Tree", keywords: ["oak", "forest", "shade", "green"], category: .nature(.plant)),
-        Emoji(id: "palmTree", character: "🌴", name: "Palm Tree", keywords: ["tropical", "beach", "vacation", "island"], category: .nature(.plant)),
-        Emoji(id: "cactus", character: "🌵", name: "Cactus", keywords: ["desert", "spiky", "prickly", "dry"], category: .nature(.plant)),
-        Emoji(id: "sheafOfRice", character: "🌾", name: "Sheaf Of Rice", keywords: ["grain", "harvest", "wheat", "crop"], category: .nature(.plant)),
-        Emoji(id: "herb", character: "🌿", name: "Herb", keywords: ["leaf", "plant", "green", "fresh"], category: .nature(.plant)),
-        Emoji(id: "shamrock", character: "☘️", name: "Shamrock", keywords: ["irish", "ireland", "green", "clover"], category: .nature(.plant)),
-        Emoji(id: "fourLeafClover", character: "🍀", name: "Four Leaf Clover", keywords: ["lucky", "rare", "irish", "fortune"], category: .nature(.plant)),
-        Emoji(id: "mapleLeaf", character: "🍁", name: "Maple Leaf", keywords: ["canada", "fall", "autumn", "red"], category: .nature(.plant)),
-        Emoji(id: "fallenLeaf", character: "🍂", name: "Fallen Leaf", keywords: ["autumn", "fall", "brown", "dry"], category: .nature(.plant)),
-        Emoji(id: "leafFlutteringInWind", character: "🍃", name: "Leaf Fluttering In Wind", keywords: ["breeze", "blow", "green"], category: .nature(.plant)),
-        Emoji(id: "emptyNest", character: "🪹", name: "Empty Nest", keywords: ["bird", "home", "twig"], category: .nature(.bird)),
-        Emoji(id: "nestWithEggs", character: "🪺", name: "Nest With Eggs", keywords: ["bird", "baby", "hatching"], category: .nature(.bird)),
-        Emoji(id: "mushroom", character: "🍄", name: "Mushroom", keywords: ["fungi", "toadstool", "forest", "shroom"], category: .nature(.plant))
+        Emoji(
+            id: "blackBird",
+            character: "🐦‍⬛",
+            name: "Black Bird",
+            keywords: ["crow", "raven", "dark"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "goose",
+            character: "🪿",
+            name: "Goose",
+            keywords: ["honk", "waterfowl", "gaggle"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "frog",
+            character: "🐸",
+            name: "Frog",
+            keywords: ["ribbit", "toad", "amphibian", "hop"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "crocodile",
+            character: "🐊",
+            name: "Crocodile",
+            keywords: ["alligator", "reptile", "dangerous", "swamp"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "turtle",
+            character: "🐢",
+            name: "Turtle",
+            keywords: ["slow", "shell", "reptile", "tortoise"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "lizard",
+            character: "🦎",
+            name: "Lizard",
+            keywords: ["reptile", "gecko", "salamander"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "snake",
+            character: "🐍",
+            name: "Snake",
+            keywords: ["reptile", "slither", "python", "viper"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "dragonFace",
+            character: "🐲",
+            name: "Dragon Face",
+            keywords: ["mythical", "fantasy", "fire"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "dragon",
+            character: "🐉",
+            name: "Dragon",
+            keywords: ["mythical", "fantasy", "fire", "chinese"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "sauropod",
+            character: "🦕",
+            name: "Sauropod",
+            keywords: ["dinosaur", "long neck", "extinct", "prehistoric"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "tRex",
+            character: "🦖",
+            name: "T Rex",
+            keywords: ["dinosaur", "tyrannosaurus", "extinct", "prehistoric"],
+            category: .nature(.reptile)
+        ),
+        Emoji(
+            id: "spoutingWhale",
+            character: "🐳",
+            name: "Spouting Whale",
+            keywords: ["ocean", "big", "mammal", "splash"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "whale",
+            character: "🐋",
+            name: "Whale",
+            keywords: ["ocean", "big", "mammal", "blue"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "dolphin",
+            character: "🐬",
+            name: "Dolphin",
+            keywords: ["ocean", "smart", "playful", "flipper"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "seal",
+            character: "🦭",
+            name: "Seal",
+            keywords: ["ocean", "cute", "clap", "arctic"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "fish",
+            character: "🐟",
+            name: "Fish",
+            keywords: ["swim", "ocean", "aquarium"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "tropicalFish",
+            character: "🐠",
+            name: "Tropical Fish",
+            keywords: ["colorful", "ocean", "nemo", "reef"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "blowfish",
+            character: "🐡",
+            name: "Blowfish",
+            keywords: ["puffer", "spiky", "inflate"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "shark",
+            character: "🦈",
+            name: "Shark",
+            keywords: ["dangerous", "jaws", "ocean", "predator"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "octopus",
+            character: "🐙",
+            name: "Octopus",
+            keywords: ["tentacles", "ocean", "squid", "ink"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "spiralShell",
+            character: "🐚",
+            name: "Spiral Shell",
+            keywords: ["beach", "ocean", "conch", "seashell"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "coral",
+            character: "🪸",
+            name: "Coral",
+            keywords: ["reef", "ocean", "underwater"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "jellyfish",
+            character: "🪼",
+            name: "Jellyfish",
+            keywords: ["ocean", "sting", "transparent", "float"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "snail",
+            character: "🐌",
+            name: "Snail",
+            keywords: ["slow", "shell", "slimy"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "butterfly",
+            character: "🦋",
+            name: "Butterfly",
+            keywords: ["beautiful", "flutter", "blue", "insect"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "bug",
+            character: "🐛",
+            name: "Bug",
+            keywords: ["caterpillar", "worm", "insect"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "ant",
+            character: "🐜",
+            name: "Ant",
+            keywords: ["insect", "colony", "tiny", "work"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "honeybee",
+            character: "🐝",
+            name: "Honeybee",
+            keywords: ["buzz", "sting", "honey", "pollinate"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "beetle",
+            character: "🪲",
+            name: "Beetle",
+            keywords: ["insect", "bug", "hard shell"],
+            category: .nature(.aquatic)
+        ),
+        Emoji(
+            id: "ladyBeetle",
+            character: "🐞",
+            name: "Lady Beetle",
+            keywords: ["ladybug", "red", "spots", "cute"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "cricket",
+            character: "🦗",
+            name: "Cricket",
+            keywords: ["insect", "chirp", "grasshopper"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "cockroach",
+            character: "🪳",
+            name: "Cockroach",
+            keywords: ["insect", "pest", "disgusting"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "spider",
+            character: "🕷️",
+            name: "Spider",
+            keywords: ["web", "eight legs", "scary", "arachnid"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "spiderWeb",
+            character: "🕸️",
+            name: "Spider Web",
+            keywords: ["cobweb", "silk", "trap"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "scorpion",
+            character: "🦂",
+            name: "Scorpion",
+            keywords: ["sting", "tail", "desert", "poison"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "mosquito",
+            character: "🦟",
+            name: "Mosquito",
+            keywords: ["bite", "itch", "pest", "buzzing"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "fly",
+            character: "🪰",
+            name: "Fly",
+            keywords: ["insect", "pest", "annoying", "buzz"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "worm",
+            character: "🪱",
+            name: "Worm",
+            keywords: ["earthworm", "soil", "fishing", "slimy"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "microbe",
+            character: "🦠",
+            name: "Microbe",
+            keywords: ["germ", "virus", "bacteria", "sick"],
+            category: .nature(.insect)
+        ),
+        Emoji(
+            id: "bouquet",
+            character: "💐",
+            name: "Bouquet",
+            keywords: ["flowers", "gift", "romantic", "beautiful"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "cherryBlossom",
+            character: "🌸",
+            name: "Cherry Blossom",
+            keywords: ["pink", "spring", "japan", "sakura"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "whiteFlower",
+            character: "💮",
+            name: "White Flower",
+            keywords: ["pure", "simple", "elegant"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "lotus",
+            character: "🪷",
+            name: "Lotus",
+            keywords: ["meditation", "zen", "buddhism", "peaceful"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "rosette",
+            character: "🏵️",
+            name: "Rosette",
+            keywords: ["award", "ribbon", "decoration"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "rose",
+            character: "🌹",
+            name: "Rose",
+            keywords: ["romantic", "love", "valentine", "red"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "wiltedFlower",
+            character: "🥀",
+            name: "Wilted Flower",
+            keywords: ["dead", "sad", "dying", "dry"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "hibiscus",
+            character: "🌺",
+            name: "Hibiscus",
+            keywords: ["tropical", "hawaii", "colorful"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "sunflower",
+            character: "🌻",
+            name: "Sunflower",
+            keywords: ["yellow", "summer", "happy", "bright"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "blossom",
+            character: "🌼",
+            name: "Blossom",
+            keywords: ["spring", "daisy", "yellow", "cheerful"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "tulip",
+            character: "🌷",
+            name: "Tulip",
+            keywords: ["spring", "netherlands", "colorful"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "hyacinth",
+            character: "🪻",
+            name: "Hyacinth",
+            keywords: ["purple", "fragrant", "spring"],
+            category: .nature(.flower)
+        ),
+        Emoji(
+            id: "seedling",
+            character: "🌱",
+            name: "Seedling",
+            keywords: ["sprout", "grow", "new", "plant"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "pottedPlant",
+            character: "🪴",
+            name: "Potted Plant",
+            keywords: ["houseplant", "indoor", "decor"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "evergreenTree",
+            character: "🌲",
+            name: "Evergreen Tree",
+            keywords: ["pine", "christmas", "forest", "green"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "deciduousTree",
+            character: "🌳",
+            name: "Deciduous Tree",
+            keywords: ["oak", "forest", "shade", "green"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "palmTree",
+            character: "🌴",
+            name: "Palm Tree",
+            keywords: ["tropical", "beach", "vacation", "island"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "cactus",
+            character: "🌵",
+            name: "Cactus",
+            keywords: ["desert", "spiky", "prickly", "dry"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "sheafOfRice",
+            character: "🌾",
+            name: "Sheaf Of Rice",
+            keywords: ["grain", "harvest", "wheat", "crop"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "herb",
+            character: "🌿",
+            name: "Herb",
+            keywords: ["leaf", "plant", "green", "fresh"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "shamrock",
+            character: "☘️",
+            name: "Shamrock",
+            keywords: ["irish", "ireland", "green", "clover"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "fourLeafClover",
+            character: "🍀",
+            name: "Four Leaf Clover",
+            keywords: ["lucky", "rare", "irish", "fortune"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "mapleLeaf",
+            character: "🍁",
+            name: "Maple Leaf",
+            keywords: ["canada", "fall", "autumn", "red"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "fallenLeaf",
+            character: "🍂",
+            name: "Fallen Leaf",
+            keywords: ["autumn", "fall", "brown", "dry"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "leafFlutteringInWind",
+            character: "🍃",
+            name: "Leaf Fluttering In Wind",
+            keywords: ["breeze", "blow", "green"],
+            category: .nature(.plant)
+        ),
+        Emoji(
+            id: "emptyNest",
+            character: "🪹",
+            name: "Empty Nest",
+            keywords: ["bird", "home", "twig"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "nestWithEggs",
+            character: "🪺",
+            name: "Nest With Eggs",
+            keywords: ["bird", "baby", "hatching"],
+            category: .nature(.bird)
+        ),
+        Emoji(
+            id: "mushroom",
+            character: "🍄",
+            name: "Mushroom",
+            keywords: ["fungi", "toadstool", "forest", "shroom"],
+            category: .nature(.plant)
+        )
     ]
 
     // MARK: - Food Emojis
+
     static let foodEmojis: [Emoji] = [
-        Emoji(id: "grapes", character: "🍇", name: "Grapes", keywords: ["wine", "purple", "fruit", "bunch"], category: .food(.fruit)),
-        Emoji(id: "melon", character: "🍈", name: "Melon", keywords: ["cantaloupe", "honeydew", "fruit", "sweet"], category: .food(.fruit)),
-        Emoji(id: "watermelon", character: "🍉", name: "Watermelon", keywords: ["summer", "juicy", "seeds", "refreshing"], category: .food(.fruit)),
-        Emoji(id: "tangerine", character: "🍊", name: "Tangerine", keywords: ["orange", "citrus", "vitamin c", "juicy"], category: .food(.fruit)),
-        Emoji(id: "lemon", character: "🍋", name: "Lemon", keywords: ["sour", "citrus", "yellow", "vitamin c"], category: .food(.fruit)),
-        Emoji(id: "banana", character: "🍌", name: "Banana", keywords: ["yellow", "potassium", "fruit", "peel"], category: .food(.fruit)),
-        Emoji(id: "pineapple", character: "🍍", name: "Pineapple", keywords: ["tropical", "spiky", "sweet", "hawaii"], category: .food(.fruit)),
-        Emoji(id: "mango", character: "🥭", name: "Mango", keywords: ["tropical", "juicy", "sweet", "orange"], category: .food(.fruit)),
-        Emoji(id: "redApple", character: "🍎", name: "Red Apple", keywords: ["fruit", "healthy", "teacher", "crisp"], category: .food(.fruit)),
-        Emoji(id: "greenApple", character: "🍏", name: "Green Apple", keywords: ["fruit", "tart", "granny smith", "crisp"], category: .food(.fruit)),
+        Emoji(
+            id: "grapes",
+            character: "🍇",
+            name: "Grapes",
+            keywords: ["wine", "purple", "fruit", "bunch"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "melon",
+            character: "🍈",
+            name: "Melon",
+            keywords: ["cantaloupe", "honeydew", "fruit", "sweet"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "watermelon",
+            character: "🍉",
+            name: "Watermelon",
+            keywords: ["summer", "juicy", "seeds", "refreshing"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "tangerine",
+            character: "🍊",
+            name: "Tangerine",
+            keywords: ["orange", "citrus", "vitamin c", "juicy"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "lemon",
+            character: "🍋",
+            name: "Lemon",
+            keywords: ["sour", "citrus", "yellow", "vitamin c"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "banana",
+            character: "🍌",
+            name: "Banana",
+            keywords: ["yellow", "potassium", "fruit", "peel"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "pineapple",
+            character: "🍍",
+            name: "Pineapple",
+            keywords: ["tropical", "spiky", "sweet", "hawaii"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "mango",
+            character: "🥭",
+            name: "Mango",
+            keywords: ["tropical", "juicy", "sweet", "orange"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "redApple",
+            character: "🍎",
+            name: "Red Apple",
+            keywords: ["fruit", "healthy", "teacher", "crisp"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "greenApple",
+            character: "🍏",
+            name: "Green Apple",
+            keywords: ["fruit", "tart", "granny smith", "crisp"],
+            category: .food(.fruit)
+        ),
         Emoji(id: "pear", character: "🍐", name: "Pear", keywords: ["fruit", "juicy", "green"], category: .food(.fruit)),
-        Emoji(id: "peach", character: "🍑", name: "Peach", keywords: ["fruit", "fuzzy", "sweet"], category: .food(.fruit)),
-        Emoji(id: "cherries", character: "🍒", name: "Cherries", keywords: ["fruit", "red", "sweet", "stem"], category: .food(.fruit)),
-        Emoji(id: "strawberry", character: "🍓", name: "Strawberry", keywords: ["fruit", "red", "sweet", "berry"], category: .food(.fruit)),
-        Emoji(id: "blueberries", character: "🫐", name: "Blueberries", keywords: ["fruit", "berry", "antioxidant", "healthy"], category: .food(.fruit)),
-        Emoji(id: "kiwiFruit", character: "🥝", name: "Kiwi Fruit", keywords: ["green", "fuzzy", "tart", "tropical"], category: .food(.fruit)),
-        Emoji(id: "tomato", character: "🍅", name: "Tomato", keywords: ["red", "vegetable", "salad", "sauce"], category: .food(.fruit)),
-        Emoji(id: "olive", character: "🫒", name: "Olive", keywords: ["mediterranean", "oil", "green", "salty"], category: .food(.fruit)),
-        Emoji(id: "coconut", character: "🥥", name: "Coconut", keywords: ["tropical", "hairy", "milk", "oil"], category: .food(.fruit)),
-        Emoji(id: "avocado", character: "🥑", name: "Avocado", keywords: ["green", "healthy", "guacamole", "toast"], category: .food(.fruit)),
-        Emoji(id: "eggplant", character: "🍆", name: "Eggplant", keywords: ["purple", "vegetable"], category: .food(.vegetable)),
-        Emoji(id: "potato", character: "🥔", name: "Potato", keywords: ["vegetable", "brown", "starch", "spud"], category: .food(.vegetable)),
-        Emoji(id: "carrot", character: "🥕", name: "Carrot", keywords: ["orange", "vegetable", "bunny", "healthy"], category: .food(.fruit)),
-        Emoji(id: "earOfCorn", character: "🌽", name: "Ear Of Corn", keywords: ["yellow", "vegetable", "cob", "maize"], category: .food(.vegetable)),
-        Emoji(id: "hotPepper", character: "🌶️", name: "Hot Pepper", keywords: ["spicy", "chili", "red", "fire"], category: .food(.vegetable)),
-        Emoji(id: "bellPepper", character: "🫑", name: "Bell Pepper", keywords: ["vegetable", "green", "capsicum"], category: .food(.vegetable)),
-        Emoji(id: "cucumber", character: "🥒", name: "Cucumber", keywords: ["green", "vegetable", "salad", "pickle"], category: .food(.vegetable)),
-        Emoji(id: "leafyGreen", character: "🥬", name: "Leafy Green", keywords: ["lettuce", "vegetable", "healthy", "salad"], category: .food(.vegetable)),
-        Emoji(id: "broccoli", character: "🥦", name: "Broccoli", keywords: ["green", "vegetable", "healthy", "tree"], category: .food(.vegetable)),
-        Emoji(id: "garlic", character: "🧄", name: "Garlic", keywords: ["flavor", "smell", "vampire", "bulb"], category: .food(.vegetable)),
-        Emoji(id: "onion", character: "🧅", name: "Onion", keywords: ["vegetable", "cry", "layers", "smell"], category: .food(.vegetable)),
-        Emoji(id: "peanuts", character: "🥜", name: "Peanuts", keywords: ["nuts", "allergy", "protein", "butter"], category: .food(.vegetable)),
-        Emoji(id: "beans", character: "🫘", name: "Beans", keywords: ["legume", "protein", "vegetable"], category: .food(.vegetable)),
-        Emoji(id: "chestnut", character: "🌰", name: "Chestnut", keywords: ["nut", "fall", "roasted", "brown"], category: .food(.vegetable)),
-        Emoji(id: "gingerRoot", character: "🫚", name: "Ginger Root", keywords: ["spice", "flavor", "asian", "tea"], category: .food(.vegetable)),
-        Emoji(id: "peaPod", character: "🫛", name: "Pea Pod", keywords: ["green", "vegetable", "pod"], category: .food(.vegetable)),
-        Emoji(id: "bread", character: "🍞", name: "Bread", keywords: ["loaf", "toast", "wheat", "carbs"], category: .food(.preparedFood)),
-        Emoji(id: "croissant", character: "🥐", name: "Croissant", keywords: ["french", "pastry", "buttery", "breakfast"], category: .food(.preparedFood)),
-        Emoji(id: "baguetteBread", character: "🥖", name: "Baguette Bread", keywords: ["french", "long", "crispy"], category: .food(.preparedFood)),
-        Emoji(id: "flatbread", character: "🫓", name: "Flatbread", keywords: ["pita", "naan", "thin"], category: .food(.preparedFood)),
-        Emoji(id: "pretzel", character: "🥨", name: "Pretzel", keywords: ["twisted", "salty", "german", "snack"], category: .food(.preparedFood)),
-        Emoji(id: "bagel", character: "🥯", name: "Bagel", keywords: ["breakfast", "cream cheese", "round", "jewish"], category: .food(.preparedFood)),
-        Emoji(id: "pancakes", character: "🥞", name: "Pancakes", keywords: ["breakfast", "syrup", "stack", "fluffy"], category: .food(.dessert)),
-        Emoji(id: "waffle", character: "🧇", name: "Waffle", keywords: ["breakfast", "syrup", "grid", "belgian"], category: .food(.preparedFood)),
-        Emoji(id: "cheeseWedge", character: "🧀", name: "Cheese Wedge", keywords: ["dairy", "yellow", "swiss", "cheddar"], category: .food(.preparedFood)),
-        Emoji(id: "meatOnBone", character: "🍖", name: "Meat On Bone", keywords: ["carnivore", "bbq", "caveman", "steak"], category: .food(.drink)),
-        Emoji(id: "poultryLeg", character: "🍗", name: "Poultry Leg", keywords: ["chicken", "turkey", "drumstick", "fried"], category: .food(.preparedFood)),
-        Emoji(id: "cutOfMeat", character: "🥩", name: "Cut Of Meat", keywords: ["steak", "beef", "red", "protein"], category: .food(.drink)),
-        Emoji(id: "bacon", character: "🥓", name: "Bacon", keywords: ["breakfast", "crispy", "pork", "strips"], category: .food(.preparedFood)),
-        Emoji(id: "hamburger", character: "🍔", name: "Hamburger", keywords: ["burger", "fast food", "beef", "bun"], category: .food(.preparedFood)),
-        Emoji(id: "frenchFries", character: "🍟", name: "French Fries", keywords: ["fries", "fast food", "potato", "crispy"], category: .food(.vegetable)),
-        Emoji(id: "pizza", character: "🍕", name: "Pizza", keywords: ["italian", "slice", "cheese", "pepperoni"], category: .food(.vegetable)),
-        Emoji(id: "hotDog", character: "🌭", name: "Hot Dog", keywords: ["sausage", "fast food", "bun", "mustard"], category: .food(.preparedFood)),
-        Emoji(id: "sandwich", character: "🥪", name: "Sandwich", keywords: ["lunch", "bread", "sub", "deli"], category: .food(.preparedFood)),
-        Emoji(id: "taco", character: "🌮", name: "Taco", keywords: ["mexican", "tortilla", "meat", "salsa"], category: .food(.preparedFood)),
-        Emoji(id: "burrito", character: "🌯", name: "Burrito", keywords: ["mexican", "wrap", "beans", "rice"], category: .food(.vegetable)),
-        Emoji(id: "tamale", character: "🫔", name: "Tamale", keywords: ["mexican", "corn", "wrapped", "masa"], category: .food(.vegetable)),
-        Emoji(id: "stuffedFlatbread", character: "🥙", name: "Stuffed Flatbread", keywords: ["pita", "gyro", "kebab", "mediterranean"], category: .food(.preparedFood)),
-        Emoji(id: "falafel", character: "🧆", name: "Falafel", keywords: ["middle eastern", "chickpea", "fried", "vegetarian"], category: .food(.preparedFood)),
-        Emoji(id: "egg", character: "🥚", name: "Egg", keywords: ["breakfast", "protein", "chicken", "shell"], category: .food(.preparedFood)),
-        Emoji(id: "cooking", character: "🍳", name: "Cooking", keywords: ["frying", "egg", "breakfast", "pan"], category: .food(.preparedFood)),
-        Emoji(id: "shallowPanOfFood", character: "🥘", name: "Shallow Pan Of Food", keywords: ["paella", "skillet", "dinner", "spanish"], category: .food(.preparedFood)),
-        Emoji(id: "potOfFood", character: "🍲", name: "Pot Of Food", keywords: ["stew", "soup", "dinner", "cooking"], category: .food(.preparedFood)),
-        Emoji(id: "fondue", character: "🫕", name: "Fondue", keywords: ["cheese", "dip", "swiss", "melted"], category: .food(.preparedFood)),
-        Emoji(id: "bowlWithSpoon", character: "🥣", name: "Bowl With Spoon", keywords: ["cereal", "soup", "oatmeal", "breakfast"], category: .food(.preparedFood)),
-        Emoji(id: "greenSalad", character: "🥗", name: "Green Salad", keywords: ["healthy", "vegetables", "lettuce", "diet"], category: .food(.vegetable)),
-        Emoji(id: "popcorn", character: "🍿", name: "Popcorn", keywords: ["movie", "snack", "kernels", "butter"], category: .food(.vegetable)),
-        Emoji(id: "butter", character: "🧈", name: "Butter", keywords: ["dairy", "yellow", "spread", "creamy"], category: .food(.preparedFood)),
-        Emoji(id: "salt", character: "🧂", name: "Salt", keywords: ["seasoning", "shaker", "sodium", "flavor"], category: .food(.preparedFood)),
-        Emoji(id: "cannedFood", character: "🥫", name: "Canned Food", keywords: ["can", "soup", "preserved", "tin"], category: .food(.preparedFood)),
-        Emoji(id: "bentoBox", character: "🍱", name: "Bento Box", keywords: ["japanese", "lunch", "compartments", "packed"], category: .food(.asian)),
-        Emoji(id: "riceCracker", character: "🍘", name: "Rice Cracker", keywords: ["japanese", "snack", "crispy", "seaweed"], category: .food(.asian)),
-        Emoji(id: "riceBall", character: "🍙", name: "Rice Ball", keywords: ["onigiri", "japanese", "seaweed", "triangle"], category: .food(.asian)),
-        Emoji(id: "cookedRice", character: "🍚", name: "Cooked Rice", keywords: ["white", "asian", "grain", "side"], category: .food(.asian)),
-        Emoji(id: "curryRice", character: "🍛", name: "Curry Rice", keywords: ["indian", "spicy", "sauce", "asian"], category: .food(.asian)),
-        Emoji(id: "steamingBowl", character: "🍜", name: "Steaming Bowl", keywords: ["ramen", "noodles", "hot", "soup"], category: .food(.asian)),
-        Emoji(id: "spaghetti", character: "🍝", name: "Spaghetti", keywords: ["pasta", "italian", "noodles", "sauce"], category: .food(.asian)),
-        Emoji(id: "roastedSweetPotato", character: "🍠", name: "Roasted Sweet Potato", keywords: ["japanese", "orange", "yam"], category: .food(.fruit)),
-        Emoji(id: "oden", character: "🍢", name: "Oden", keywords: ["japanese", "skewer", "fish cake", "soup"], category: .food(.asian)),
-        Emoji(id: "sushi", character: "🍣", name: "Sushi", keywords: ["japanese", "raw fish", "rice", "wasabi"], category: .food(.asian)),
-        Emoji(id: "friedShrimp", character: "🍤", name: "Fried Shrimp", keywords: ["tempura", "seafood", "crispy", "japanese"], category: .food(.preparedFood)),
-        Emoji(id: "fishCakeWithSwirl", character: "🍥", name: "Fish Cake With Swirl", keywords: ["naruto", "japanese", "pink", "ramen"], category: .food(.asian)),
-        Emoji(id: "moonCake", character: "🥮", name: "Moon Cake", keywords: ["chinese", "pastry", "festival", "mid autumn"], category: .food(.asian)),
-        Emoji(id: "dango", character: "🍡", name: "Dango", keywords: ["japanese", "skewer", "sweet", "mochi"], category: .food(.asian)),
-        Emoji(id: "dumpling", character: "🥟", name: "Dumpling", keywords: ["asian", "gyoza", "potsticker", "filled"], category: .food(.asian)),
-        Emoji(id: "fortuneCookie", character: "🥠", name: "Fortune Cookie", keywords: ["chinese", "crispy", "message", "lucky"], category: .food(.asian)),
-        Emoji(id: "takeoutBox", character: "🥡", name: "Takeout Box", keywords: ["chinese", "container", "delivery", "leftovers"], category: .food(.asian)),
-        Emoji(id: "crab", character: "🦀", name: "Crab", keywords: ["seafood", "claws", "shell", "ocean"], category: .food(.preparedFood)),
-        Emoji(id: "lobster", character: "🦞", name: "Lobster", keywords: ["seafood", "fancy", "claws", "red"], category: .food(.preparedFood)),
-        Emoji(id: "shrimp", character: "🦐", name: "Shrimp", keywords: ["seafood", "prawn", "pink", "ocean"], category: .food(.preparedFood)),
-        Emoji(id: "squid", character: "🦑", name: "Squid", keywords: ["seafood", "tentacles", "calamari", "ocean"], category: .food(.preparedFood)),
-        Emoji(id: "oyster", character: "🦪", name: "Oyster", keywords: ["seafood", "pearl", "shell", "raw"], category: .food(.fruit)),
-        Emoji(id: "softIceCream", character: "🍦", name: "Soft Ice Cream", keywords: ["cone", "sweet", "dessert", "cold"], category: .food(.dessert)),
-        Emoji(id: "shavedIce", character: "🍧", name: "Shaved Ice", keywords: ["snow cone", "cold", "summer", "syrup"], category: .food(.dessert)),
-        Emoji(id: "iceCream", character: "🍨", name: "Ice Cream", keywords: ["dessert", "sweet", "cold", "scoop"], category: .food(.dessert)),
-        Emoji(id: "doughnut", character: "🍩", name: "Doughnut", keywords: ["donut", "sweet", "fried", "glazed"], category: .food(.dessert)),
-        Emoji(id: "cookie", character: "🍪", name: "Cookie", keywords: ["biscuit", "sweet", "chocolate chip", "baked"], category: .food(.dessert)),
-        Emoji(id: "birthdayCake", character: "🎂", name: "Birthday Cake", keywords: ["celebration", "party", "candles", "sweet"], category: .food(.dessert)),
-        Emoji(id: "shortcake", character: "🍰", name: "Shortcake", keywords: ["dessert", "slice", "sweet", "frosting"], category: .food(.dessert)),
-        Emoji(id: "cupcake", character: "🧁", name: "Cupcake", keywords: ["muffin", "sweet", "frosting", "small"], category: .food(.dessert)),
-        Emoji(id: "pie", character: "🥧", name: "Pie", keywords: ["dessert", "apple", "pumpkin", "baked"], category: .food(.fruit)),
-        Emoji(id: "chocolateBar", character: "🍫", name: "Chocolate Bar", keywords: ["candy", "sweet", "cocoa", "brown"], category: .food(.dessert)),
-        Emoji(id: "candy", character: "🍬", name: "Candy", keywords: ["sweet", "wrapped", "sugar"], category: .food(.dessert)),
-        Emoji(id: "lollipop", character: "🍭", name: "Lollipop", keywords: ["candy", "sweet", "stick", "sucker"], category: .food(.dessert)),
-        Emoji(id: "custard", character: "🍮", name: "Custard", keywords: ["pudding", "flan", "dessert", "sweet"], category: .food(.dessert)),
-        Emoji(id: "honeyPot", character: "🍯", name: "Honey Pot", keywords: ["sweet", "bee", "sticky", "golden"], category: .food(.dessert)),
-        Emoji(id: "babyBottle", character: "🍼", name: "Baby Bottle", keywords: ["infant", "milk", "feeding", "nipple"], category: .food(.drink)),
-        Emoji(id: "glassOfMilk", character: "🥛", name: "Glass Of Milk", keywords: ["dairy", "white", "calcium", "drink"], category: .food(.drink)),
-        Emoji(id: "hotBeverage", character: "☕", name: "Hot Beverage", keywords: ["coffee", "tea", "morning", "caffeine"], category: .food(.drink)),
-        Emoji(id: "teapot", character: "🫖", name: "Teapot", keywords: ["tea", "brewing", "hot", "ceramic"], category: .food(.drink)),
-        Emoji(id: "teacupWithoutHandle", character: "🍵", name: "Teacup Without Handle", keywords: ["tea", "green", "japanese", "hot"], category: .food(.drink)),
-        Emoji(id: "sake", character: "🍶", name: "Sake", keywords: ["japanese", "alcohol", "rice wine", "bottle"], category: .food(.drink)),
-        Emoji(id: "bottleWithPoppingCork", character: "🍾", name: "Bottle With Popping Cork", keywords: ["champagne", "celebration", "party", "bubbly"], category: .food(.drink)),
-        Emoji(id: "wineGlass", character: "🍷", name: "Wine Glass", keywords: ["red wine", "alcohol", "drink", "fancy"], category: .food(.drink)),
-        Emoji(id: "cocktailGlass", character: "🍸", name: "Cocktail Glass", keywords: ["martini", "alcohol", "drink", "fancy"], category: .food(.drink)),
-        Emoji(id: "tropicalDrink", character: "🍹", name: "Tropical Drink", keywords: ["beach", "vacation", "fruity", "umbrella"], category: .food(.drink)),
-        Emoji(id: "beerMug", character: "🍺", name: "Beer Mug", keywords: ["alcohol", "drink", "foam", "pub"], category: .food(.drink)),
-        Emoji(id: "clinkingBeerMugs", character: "🍻", name: "Clinking Beer Mugs", keywords: ["cheers", "celebration", "toast", "party"], category: .food(.drink)),
-        Emoji(id: "clinkingGlasses", character: "🥂", name: "Clinking Glasses", keywords: ["cheers", "celebration", "toast", "champagne"], category: .food(.drink)),
-        Emoji(id: "tumblerGlass", character: "🥃", name: "Tumbler Glass", keywords: ["whiskey", "bourbon", "alcohol", "rocks"], category: .food(.drink)),
-        Emoji(id: "pouringLiquid", character: "🫗", name: "Pouring Liquid", keywords: ["drink", "water", "filling"], category: .food(.drink)),
-        Emoji(id: "cupWithStraw", character: "🥤", name: "Cup With Straw", keywords: ["soda", "drink", "fast food", "beverage"], category: .food(.drink)),
-        Emoji(id: "bubbleTea", character: "🧋", name: "Bubble Tea", keywords: ["boba", "taiwanese", "tapioca", "drink"], category: .food(.drink)),
-        Emoji(id: "beverageBox", character: "🧃", name: "Beverage Box", keywords: ["juice box", "drink", "kids", "straw"], category: .food(.drink)),
-        Emoji(id: "mate", character: "🧉", name: "Mate", keywords: ["yerba", "south american", "tea", "drink"], category: .food(.drink)),
-        Emoji(id: "ice", character: "🧊", name: "Ice", keywords: ["cube", "cold", "frozen", "water"], category: .food(.drink)),
-        Emoji(id: "chopsticks", character: "🥢", name: "Chopsticks", keywords: ["asian", "utensils", "eating", "sticks"], category: .food(.preparedFood)),
-        Emoji(id: "forkAndKnifeWithPlate", character: "🍽️", name: "Fork And Knife With Plate", keywords: ["dining", "meal", "restaurant", "utensils"], category: .food(.preparedFood)),
-        Emoji(id: "forkAndKnife", character: "🍴", name: "Fork And Knife", keywords: ["utensils", "eating", "cutlery", "dining"], category: .food(.preparedFood)),
-        Emoji(id: "spoon", character: "🥄", name: "Spoon", keywords: ["utensil", "eating", "soup", "silverware"], category: .food(.preparedFood)),
-        Emoji(id: "kitchenKnife", character: "🔪", name: "Kitchen Knife", keywords: ["cooking", "sharp", "cutting", "chef"], category: .food(.preparedFood)),
-        Emoji(id: "jar", character: "🫙", name: "Jar", keywords: ["container", "glass", "preserve", "storage"], category: .food(.preparedFood)),
-        Emoji(id: "amphora", character: "🏺", name: "Amphora", keywords: ["ancient", "greek", "vase", "pottery"], category: .food(.preparedFood))
+        Emoji(
+            id: "peach",
+            character: "🍑",
+            name: "Peach",
+            keywords: ["fruit", "fuzzy", "sweet"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "cherries",
+            character: "🍒",
+            name: "Cherries",
+            keywords: ["fruit", "red", "sweet", "stem"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "strawberry",
+            character: "🍓",
+            name: "Strawberry",
+            keywords: ["fruit", "red", "sweet", "berry"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "blueberries",
+            character: "🫐",
+            name: "Blueberries",
+            keywords: ["fruit", "berry", "antioxidant", "healthy"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "kiwiFruit",
+            character: "🥝",
+            name: "Kiwi Fruit",
+            keywords: ["green", "fuzzy", "tart", "tropical"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "tomato",
+            character: "🍅",
+            name: "Tomato",
+            keywords: ["red", "vegetable", "salad", "sauce"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "olive",
+            character: "🫒",
+            name: "Olive",
+            keywords: ["mediterranean", "oil", "green", "salty"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "coconut",
+            character: "🥥",
+            name: "Coconut",
+            keywords: ["tropical", "hairy", "milk", "oil"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "avocado",
+            character: "🥑",
+            name: "Avocado",
+            keywords: ["green", "healthy", "guacamole", "toast"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "eggplant",
+            character: "🍆",
+            name: "Eggplant",
+            keywords: ["purple", "vegetable"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "potato",
+            character: "🥔",
+            name: "Potato",
+            keywords: ["vegetable", "brown", "starch", "spud"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "carrot",
+            character: "🥕",
+            name: "Carrot",
+            keywords: ["orange", "vegetable", "bunny", "healthy"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "earOfCorn",
+            character: "🌽",
+            name: "Ear Of Corn",
+            keywords: ["yellow", "vegetable", "cob", "maize"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "hotPepper",
+            character: "🌶️",
+            name: "Hot Pepper",
+            keywords: ["spicy", "chili", "red", "fire"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "bellPepper",
+            character: "🫑",
+            name: "Bell Pepper",
+            keywords: ["vegetable", "green", "capsicum"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "cucumber",
+            character: "🥒",
+            name: "Cucumber",
+            keywords: ["green", "vegetable", "salad", "pickle"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "leafyGreen",
+            character: "🥬",
+            name: "Leafy Green",
+            keywords: ["lettuce", "vegetable", "healthy", "salad"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "broccoli",
+            character: "🥦",
+            name: "Broccoli",
+            keywords: ["green", "vegetable", "healthy", "tree"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "garlic",
+            character: "🧄",
+            name: "Garlic",
+            keywords: ["flavor", "smell", "vampire", "bulb"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "onion",
+            character: "🧅",
+            name: "Onion",
+            keywords: ["vegetable", "cry", "layers", "smell"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "peanuts",
+            character: "🥜",
+            name: "Peanuts",
+            keywords: ["nuts", "allergy", "protein", "butter"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "beans",
+            character: "🫘",
+            name: "Beans",
+            keywords: ["legume", "protein", "vegetable"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "chestnut",
+            character: "🌰",
+            name: "Chestnut",
+            keywords: ["nut", "fall", "roasted", "brown"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "gingerRoot",
+            character: "🫚",
+            name: "Ginger Root",
+            keywords: ["spice", "flavor", "asian", "tea"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "peaPod",
+            character: "🫛",
+            name: "Pea Pod",
+            keywords: ["green", "vegetable", "pod"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "bread",
+            character: "🍞",
+            name: "Bread",
+            keywords: ["loaf", "toast", "wheat", "carbs"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "croissant",
+            character: "🥐",
+            name: "Croissant",
+            keywords: ["french", "pastry", "buttery", "breakfast"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "baguetteBread",
+            character: "🥖",
+            name: "Baguette Bread",
+            keywords: ["french", "long", "crispy"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "flatbread",
+            character: "🫓",
+            name: "Flatbread",
+            keywords: ["pita", "naan", "thin"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "pretzel",
+            character: "🥨",
+            name: "Pretzel",
+            keywords: ["twisted", "salty", "german", "snack"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "bagel",
+            character: "🥯",
+            name: "Bagel",
+            keywords: ["breakfast", "cream cheese", "round", "jewish"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "pancakes",
+            character: "🥞",
+            name: "Pancakes",
+            keywords: ["breakfast", "syrup", "stack", "fluffy"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "waffle",
+            character: "🧇",
+            name: "Waffle",
+            keywords: ["breakfast", "syrup", "grid", "belgian"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "cheeseWedge",
+            character: "🧀",
+            name: "Cheese Wedge",
+            keywords: ["dairy", "yellow", "swiss", "cheddar"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "meatOnBone",
+            character: "🍖",
+            name: "Meat On Bone",
+            keywords: ["carnivore", "bbq", "caveman", "steak"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "poultryLeg",
+            character: "🍗",
+            name: "Poultry Leg",
+            keywords: ["chicken", "turkey", "drumstick", "fried"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "cutOfMeat",
+            character: "🥩",
+            name: "Cut Of Meat",
+            keywords: ["steak", "beef", "red", "protein"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "bacon",
+            character: "🥓",
+            name: "Bacon",
+            keywords: ["breakfast", "crispy", "pork", "strips"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "hamburger",
+            character: "🍔",
+            name: "Hamburger",
+            keywords: ["burger", "fast food", "beef", "bun"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "frenchFries",
+            character: "🍟",
+            name: "French Fries",
+            keywords: ["fries", "fast food", "potato", "crispy"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "pizza",
+            character: "🍕",
+            name: "Pizza",
+            keywords: ["italian", "slice", "cheese", "pepperoni"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "hotDog",
+            character: "🌭",
+            name: "Hot Dog",
+            keywords: ["sausage", "fast food", "bun", "mustard"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "sandwich",
+            character: "🥪",
+            name: "Sandwich",
+            keywords: ["lunch", "bread", "sub", "deli"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "taco",
+            character: "🌮",
+            name: "Taco",
+            keywords: ["mexican", "tortilla", "meat", "salsa"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "burrito",
+            character: "🌯",
+            name: "Burrito",
+            keywords: ["mexican", "wrap", "beans", "rice"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "tamale",
+            character: "🫔",
+            name: "Tamale",
+            keywords: ["mexican", "corn", "wrapped", "masa"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "stuffedFlatbread",
+            character: "🥙",
+            name: "Stuffed Flatbread",
+            keywords: ["pita", "gyro", "kebab", "mediterranean"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "falafel",
+            character: "🧆",
+            name: "Falafel",
+            keywords: ["middle eastern", "chickpea", "fried", "vegetarian"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "egg",
+            character: "🥚",
+            name: "Egg",
+            keywords: ["breakfast", "protein", "chicken", "shell"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "cooking",
+            character: "🍳",
+            name: "Cooking",
+            keywords: ["frying", "egg", "breakfast", "pan"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "shallowPanOfFood",
+            character: "🥘",
+            name: "Shallow Pan Of Food",
+            keywords: ["paella", "skillet", "dinner", "spanish"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "potOfFood",
+            character: "🍲",
+            name: "Pot Of Food",
+            keywords: ["stew", "soup", "dinner", "cooking"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "fondue",
+            character: "🫕",
+            name: "Fondue",
+            keywords: ["cheese", "dip", "swiss", "melted"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "bowlWithSpoon",
+            character: "🥣",
+            name: "Bowl With Spoon",
+            keywords: ["cereal", "soup", "oatmeal", "breakfast"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "greenSalad",
+            character: "🥗",
+            name: "Green Salad",
+            keywords: ["healthy", "vegetables", "lettuce", "diet"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "popcorn",
+            character: "🍿",
+            name: "Popcorn",
+            keywords: ["movie", "snack", "kernels", "butter"],
+            category: .food(.vegetable)
+        ),
+        Emoji(
+            id: "butter",
+            character: "🧈",
+            name: "Butter",
+            keywords: ["dairy", "yellow", "spread", "creamy"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "salt",
+            character: "🧂",
+            name: "Salt",
+            keywords: ["seasoning", "shaker", "sodium", "flavor"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "cannedFood",
+            character: "🥫",
+            name: "Canned Food",
+            keywords: ["can", "soup", "preserved", "tin"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "bentoBox",
+            character: "🍱",
+            name: "Bento Box",
+            keywords: ["japanese", "lunch", "compartments", "packed"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "riceCracker",
+            character: "🍘",
+            name: "Rice Cracker",
+            keywords: ["japanese", "snack", "crispy", "seaweed"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "riceBall",
+            character: "🍙",
+            name: "Rice Ball",
+            keywords: ["onigiri", "japanese", "seaweed", "triangle"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "cookedRice",
+            character: "🍚",
+            name: "Cooked Rice",
+            keywords: ["white", "asian", "grain", "side"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "curryRice",
+            character: "🍛",
+            name: "Curry Rice",
+            keywords: ["indian", "spicy", "sauce", "asian"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "steamingBowl",
+            character: "🍜",
+            name: "Steaming Bowl",
+            keywords: ["ramen", "noodles", "hot", "soup"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "spaghetti",
+            character: "🍝",
+            name: "Spaghetti",
+            keywords: ["pasta", "italian", "noodles", "sauce"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "roastedSweetPotato",
+            character: "🍠",
+            name: "Roasted Sweet Potato",
+            keywords: ["japanese", "orange", "yam"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "oden",
+            character: "🍢",
+            name: "Oden",
+            keywords: ["japanese", "skewer", "fish cake", "soup"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "sushi",
+            character: "🍣",
+            name: "Sushi",
+            keywords: ["japanese", "raw fish", "rice", "wasabi"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "friedShrimp",
+            character: "🍤",
+            name: "Fried Shrimp",
+            keywords: ["tempura", "seafood", "crispy", "japanese"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "fishCakeWithSwirl",
+            character: "🍥",
+            name: "Fish Cake With Swirl",
+            keywords: ["naruto", "japanese", "pink", "ramen"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "moonCake",
+            character: "🥮",
+            name: "Moon Cake",
+            keywords: ["chinese", "pastry", "festival", "mid autumn"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "dango",
+            character: "🍡",
+            name: "Dango",
+            keywords: ["japanese", "skewer", "sweet", "mochi"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "dumpling",
+            character: "🥟",
+            name: "Dumpling",
+            keywords: ["asian", "gyoza", "potsticker", "filled"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "fortuneCookie",
+            character: "🥠",
+            name: "Fortune Cookie",
+            keywords: ["chinese", "crispy", "message", "lucky"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "takeoutBox",
+            character: "🥡",
+            name: "Takeout Box",
+            keywords: ["chinese", "container", "delivery", "leftovers"],
+            category: .food(.asian)
+        ),
+        Emoji(
+            id: "crab",
+            character: "🦀",
+            name: "Crab",
+            keywords: ["seafood", "claws", "shell", "ocean"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "lobster",
+            character: "🦞",
+            name: "Lobster",
+            keywords: ["seafood", "fancy", "claws", "red"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "shrimp",
+            character: "🦐",
+            name: "Shrimp",
+            keywords: ["seafood", "prawn", "pink", "ocean"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "squid",
+            character: "🦑",
+            name: "Squid",
+            keywords: ["seafood", "tentacles", "calamari", "ocean"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "oyster",
+            character: "🦪",
+            name: "Oyster",
+            keywords: ["seafood", "pearl", "shell", "raw"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "softIceCream",
+            character: "🍦",
+            name: "Soft Ice Cream",
+            keywords: ["cone", "sweet", "dessert", "cold"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "shavedIce",
+            character: "🍧",
+            name: "Shaved Ice",
+            keywords: ["snow cone", "cold", "summer", "syrup"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "iceCream",
+            character: "🍨",
+            name: "Ice Cream",
+            keywords: ["dessert", "sweet", "cold", "scoop"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "doughnut",
+            character: "🍩",
+            name: "Doughnut",
+            keywords: ["donut", "sweet", "fried", "glazed"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "cookie",
+            character: "🍪",
+            name: "Cookie",
+            keywords: ["biscuit", "sweet", "chocolate chip", "baked"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "birthdayCake",
+            character: "🎂",
+            name: "Birthday Cake",
+            keywords: ["celebration", "party", "candles", "sweet"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "shortcake",
+            character: "🍰",
+            name: "Shortcake",
+            keywords: ["dessert", "slice", "sweet", "frosting"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "cupcake",
+            character: "🧁",
+            name: "Cupcake",
+            keywords: ["muffin", "sweet", "frosting", "small"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "pie",
+            character: "🥧",
+            name: "Pie",
+            keywords: ["dessert", "apple", "pumpkin", "baked"],
+            category: .food(.fruit)
+        ),
+        Emoji(
+            id: "chocolateBar",
+            character: "🍫",
+            name: "Chocolate Bar",
+            keywords: ["candy", "sweet", "cocoa", "brown"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "candy",
+            character: "🍬",
+            name: "Candy",
+            keywords: ["sweet", "wrapped", "sugar"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "lollipop",
+            character: "🍭",
+            name: "Lollipop",
+            keywords: ["candy", "sweet", "stick", "sucker"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "custard",
+            character: "🍮",
+            name: "Custard",
+            keywords: ["pudding", "flan", "dessert", "sweet"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "honeyPot",
+            character: "🍯",
+            name: "Honey Pot",
+            keywords: ["sweet", "bee", "sticky", "golden"],
+            category: .food(.dessert)
+        ),
+        Emoji(
+            id: "babyBottle",
+            character: "🍼",
+            name: "Baby Bottle",
+            keywords: ["infant", "milk", "feeding", "nipple"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "glassOfMilk",
+            character: "🥛",
+            name: "Glass Of Milk",
+            keywords: ["dairy", "white", "calcium", "drink"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "hotBeverage",
+            character: "☕",
+            name: "Hot Beverage",
+            keywords: ["coffee", "tea", "morning", "caffeine"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "teapot",
+            character: "🫖",
+            name: "Teapot",
+            keywords: ["tea", "brewing", "hot", "ceramic"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "teacupWithoutHandle",
+            character: "🍵",
+            name: "Teacup Without Handle",
+            keywords: ["tea", "green", "japanese", "hot"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "sake",
+            character: "🍶",
+            name: "Sake",
+            keywords: ["japanese", "alcohol", "rice wine", "bottle"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "bottleWithPoppingCork",
+            character: "🍾",
+            name: "Bottle With Popping Cork",
+            keywords: ["champagne", "celebration", "party", "bubbly"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "wineGlass",
+            character: "🍷",
+            name: "Wine Glass",
+            keywords: ["red wine", "alcohol", "drink", "fancy"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "cocktailGlass",
+            character: "🍸",
+            name: "Cocktail Glass",
+            keywords: ["martini", "alcohol", "drink", "fancy"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "tropicalDrink",
+            character: "🍹",
+            name: "Tropical Drink",
+            keywords: ["beach", "vacation", "fruity", "umbrella"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "beerMug",
+            character: "🍺",
+            name: "Beer Mug",
+            keywords: ["alcohol", "drink", "foam", "pub"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "clinkingBeerMugs",
+            character: "🍻",
+            name: "Clinking Beer Mugs",
+            keywords: ["cheers", "celebration", "toast", "party"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "clinkingGlasses",
+            character: "🥂",
+            name: "Clinking Glasses",
+            keywords: ["cheers", "celebration", "toast", "champagne"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "tumblerGlass",
+            character: "🥃",
+            name: "Tumbler Glass",
+            keywords: ["whiskey", "bourbon", "alcohol", "rocks"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "pouringLiquid",
+            character: "🫗",
+            name: "Pouring Liquid",
+            keywords: ["drink", "water", "filling"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "cupWithStraw",
+            character: "🥤",
+            name: "Cup With Straw",
+            keywords: ["soda", "drink", "fast food", "beverage"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "bubbleTea",
+            character: "🧋",
+            name: "Bubble Tea",
+            keywords: ["boba", "taiwanese", "tapioca", "drink"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "beverageBox",
+            character: "🧃",
+            name: "Beverage Box",
+            keywords: ["juice box", "drink", "kids", "straw"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "mate",
+            character: "🧉",
+            name: "Mate",
+            keywords: ["yerba", "south american", "tea", "drink"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "ice",
+            character: "🧊",
+            name: "Ice",
+            keywords: ["cube", "cold", "frozen", "water"],
+            category: .food(.drink)
+        ),
+        Emoji(
+            id: "chopsticks",
+            character: "🥢",
+            name: "Chopsticks",
+            keywords: ["asian", "utensils", "eating", "sticks"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "forkAndKnifeWithPlate",
+            character: "🍽️",
+            name: "Fork And Knife With Plate",
+            keywords: ["dining", "meal", "restaurant", "utensils"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "forkAndKnife",
+            character: "🍴",
+            name: "Fork And Knife",
+            keywords: ["utensils", "eating", "cutlery", "dining"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "spoon",
+            character: "🥄",
+            name: "Spoon",
+            keywords: ["utensil", "eating", "soup", "silverware"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "kitchenKnife",
+            character: "🔪",
+            name: "Kitchen Knife",
+            keywords: ["cooking", "sharp", "cutting", "chef"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "jar",
+            character: "🫙",
+            name: "Jar",
+            keywords: ["container", "glass", "preserve", "storage"],
+            category: .food(.preparedFood)
+        ),
+        Emoji(
+            id: "amphora",
+            character: "🏺",
+            name: "Amphora",
+            keywords: ["ancient", "greek", "vase", "pottery"],
+            category: .food(.preparedFood)
+        )
     ]
 
     // MARK: - Activities Emojis
+
     static let activitiesEmojis: [Emoji] = [
-        Emoji(id: "jackOLantern", character: "🎃", name: "Jack O Lantern", keywords: ["halloween", "pumpkin", "scary", "october"], category: .activities(.celebration)),
-        Emoji(id: "christmasTree", character: "🎄", name: "Christmas Tree", keywords: ["holiday", "xmas", "december", "pine"], category: .activities(.celebration)),
-        Emoji(id: "fireworks", character: "🎆", name: "Fireworks", keywords: ["celebration", "new year", "fourth july", "explosion"], category: .activities(.celebration)),
-        Emoji(id: "sparkler", character: "🎇", name: "Sparkler", keywords: ["celebration", "handheld", "firework", "sparkle"], category: .activities(.celebration)),
-        Emoji(id: "firecracker", character: "🧨", name: "Firecracker", keywords: ["explosion", "bang", "dynamite", "celebration"], category: .activities(.celebration)),
-        Emoji(id: "sparkles", character: "✨", name: "Sparkles", keywords: ["glitter", "shine", "magic", "twinkle"], category: .activities(.celebration)),
-        Emoji(id: "balloon", character: "🎈", name: "Balloon", keywords: ["party", "celebration", "float", "helium"], category: .activities(.celebration)),
-        Emoji(id: "partyPopper", character: "🎉", name: "Party Popper", keywords: ["celebration", "confetti", "yay", "hooray"], category: .activities(.celebration)),
-        Emoji(id: "confettiBall", character: "🎊", name: "Confetti Ball", keywords: ["celebration", "party", "colorful", "festive"], category: .activities(.celebration)),
-        Emoji(id: "tanabataTree", character: "🎋", name: "Tanabata Tree", keywords: ["japanese", "festival", "wish", "bamboo"], category: .activities(.celebration)),
-        Emoji(id: "pineDecoration", character: "🎍", name: "Pine Decoration", keywords: ["japanese", "new year", "kadomatsu", "bamboo"], category: .activities(.celebration)),
-        Emoji(id: "japaneseDolls", character: "🎎", name: "Japanese Dolls", keywords: ["hina matsuri", "festival", "traditional"], category: .activities(.celebration)),
-        Emoji(id: "carpStreamer", character: "🎏", name: "Carp Streamer", keywords: ["japanese", "koinobori", "boys day", "windsock"], category: .activities(.celebration)),
-        Emoji(id: "windChime", character: "🎐", name: "Wind Chime", keywords: ["japanese", "bell", "summer", "sound"], category: .activities(.celebration)),
-        Emoji(id: "moonViewingCeremony", character: "🎑", name: "Moon Viewing Ceremony", keywords: ["japanese", "tsukimi", "harvest", "autumn"], category: .activities(.celebration)),
-        Emoji(id: "redEnvelope", character: "🧧", name: "Red Envelope", keywords: ["chinese", "lucky money", "new year", "hongbao"], category: .activities(.celebration)),
-        Emoji(id: "ribbon", character: "🎀", name: "Ribbon", keywords: ["bow", "gift", "decoration", "pink"], category: .activities(.celebration)),
-        Emoji(id: "wrappedGift", character: "🎁", name: "Wrapped Gift", keywords: ["present", "birthday", "christmas", "surprise"], category: .activities(.celebration)),
-        Emoji(id: "reminderRibbon", character: "🎗️", name: "Reminder Ribbon", keywords: ["awareness", "support", "cause", "charity"], category: .activities(.celebration)),
-        Emoji(id: "admissionTickets", character: "🎟️", name: "Admission Tickets", keywords: ["event", "movie", "concert", "entry"], category: .activities(.celebration)),
-        Emoji(id: "ticket", character: "🎫", name: "Ticket", keywords: ["event", "movie", "entry", "pass"], category: .activities(.celebration)),
-        Emoji(id: "militaryMedal", character: "🎖️", name: "Military Medal", keywords: ["award", "honor", "veteran", "service"], category: .activities(.sport)),
-        Emoji(id: "trophy", character: "🏆", name: "Trophy", keywords: ["award", "winner", "champion", "victory"], category: .activities(.sport)),
-        Emoji(id: "sportsMedal", character: "🏅", name: "Sports Medal", keywords: ["award", "winner", "gold", "achievement"], category: .activities(.sport)),
-        Emoji(id: "1stPlaceMedal", character: "🥇", name: "1St Place Medal", keywords: ["gold", "winner", "first", "champion"], category: .activities(.sport)),
-        Emoji(id: "2ndPlaceMedal", character: "🥈", name: "2Nd Place Medal", keywords: ["silver", "second", "runner up"], category: .activities(.sport)),
-        Emoji(id: "3rdPlaceMedal", character: "🥉", name: "3Rd Place Medal", keywords: ["bronze", "third", "podium"], category: .activities(.sport)),
-        Emoji(id: "soccerBall", character: "⚽", name: "Soccer Ball", keywords: ["football", "sport", "kick", "goal"], category: .activities(.sport)),
-        Emoji(id: "baseball", character: "⚾", name: "Baseball", keywords: ["sport", "bat", "pitch", "home run"], category: .activities(.sport)),
-        Emoji(id: "softball", character: "🥎", name: "Softball", keywords: ["sport", "bat", "yellow"], category: .activities(.sport)),
-        Emoji(id: "basketball", character: "🏀", name: "Basketball", keywords: ["sport", "hoop", "dunk", "orange"], category: .activities(.sport)),
-        Emoji(id: "volleyball", character: "🏐", name: "Volleyball", keywords: ["sport", "beach", "net", "spike"], category: .activities(.sport)),
-        Emoji(id: "americanFootball", character: "🏈", name: "American Football", keywords: ["sport", "nfl", "touchdown", "superbowl"], category: .activities(.sport)),
-        Emoji(id: "rugbyFootball", character: "🏉", name: "Rugby Football", keywords: ["sport", "tackle", "scrum"], category: .activities(.sport)),
-        Emoji(id: "tennis", character: "🎾", name: "Tennis", keywords: ["sport", "racket", "court", "serve"], category: .activities(.sport)),
-        Emoji(id: "flyingDisc", character: "🥏", name: "Flying Disc", keywords: ["frisbee", "sport", "throw", "catch"], category: .activities(.sport)),
-        Emoji(id: "bowling", character: "🎳", name: "Bowling", keywords: ["sport", "pins", "strike", "alley"], category: .activities(.sport)),
-        Emoji(id: "cricketGame", character: "🏏", name: "Cricket Game", keywords: ["sport", "bat", "wicket", "british"], category: .activities(.sport)),
-        Emoji(id: "fieldHockey", character: "🏑", name: "Field Hockey", keywords: ["sport", "stick", "ball"], category: .activities(.sport)),
-        Emoji(id: "iceHockey", character: "🏒", name: "Ice Hockey", keywords: ["sport", "puck", "stick", "rink"], category: .activities(.sport)),
-        Emoji(id: "lacrosse", character: "🥍", name: "Lacrosse", keywords: ["sport", "stick", "net"], category: .activities(.sport)),
-        Emoji(id: "pingPong", character: "🏓", name: "Ping Pong", keywords: ["table tennis", "sport", "paddle"], category: .activities(.sport)),
-        Emoji(id: "badminton", character: "🏸", name: "Badminton", keywords: ["sport", "racket", "shuttlecock", "net"], category: .activities(.sport)),
-        Emoji(id: "boxingGlove", character: "🥊", name: "Boxing Glove", keywords: ["sport", "fight", "punch", "red"], category: .activities(.sport)),
-        Emoji(id: "martialArtsUniform", character: "🥋", name: "Martial Arts Uniform", keywords: ["karate", "judo", "gi", "belt"], category: .activities(.sport)),
-        Emoji(id: "goalNet", character: "🥅", name: "Goal Net", keywords: ["sport", "hockey", "soccer", "score"], category: .activities(.sport)),
-        Emoji(id: "flagInHole", character: "⛳", name: "Flag In Hole", keywords: ["golf", "sport", "green", "putt"], category: .activities(.sport)),
-        Emoji(id: "iceSkate", character: "⛸️", name: "Ice Skate", keywords: ["winter", "sport", "skating", "blade"], category: .activities(.sport)),
-        Emoji(id: "fishingPole", character: "🎣", name: "Fishing Pole", keywords: ["fishing", "rod", "hobby", "catch"], category: .activities(.sport)),
-        Emoji(id: "divingMask", character: "🤿", name: "Diving Mask", keywords: ["scuba", "snorkel", "underwater", "ocean"], category: .activities(.sport)),
-        Emoji(id: "runningShirt", character: "🎽", name: "Running Shirt", keywords: ["sport", "marathon", "jersey", "athletic"], category: .activities(.sport)),
-        Emoji(id: "skis", character: "🎿", name: "Skis", keywords: ["winter", "sport", "snow", "downhill"], category: .activities(.sport)),
-        Emoji(id: "sled", character: "🛷", name: "Sled", keywords: ["winter", "snow", "sledding", "toboggan"], category: .activities(.sport)),
-        Emoji(id: "curlingStone", character: "🥌", name: "Curling Stone", keywords: ["winter", "sport", "ice", "sweep"], category: .activities(.sport)),
-        Emoji(id: "bullseye", character: "🎯", name: "Bullseye", keywords: ["target", "dart", "accuracy", "aim"], category: .activities(.game)),
-        Emoji(id: "yoYo", character: "🪀", name: "Yo Yo", keywords: ["toy", "string", "trick", "spin"], category: .activities(.hobby)),
-        Emoji(id: "kite", character: "🪁", name: "Kite", keywords: ["fly", "wind", "string", "outdoor"], category: .activities(.hobby)),
-        Emoji(id: "waterPistol", character: "🔫", name: "Water Pistol", keywords: ["toy", "squirt gun", "spray", "summer"], category: .activities(.hobby)),
-        Emoji(id: "pool8Ball", character: "🎱", name: "Pool8 Ball", keywords: ["billiards", "eight ball", "game", "black"], category: .activities(.game)),
-        Emoji(id: "crystalBall", character: "🔮", name: "Crystal Ball", keywords: ["fortune", "psychic", "future", "magic"], category: .activities(.hobby)),
-        Emoji(id: "magicWand", character: "🪄", name: "Magic Wand", keywords: ["wizard", "spell", "magic", "sparkle"], category: .activities(.hobby)),
-        Emoji(id: "videoGame", character: "🎮", name: "Video Game", keywords: ["gaming", "controller", "console", "play"], category: .activities(.game)),
-        Emoji(id: "joystick", character: "🕹️", name: "Joystick", keywords: ["gaming", "arcade", "controller", "retro"], category: .activities(.game)),
-        Emoji(id: "slotMachine", character: "🎰", name: "Slot Machine", keywords: ["gambling", "casino", "jackpot", "vegas"], category: .activities(.celebration)),
-        Emoji(id: "gameDie", character: "🎲", name: "Game Die", keywords: ["dice", "roll", "random", "board game"], category: .activities(.game)),
-        Emoji(id: "puzzlePiece", character: "🧩", name: "Puzzle Piece", keywords: ["jigsaw", "game", "fit", "autism"], category: .activities(.game)),
-        Emoji(id: "teddyBear", character: "🧸", name: "Teddy Bear", keywords: ["toy", "stuffed animal", "cute", "childhood"], category: .activities(.hobby)),
-        Emoji(id: "piñata", character: "🪅", name: "Piñata", keywords: ["party", "candy", "mexican", "birthday"], category: .activities(.hobby)),
-        Emoji(id: "mirrorBall", character: "🪩", name: "Mirror Ball", keywords: ["disco", "dance", "party", "sparkle"], category: .activities(.hobby)),
-        Emoji(id: "nestingDolls", character: "🪆", name: "Nesting Dolls", keywords: ["russian", "matryoshka", "toy", "stacking"], category: .activities(.hobby)),
-        Emoji(id: "spadeSuit", character: "♠️", name: "Spade Suit", keywords: ["cards", "poker", "playing", "black"], category: .activities(.game)),
-        Emoji(id: "heartSuit", character: "♥️", name: "Heart Suit", keywords: ["cards", "poker", "playing", "red"], category: .activities(.game)),
-        Emoji(id: "diamondSuit", character: "♦️", name: "Diamond Suit", keywords: ["cards", "poker", "playing", "red"], category: .activities(.game)),
-        Emoji(id: "clubSuit", character: "♣️", name: "Club Suit", keywords: ["cards", "poker", "playing", "black"], category: .activities(.game)),
-        Emoji(id: "chessPawn", character: "♟️", name: "Chess Pawn", keywords: ["chess", "strategy", "game", "piece"], category: .activities(.game)),
-        Emoji(id: "joker", character: "🃏", name: "Joker", keywords: ["cards", "wild", "playing", "jester"], category: .activities(.game)),
-        Emoji(id: "mahjongRedDragon", character: "🀄", name: "Mahjong Red Dragon", keywords: ["tile", "game", "chinese"], category: .activities(.game)),
-        Emoji(id: "flowerPlayingCards", character: "🎴", name: "Flower Playing Cards", keywords: ["japanese", "hanafuda", "game"], category: .activities(.game)),
-        Emoji(id: "performingArts", character: "🎭", name: "Performing Arts", keywords: ["theater", "drama", "masks", "comedy tragedy"], category: .activities(.art)),
-        Emoji(id: "framedPicture", character: "🖼️", name: "Framed Picture", keywords: ["art", "painting", "museum", "gallery"], category: .activities(.art)),
-        Emoji(id: "artistPalette", character: "🎨", name: "Artist Palette", keywords: ["art", "painting", "colors", "creative"], category: .activities(.art)),
-        Emoji(id: "thread", character: "🧵", name: "Thread", keywords: ["sewing", "spool", "craft", "needle"], category: .activities(.art)),
-        Emoji(id: "sewingNeedle", character: "🪡", name: "Sewing Needle", keywords: ["sewing", "craft", "thread", "sharp"], category: .activities(.art)),
-        Emoji(id: "yarn", character: "🧶", name: "Yarn", keywords: ["knitting", "craft", "wool", "crochet"], category: .activities(.art)),
-        Emoji(id: "knot", character: "🪢", name: "Knot", keywords: ["rope", "tie", "tied", "sailor"], category: .activities(.art))
+        Emoji(
+            id: "jackOLantern",
+            character: "🎃",
+            name: "Jack O Lantern",
+            keywords: ["halloween", "pumpkin", "scary", "october"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "christmasTree",
+            character: "🎄",
+            name: "Christmas Tree",
+            keywords: ["holiday", "xmas", "december", "pine"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "fireworks",
+            character: "🎆",
+            name: "Fireworks",
+            keywords: ["celebration", "new year", "fourth july", "explosion"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "sparkler",
+            character: "🎇",
+            name: "Sparkler",
+            keywords: ["celebration", "handheld", "firework", "sparkle"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "firecracker",
+            character: "🧨",
+            name: "Firecracker",
+            keywords: ["explosion", "bang", "dynamite", "celebration"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "sparkles",
+            character: "✨",
+            name: "Sparkles",
+            keywords: ["glitter", "shine", "magic", "twinkle"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "balloon",
+            character: "🎈",
+            name: "Balloon",
+            keywords: ["party", "celebration", "float", "helium"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "partyPopper",
+            character: "🎉",
+            name: "Party Popper",
+            keywords: ["celebration", "confetti", "yay", "hooray"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "confettiBall",
+            character: "🎊",
+            name: "Confetti Ball",
+            keywords: ["celebration", "party", "colorful", "festive"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "tanabataTree",
+            character: "🎋",
+            name: "Tanabata Tree",
+            keywords: ["japanese", "festival", "wish", "bamboo"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "pineDecoration",
+            character: "🎍",
+            name: "Pine Decoration",
+            keywords: ["japanese", "new year", "kadomatsu", "bamboo"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "japaneseDolls",
+            character: "🎎",
+            name: "Japanese Dolls",
+            keywords: ["hina matsuri", "festival", "traditional"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "carpStreamer",
+            character: "🎏",
+            name: "Carp Streamer",
+            keywords: ["japanese", "koinobori", "boys day", "windsock"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "windChime",
+            character: "🎐",
+            name: "Wind Chime",
+            keywords: ["japanese", "bell", "summer", "sound"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "moonViewingCeremony",
+            character: "🎑",
+            name: "Moon Viewing Ceremony",
+            keywords: ["japanese", "tsukimi", "harvest", "autumn"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "redEnvelope",
+            character: "🧧",
+            name: "Red Envelope",
+            keywords: ["chinese", "lucky money", "new year", "hongbao"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "ribbon",
+            character: "🎀",
+            name: "Ribbon",
+            keywords: ["bow", "gift", "decoration", "pink"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "wrappedGift",
+            character: "🎁",
+            name: "Wrapped Gift",
+            keywords: ["present", "birthday", "christmas", "surprise"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "reminderRibbon",
+            character: "🎗️",
+            name: "Reminder Ribbon",
+            keywords: ["awareness", "support", "cause", "charity"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "admissionTickets",
+            character: "🎟️",
+            name: "Admission Tickets",
+            keywords: ["event", "movie", "concert", "entry"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "ticket",
+            character: "🎫",
+            name: "Ticket",
+            keywords: ["event", "movie", "entry", "pass"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "militaryMedal",
+            character: "🎖️",
+            name: "Military Medal",
+            keywords: ["award", "honor", "veteran", "service"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "trophy",
+            character: "🏆",
+            name: "Trophy",
+            keywords: ["award", "winner", "champion", "victory"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "sportsMedal",
+            character: "🏅",
+            name: "Sports Medal",
+            keywords: ["award", "winner", "gold", "achievement"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "1stPlaceMedal",
+            character: "🥇",
+            name: "1St Place Medal",
+            keywords: ["gold", "winner", "first", "champion"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "2ndPlaceMedal",
+            character: "🥈",
+            name: "2Nd Place Medal",
+            keywords: ["silver", "second", "runner up"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "3rdPlaceMedal",
+            character: "🥉",
+            name: "3Rd Place Medal",
+            keywords: ["bronze", "third", "podium"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "soccerBall",
+            character: "⚽",
+            name: "Soccer Ball",
+            keywords: ["football", "sport", "kick", "goal"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "baseball",
+            character: "⚾",
+            name: "Baseball",
+            keywords: ["sport", "bat", "pitch", "home run"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "softball",
+            character: "🥎",
+            name: "Softball",
+            keywords: ["sport", "bat", "yellow"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "basketball",
+            character: "🏀",
+            name: "Basketball",
+            keywords: ["sport", "hoop", "dunk", "orange"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "volleyball",
+            character: "🏐",
+            name: "Volleyball",
+            keywords: ["sport", "beach", "net", "spike"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "americanFootball",
+            character: "🏈",
+            name: "American Football",
+            keywords: ["sport", "nfl", "touchdown", "superbowl"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "rugbyFootball",
+            character: "🏉",
+            name: "Rugby Football",
+            keywords: ["sport", "tackle", "scrum"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "tennis",
+            character: "🎾",
+            name: "Tennis",
+            keywords: ["sport", "racket", "court", "serve"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "flyingDisc",
+            character: "🥏",
+            name: "Flying Disc",
+            keywords: ["frisbee", "sport", "throw", "catch"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "bowling",
+            character: "🎳",
+            name: "Bowling",
+            keywords: ["sport", "pins", "strike", "alley"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "cricketGame",
+            character: "🏏",
+            name: "Cricket Game",
+            keywords: ["sport", "bat", "wicket", "british"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "fieldHockey",
+            character: "🏑",
+            name: "Field Hockey",
+            keywords: ["sport", "stick", "ball"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "iceHockey",
+            character: "🏒",
+            name: "Ice Hockey",
+            keywords: ["sport", "puck", "stick", "rink"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "lacrosse",
+            character: "🥍",
+            name: "Lacrosse",
+            keywords: ["sport", "stick", "net"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "pingPong",
+            character: "🏓",
+            name: "Ping Pong",
+            keywords: ["table tennis", "sport", "paddle"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "badminton",
+            character: "🏸",
+            name: "Badminton",
+            keywords: ["sport", "racket", "shuttlecock", "net"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "boxingGlove",
+            character: "🥊",
+            name: "Boxing Glove",
+            keywords: ["sport", "fight", "punch", "red"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "martialArtsUniform",
+            character: "🥋",
+            name: "Martial Arts Uniform",
+            keywords: ["karate", "judo", "gi", "belt"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "goalNet",
+            character: "🥅",
+            name: "Goal Net",
+            keywords: ["sport", "hockey", "soccer", "score"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "flagInHole",
+            character: "⛳",
+            name: "Flag In Hole",
+            keywords: ["golf", "sport", "green", "putt"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "iceSkate",
+            character: "⛸️",
+            name: "Ice Skate",
+            keywords: ["winter", "sport", "skating", "blade"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "fishingPole",
+            character: "🎣",
+            name: "Fishing Pole",
+            keywords: ["fishing", "rod", "hobby", "catch"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "divingMask",
+            character: "🤿",
+            name: "Diving Mask",
+            keywords: ["scuba", "snorkel", "underwater", "ocean"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "runningShirt",
+            character: "🎽",
+            name: "Running Shirt",
+            keywords: ["sport", "marathon", "jersey", "athletic"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "skis",
+            character: "🎿",
+            name: "Skis",
+            keywords: ["winter", "sport", "snow", "downhill"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "sled",
+            character: "🛷",
+            name: "Sled",
+            keywords: ["winter", "snow", "sledding", "toboggan"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "curlingStone",
+            character: "🥌",
+            name: "Curling Stone",
+            keywords: ["winter", "sport", "ice", "sweep"],
+            category: .activities(.sport)
+        ),
+        Emoji(
+            id: "bullseye",
+            character: "🎯",
+            name: "Bullseye",
+            keywords: ["target", "dart", "accuracy", "aim"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "yoYo",
+            character: "🪀",
+            name: "Yo Yo",
+            keywords: ["toy", "string", "trick", "spin"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "kite",
+            character: "🪁",
+            name: "Kite",
+            keywords: ["fly", "wind", "string", "outdoor"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "waterPistol",
+            character: "🔫",
+            name: "Water Pistol",
+            keywords: ["toy", "squirt gun", "spray", "summer"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "pool8Ball",
+            character: "🎱",
+            name: "Pool8 Ball",
+            keywords: ["billiards", "eight ball", "game", "black"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "crystalBall",
+            character: "🔮",
+            name: "Crystal Ball",
+            keywords: ["fortune", "psychic", "future", "magic"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "magicWand",
+            character: "🪄",
+            name: "Magic Wand",
+            keywords: ["wizard", "spell", "magic", "sparkle"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "videoGame",
+            character: "🎮",
+            name: "Video Game",
+            keywords: ["gaming", "controller", "console", "play"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "joystick",
+            character: "🕹️",
+            name: "Joystick",
+            keywords: ["gaming", "arcade", "controller", "retro"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "slotMachine",
+            character: "🎰",
+            name: "Slot Machine",
+            keywords: ["gambling", "casino", "jackpot", "vegas"],
+            category: .activities(.celebration)
+        ),
+        Emoji(
+            id: "gameDie",
+            character: "🎲",
+            name: "Game Die",
+            keywords: ["dice", "roll", "random", "board game"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "puzzlePiece",
+            character: "🧩",
+            name: "Puzzle Piece",
+            keywords: ["jigsaw", "game", "fit", "autism"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "teddyBear",
+            character: "🧸",
+            name: "Teddy Bear",
+            keywords: ["toy", "stuffed animal", "cute", "childhood"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "piñata",
+            character: "🪅",
+            name: "Piñata",
+            keywords: ["party", "candy", "mexican", "birthday"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "mirrorBall",
+            character: "🪩",
+            name: "Mirror Ball",
+            keywords: ["disco", "dance", "party", "sparkle"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "nestingDolls",
+            character: "🪆",
+            name: "Nesting Dolls",
+            keywords: ["russian", "matryoshka", "toy", "stacking"],
+            category: .activities(.hobby)
+        ),
+        Emoji(
+            id: "spadeSuit",
+            character: "♠️",
+            name: "Spade Suit",
+            keywords: ["cards", "poker", "playing", "black"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "heartSuit",
+            character: "♥️",
+            name: "Heart Suit",
+            keywords: ["cards", "poker", "playing", "red"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "diamondSuit",
+            character: "♦️",
+            name: "Diamond Suit",
+            keywords: ["cards", "poker", "playing", "red"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "clubSuit",
+            character: "♣️",
+            name: "Club Suit",
+            keywords: ["cards", "poker", "playing", "black"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "chessPawn",
+            character: "♟️",
+            name: "Chess Pawn",
+            keywords: ["chess", "strategy", "game", "piece"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "joker",
+            character: "🃏",
+            name: "Joker",
+            keywords: ["cards", "wild", "playing", "jester"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "mahjongRedDragon",
+            character: "🀄",
+            name: "Mahjong Red Dragon",
+            keywords: ["tile", "game", "chinese"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "flowerPlayingCards",
+            character: "🎴",
+            name: "Flower Playing Cards",
+            keywords: ["japanese", "hanafuda", "game"],
+            category: .activities(.game)
+        ),
+        Emoji(
+            id: "performingArts",
+            character: "🎭",
+            name: "Performing Arts",
+            keywords: ["theater", "drama", "masks", "comedy tragedy"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "framedPicture",
+            character: "🖼️",
+            name: "Framed Picture",
+            keywords: ["art", "painting", "museum", "gallery"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "artistPalette",
+            character: "🎨",
+            name: "Artist Palette",
+            keywords: ["art", "painting", "colors", "creative"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "thread",
+            character: "🧵",
+            name: "Thread",
+            keywords: ["sewing", "spool", "craft", "needle"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "sewingNeedle",
+            character: "🪡",
+            name: "Sewing Needle",
+            keywords: ["sewing", "craft", "thread", "sharp"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "yarn",
+            character: "🧶",
+            name: "Yarn",
+            keywords: ["knitting", "craft", "wool", "crochet"],
+            category: .activities(.art)
+        ),
+        Emoji(
+            id: "knot",
+            character: "🪢",
+            name: "Knot",
+            keywords: ["rope", "tie", "tied", "sailor"],
+            category: .activities(.art)
+        )
     ]
 
     // MARK: - Travel Emojis
+
     static let travelEmojis: [Emoji] = [
-        Emoji(id: "globeShowingEuropeAfrica", character: "🌍", name: "Globe Showing Europe Africa", keywords: ["world", "earth", "planet", "international"], category: .travel(.airVehicle)),
-        Emoji(id: "globeShowingAmericas", character: "🌎", name: "Globe Showing Americas", keywords: ["world", "earth", "planet", "international"], category: .travel(.airVehicle)),
-        Emoji(id: "globeShowingAsiaAustralia", character: "🌏", name: "Globe Showing Asia Australia", keywords: ["world", "earth", "planet", "international"], category: .travel(.airVehicle)),
-        Emoji(id: "globeWithMeridians", character: "🌐", name: "Globe With Meridians", keywords: ["world", "internet", "web", "international"], category: .travel(.sky)),
-        Emoji(id: "worldMap", character: "🗺️", name: "World Map", keywords: ["geography", "atlas", "navigation", "countries"], category: .travel(.sky)),
-        Emoji(id: "mapOfJapan", character: "🗾", name: "Map Of Japan", keywords: ["japanese", "country", "asia"], category: .travel(.sky)),
-        Emoji(id: "compass", character: "🧭", name: "Compass", keywords: ["navigation", "direction", "north", "orient"], category: .travel(.sign)),
-        Emoji(id: "snowCappedMountain", character: "🏔️", name: "Snow Capped Mountain", keywords: ["peak", "summit", "alpine", "winter"], category: .travel(.nature)),
-        Emoji(id: "mountain", character: "⛰️", name: "Mountain", keywords: ["peak", "hiking", "nature", "climb"], category: .travel(.nature)),
-        Emoji(id: "volcano", character: "🌋", name: "Volcano", keywords: ["eruption", "lava", "magma", "hot"], category: .travel(.nature)),
-        Emoji(id: "mountFuji", character: "🗻", name: "Mount Fuji", keywords: ["japan", "mountain", "snow", "iconic"], category: .travel(.nature)),
-        Emoji(id: "camping", character: "🏕️", name: "Camping", keywords: ["tent", "outdoor", "nature", "hiking"], category: .travel(.nature)),
-        Emoji(id: "beachWithUmbrella", character: "🏖️", name: "Beach With Umbrella", keywords: ["vacation", "sand", "ocean", "relax"], category: .travel(.nature)),
-        Emoji(id: "desert", character: "🏜️", name: "Desert", keywords: ["sand", "hot", "dry", "cactus"], category: .travel(.nature)),
-        Emoji(id: "desertIsland", character: "🏝️", name: "Desert Island", keywords: ["tropical", "beach", "palm", "paradise"], category: .travel(.nature)),
-        Emoji(id: "nationalPark", character: "🏞️", name: "National Park", keywords: ["nature", "scenic", "outdoor", "protected"], category: .travel(.nature)),
-        Emoji(id: "stadium", character: "🏟️", name: "Stadium", keywords: ["sports", "arena", "large", "event"], category: .travel(.building)),
-        Emoji(id: "classicalBuilding", character: "🏛️", name: "Classical Building", keywords: ["museum", "greek", "columns", "government"], category: .travel(.building)),
-        Emoji(id: "buildingConstruction", character: "🏗️", name: "Building Construction", keywords: ["crane", "work", "development", "site"], category: .travel(.building)),
-        Emoji(id: "brick", character: "🧱", name: "Brick", keywords: ["building", "wall", "construction", "red"], category: .travel(.building)),
-        Emoji(id: "rock", character: "🪨", name: "Rock", keywords: ["stone", "boulder", "geology"], category: .travel(.nature)),
-        Emoji(id: "wood", character: "🪵", name: "Wood", keywords: ["log", "timber", "tree", "lumber"], category: .travel(.nature)),
-        Emoji(id: "hut", character: "🛖", name: "Hut", keywords: ["primitive", "shelter", "simple", "thatched"], category: .travel(.building)),
-        Emoji(id: "houses", character: "🏘️", name: "Houses", keywords: ["neighborhood", "suburb", "residential", "homes"], category: .travel(.building)),
-        Emoji(id: "derelictHouse", character: "🏚️", name: "Derelict House", keywords: ["abandoned", "haunted", "old", "broken"], category: .travel(.building)),
-        Emoji(id: "house", character: "🏠", name: "House", keywords: ["home", "building", "residence"], category: .travel(.building)),
-        Emoji(id: "houseWithGarden", character: "🏡", name: "House With Garden", keywords: ["home", "suburbs", "yard", "trees"], category: .travel(.building)),
-        Emoji(id: "officeBuilding", character: "🏢", name: "Office Building", keywords: ["work", "business", "corporate", "skyscraper"], category: .travel(.building)),
-        Emoji(id: "japanesePostOffice", character: "🏣", name: "Japanese Post Office", keywords: ["mail", "japan", "building"], category: .travel(.building)),
-        Emoji(id: "postOffice", character: "🏤", name: "Post Office", keywords: ["mail", "letter", "package", "building"], category: .travel(.building)),
-        Emoji(id: "hospital", character: "🏥", name: "Hospital", keywords: ["medical", "doctor", "emergency", "health"], category: .travel(.building)),
-        Emoji(id: "bank", character: "🏦", name: "Bank", keywords: ["money", "finance", "atm", "building"], category: .travel(.building)),
-        Emoji(id: "hotel", character: "🏨", name: "Hotel", keywords: ["lodging", "accommodation", "vacation", "stay"], category: .travel(.building)),
-        Emoji(id: "loveHotel", character: "🏩", name: "Love Hotel", keywords: ["japanese", "romantic", "adults", "heart"], category: .travel(.building)),
-        Emoji(id: "convenienceStore", character: "🏪", name: "Convenience Store", keywords: ["shop", "24 hour", "snacks", "quick"], category: .travel(.building)),
-        Emoji(id: "school", character: "🏫", name: "School", keywords: ["education", "students", "building", "learn"], category: .travel(.building)),
-        Emoji(id: "departmentStore", character: "🏬", name: "Department Store", keywords: ["shopping", "mall", "retail", "building"], category: .travel(.building)),
-        Emoji(id: "factory", character: "🏭", name: "Factory", keywords: ["industrial", "manufacturing", "smoke", "production"], category: .travel(.building)),
-        Emoji(id: "japaneseCastle", character: "🏯", name: "Japanese Castle", keywords: ["japan", "historic", "pagoda", "fortress"], category: .travel(.building)),
-        Emoji(id: "castle", character: "🏰", name: "Castle", keywords: ["medieval", "fortress", "kingdom", "fairy tale"], category: .travel(.building)),
-        Emoji(id: "wedding", character: "💒", name: "Wedding", keywords: ["marriage", "chapel", "ceremony", "church"], category: .travel(.religious)),
-        Emoji(id: "tokyoTower", character: "🗼", name: "Tokyo Tower", keywords: ["japan", "landmark", "red", "tall"], category: .travel(.building)),
-        Emoji(id: "statueOfLiberty", character: "🗽", name: "Statue Of Liberty", keywords: ["new york", "america", "freedom", "usa"], category: .travel(.building)),
-        Emoji(id: "church", character: "⛪", name: "Church", keywords: ["religion", "christian", "worship", "building"], category: .travel(.religious)),
-        Emoji(id: "mosque", character: "🕌", name: "Mosque", keywords: ["islam", "muslim", "worship", "dome"], category: .travel(.religious)),
-        Emoji(id: "hinduTemple", character: "🛕", name: "Hindu Temple", keywords: ["india", "religion", "worship", "building"], category: .travel(.religious)),
-        Emoji(id: "synagogue", character: "🕍", name: "Synagogue", keywords: ["jewish", "religion", "worship", "temple"], category: .travel(.religious)),
-        Emoji(id: "shintoShrine", character: "⛩️", name: "Shinto Shrine", keywords: ["japanese", "torii", "gate", "red"], category: .travel(.religious)),
-        Emoji(id: "kaaba", character: "🕋", name: "Kaaba", keywords: ["mecca", "islam", "muslim", "pilgrimage"], category: .travel(.religious)),
-        Emoji(id: "fountain", character: "⛲", name: "Fountain", keywords: ["water", "park", "decorative", "spray"], category: .travel(.building)),
-        Emoji(id: "tent", character: "⛺", name: "Tent", keywords: ["camping", "outdoor", "shelter", "sleep"], category: .travel(.nature)),
-        Emoji(id: "foggy", character: "🌁", name: "Foggy", keywords: ["mist", "bridge", "golden gate", "visibility"], category: .travel(.scene)),
-        Emoji(id: "nightWithStars", character: "🌃", name: "Night With Stars", keywords: ["city", "evening", "skyline", "dark"], category: .travel(.scene)),
-        Emoji(id: "cityscape", character: "🏙️", name: "Cityscape", keywords: ["urban", "buildings", "skyline", "downtown"], category: .travel(.scene)),
-        Emoji(id: "sunriseOverMountains", character: "🌄", name: "Sunrise Over Mountains", keywords: ["morning", "dawn", "scenic", "peaks"], category: .travel(.nature)),
-        Emoji(id: "sunrise", character: "🌅", name: "Sunrise", keywords: ["morning", "dawn", "ocean", "sky"], category: .travel(.scene)),
-        Emoji(id: "cityscapeAtDusk", character: "🌆", name: "Cityscape At Dusk", keywords: ["evening", "sunset", "urban", "twilight"], category: .travel(.scene)),
-        Emoji(id: "sunset", character: "🌇", name: "Sunset", keywords: ["evening", "dusk", "orange", "sky"], category: .travel(.scene)),
-        Emoji(id: "bridgeAtNight", character: "🌉", name: "Bridge At Night", keywords: ["lights", "city", "river", "evening"], category: .travel(.scene)),
-        Emoji(id: "hotSprings", character: "♨️", name: "Hot Springs", keywords: ["japanese", "onsen", "spa", "relax"], category: .travel(.scene)),
-        Emoji(id: "carouselHorse", character: "🎠", name: "Carousel Horse", keywords: ["merry go round", "ride", "fair", "amusement"], category: .travel(.scene)),
-        Emoji(id: "playgroundSlide", character: "🛝", name: "Playground Slide", keywords: ["kids", "park", "play", "children"], category: .travel(.scene)),
-        Emoji(id: "ferrisWheel", character: "🎡", name: "Ferris Wheel", keywords: ["amusement park", "fair", "ride", "carnival"], category: .travel(.scene)),
-        Emoji(id: "rollerCoaster", character: "🎢", name: "Roller Coaster", keywords: ["amusement park", "thrill", "ride", "fun"], category: .travel(.scene)),
-        Emoji(id: "barberPole", character: "💈", name: "Barber Pole", keywords: ["haircut", "salon", "shop", "stripes"], category: .travel(.scene)),
-        Emoji(id: "circusTent", character: "🎪", name: "Circus Tent", keywords: ["carnival", "big top", "show", "entertainment"], category: .travel(.nature)),
-        Emoji(id: "locomotive", character: "🚂", name: "Locomotive", keywords: ["steam", "train", "railroad", "engine"], category: .travel(.landVehicle)),
-        Emoji(id: "railwayCar", character: "🚃", name: "Railway Car", keywords: ["train", "passenger", "transit"], category: .travel(.landVehicle)),
-        Emoji(id: "highSpeedTrain", character: "🚄", name: "High Speed Train", keywords: ["fast", "bullet", "japan", "shinkansen"], category: .travel(.landVehicle)),
-        Emoji(id: "bulletTrain", character: "🚅", name: "Bullet Train", keywords: ["fast", "japan", "shinkansen", "speed"], category: .travel(.landVehicle)),
-        Emoji(id: "train", character: "🚆", name: "Train", keywords: ["railroad", "transit", "commute"], category: .travel(.landVehicle)),
-        Emoji(id: "metro", character: "🚇", name: "Metro", keywords: ["subway", "underground", "transit", "tube"], category: .travel(.landVehicle)),
-        Emoji(id: "lightRail", character: "🚈", name: "Light Rail", keywords: ["transit", "tram", "commute"], category: .travel(.landVehicle)),
-        Emoji(id: "station", character: "🚉", name: "Station", keywords: ["train", "platform", "transit", "stop"], category: .travel(.landVehicle)),
-        Emoji(id: "tram", character: "🚊", name: "Tram", keywords: ["streetcar", "trolley", "transit"], category: .travel(.landVehicle)),
-        Emoji(id: "monorail", character: "🚝", name: "Monorail", keywords: ["transit", "train", "single rail"], category: .travel(.landVehicle)),
-        Emoji(id: "mountainRailway", character: "🚞", name: "Mountain Railway", keywords: ["funicular", "scenic", "steep"], category: .travel(.nature)),
-        Emoji(id: "tramCar", character: "🚋", name: "Tram Car", keywords: ["streetcar", "transit", "trolley"], category: .travel(.landVehicle)),
-        Emoji(id: "bus", character: "🚌", name: "Bus", keywords: ["transit", "public", "transport", "vehicle"], category: .travel(.landVehicle)),
-        Emoji(id: "oncomingBus", character: "🚍", name: "Oncoming Bus", keywords: ["transit", "vehicle", "front"], category: .travel(.landVehicle)),
-        Emoji(id: "trolleybus", character: "🚎", name: "Trolleybus", keywords: ["electric", "bus", "transit"], category: .travel(.landVehicle)),
-        Emoji(id: "minibus", character: "🚐", name: "Minibus", keywords: ["van", "small", "shuttle"], category: .travel(.building)),
-        Emoji(id: "ambulance", character: "🚑", name: "Ambulance", keywords: ["emergency", "medical", "hospital", "siren"], category: .travel(.building)),
-        Emoji(id: "fireEngine", character: "🚒", name: "Fire Engine", keywords: ["emergency", "truck", "firefighter", "red"], category: .travel(.landVehicle)),
-        Emoji(id: "policeCar", character: "🚓", name: "Police Car", keywords: ["law", "cop", "emergency", "patrol"], category: .travel(.landVehicle)),
-        Emoji(id: "oncomingPoliceCar", character: "🚔", name: "Oncoming Police Car", keywords: ["law", "cop", "emergency", "front"], category: .travel(.landVehicle)),
-        Emoji(id: "taxi", character: "🚕", name: "Taxi", keywords: ["cab", "ride", "yellow", "transport"], category: .travel(.landVehicle)),
-        Emoji(id: "oncomingTaxi", character: "🚖", name: "Oncoming Taxi", keywords: ["cab", "ride", "front"], category: .travel(.landVehicle)),
-        Emoji(id: "automobile", character: "🚗", name: "Automobile", keywords: ["car", "vehicle", "drive"], category: .travel(.landVehicle)),
-        Emoji(id: "oncomingAutomobile", character: "🚘", name: "Oncoming Automobile", keywords: ["car", "vehicle", "front"], category: .travel(.landVehicle)),
-        Emoji(id: "sportUtilityVehicle", character: "🚙", name: "Sport Utility Vehicle", keywords: ["suv", "car", "offroad", "4x4"], category: .travel(.landVehicle)),
-        Emoji(id: "pickupTruck", character: "🛻", name: "Pickup Truck", keywords: ["vehicle", "bed", "utility"], category: .travel(.landVehicle)),
-        Emoji(id: "deliveryTruck", character: "🚚", name: "Delivery Truck", keywords: ["moving", "package", "cargo"], category: .travel(.landVehicle)),
-        Emoji(id: "articulatedLorry", character: "🚛", name: "Articulated Lorry", keywords: ["semi", "truck", "big rig", "18 wheeler"], category: .travel(.landVehicle)),
-        Emoji(id: "tractor", character: "🚜", name: "Tractor", keywords: ["farm", "agriculture", "vehicle"], category: .travel(.landVehicle)),
-        Emoji(id: "racingCar", character: "🏎️", name: "Racing Car", keywords: ["fast", "f1", "speed", "sports"], category: .travel(.landVehicle)),
-        Emoji(id: "motorcycle", character: "🏍️", name: "Motorcycle", keywords: ["bike", "ride", "motorbike"], category: .travel(.landVehicle)),
-        Emoji(id: "motorScooter", character: "🛵", name: "Motor Scooter", keywords: ["moped", "vespa", "scooter"], category: .travel(.landVehicle)),
-        Emoji(id: "manualWheelchair", character: "🦽", name: "Manual Wheelchair", keywords: ["accessibility", "disabled", "handicap"], category: .travel(.landVehicle)),
-        Emoji(id: "motorizedWheelchair", character: "🦼", name: "Motorized Wheelchair", keywords: ["electric", "accessibility", "disabled"], category: .travel(.landVehicle)),
-        Emoji(id: "autoRickshaw", character: "🛺", name: "Auto Rickshaw", keywords: ["tuk tuk", "india", "taxi", "asian"], category: .travel(.landVehicle)),
-        Emoji(id: "bicycle", character: "🚲", name: "Bicycle", keywords: ["bike", "ride", "cycle", "pedal"], category: .travel(.landVehicle)),
-        Emoji(id: "kickScooter", character: "🛴", name: "Kick Scooter", keywords: ["ride", "push", "wheels"], category: .travel(.landVehicle)),
-        Emoji(id: "skateboard", character: "🛹", name: "Skateboard", keywords: ["skate", "trick", "wheels", "ride"], category: .travel(.landVehicle)),
-        Emoji(id: "rollerSkate", character: "🛼", name: "Roller Skate", keywords: ["skate", "wheels", "disco"], category: .travel(.landVehicle)),
-        Emoji(id: "busStop", character: "🚏", name: "Bus Stop", keywords: ["transit", "wait", "sign", "station"], category: .travel(.landVehicle)),
-        Emoji(id: "motorway", character: "🛣️", name: "Motorway", keywords: ["highway", "freeway", "road"], category: .travel(.sign)),
-        Emoji(id: "railwayTrack", character: "🛤️", name: "Railway Track", keywords: ["train", "rails", "tracks"], category: .travel(.landVehicle)),
-        Emoji(id: "oilDrum", character: "🛢️", name: "Oil Drum", keywords: ["barrel", "fuel", "petroleum"], category: .travel(.sign)),
-        Emoji(id: "fuelPump", character: "⛽", name: "Fuel Pump", keywords: ["gas", "petrol", "station", "fill"], category: .travel(.sign)),
-        Emoji(id: "wheel", character: "🛞", name: "Wheel", keywords: ["tire", "car", "round", "vehicle"], category: .travel(.landVehicle)),
-        Emoji(id: "policeCarLight", character: "🚨", name: "Police Car Light", keywords: ["emergency", "siren", "alarm", "cop"], category: .travel(.landVehicle)),
-        Emoji(id: "horizontalTrafficLight", character: "🚥", name: "Horizontal Traffic Light", keywords: ["signal", "stop", "go", "road"], category: .travel(.sign)),
-        Emoji(id: "verticalTrafficLight", character: "🚦", name: "Vertical Traffic Light", keywords: ["signal", "stop", "go", "road"], category: .travel(.sign)),
-        Emoji(id: "stopSign", character: "🛑", name: "Stop Sign", keywords: ["traffic", "halt", "red", "road"], category: .travel(.sign)),
-        Emoji(id: "construction", character: "🚧", name: "Construction", keywords: ["work", "road", "caution", "barrier"], category: .travel(.building)),
-        Emoji(id: "anchor", character: "⚓", name: "Anchor", keywords: ["ship", "boat", "nautical", "heavy"], category: .travel(.waterVehicle)),
-        Emoji(id: "ringBuoy", character: "🛟", name: "Ring Buoy", keywords: ["life preserver", "safety", "rescue", "float"], category: .travel(.sign)),
-        Emoji(id: "sailboat", character: "⛵", name: "Sailboat", keywords: ["boat", "sailing", "wind", "yacht"], category: .travel(.waterVehicle)),
-        Emoji(id: "canoe", character: "🛶", name: "Canoe", keywords: ["kayak", "paddle", "boat", "water"], category: .travel(.waterVehicle)),
-        Emoji(id: "speedboat", character: "🚤", name: "Speedboat", keywords: ["fast", "motorboat", "water"], category: .travel(.waterVehicle)),
-        Emoji(id: "passengerShip", character: "🛳️", name: "Passenger Ship", keywords: ["cruise", "boat", "ocean", "vacation"], category: .travel(.waterVehicle)),
-        Emoji(id: "ferry", character: "⛴️", name: "Ferry", keywords: ["boat", "transport", "water", "crossing"], category: .travel(.waterVehicle)),
-        Emoji(id: "motorBoat", character: "🛥️", name: "Motor Boat", keywords: ["boat", "fast", "water", "yacht"], category: .travel(.waterVehicle)),
-        Emoji(id: "ship", character: "🚢", name: "Ship", keywords: ["boat", "ocean", "cruise", "vessel"], category: .travel(.waterVehicle)),
-        Emoji(id: "airplane", character: "✈️", name: "Airplane", keywords: ["plane", "flight", "travel", "jet"], category: .travel(.airVehicle)),
-        Emoji(id: "smallAirplane", character: "🛩️", name: "Small Airplane", keywords: ["plane", "flight", "private", "propeller"], category: .travel(.airVehicle)),
-        Emoji(id: "airplaneDeparture", character: "🛫", name: "Airplane Departure", keywords: ["takeoff", "flight", "leaving", "airport"], category: .travel(.airVehicle)),
-        Emoji(id: "airplaneArrival", character: "🛬", name: "Airplane Arrival", keywords: ["landing", "flight", "airport"], category: .travel(.airVehicle)),
-        Emoji(id: "parachute", character: "🪂", name: "Parachute", keywords: ["skydiving", "jump", "fall", "safety"], category: .travel(.building)),
-        Emoji(id: "seat", character: "💺", name: "Seat", keywords: ["chair", "airplane", "flight", "sit"], category: .travel(.airVehicle)),
-        Emoji(id: "helicopter", character: "🚁", name: "Helicopter", keywords: ["chopper", "flight", "rotor", "hover"], category: .travel(.airVehicle)),
-        Emoji(id: "suspensionRailway", character: "🚟", name: "Suspension Railway", keywords: ["monorail", "transit", "hanging"], category: .travel(.landVehicle)),
-        Emoji(id: "mountainCableway", character: "🚠", name: "Mountain Cableway", keywords: ["gondola", "ski", "cable car"], category: .travel(.nature)),
-        Emoji(id: "aerialTramway", character: "🚡", name: "Aerial Tramway", keywords: ["cable car", "gondola", "ski"], category: .travel(.landVehicle)),
-        Emoji(id: "satellite", character: "🛰️", name: "Satellite", keywords: ["space", "orbit", "communication", "gps"], category: .travel(.airVehicle)),
-        Emoji(id: "rocket", character: "🚀", name: "Rocket", keywords: ["space", "launch", "nasa", "ship"], category: .travel(.nature)),
-        Emoji(id: "flyingSaucer", character: "🛸", name: "Flying Saucer", keywords: ["ufo", "alien", "space", "extraterrestrial"], category: .travel(.airVehicle)),
-        Emoji(id: "bellhopBell", character: "🛎️", name: "Bellhop Bell", keywords: ["hotel", "service", "ring", "desk"], category: .travel(.building)),
-        Emoji(id: "luggage", character: "🧳", name: "Luggage", keywords: ["suitcase", "travel", "baggage", "trip"], category: .travel(.sign)),
-        Emoji(id: "hourglassDone", character: "⌛", name: "Hourglass Done", keywords: ["time", "sand", "finished", "empty"], category: .travel(.sign)),
-        Emoji(id: "hourglassNotDone", character: "⏳", name: "Hourglass Not Done", keywords: ["time", "sand", "waiting", "running"], category: .travel(.sign)),
-        Emoji(id: "watch", character: "⌚", name: "Watch", keywords: ["time", "wristwatch", "clock", "wearable"], category: .travel(.sign)),
-        Emoji(id: "alarmClock", character: "⏰", name: "Alarm Clock", keywords: ["time", "wake", "morning", "ring"], category: .travel(.sign)),
-        Emoji(id: "stopwatch", character: "⏱️", name: "Stopwatch", keywords: ["time", "timer", "sports", "count"], category: .travel(.sign)),
-        Emoji(id: "timerClock", character: "⏲️", name: "Timer Clock", keywords: ["time", "countdown", "cooking"], category: .travel(.sign)),
-        Emoji(id: "mantelpieceClock", character: "🕰️", name: "Mantelpiece Clock", keywords: ["time", "antique", "classic", "grandfather"], category: .travel(.sign)),
-        Emoji(id: "twelveOClock", character: "🕛", name: "Twelve O Clock", keywords: ["time", "noon", "midnight"], category: .travel(.sign)),
-        Emoji(id: "twelveThirty", character: "🕧", name: "Twelve Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "oneOClock", character: "🕐", name: "One O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "oneThirty", character: "🕜", name: "One Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "twoOClock", character: "🕑", name: "Two O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "twoThirty", character: "🕝", name: "Two Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "threeOClock", character: "🕒", name: "Three O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "threeThirty", character: "🕞", name: "Three Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "fourOClock", character: "🕓", name: "Four O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "fourThirty", character: "🕟", name: "Four Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "fiveOClock", character: "🕔", name: "Five O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "fiveThirty", character: "🕠", name: "Five Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "sixOClock", character: "🕕", name: "Six O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "sixThirty", character: "🕡", name: "Six Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "sevenOClock", character: "🕖", name: "Seven O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "sevenThirty", character: "🕢", name: "Seven Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "eightOClock", character: "🕗", name: "Eight O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "eightThirty", character: "🕣", name: "Eight Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "nineOClock", character: "🕘", name: "Nine O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "nineThirty", character: "🕤", name: "Nine Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "tenOClock", character: "🕙", name: "Ten O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "tenThirty", character: "🕥", name: "Ten Thirty", keywords: ["time", "half past"], category: .travel(.nature)),
-        Emoji(id: "elevenOClock", character: "🕚", name: "Eleven O Clock", keywords: ["time", "hour"], category: .travel(.sign)),
-        Emoji(id: "elevenThirty", character: "🕦", name: "Eleven Thirty", keywords: ["time", "half past"], category: .travel(.sign)),
-        Emoji(id: "newMoon", character: "🌑", name: "New Moon", keywords: ["space", "dark", "phase", "night"], category: .travel(.sky)),
-        Emoji(id: "waxingCrescentMoon", character: "🌒", name: "Waxing Crescent Moon", keywords: ["space", "phase", "night", "growing"], category: .travel(.sky)),
-        Emoji(id: "firstQuarterMoon", character: "🌓", name: "First Quarter Moon", keywords: ["space", "phase", "night", "half"], category: .travel(.sky)),
-        Emoji(id: "waxingGibbousMoon", character: "🌔", name: "Waxing Gibbous Moon", keywords: ["space", "phase", "night", "almost full"], category: .travel(.sky)),
-        Emoji(id: "fullMoon", character: "🌕", name: "Full Moon", keywords: ["space", "bright", "night", "complete"], category: .travel(.sky)),
-        Emoji(id: "waningGibbousMoon", character: "🌖", name: "Waning Gibbous Moon", keywords: ["space", "phase", "night", "shrinking"], category: .travel(.sky)),
-        Emoji(id: "lastQuarterMoon", character: "🌗", name: "Last Quarter Moon", keywords: ["space", "phase", "night", "half"], category: .travel(.sky)),
-        Emoji(id: "waningCrescentMoon", character: "🌘", name: "Waning Crescent Moon", keywords: ["space", "phase", "night", "small"], category: .travel(.sky)),
-        Emoji(id: "crescentMoon", character: "🌙", name: "Crescent Moon", keywords: ["space", "night", "islamic", "yellow"], category: .travel(.sky)),
-        Emoji(id: "newMoonFace", character: "🌚", name: "New Moon Face", keywords: ["space", "dark", "creepy", "night"], category: .travel(.sky)),
-        Emoji(id: "firstQuarterMoonFace", character: "🌛", name: "First Quarter Moon Face", keywords: ["space", "night", "smiling"], category: .travel(.sky)),
-        Emoji(id: "lastQuarterMoonFace", character: "🌜", name: "Last Quarter Moon Face", keywords: ["space", "night", "smiling"], category: .travel(.sky)),
-        Emoji(id: "thermometer", character: "🌡️", name: "Thermometer", keywords: ["hot", "cold", "temperature", "fever", "weather"], category: .travel(.sky)),
-        Emoji(id: "sun", character: "☀️", name: "Sun", keywords: ["sunny", "bright", "day", "weather"], category: .travel(.sky)),
-        Emoji(id: "fullMoonFace", character: "🌝", name: "Full Moon Face", keywords: ["space", "smiling", "night", "bright"], category: .travel(.sky)),
-        Emoji(id: "sunWithFace", character: "🌞", name: "Sun With Face", keywords: ["sunny", "smiling", "bright", "happy"], category: .travel(.sky)),
-        Emoji(id: "ringedPlanet", character: "🪐", name: "Ringed Planet", keywords: ["saturn", "space", "astronomy"], category: .travel(.airVehicle)),
-        Emoji(id: "star", character: "⭐", name: "Star", keywords: ["space", "shine", "night", "favorite"], category: .travel(.sky)),
-        Emoji(id: "glowingStar", character: "🌟", name: "Glowing Star", keywords: ["sparkle", "shine", "bright", "special"], category: .travel(.sky)),
-        Emoji(id: "shootingStar", character: "🌠", name: "Shooting Star", keywords: ["meteor", "wish", "space", "streak"], category: .travel(.sky)),
-        Emoji(id: "milkyWay", character: "🌌", name: "Milky Way", keywords: ["galaxy", "space", "stars", "night"], category: .travel(.sky)),
-        Emoji(id: "cloud", character: "☁️", name: "Cloud", keywords: ["weather", "sky", "fluffy", "overcast"], category: .travel(.sky)),
-        Emoji(id: "sunBehindCloud", character: "⛅", name: "Sun Behind Cloud", keywords: ["weather", "partly cloudy", "partly sunny"], category: .travel(.sky)),
-        Emoji(id: "cloudWithLightningAndRain", character: "⛈️", name: "Cloud With Lightning And Rain", keywords: ["storm", "thunder", "weather", "heavy"], category: .travel(.sky)),
-        Emoji(id: "sunBehindSmallCloud", character: "🌤️", name: "Sun Behind Small Cloud", keywords: ["weather", "partly sunny", "nice"], category: .travel(.sky)),
-        Emoji(id: "sunBehindLargeCloud", character: "🌥️", name: "Sun Behind Large Cloud", keywords: ["weather", "cloudy", "overcast"], category: .travel(.sky)),
-        Emoji(id: "sunBehindRainCloud", character: "🌦️", name: "Sun Behind Rain Cloud", keywords: ["weather", "shower", "mixed"], category: .travel(.sky)),
-        Emoji(id: "cloudWithRain", character: "🌧️", name: "Cloud With Rain", keywords: ["weather", "rainy", "wet", "drizzle"], category: .travel(.sky)),
-        Emoji(id: "cloudWithSnow", character: "🌨️", name: "Cloud With Snow", keywords: ["weather", "winter", "cold", "snowy"], category: .travel(.sky)),
-        Emoji(id: "cloudWithLightning", character: "🌩️", name: "Cloud With Lightning", keywords: ["weather", "storm", "thunder", "electric"], category: .travel(.sky)),
-        Emoji(id: "tornado", character: "🌪️", name: "Tornado", keywords: ["storm", "twister", "cyclone", "disaster"], category: .travel(.sky)),
-        Emoji(id: "fog", character: "🌫️", name: "Fog", keywords: ["weather", "mist", "hazy", "visibility"], category: .travel(.sky)),
-        Emoji(id: "windFace", character: "🌬️", name: "Wind Face", keywords: ["weather", "blow", "breeze", "gust"], category: .travel(.sky)),
-        Emoji(id: "cyclone", character: "🌀", name: "Cyclone", keywords: ["hurricane", "typhoon", "storm", "spiral"], category: .travel(.sky)),
-        Emoji(id: "rainbow", character: "🌈", name: "Rainbow", keywords: ["gay", "lgbt", "color", "beautiful", "pride"], category: .travel(.sky)),
-        Emoji(id: "closedUmbrella", character: "🌂", name: "Closed Umbrella", keywords: ["rain", "accessory", "folded"], category: .travel(.sky)),
-        Emoji(id: "umbrella", character: "☂️", name: "Umbrella", keywords: ["rain", "protection", "weather"], category: .travel(.sky)),
-        Emoji(id: "umbrellaWithRainDrops", character: "☔", name: "Umbrella With Rain Drops", keywords: ["rain", "weather", "wet", "protection"], category: .travel(.sky)),
-        Emoji(id: "umbrellaOnGround", character: "⛱️", name: "Umbrella On Ground", keywords: ["beach", "parasol", "shade", "sun"], category: .travel(.nature)),
-        Emoji(id: "highVoltage", character: "⚡", name: "High Voltage", keywords: ["lightning", "electric", "power", "zap"], category: .travel(.sky)),
-        Emoji(id: "snowflake", character: "❄️", name: "Snowflake", keywords: ["winter", "cold", "ice", "frozen"], category: .travel(.sky)),
-        Emoji(id: "snowman", character: "☃️", name: "Snowman", keywords: ["winter", "cold", "frosty", "snow"], category: .travel(.sky)),
-        Emoji(id: "snowmanWithoutSnow", character: "⛄", name: "Snowman Without Snow", keywords: ["winter", "cold", "frosty", "olaf"], category: .travel(.sky)),
-        Emoji(id: "comet", character: "☄️", name: "Comet", keywords: ["space", "meteor", "asteroid", "streak"], category: .travel(.sky)),
-        Emoji(id: "fire", character: "🔥", name: "Fire", keywords: ["flame", "hot", "burn", "lit"], category: .travel(.sign)),
-        Emoji(id: "droplet", character: "💧", name: "Droplet", keywords: ["water", "drop", "liquid", "wet"], category: .travel(.sky)),
-        Emoji(id: "waterWave", character: "🌊", name: "Water Wave", keywords: ["ocean", "sea", "surf", "tsunami"], category: .travel(.sky))
+        Emoji(
+            id: "globeShowingEuropeAfrica",
+            character: "🌍",
+            name: "Globe Showing Europe Africa",
+            keywords: ["world", "earth", "planet", "international"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "globeShowingAmericas",
+            character: "🌎",
+            name: "Globe Showing Americas",
+            keywords: ["world", "earth", "planet", "international"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "globeShowingAsiaAustralia",
+            character: "🌏",
+            name: "Globe Showing Asia Australia",
+            keywords: ["world", "earth", "planet", "international"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "globeWithMeridians",
+            character: "🌐",
+            name: "Globe With Meridians",
+            keywords: ["world", "internet", "web", "international"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "worldMap",
+            character: "🗺️",
+            name: "World Map",
+            keywords: ["geography", "atlas", "navigation", "countries"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "mapOfJapan",
+            character: "🗾",
+            name: "Map Of Japan",
+            keywords: ["japanese", "country", "asia"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "compass",
+            character: "🧭",
+            name: "Compass",
+            keywords: ["navigation", "direction", "north", "orient"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "snowCappedMountain",
+            character: "🏔️",
+            name: "Snow Capped Mountain",
+            keywords: ["peak", "summit", "alpine", "winter"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "mountain",
+            character: "⛰️",
+            name: "Mountain",
+            keywords: ["peak", "hiking", "nature", "climb"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "volcano",
+            character: "🌋",
+            name: "Volcano",
+            keywords: ["eruption", "lava", "magma", "hot"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "mountFuji",
+            character: "🗻",
+            name: "Mount Fuji",
+            keywords: ["japan", "mountain", "snow", "iconic"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "camping",
+            character: "🏕️",
+            name: "Camping",
+            keywords: ["tent", "outdoor", "nature", "hiking"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "beachWithUmbrella",
+            character: "🏖️",
+            name: "Beach With Umbrella",
+            keywords: ["vacation", "sand", "ocean", "relax"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "desert",
+            character: "🏜️",
+            name: "Desert",
+            keywords: ["sand", "hot", "dry", "cactus"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "desertIsland",
+            character: "🏝️",
+            name: "Desert Island",
+            keywords: ["tropical", "beach", "palm", "paradise"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "nationalPark",
+            character: "🏞️",
+            name: "National Park",
+            keywords: ["nature", "scenic", "outdoor", "protected"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "stadium",
+            character: "🏟️",
+            name: "Stadium",
+            keywords: ["sports", "arena", "large", "event"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "classicalBuilding",
+            character: "🏛️",
+            name: "Classical Building",
+            keywords: ["museum", "greek", "columns", "government"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "buildingConstruction",
+            character: "🏗️",
+            name: "Building Construction",
+            keywords: ["crane", "work", "development", "site"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "brick",
+            character: "🧱",
+            name: "Brick",
+            keywords: ["building", "wall", "construction", "red"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "rock",
+            character: "🪨",
+            name: "Rock",
+            keywords: ["stone", "boulder", "geology"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "wood",
+            character: "🪵",
+            name: "Wood",
+            keywords: ["log", "timber", "tree", "lumber"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "hut",
+            character: "🛖",
+            name: "Hut",
+            keywords: ["primitive", "shelter", "simple", "thatched"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "houses",
+            character: "🏘️",
+            name: "Houses",
+            keywords: ["neighborhood", "suburb", "residential", "homes"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "derelictHouse",
+            character: "🏚️",
+            name: "Derelict House",
+            keywords: ["abandoned", "haunted", "old", "broken"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "house",
+            character: "🏠",
+            name: "House",
+            keywords: ["home", "building", "residence"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "houseWithGarden",
+            character: "🏡",
+            name: "House With Garden",
+            keywords: ["home", "suburbs", "yard", "trees"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "officeBuilding",
+            character: "🏢",
+            name: "Office Building",
+            keywords: ["work", "business", "corporate", "skyscraper"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "japanesePostOffice",
+            character: "🏣",
+            name: "Japanese Post Office",
+            keywords: ["mail", "japan", "building"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "postOffice",
+            character: "🏤",
+            name: "Post Office",
+            keywords: ["mail", "letter", "package", "building"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "hospital",
+            character: "🏥",
+            name: "Hospital",
+            keywords: ["medical", "doctor", "emergency", "health"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "bank",
+            character: "🏦",
+            name: "Bank",
+            keywords: ["money", "finance", "atm", "building"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "hotel",
+            character: "🏨",
+            name: "Hotel",
+            keywords: ["lodging", "accommodation", "vacation", "stay"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "loveHotel",
+            character: "🏩",
+            name: "Love Hotel",
+            keywords: ["japanese", "romantic", "adults", "heart"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "convenienceStore",
+            character: "🏪",
+            name: "Convenience Store",
+            keywords: ["shop", "24 hour", "snacks", "quick"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "school",
+            character: "🏫",
+            name: "School",
+            keywords: ["education", "students", "building", "learn"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "departmentStore",
+            character: "🏬",
+            name: "Department Store",
+            keywords: ["shopping", "mall", "retail", "building"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "factory",
+            character: "🏭",
+            name: "Factory",
+            keywords: ["industrial", "manufacturing", "smoke", "production"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "japaneseCastle",
+            character: "🏯",
+            name: "Japanese Castle",
+            keywords: ["japan", "historic", "pagoda", "fortress"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "castle",
+            character: "🏰",
+            name: "Castle",
+            keywords: ["medieval", "fortress", "kingdom", "fairy tale"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "wedding",
+            character: "💒",
+            name: "Wedding",
+            keywords: ["marriage", "chapel", "ceremony", "church"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "tokyoTower",
+            character: "🗼",
+            name: "Tokyo Tower",
+            keywords: ["japan", "landmark", "red", "tall"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "statueOfLiberty",
+            character: "🗽",
+            name: "Statue Of Liberty",
+            keywords: ["new york", "america", "freedom", "usa"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "church",
+            character: "⛪",
+            name: "Church",
+            keywords: ["religion", "christian", "worship", "building"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "mosque",
+            character: "🕌",
+            name: "Mosque",
+            keywords: ["islam", "muslim", "worship", "dome"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "hinduTemple",
+            character: "🛕",
+            name: "Hindu Temple",
+            keywords: ["india", "religion", "worship", "building"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "synagogue",
+            character: "🕍",
+            name: "Synagogue",
+            keywords: ["jewish", "religion", "worship", "temple"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "shintoShrine",
+            character: "⛩️",
+            name: "Shinto Shrine",
+            keywords: ["japanese", "torii", "gate", "red"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "kaaba",
+            character: "🕋",
+            name: "Kaaba",
+            keywords: ["mecca", "islam", "muslim", "pilgrimage"],
+            category: .travel(.religious)
+        ),
+        Emoji(
+            id: "fountain",
+            character: "⛲",
+            name: "Fountain",
+            keywords: ["water", "park", "decorative", "spray"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "tent",
+            character: "⛺",
+            name: "Tent",
+            keywords: ["camping", "outdoor", "shelter", "sleep"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "foggy",
+            character: "🌁",
+            name: "Foggy",
+            keywords: ["mist", "bridge", "golden gate", "visibility"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "nightWithStars",
+            character: "🌃",
+            name: "Night With Stars",
+            keywords: ["city", "evening", "skyline", "dark"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "cityscape",
+            character: "🏙️",
+            name: "Cityscape",
+            keywords: ["urban", "buildings", "skyline", "downtown"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "sunriseOverMountains",
+            character: "🌄",
+            name: "Sunrise Over Mountains",
+            keywords: ["morning", "dawn", "scenic", "peaks"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "sunrise",
+            character: "🌅",
+            name: "Sunrise",
+            keywords: ["morning", "dawn", "ocean", "sky"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "cityscapeAtDusk",
+            character: "🌆",
+            name: "Cityscape At Dusk",
+            keywords: ["evening", "sunset", "urban", "twilight"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "sunset",
+            character: "🌇",
+            name: "Sunset",
+            keywords: ["evening", "dusk", "orange", "sky"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "bridgeAtNight",
+            character: "🌉",
+            name: "Bridge At Night",
+            keywords: ["lights", "city", "river", "evening"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "hotSprings",
+            character: "♨️",
+            name: "Hot Springs",
+            keywords: ["japanese", "onsen", "spa", "relax"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "carouselHorse",
+            character: "🎠",
+            name: "Carousel Horse",
+            keywords: ["merry go round", "ride", "fair", "amusement"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "playgroundSlide",
+            character: "🛝",
+            name: "Playground Slide",
+            keywords: ["kids", "park", "play", "children"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "ferrisWheel",
+            character: "🎡",
+            name: "Ferris Wheel",
+            keywords: ["amusement park", "fair", "ride", "carnival"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "rollerCoaster",
+            character: "🎢",
+            name: "Roller Coaster",
+            keywords: ["amusement park", "thrill", "ride", "fun"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "barberPole",
+            character: "💈",
+            name: "Barber Pole",
+            keywords: ["haircut", "salon", "shop", "stripes"],
+            category: .travel(.scene)
+        ),
+        Emoji(
+            id: "circusTent",
+            character: "🎪",
+            name: "Circus Tent",
+            keywords: ["carnival", "big top", "show", "entertainment"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "locomotive",
+            character: "🚂",
+            name: "Locomotive",
+            keywords: ["steam", "train", "railroad", "engine"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "railwayCar",
+            character: "🚃",
+            name: "Railway Car",
+            keywords: ["train", "passenger", "transit"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "highSpeedTrain",
+            character: "🚄",
+            name: "High Speed Train",
+            keywords: ["fast", "bullet", "japan", "shinkansen"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "bulletTrain",
+            character: "🚅",
+            name: "Bullet Train",
+            keywords: ["fast", "japan", "shinkansen", "speed"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "train",
+            character: "🚆",
+            name: "Train",
+            keywords: ["railroad", "transit", "commute"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "metro",
+            character: "🚇",
+            name: "Metro",
+            keywords: ["subway", "underground", "transit", "tube"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "lightRail",
+            character: "🚈",
+            name: "Light Rail",
+            keywords: ["transit", "tram", "commute"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "station",
+            character: "🚉",
+            name: "Station",
+            keywords: ["train", "platform", "transit", "stop"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "tram",
+            character: "🚊",
+            name: "Tram",
+            keywords: ["streetcar", "trolley", "transit"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "monorail",
+            character: "🚝",
+            name: "Monorail",
+            keywords: ["transit", "train", "single rail"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "mountainRailway",
+            character: "🚞",
+            name: "Mountain Railway",
+            keywords: ["funicular", "scenic", "steep"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "tramCar",
+            character: "🚋",
+            name: "Tram Car",
+            keywords: ["streetcar", "transit", "trolley"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "bus",
+            character: "🚌",
+            name: "Bus",
+            keywords: ["transit", "public", "transport", "vehicle"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "oncomingBus",
+            character: "🚍",
+            name: "Oncoming Bus",
+            keywords: ["transit", "vehicle", "front"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "trolleybus",
+            character: "🚎",
+            name: "Trolleybus",
+            keywords: ["electric", "bus", "transit"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "minibus",
+            character: "🚐",
+            name: "Minibus",
+            keywords: ["van", "small", "shuttle"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "ambulance",
+            character: "🚑",
+            name: "Ambulance",
+            keywords: ["emergency", "medical", "hospital", "siren"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "fireEngine",
+            character: "🚒",
+            name: "Fire Engine",
+            keywords: ["emergency", "truck", "firefighter", "red"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "policeCar",
+            character: "🚓",
+            name: "Police Car",
+            keywords: ["law", "cop", "emergency", "patrol"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "oncomingPoliceCar",
+            character: "🚔",
+            name: "Oncoming Police Car",
+            keywords: ["law", "cop", "emergency", "front"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "taxi",
+            character: "🚕",
+            name: "Taxi",
+            keywords: ["cab", "ride", "yellow", "transport"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "oncomingTaxi",
+            character: "🚖",
+            name: "Oncoming Taxi",
+            keywords: ["cab", "ride", "front"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "automobile",
+            character: "🚗",
+            name: "Automobile",
+            keywords: ["car", "vehicle", "drive"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "oncomingAutomobile",
+            character: "🚘",
+            name: "Oncoming Automobile",
+            keywords: ["car", "vehicle", "front"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "sportUtilityVehicle",
+            character: "🚙",
+            name: "Sport Utility Vehicle",
+            keywords: ["suv", "car", "offroad", "4x4"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "pickupTruck",
+            character: "🛻",
+            name: "Pickup Truck",
+            keywords: ["vehicle", "bed", "utility"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "deliveryTruck",
+            character: "🚚",
+            name: "Delivery Truck",
+            keywords: ["moving", "package", "cargo"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "articulatedLorry",
+            character: "🚛",
+            name: "Articulated Lorry",
+            keywords: ["semi", "truck", "big rig", "18 wheeler"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "tractor",
+            character: "🚜",
+            name: "Tractor",
+            keywords: ["farm", "agriculture", "vehicle"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "racingCar",
+            character: "🏎️",
+            name: "Racing Car",
+            keywords: ["fast", "f1", "speed", "sports"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "motorcycle",
+            character: "🏍️",
+            name: "Motorcycle",
+            keywords: ["bike", "ride", "motorbike"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "motorScooter",
+            character: "🛵",
+            name: "Motor Scooter",
+            keywords: ["moped", "vespa", "scooter"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "manualWheelchair",
+            character: "🦽",
+            name: "Manual Wheelchair",
+            keywords: ["accessibility", "disabled", "handicap"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "motorizedWheelchair",
+            character: "🦼",
+            name: "Motorized Wheelchair",
+            keywords: ["electric", "accessibility", "disabled"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "autoRickshaw",
+            character: "🛺",
+            name: "Auto Rickshaw",
+            keywords: ["tuk tuk", "india", "taxi", "asian"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "bicycle",
+            character: "🚲",
+            name: "Bicycle",
+            keywords: ["bike", "ride", "cycle", "pedal"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "kickScooter",
+            character: "🛴",
+            name: "Kick Scooter",
+            keywords: ["ride", "push", "wheels"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "skateboard",
+            character: "🛹",
+            name: "Skateboard",
+            keywords: ["skate", "trick", "wheels", "ride"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "rollerSkate",
+            character: "🛼",
+            name: "Roller Skate",
+            keywords: ["skate", "wheels", "disco"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "busStop",
+            character: "🚏",
+            name: "Bus Stop",
+            keywords: ["transit", "wait", "sign", "station"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "motorway",
+            character: "🛣️",
+            name: "Motorway",
+            keywords: ["highway", "freeway", "road"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "railwayTrack",
+            character: "🛤️",
+            name: "Railway Track",
+            keywords: ["train", "rails", "tracks"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "oilDrum",
+            character: "🛢️",
+            name: "Oil Drum",
+            keywords: ["barrel", "fuel", "petroleum"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "fuelPump",
+            character: "⛽",
+            name: "Fuel Pump",
+            keywords: ["gas", "petrol", "station", "fill"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "wheel",
+            character: "🛞",
+            name: "Wheel",
+            keywords: ["tire", "car", "round", "vehicle"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "policeCarLight",
+            character: "🚨",
+            name: "Police Car Light",
+            keywords: ["emergency", "siren", "alarm", "cop"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "horizontalTrafficLight",
+            character: "🚥",
+            name: "Horizontal Traffic Light",
+            keywords: ["signal", "stop", "go", "road"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "verticalTrafficLight",
+            character: "🚦",
+            name: "Vertical Traffic Light",
+            keywords: ["signal", "stop", "go", "road"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "stopSign",
+            character: "🛑",
+            name: "Stop Sign",
+            keywords: ["traffic", "halt", "red", "road"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "construction",
+            character: "🚧",
+            name: "Construction",
+            keywords: ["work", "road", "caution", "barrier"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "anchor",
+            character: "⚓",
+            name: "Anchor",
+            keywords: ["ship", "boat", "nautical", "heavy"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "ringBuoy",
+            character: "🛟",
+            name: "Ring Buoy",
+            keywords: ["life preserver", "safety", "rescue", "float"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "sailboat",
+            character: "⛵",
+            name: "Sailboat",
+            keywords: ["boat", "sailing", "wind", "yacht"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "canoe",
+            character: "🛶",
+            name: "Canoe",
+            keywords: ["kayak", "paddle", "boat", "water"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "speedboat",
+            character: "🚤",
+            name: "Speedboat",
+            keywords: ["fast", "motorboat", "water"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "passengerShip",
+            character: "🛳️",
+            name: "Passenger Ship",
+            keywords: ["cruise", "boat", "ocean", "vacation"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "ferry",
+            character: "⛴️",
+            name: "Ferry",
+            keywords: ["boat", "transport", "water", "crossing"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "motorBoat",
+            character: "🛥️",
+            name: "Motor Boat",
+            keywords: ["boat", "fast", "water", "yacht"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "ship",
+            character: "🚢",
+            name: "Ship",
+            keywords: ["boat", "ocean", "cruise", "vessel"],
+            category: .travel(.waterVehicle)
+        ),
+        Emoji(
+            id: "airplane",
+            character: "✈️",
+            name: "Airplane",
+            keywords: ["plane", "flight", "travel", "jet"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "smallAirplane",
+            character: "🛩️",
+            name: "Small Airplane",
+            keywords: ["plane", "flight", "private", "propeller"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "airplaneDeparture",
+            character: "🛫",
+            name: "Airplane Departure",
+            keywords: ["takeoff", "flight", "leaving", "airport"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "airplaneArrival",
+            character: "🛬",
+            name: "Airplane Arrival",
+            keywords: ["landing", "flight", "airport"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "parachute",
+            character: "🪂",
+            name: "Parachute",
+            keywords: ["skydiving", "jump", "fall", "safety"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "seat",
+            character: "💺",
+            name: "Seat",
+            keywords: ["chair", "airplane", "flight", "sit"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "helicopter",
+            character: "🚁",
+            name: "Helicopter",
+            keywords: ["chopper", "flight", "rotor", "hover"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "suspensionRailway",
+            character: "🚟",
+            name: "Suspension Railway",
+            keywords: ["monorail", "transit", "hanging"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "mountainCableway",
+            character: "🚠",
+            name: "Mountain Cableway",
+            keywords: ["gondola", "ski", "cable car"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "aerialTramway",
+            character: "🚡",
+            name: "Aerial Tramway",
+            keywords: ["cable car", "gondola", "ski"],
+            category: .travel(.landVehicle)
+        ),
+        Emoji(
+            id: "satellite",
+            character: "🛰️",
+            name: "Satellite",
+            keywords: ["space", "orbit", "communication", "gps"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "rocket",
+            character: "🚀",
+            name: "Rocket",
+            keywords: ["space", "launch", "nasa", "ship"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "flyingSaucer",
+            character: "🛸",
+            name: "Flying Saucer",
+            keywords: ["ufo", "alien", "space", "extraterrestrial"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "bellhopBell",
+            character: "🛎️",
+            name: "Bellhop Bell",
+            keywords: ["hotel", "service", "ring", "desk"],
+            category: .travel(.building)
+        ),
+        Emoji(
+            id: "luggage",
+            character: "🧳",
+            name: "Luggage",
+            keywords: ["suitcase", "travel", "baggage", "trip"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "hourglassDone",
+            character: "⌛",
+            name: "Hourglass Done",
+            keywords: ["time", "sand", "finished", "empty"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "hourglassNotDone",
+            character: "⏳",
+            name: "Hourglass Not Done",
+            keywords: ["time", "sand", "waiting", "running"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "watch",
+            character: "⌚",
+            name: "Watch",
+            keywords: ["time", "wristwatch", "clock", "wearable"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "alarmClock",
+            character: "⏰",
+            name: "Alarm Clock",
+            keywords: ["time", "wake", "morning", "ring"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "stopwatch",
+            character: "⏱️",
+            name: "Stopwatch",
+            keywords: ["time", "timer", "sports", "count"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "timerClock",
+            character: "⏲️",
+            name: "Timer Clock",
+            keywords: ["time", "countdown", "cooking"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "mantelpieceClock",
+            character: "🕰️",
+            name: "Mantelpiece Clock",
+            keywords: ["time", "antique", "classic", "grandfather"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "twelveOClock",
+            character: "🕛",
+            name: "Twelve O Clock",
+            keywords: ["time", "noon", "midnight"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "twelveThirty",
+            character: "🕧",
+            name: "Twelve Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "oneOClock",
+            character: "🕐",
+            name: "One O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "oneThirty",
+            character: "🕜",
+            name: "One Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "twoOClock",
+            character: "🕑",
+            name: "Two O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "twoThirty",
+            character: "🕝",
+            name: "Two Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "threeOClock",
+            character: "🕒",
+            name: "Three O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "threeThirty",
+            character: "🕞",
+            name: "Three Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "fourOClock",
+            character: "🕓",
+            name: "Four O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "fourThirty",
+            character: "🕟",
+            name: "Four Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "fiveOClock",
+            character: "🕔",
+            name: "Five O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "fiveThirty",
+            character: "🕠",
+            name: "Five Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "sixOClock",
+            character: "🕕",
+            name: "Six O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "sixThirty",
+            character: "🕡",
+            name: "Six Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "sevenOClock",
+            character: "🕖",
+            name: "Seven O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "sevenThirty",
+            character: "🕢",
+            name: "Seven Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "eightOClock",
+            character: "🕗",
+            name: "Eight O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "eightThirty",
+            character: "🕣",
+            name: "Eight Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "nineOClock",
+            character: "🕘",
+            name: "Nine O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "nineThirty",
+            character: "🕤",
+            name: "Nine Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "tenOClock",
+            character: "🕙",
+            name: "Ten O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "tenThirty",
+            character: "🕥",
+            name: "Ten Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "elevenOClock",
+            character: "🕚",
+            name: "Eleven O Clock",
+            keywords: ["time", "hour"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "elevenThirty",
+            character: "🕦",
+            name: "Eleven Thirty",
+            keywords: ["time", "half past"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "newMoon",
+            character: "🌑",
+            name: "New Moon",
+            keywords: ["space", "dark", "phase", "night"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "waxingCrescentMoon",
+            character: "🌒",
+            name: "Waxing Crescent Moon",
+            keywords: ["space", "phase", "night", "growing"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "firstQuarterMoon",
+            character: "🌓",
+            name: "First Quarter Moon",
+            keywords: ["space", "phase", "night", "half"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "waxingGibbousMoon",
+            character: "🌔",
+            name: "Waxing Gibbous Moon",
+            keywords: ["space", "phase", "night", "almost full"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "fullMoon",
+            character: "🌕",
+            name: "Full Moon",
+            keywords: ["space", "bright", "night", "complete"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "waningGibbousMoon",
+            character: "🌖",
+            name: "Waning Gibbous Moon",
+            keywords: ["space", "phase", "night", "shrinking"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "lastQuarterMoon",
+            character: "🌗",
+            name: "Last Quarter Moon",
+            keywords: ["space", "phase", "night", "half"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "waningCrescentMoon",
+            character: "🌘",
+            name: "Waning Crescent Moon",
+            keywords: ["space", "phase", "night", "small"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "crescentMoon",
+            character: "🌙",
+            name: "Crescent Moon",
+            keywords: ["space", "night", "islamic", "yellow"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "newMoonFace",
+            character: "🌚",
+            name: "New Moon Face",
+            keywords: ["space", "dark", "creepy", "night"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "firstQuarterMoonFace",
+            character: "🌛",
+            name: "First Quarter Moon Face",
+            keywords: ["space", "night", "smiling"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "lastQuarterMoonFace",
+            character: "🌜",
+            name: "Last Quarter Moon Face",
+            keywords: ["space", "night", "smiling"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "thermometer",
+            character: "🌡️",
+            name: "Thermometer",
+            keywords: ["hot", "cold", "temperature", "fever", "weather"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sun",
+            character: "☀️",
+            name: "Sun",
+            keywords: ["sunny", "bright", "day", "weather"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "fullMoonFace",
+            character: "🌝",
+            name: "Full Moon Face",
+            keywords: ["space", "smiling", "night", "bright"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sunWithFace",
+            character: "🌞",
+            name: "Sun With Face",
+            keywords: ["sunny", "smiling", "bright", "happy"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "ringedPlanet",
+            character: "🪐",
+            name: "Ringed Planet",
+            keywords: ["saturn", "space", "astronomy"],
+            category: .travel(.airVehicle)
+        ),
+        Emoji(
+            id: "star",
+            character: "⭐",
+            name: "Star",
+            keywords: ["space", "shine", "night", "favorite"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "glowingStar",
+            character: "🌟",
+            name: "Glowing Star",
+            keywords: ["sparkle", "shine", "bright", "special"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "shootingStar",
+            character: "🌠",
+            name: "Shooting Star",
+            keywords: ["meteor", "wish", "space", "streak"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "milkyWay",
+            character: "🌌",
+            name: "Milky Way",
+            keywords: ["galaxy", "space", "stars", "night"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cloud",
+            character: "☁️",
+            name: "Cloud",
+            keywords: ["weather", "sky", "fluffy", "overcast"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sunBehindCloud",
+            character: "⛅",
+            name: "Sun Behind Cloud",
+            keywords: ["weather", "partly cloudy", "partly sunny"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cloudWithLightningAndRain",
+            character: "⛈️",
+            name: "Cloud With Lightning And Rain",
+            keywords: ["storm", "thunder", "weather", "heavy"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sunBehindSmallCloud",
+            character: "🌤️",
+            name: "Sun Behind Small Cloud",
+            keywords: ["weather", "partly sunny", "nice"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sunBehindLargeCloud",
+            character: "🌥️",
+            name: "Sun Behind Large Cloud",
+            keywords: ["weather", "cloudy", "overcast"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "sunBehindRainCloud",
+            character: "🌦️",
+            name: "Sun Behind Rain Cloud",
+            keywords: ["weather", "shower", "mixed"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cloudWithRain",
+            character: "🌧️",
+            name: "Cloud With Rain",
+            keywords: ["weather", "rainy", "wet", "drizzle"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cloudWithSnow",
+            character: "🌨️",
+            name: "Cloud With Snow",
+            keywords: ["weather", "winter", "cold", "snowy"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cloudWithLightning",
+            character: "🌩️",
+            name: "Cloud With Lightning",
+            keywords: ["weather", "storm", "thunder", "electric"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "tornado",
+            character: "🌪️",
+            name: "Tornado",
+            keywords: ["storm", "twister", "cyclone", "disaster"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "fog",
+            character: "🌫️",
+            name: "Fog",
+            keywords: ["weather", "mist", "hazy", "visibility"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "windFace",
+            character: "🌬️",
+            name: "Wind Face",
+            keywords: ["weather", "blow", "breeze", "gust"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "cyclone",
+            character: "🌀",
+            name: "Cyclone",
+            keywords: ["hurricane", "typhoon", "storm", "spiral"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "rainbow",
+            character: "🌈",
+            name: "Rainbow",
+            keywords: ["gay", "lgbt", "color", "beautiful", "pride"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "closedUmbrella",
+            character: "🌂",
+            name: "Closed Umbrella",
+            keywords: ["rain", "accessory", "folded"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "umbrella",
+            character: "☂️",
+            name: "Umbrella",
+            keywords: ["rain", "protection", "weather"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "umbrellaWithRainDrops",
+            character: "☔",
+            name: "Umbrella With Rain Drops",
+            keywords: ["rain", "weather", "wet", "protection"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "umbrellaOnGround",
+            character: "⛱️",
+            name: "Umbrella On Ground",
+            keywords: ["beach", "parasol", "shade", "sun"],
+            category: .travel(.nature)
+        ),
+        Emoji(
+            id: "highVoltage",
+            character: "⚡",
+            name: "High Voltage",
+            keywords: ["lightning", "electric", "power", "zap"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "snowflake",
+            character: "❄️",
+            name: "Snowflake",
+            keywords: ["winter", "cold", "ice", "frozen"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "snowman",
+            character: "☃️",
+            name: "Snowman",
+            keywords: ["winter", "cold", "frosty", "snow"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "snowmanWithoutSnow",
+            character: "⛄",
+            name: "Snowman Without Snow",
+            keywords: ["winter", "cold", "frosty", "olaf"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "comet",
+            character: "☄️",
+            name: "Comet",
+            keywords: ["space", "meteor", "asteroid", "streak"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "fire",
+            character: "🔥",
+            name: "Fire",
+            keywords: ["flame", "hot", "burn", "lit"],
+            category: .travel(.sign)
+        ),
+        Emoji(
+            id: "droplet",
+            character: "💧",
+            name: "Droplet",
+            keywords: ["water", "drop", "liquid", "wet"],
+            category: .travel(.sky)
+        ),
+        Emoji(
+            id: "waterWave",
+            character: "🌊",
+            name: "Water Wave",
+            keywords: ["ocean", "sea", "surf", "tsunami"],
+            category: .travel(.sky)
+        )
     ]
 
     // MARK: - Objects Emojis
+
     static let objectsEmojis: [Emoji] = [
-        Emoji(id: "glasses", character: "👓", name: "Glasses", keywords: ["eyewear", "vision", "spectacles", "nerdy"], category: .objects(.clothing)),
-        Emoji(id: "sunglasses", character: "🕶️", name: "Sunglasses", keywords: ["cool", "shades", "sunny", "fashion"], category: .objects(.clothing)),
-        Emoji(id: "goggles", character: "🥽", name: "Goggles", keywords: ["swim", "safety", "ski", "protection"], category: .objects(.clothing)),
-        Emoji(id: "labCoat", character: "🥼", name: "Lab Coat", keywords: ["scientist", "doctor", "medical", "white"], category: .objects(.clothing)),
-        Emoji(id: "safetyVest", character: "🦺", name: "Safety Vest", keywords: ["construction", "visibility", "work", "orange"], category: .objects(.clothing)),
-        Emoji(id: "necktie", character: "👔", name: "Necktie", keywords: ["formal", "business", "professional", "suit"], category: .objects(.clothing)),
-        Emoji(id: "tShirt", character: "👕", name: "T Shirt", keywords: ["shirt", "casual", "clothing", "top"], category: .objects(.clothing)),
-        Emoji(id: "jeans", character: "👖", name: "Jeans", keywords: ["pants", "denim", "casual", "blue"], category: .objects(.clothing)),
-        Emoji(id: "scarf", character: "🧣", name: "Scarf", keywords: ["warm", "winter", "neck", "accessory"], category: .objects(.clothing)),
-        Emoji(id: "gloves", character: "🧤", name: "Gloves", keywords: ["hands", "warm", "winter", "accessory"], category: .objects(.clothing)),
-        Emoji(id: "coat", character: "🧥", name: "Coat", keywords: ["jacket", "warm", "winter", "outerwear"], category: .objects(.clothing)),
-        Emoji(id: "socks", character: "🧦", name: "Socks", keywords: ["feet", "clothing", "warm", "pair"], category: .objects(.clothing)),
-        Emoji(id: "dress", character: "👗", name: "Dress", keywords: ["clothing", "woman", "formal", "fashion"], category: .objects(.clothing)),
-        Emoji(id: "kimono", character: "👘", name: "Kimono", keywords: ["japanese", "traditional", "clothing", "robe"], category: .objects(.clothing)),
-        Emoji(id: "sari", character: "🥻", name: "Sari", keywords: ["indian", "traditional", "clothing", "woman"], category: .objects(.clothing)),
-        Emoji(id: "onePieceSwimsuit", character: "🩱", name: "One Piece Swimsuit", keywords: ["swimming", "beach", "pool", "bathing suit"], category: .objects(.clothing)),
-        Emoji(id: "briefs", character: "🩲", name: "Briefs", keywords: ["underwear", "swim", "shorts"], category: .objects(.clothing)),
-        Emoji(id: "shorts", character: "🩳", name: "Shorts", keywords: ["pants", "summer", "casual", "swim"], category: .objects(.clothing)),
-        Emoji(id: "bikini", character: "👙", name: "Bikini", keywords: ["swimsuit", "beach", "two piece", "summer"], category: .objects(.clothing)),
-        Emoji(id: "womanSClothes", character: "👚", name: "Woman S Clothes", keywords: ["blouse", "shirt", "top", "clothing"], category: .objects(.clothing)),
-        Emoji(id: "foldingHandFan", character: "🪭", name: "Folding Hand Fan", keywords: ["cool", "asian", "hot", "air"], category: .objects(.accessory)),
-        Emoji(id: "purse", character: "👛", name: "Purse", keywords: ["bag", "wallet", "money", "coin"], category: .objects(.accessory)),
-        Emoji(id: "handbag", character: "👜", name: "Handbag", keywords: ["bag", "purse", "accessory", "fashion"], category: .objects(.accessory)),
-        Emoji(id: "clutchBag", character: "👝", name: "Clutch Bag", keywords: ["purse", "fancy", "formal", "small"], category: .objects(.accessory)),
-        Emoji(id: "shoppingBags", character: "🛍️", name: "Shopping Bags", keywords: ["retail", "purchase", "store", "buy"], category: .objects(.accessory)),
-        Emoji(id: "backpack", character: "🎒", name: "Backpack", keywords: ["bag", "school", "hiking", "rucksack"], category: .objects(.accessory)),
-        Emoji(id: "thongSandal", character: "🩴", name: "Thong Sandal", keywords: ["flip flop", "beach", "summer", "casual"], category: .objects(.accessory)),
-        Emoji(id: "manSShoe", character: "👞", name: "Man S Shoe", keywords: ["formal", "dress", "footwear", "leather"], category: .objects(.clothing)),
-        Emoji(id: "runningShoe", character: "👟", name: "Running Shoe", keywords: ["sneaker", "athletic", "sport", "tennis"], category: .objects(.accessory)),
-        Emoji(id: "hikingBoot", character: "🥾", name: "Hiking Boot", keywords: ["outdoor", "trail", "sturdy", "adventure"], category: .objects(.accessory)),
-        Emoji(id: "flatShoe", character: "🥿", name: "Flat Shoe", keywords: ["casual", "comfortable", "loafer"], category: .objects(.accessory)),
-        Emoji(id: "highHeeledShoe", character: "👠", name: "High Heeled Shoe", keywords: ["heel", "fancy", "formal", "woman"], category: .objects(.accessory)),
-        Emoji(id: "womanSSandal", character: "👡", name: "Woman S Sandal", keywords: ["footwear", "summer", "open toe"], category: .objects(.accessory)),
-        Emoji(id: "balletShoes", character: "🩰", name: "Ballet Shoes", keywords: ["dance", "pointe", "pink", "graceful"], category: .objects(.accessory)),
-        Emoji(id: "womanSBoot", character: "👢", name: "Woman S Boot", keywords: ["footwear", "fashion", "high", "stylish"], category: .objects(.accessory)),
-        Emoji(id: "hairPick", character: "🪮", name: "Hair Pick", keywords: ["comb", "afro", "grooming", "style"], category: .objects(.accessory)),
-        Emoji(id: "crown", character: "👑", name: "Crown", keywords: ["king", "queen", "royal", "gold"], category: .objects(.accessory)),
-        Emoji(id: "womanSHat", character: "👒", name: "Woman S Hat", keywords: ["sun", "fashion", "accessory", "derby"], category: .objects(.accessory)),
-        Emoji(id: "topHat", character: "🎩", name: "Top Hat", keywords: ["formal", "fancy", "gentleman", "magician"], category: .objects(.accessory)),
-        Emoji(id: "graduationCap", character: "🎓", name: "Graduation Cap", keywords: ["school", "education", "mortar board", "diploma"], category: .objects(.tool)),
-        Emoji(id: "billedCap", character: "🧢", name: "Billed Cap", keywords: ["baseball cap", "hat", "casual", "sports"], category: .objects(.accessory)),
-        Emoji(id: "militaryHelmet", character: "🪖", name: "Military Helmet", keywords: ["army", "soldier", "protection", "war"], category: .objects(.accessory)),
-        Emoji(id: "rescueWorkerSHelmet", character: "⛑️", name: "Rescue Worker S Helmet", keywords: ["safety", "firefighter", "emergency", "hard hat"], category: .objects(.accessory)),
-        Emoji(id: "prayerBeads", character: "📿", name: "Prayer Beads", keywords: ["rosary", "meditation", "religious", "beads"], category: .objects(.accessory)),
-        Emoji(id: "lipstick", character: "💄", name: "Lipstick", keywords: ["makeup", "cosmetic", "beauty", "red"], category: .objects(.accessory)),
-        Emoji(id: "ring", character: "💍", name: "Ring", keywords: ["wedding", "marriage", "fiance", "proposal", "engagement"], category: .objects(.accessory)),
-        Emoji(id: "gemStone", character: "💎", name: "Gem Stone", keywords: ["diamond", "jewel", "expensive", "precious"], category: .objects(.accessory)),
-        Emoji(id: "mutedSpeaker", character: "🔇", name: "Muted Speaker", keywords: ["silent", "quiet", "no sound", "volume"], category: .objects(.music)),
-        Emoji(id: "speakerLowVolume", character: "🔈", name: "Speaker Low Volume", keywords: ["quiet", "soft", "sound", "audio"], category: .objects(.music)),
-        Emoji(id: "speakerMediumVolume", character: "🔉", name: "Speaker Medium Volume", keywords: ["moderate", "sound", "audio", "volume"], category: .objects(.music)),
-        Emoji(id: "speakerHighVolume", character: "🔊", name: "Speaker High Volume", keywords: ["loud", "sound", "audio", "max"], category: .objects(.music)),
-        Emoji(id: "loudspeaker", character: "📢", name: "Loudspeaker", keywords: ["announce", "amplify", "broadcast", "megaphone"], category: .objects(.music)),
-        Emoji(id: "megaphone", character: "📣", name: "Megaphone", keywords: ["announce", "cheer", "loud", "bullhorn"], category: .objects(.music)),
-        Emoji(id: "postalHorn", character: "📯", name: "Postal Horn", keywords: ["bugle", "announcement", "mail"], category: .objects(.music)),
-        Emoji(id: "bell", character: "🔔", name: "Bell", keywords: ["notification", "ring", "alarm", "ding"], category: .objects(.accessory)),
-        Emoji(id: "bellWithSlash", character: "🔕", name: "Bell With Slash", keywords: ["silent", "mute", "no notifications", "off"], category: .objects(.music)),
-        Emoji(id: "musicalScore", character: "🎼", name: "Musical Score", keywords: ["sheet music", "notes", "composition", "staff"], category: .objects(.music)),
-        Emoji(id: "musicalNote", character: "🎵", name: "Musical Note", keywords: ["music", "sing", "melody", "song"], category: .objects(.music)),
-        Emoji(id: "musicalNotes", character: "🎶", name: "Musical Notes", keywords: ["music", "song", "melody", "singing"], category: .objects(.music)),
-        Emoji(id: "studioMicrophone", character: "🎙️", name: "Studio Microphone", keywords: ["podcast", "recording", "broadcast", "radio"], category: .objects(.music)),
-        Emoji(id: "levelSlider", character: "🎚️", name: "Level Slider", keywords: ["mixing", "audio", "control", "adjust"], category: .objects(.tool)),
-        Emoji(id: "controlKnobs", character: "🎛️", name: "Control Knobs", keywords: ["mixing", "audio", "adjust", "dials"], category: .objects(.tool)),
-        Emoji(id: "microphone", character: "🎤", name: "Microphone", keywords: ["singing", "karaoke", "recording", "performance"], category: .objects(.music)),
-        Emoji(id: "headphone", character: "🎧", name: "Headphone", keywords: ["music", "listen", "audio", "earphones"], category: .objects(.music)),
-        Emoji(id: "radio", character: "📻", name: "Radio", keywords: ["music", "broadcast", "station", "listen"], category: .objects(.music)),
-        Emoji(id: "saxophone", character: "🎷", name: "Saxophone", keywords: ["jazz", "instrument", "music", "brass"], category: .objects(.music)),
-        Emoji(id: "accordion", character: "🪗", name: "Accordion", keywords: ["instrument", "music", "squeezebox", "folk"], category: .objects(.music)),
-        Emoji(id: "guitar", character: "🎸", name: "Guitar", keywords: ["music", "rock", "instrument", "strings"], category: .objects(.accessory)),
-        Emoji(id: "musicalKeyboard", character: "🎹", name: "Musical Keyboard", keywords: ["piano", "music", "instrument", "keys"], category: .objects(.music)),
-        Emoji(id: "trumpet", character: "🎺", name: "Trumpet", keywords: ["brass", "music", "instrument", "horn"], category: .objects(.music)),
-        Emoji(id: "violin", character: "🎻", name: "Violin", keywords: ["strings", "music", "instrument", "classical"], category: .objects(.accessory)),
-        Emoji(id: "banjo", character: "🪕", name: "Banjo", keywords: ["strings", "music", "country", "folk"], category: .objects(.accessory)),
-        Emoji(id: "drum", character: "🥁", name: "Drum", keywords: ["music", "percussion", "beat", "sticks"], category: .objects(.music)),
-        Emoji(id: "longDrum", character: "🪘", name: "Long Drum", keywords: ["music", "percussion", "african", "tribal"], category: .objects(.music)),
-        Emoji(id: "maracas", character: "🪇", name: "Maracas", keywords: ["music", "percussion", "shake", "latin"], category: .objects(.music)),
-        Emoji(id: "flute", character: "🪈", name: "Flute", keywords: ["music", "instrument", "woodwind", "blow"], category: .objects(.music)),
-        Emoji(id: "mobilePhone", character: "📱", name: "Mobile Phone", keywords: ["smartphone", "cell", "iphone", "device"], category: .objects(.tech)),
-        Emoji(id: "mobilePhoneWithArrow", character: "📲", name: "Mobile Phone With Arrow", keywords: ["call", "incoming", "smartphone", "receive"], category: .objects(.tech)),
-        Emoji(id: "telephone", character: "☎️", name: "Telephone", keywords: ["phone", "landline", "call", "retro"], category: .objects(.tech)),
-        Emoji(id: "telephoneReceiver", character: "📞", name: "Telephone Receiver", keywords: ["phone", "call", "handset"], category: .objects(.tech)),
-        Emoji(id: "pager", character: "📟", name: "Pager", keywords: ["beeper", "retro", "device", "old"], category: .objects(.tech)),
-        Emoji(id: "faxMachine", character: "📠", name: "Fax Machine", keywords: ["document", "send", "office", "old"], category: .objects(.tech)),
-        Emoji(id: "battery", character: "🔋", name: "Battery", keywords: ["power", "charge", "energy", "full"], category: .objects(.tech)),
-        Emoji(id: "lowBattery", character: "🪫", name: "Low Battery", keywords: ["power", "empty", "dying", "charge"], category: .objects(.tech)),
-        Emoji(id: "electricPlug", character: "🔌", name: "Electric Plug", keywords: ["power", "electricity", "outlet", "charge"], category: .objects(.tech)),
-        Emoji(id: "laptop", character: "💻", name: "Laptop", keywords: ["computer", "portable", "work", "notebook"], category: .objects(.tech)),
-        Emoji(id: "desktopComputer", character: "🖥️", name: "Desktop Computer", keywords: ["pc", "monitor", "work", "screen"], category: .objects(.tech)),
-        Emoji(id: "printer", character: "🖨️", name: "Printer", keywords: ["print", "paper", "office", "document"], category: .objects(.tech)),
-        Emoji(id: "keyboard", character: "⌨️", name: "Keyboard", keywords: ["typing", "computer", "keys", "input"], category: .objects(.music)),
-        Emoji(id: "computerMouse", character: "🖱️", name: "Computer Mouse", keywords: ["click", "pointer", "computer", "device"], category: .objects(.tech)),
-        Emoji(id: "trackball", character: "🖲️", name: "Trackball", keywords: ["mouse", "pointer", "computer", "ball"], category: .objects(.tech)),
-        Emoji(id: "computerDisk", character: "💽", name: "Computer Disk", keywords: ["minidisc", "data", "storage", "retro"], category: .objects(.tech)),
-        Emoji(id: "floppyDisk", character: "💾", name: "Floppy Disk", keywords: ["save", "storage", "retro", "data"], category: .objects(.tech)),
-        Emoji(id: "opticalDisk", character: "💿", name: "Optical Disk", keywords: ["cd", "music", "data", "disc"], category: .objects(.music)),
-        Emoji(id: "dvd", character: "📀", name: "Dvd", keywords: ["disc", "movie", "video", "data"], category: .objects(.tech)),
-        Emoji(id: "abacus", character: "🧮", name: "Abacus", keywords: ["calculator", "counting", "math", "beads"], category: .objects(.tech)),
-        Emoji(id: "movieCamera", character: "🎥", name: "Movie Camera", keywords: ["film", "cinema", "recording", "video"], category: .objects(.tech)),
-        Emoji(id: "filmFrames", character: "🎞️", name: "Film Frames", keywords: ["movie", "cinema", "strip", "reel"], category: .objects(.tool)),
-        Emoji(id: "filmProjector", character: "📽️", name: "Film Projector", keywords: ["movie", "cinema", "old", "reel"], category: .objects(.tech)),
-        Emoji(id: "clapperBoard", character: "🎬", name: "Clapper Board", keywords: ["movie", "cinema", "action", "film"], category: .objects(.tool)),
-        Emoji(id: "television", character: "📺", name: "Television", keywords: ["tv", "screen", "watch", "show"], category: .objects(.tool)),
-        Emoji(id: "camera", character: "📷", name: "Camera", keywords: ["photo", "picture", "photography", "snap"], category: .objects(.tech)),
-        Emoji(id: "cameraWithFlash", character: "📸", name: "Camera With Flash", keywords: ["photo", "picture", "snap", "bright"], category: .objects(.tech)),
-        Emoji(id: "videoCamera", character: "📹", name: "Video Camera", keywords: ["recording", "camcorder", "film"], category: .objects(.tech)),
-        Emoji(id: "videocassette", character: "📼", name: "Videocassette", keywords: ["vhs", "tape", "retro", "movie"], category: .objects(.tool)),
-        Emoji(id: "magnifyingGlassTiltedLeft", character: "🔍", name: "Magnifying Glass Tilted Left", keywords: ["search", "find", "zoom", "look"], category: .objects(.tool)),
-        Emoji(id: "magnifyingGlassTiltedRight", character: "🔎", name: "Magnifying Glass Tilted Right", keywords: ["search", "find", "zoom", "look"], category: .objects(.tool)),
-        Emoji(id: "candle", character: "🕯️", name: "Candle", keywords: ["light", "flame", "wax", "romantic"], category: .objects(.tool)),
-        Emoji(id: "lightBulb", character: "💡", name: "Light Bulb", keywords: ["idea", "bright", "electricity", "think"], category: .objects(.tool)),
-        Emoji(id: "flashlight", character: "🔦", name: "Flashlight", keywords: ["torch", "light", "beam", "dark"], category: .objects(.tool)),
-        Emoji(id: "redPaperLantern", character: "🏮", name: "Red Paper Lantern", keywords: ["japanese", "izakaya", "light", "traditional"], category: .objects(.tool)),
-        Emoji(id: "diyaLamp", character: "🪔", name: "Diya Lamp", keywords: ["oil", "indian", "diwali", "light"], category: .objects(.household)),
-        Emoji(id: "notebookWithDecorativeCover", character: "📔", name: "Notebook With Decorative Cover", keywords: ["book", "journal", "notes", "writing"], category: .objects(.household)),
-        Emoji(id: "closedBook", character: "📕", name: "Closed Book", keywords: ["read", "library", "red", "literature"], category: .objects(.office)),
-        Emoji(id: "openBook", character: "📖", name: "Open Book", keywords: ["reading", "study", "learn", "literature"], category: .objects(.office)),
-        Emoji(id: "greenBook", character: "📗", name: "Green Book", keywords: ["read", "library", "literature", "study"], category: .objects(.office)),
-        Emoji(id: "blueBook", character: "📘", name: "Blue Book", keywords: ["read", "library", "literature", "study"], category: .objects(.office)),
-        Emoji(id: "orangeBook", character: "📙", name: "Orange Book", keywords: ["read", "library", "literature", "study"], category: .objects(.office)),
-        Emoji(id: "books", character: "📚", name: "Books", keywords: ["reading", "library", "stack", "literature"], category: .objects(.office)),
-        Emoji(id: "notebook", character: "📓", name: "Notebook", keywords: ["notes", "writing", "journal", "school"], category: .objects(.household)),
-        Emoji(id: "ledger", character: "📒", name: "Ledger", keywords: ["notebook", "accounting", "book", "journal"], category: .objects(.household)),
-        Emoji(id: "pageWithCurl", character: "📃", name: "Page With Curl", keywords: ["document", "paper", "sheet", "text"], category: .objects(.office)),
-        Emoji(id: "scroll", character: "📜", name: "Scroll", keywords: ["ancient", "parchment", "document", "old"], category: .objects(.office)),
-        Emoji(id: "pageFacingUp", character: "📄", name: "Page Facing Up", keywords: ["document", "paper", "text", "sheet"], category: .objects(.office)),
-        Emoji(id: "newspaper", character: "📰", name: "Newspaper", keywords: ["news", "paper", "press", "article"], category: .objects(.office)),
-        Emoji(id: "rolledUpNewspaper", character: "🗞️", name: "Rolled Up Newspaper", keywords: ["news", "paper", "delivery"], category: .objects(.office)),
-        Emoji(id: "bookmarkTabs", character: "📑", name: "Bookmark Tabs", keywords: ["pages", "organization", "dividers"], category: .objects(.office)),
-        Emoji(id: "bookmark", character: "🔖", name: "Bookmark", keywords: ["book", "page", "save", "marker"], category: .objects(.office)),
-        Emoji(id: "label", character: "🏷️", name: "Label", keywords: ["tag", "price", "sticker"], category: .objects(.office)),
-        Emoji(id: "moneyBag", character: "💰", name: "Money Bag", keywords: ["cash", "rich", "wealth", "dollar"], category: .objects(.office)),
-        Emoji(id: "coin", character: "🪙", name: "Coin", keywords: ["money", "currency", "gold", "change"], category: .objects(.office)),
-        Emoji(id: "yenBanknote", character: "💴", name: "Yen Banknote", keywords: ["money", "japan", "currency", "cash"], category: .objects(.office)),
-        Emoji(id: "dollarBanknote", character: "💵", name: "Dollar Banknote", keywords: ["money", "cash", "currency", "usd"], category: .objects(.office)),
-        Emoji(id: "euroBanknote", character: "💶", name: "Euro Banknote", keywords: ["money", "currency", "cash", "europe"], category: .objects(.office)),
-        Emoji(id: "poundBanknote", character: "💷", name: "Pound Banknote", keywords: ["money", "currency", "uk", "british"], category: .objects(.office)),
-        Emoji(id: "moneyWithWings", character: "💸", name: "Money With Wings", keywords: ["spending", "flying", "losing", "expense"], category: .objects(.office)),
-        Emoji(id: "creditCard", character: "💳", name: "Credit Card", keywords: ["payment", "purchase", "plastic", "visa"], category: .objects(.office)),
-        Emoji(id: "receipt", character: "🧾", name: "Receipt", keywords: ["bill", "payment", "invoice", "purchase"], category: .objects(.tool)),
-        Emoji(id: "chartIncreasingWithYen", character: "💹", name: "Chart Increasing With Yen", keywords: ["stocks", "market", "growth", "finance"], category: .objects(.office)),
-        Emoji(id: "envelope", character: "✉️", name: "Envelope", keywords: ["mail", "letter", "send", "post"], category: .objects(.office)),
-        Emoji(id: "eMail", character: "📧", name: "E Mail", keywords: ["email", "message", "internet", "send"], category: .objects(.tool)),
-        Emoji(id: "incomingEnvelope", character: "📨", name: "Incoming Envelope", keywords: ["mail", "receive", "letter", "arrival"], category: .objects(.office)),
-        Emoji(id: "envelopeWithArrow", character: "📩", name: "Envelope With Arrow", keywords: ["mail", "send", "outgoing", "message"], category: .objects(.office)),
-        Emoji(id: "outboxTray", character: "📤", name: "Outbox Tray", keywords: ["mail", "send", "sent", "out"], category: .objects(.tool)),
-        Emoji(id: "inboxTray", character: "📥", name: "Inbox Tray", keywords: ["mail", "receive", "incoming", "in"], category: .objects(.office)),
-        Emoji(id: "package", character: "📦", name: "Package", keywords: ["box", "delivery", "shipping", "parcel"], category: .objects(.office)),
-        Emoji(id: "closedMailboxWithRaisedFlag", character: "📫", name: "Closed Mailbox With Raised Flag", keywords: ["mail", "post", "you've got mail"], category: .objects(.office)),
-        Emoji(id: "closedMailboxWithLoweredFlag", character: "📪", name: "Closed Mailbox With Lowered Flag", keywords: ["mail", "post", "empty"], category: .objects(.office)),
-        Emoji(id: "openMailboxWithRaisedFlag", character: "📬", name: "Open Mailbox With Raised Flag", keywords: ["mail", "post", "received"], category: .objects(.office)),
-        Emoji(id: "openMailboxWithLoweredFlag", character: "📭", name: "Open Mailbox With Lowered Flag", keywords: ["mail", "post", "empty"], category: .objects(.office)),
-        Emoji(id: "postbox", character: "📮", name: "Postbox", keywords: ["mail", "letter", "send", "red"], category: .objects(.office)),
-        Emoji(id: "ballotBoxWithBallot", character: "🗳️", name: "Ballot Box With Ballot", keywords: ["vote", "election", "democracy", "voting"], category: .objects(.office)),
-        Emoji(id: "pencil", character: "✏️", name: "Pencil", keywords: ["write", "draw", "school", "eraser"], category: .objects(.office)),
-        Emoji(id: "blackNib", character: "✒️", name: "Black Nib", keywords: ["pen", "writing", "ink", "calligraphy"], category: .objects(.office)),
-        Emoji(id: "fountainPen", character: "🖋️", name: "Fountain Pen", keywords: ["writing", "ink", "fancy", "signature"], category: .objects(.accessory)),
-        Emoji(id: "pen", character: "🖊️", name: "Pen", keywords: ["writing", "ballpoint", "ink", "office"], category: .objects(.office)),
-        Emoji(id: "paintbrush", character: "🖌️", name: "Paintbrush", keywords: ["art", "painting", "draw", "creative"], category: .objects(.office)),
-        Emoji(id: "crayon", character: "🖍️", name: "Crayon", keywords: ["coloring", "kids", "draw", "wax"], category: .objects(.accessory)),
-        Emoji(id: "memo", character: "📝", name: "Memo", keywords: ["note", "writing", "document", "pencil"], category: .objects(.office)),
-        Emoji(id: "briefcase", character: "💼", name: "Briefcase", keywords: ["business", "work", "office", "professional"], category: .objects(.office)),
-        Emoji(id: "fileFolder", character: "📁", name: "File Folder", keywords: ["organize", "documents", "office", "files"], category: .objects(.office)),
-        Emoji(id: "openFileFolder", character: "📂", name: "Open File Folder", keywords: ["documents", "organize", "files", "office"], category: .objects(.office)),
-        Emoji(id: "cardIndexDividers", character: "🗂️", name: "Card Index Dividers", keywords: ["organize", "tabs", "filing", "office"], category: .objects(.office)),
-        Emoji(id: "calendar", character: "📅", name: "Calendar", keywords: ["date", "schedule", "plan", "day"], category: .objects(.office)),
-        Emoji(id: "tearOffCalendar", character: "📆", name: "Tear Off Calendar", keywords: ["date", "schedule", "daily", "day"], category: .objects(.office)),
-        Emoji(id: "spiralNotepad", character: "🗒️", name: "Spiral Notepad", keywords: ["notes", "writing", "memo", "pad"], category: .objects(.office)),
-        Emoji(id: "spiralCalendar", character: "🗓️", name: "Spiral Calendar", keywords: ["date", "schedule", "planner"], category: .objects(.office)),
-        Emoji(id: "cardIndex", character: "📇", name: "Card Index", keywords: ["rolodex", "contacts", "organize", "office"], category: .objects(.office)),
-        Emoji(id: "chartIncreasing", character: "📈", name: "Chart Increasing", keywords: ["growth", "trending up", "stocks", "success"], category: .objects(.office)),
-        Emoji(id: "chartDecreasing", character: "📉", name: "Chart Decreasing", keywords: ["loss", "trending down", "stocks", "decline"], category: .objects(.office)),
-        Emoji(id: "barChart", character: "📊", name: "Bar Chart", keywords: ["graph", "data", "statistics", "presentation"], category: .objects(.office)),
-        Emoji(id: "clipboard", character: "📋", name: "Clipboard", keywords: ["notes", "paper", "list", "office"], category: .objects(.tool)),
-        Emoji(id: "pushpin", character: "📌", name: "Pushpin", keywords: ["pin", "tack", "notice", "board"], category: .objects(.office)),
-        Emoji(id: "roundPushpin", character: "📍", name: "Round Pushpin", keywords: ["location", "pin", "map", "marker"], category: .objects(.office)),
-        Emoji(id: "paperclip", character: "📎", name: "Paperclip", keywords: ["attach", "office", "clip", "paper"], category: .objects(.office)),
-        Emoji(id: "linkedPaperclips", character: "🖇️", name: "Linked Paperclips", keywords: ["attach", "office", "connected"], category: .objects(.office)),
-        Emoji(id: "straightRuler", character: "📏", name: "Straight Ruler", keywords: ["measure", "school", "draw", "line"], category: .objects(.office)),
-        Emoji(id: "triangularRuler", character: "📐", name: "Triangular Ruler", keywords: ["measure", "geometry", "school", "angle"], category: .objects(.office)),
-        Emoji(id: "scissors", character: "✂️", name: "Scissors", keywords: ["cut", "craft", "sharp", "snip"], category: .objects(.office)),
-        Emoji(id: "cardFileBox", character: "🗃️", name: "Card File Box", keywords: ["organize", "filing", "storage", "office"], category: .objects(.office)),
-        Emoji(id: "fileCabinet", character: "🗄️", name: "File Cabinet", keywords: ["storage", "office", "filing", "organize"], category: .objects(.tool)),
-        Emoji(id: "wastebasket", character: "🗑️", name: "Wastebasket", keywords: ["trash", "garbage", "bin", "delete"], category: .objects(.household)),
-        Emoji(id: "locked", character: "🔒", name: "Locked", keywords: ["secure", "padlock", "closed", "privacy"], category: .objects(.tool)),
-        Emoji(id: "unlocked", character: "🔓", name: "Unlocked", keywords: ["open", "padlock", "unsecure", "access"], category: .objects(.office)),
-        Emoji(id: "lockedWithPen", character: "🔏", name: "Locked With Pen", keywords: ["secure", "document", "privacy", "signature"], category: .objects(.office)),
-        Emoji(id: "lockedWithKey", character: "🔐", name: "Locked With Key", keywords: ["secure", "locked", "padlock", "safe"], category: .objects(.tool)),
-        Emoji(id: "key", character: "🔑", name: "Key", keywords: ["unlock", "door", "access", "security"], category: .objects(.tool)),
-        Emoji(id: "oldKey", character: "🗝️", name: "Old Key", keywords: ["antique", "vintage", "unlock", "skeleton"], category: .objects(.tool)),
-        Emoji(id: "hammer", character: "🔨", name: "Hammer", keywords: ["tool", "nail", "build", "construction"], category: .objects(.tool)),
-        Emoji(id: "axe", character: "🪓", name: "Axe", keywords: ["tool", "chop", "wood", "lumber"], category: .objects(.tool)),
-        Emoji(id: "pick", character: "⛏️", name: "Pick", keywords: ["tool", "mine", "dig", "pickaxe"], category: .objects(.tool)),
-        Emoji(id: "hammerAndPick", character: "⚒️", name: "Hammer And Pick", keywords: ["tools", "mining", "construction", "work"], category: .objects(.tool)),
-        Emoji(id: "hammerAndWrench", character: "🛠️", name: "Hammer And Wrench", keywords: ["tools", "repair", "fix", "maintenance"], category: .objects(.tool)),
-        Emoji(id: "dagger", character: "🗡️", name: "Dagger", keywords: ["knife", "weapon", "blade", "sharp"], category: .objects(.tool)),
-        Emoji(id: "crossedSwords", character: "⚔️", name: "Crossed Swords", keywords: ["battle", "fight", "weapons", "medieval"], category: .objects(.tool)),
-        Emoji(id: "bomb", character: "💣", name: "Bomb", keywords: ["explosive", "danger", "blast", "explosive"], category: .objects(.tool)),
-        Emoji(id: "boomerang", character: "🪃", name: "Boomerang", keywords: ["australian", "throw", "return", "weapon"], category: .objects(.household)),
-        Emoji(id: "bowAndArrow", character: "🏹", name: "Bow And Arrow", keywords: ["archery", "weapon", "shoot", "target"], category: .objects(.tool)),
-        Emoji(id: "shield", character: "🛡️", name: "Shield", keywords: ["protection", "defense", "armor", "medieval"], category: .objects(.tool)),
-        Emoji(id: "carpentrySaw", character: "🪚", name: "Carpentry Saw", keywords: ["tool", "cut", "wood", "construction"], category: .objects(.office)),
-        Emoji(id: "wrench", character: "🔧", name: "Wrench", keywords: ["tool", "spanner", "fix", "mechanic"], category: .objects(.tool)),
-        Emoji(id: "screwdriver", character: "🪛", name: "Screwdriver", keywords: ["tool", "screw", "fix", "repair"], category: .objects(.tool)),
-        Emoji(id: "nutAndBolt", character: "🔩", name: "Nut And Bolt", keywords: ["tool", "hardware", "fastener", "mechanic"], category: .objects(.tool)),
-        Emoji(id: "gear", character: "⚙️", name: "Gear", keywords: ["settings", "cog", "mechanical", "machinery"], category: .objects(.tool)),
-        Emoji(id: "clamp", character: "🗜️", name: "Clamp", keywords: ["tool", "vice", "hold", "squeeze"], category: .objects(.household)),
-        Emoji(id: "balanceScale", character: "⚖️", name: "Balance Scale", keywords: ["justice", "law", "weight", "fair"], category: .objects(.tool)),
-        Emoji(id: "whiteCane", character: "🦯", name: "White Cane", keywords: ["blind", "accessibility", "visually impaired", "walking stick"], category: .objects(.tool)),
-        Emoji(id: "link", character: "🔗", name: "Link", keywords: ["chain", "connection", "url", "hyperlink"], category: .objects(.office)),
-        Emoji(id: "chains", character: "⛓️", name: "Chains", keywords: ["links", "metal", "locked", "bound"], category: .objects(.office)),
-        Emoji(id: "hook", character: "🪝", name: "Hook", keywords: ["fishing", "hang", "catch", "pirate"], category: .objects(.tool)),
-        Emoji(id: "toolbox", character: "🧰", name: "Toolbox", keywords: ["tools", "kit", "repair", "handy"], category: .objects(.tool)),
-        Emoji(id: "magnet", character: "🧲", name: "Magnet", keywords: ["attract", "pull", "magnetic", "metal"], category: .objects(.tool)),
-        Emoji(id: "ladder", character: "🪜", name: "Ladder", keywords: ["climb", "steps", "height", "rungs"], category: .objects(.tool)),
-        Emoji(id: "alembic", character: "⚗️", name: "Alembic", keywords: ["chemistry", "science", "flask", "distill"], category: .objects(.tool)),
-        Emoji(id: "testTube", character: "🧪", name: "Test Tube", keywords: ["science", "chemistry", "lab", "experiment"], category: .objects(.tool)),
-        Emoji(id: "petriDish", character: "🧫", name: "Petri Dish", keywords: ["science", "lab", "bacteria", "culture"], category: .objects(.tool)),
-        Emoji(id: "dna", character: "🧬", name: "Dna", keywords: ["genetics", "science", "double helix", "genes"], category: .objects(.medical)),
-        Emoji(id: "microscope", character: "🔬", name: "Microscope", keywords: ["science", "lab", "magnify", "study"], category: .objects(.tool)),
-        Emoji(id: "telescope", character: "🔭", name: "Telescope", keywords: ["astronomy", "stars", "space", "observe"], category: .objects(.tool)),
-        Emoji(id: "satelliteAntenna", character: "📡", name: "Satellite Antenna", keywords: ["dish", "communication", "signal", "receiver"], category: .objects(.tool)),
-        Emoji(id: "syringe", character: "💉", name: "Syringe", keywords: ["needle", "injection", "shot", "vaccine"], category: .objects(.accessory)),
-        Emoji(id: "dropOfBlood", character: "🩸", name: "Drop Of Blood", keywords: ["blood", "red", "donate", "injury"], category: .objects(.medical)),
-        Emoji(id: "pill", character: "💊", name: "Pill", keywords: ["medicine", "drug", "capsule", "medication"], category: .objects(.medical)),
-        Emoji(id: "adhesiveBandage", character: "🩹", name: "Adhesive Bandage", keywords: ["band aid", "injury", "first aid", "cut"], category: .objects(.medical)),
-        Emoji(id: "crutch", character: "🩼", name: "Crutch", keywords: ["injured", "walking", "support", "broken"], category: .objects(.medical)),
-        Emoji(id: "stethoscope", character: "🩺", name: "Stethoscope", keywords: ["doctor", "medical", "heartbeat", "checkup"], category: .objects(.medical)),
-        Emoji(id: "xRay", character: "🩻", name: "X Ray", keywords: ["medical", "bones", "scan", "radiograph"], category: .objects(.music)),
-        Emoji(id: "door", character: "🚪", name: "Door", keywords: ["entrance", "exit", "open", "close"], category: .objects(.office)),
-        Emoji(id: "elevator", character: "🛗", name: "Elevator", keywords: ["lift", "up", "down", "building"], category: .objects(.tool)),
-        Emoji(id: "mirror", character: "🪞", name: "Mirror", keywords: ["reflection", "look", "vanity", "glass"], category: .objects(.tool)),
-        Emoji(id: "window", character: "🪟", name: "Window", keywords: ["glass", "view", "open", "light"], category: .objects(.office)),
-        Emoji(id: "bed", character: "🛏️", name: "Bed", keywords: ["sleep", "rest", "furniture", "bedroom"], category: .objects(.household)),
-        Emoji(id: "couchAndLamp", character: "🛋️", name: "Couch And Lamp", keywords: ["sofa", "furniture", "living room", "relax"], category: .objects(.household)),
-        Emoji(id: "chair", character: "🪑", name: "Chair", keywords: ["sit", "furniture", "seat"], category: .objects(.household)),
-        Emoji(id: "toilet", character: "🚽", name: "Toilet", keywords: ["bathroom", "potty", "restroom", "loo"], category: .objects(.household)),
-        Emoji(id: "plunger", character: "🪠", name: "Plunger", keywords: ["toilet", "unclog", "bathroom", "plumber"], category: .objects(.household)),
-        Emoji(id: "shower", character: "🚿", name: "Shower", keywords: ["bath", "clean", "water", "wash"], category: .objects(.household)),
-        Emoji(id: "bathtub", character: "🛁", name: "Bathtub", keywords: ["bath", "soak", "relax", "clean"], category: .objects(.household)),
-        Emoji(id: "mouseTrap", character: "🪤", name: "Mouse Trap", keywords: ["catch", "rodent", "pest", "snap"], category: .objects(.tech)),
-        Emoji(id: "razor", character: "🪒", name: "Razor", keywords: ["shave", "blade", "grooming", "shaving"], category: .objects(.household)),
-        Emoji(id: "lotionBottle", character: "🧴", name: "Lotion Bottle", keywords: ["moisturizer", "cream", "skincare", "pump"], category: .objects(.household)),
-        Emoji(id: "safetyPin", character: "🧷", name: "Safety Pin", keywords: ["pin", "fasten", "attach", "diaper"], category: .objects(.household)),
-        Emoji(id: "broom", character: "🧹", name: "Broom", keywords: ["sweep", "clean", "witch", "tidy"], category: .objects(.household)),
-        Emoji(id: "basket", character: "🧺", name: "Basket", keywords: ["laundry", "wicker", "carry", "storage"], category: .objects(.household)),
-        Emoji(id: "rollOfPaper", character: "🧻", name: "Roll Of Paper", keywords: ["toilet paper", "bathroom", "tissue"], category: .objects(.household)),
-        Emoji(id: "bucket", character: "🪣", name: "Bucket", keywords: ["pail", "water", "carry", "clean"], category: .objects(.household)),
-        Emoji(id: "soap", character: "🧼", name: "Soap", keywords: ["clean", "wash", "bar", "hygiene"], category: .objects(.household)),
-        Emoji(id: "bubbles", character: "🫧", name: "Bubbles", keywords: ["soap", "foam", "clean", "floating"], category: .objects(.household)),
-        Emoji(id: "toothbrush", character: "🪥", name: "Toothbrush", keywords: ["dental", "clean", "teeth", "brush"], category: .objects(.household)),
-        Emoji(id: "sponge", character: "🧽", name: "Sponge", keywords: ["clean", "scrub", "wash", "absorbent"], category: .objects(.household)),
-        Emoji(id: "fireExtinguisher", character: "🧯", name: "Fire Extinguisher", keywords: ["safety", "emergency", "red", "put out"], category: .objects(.household)),
-        Emoji(id: "shoppingCart", character: "🛒", name: "Shopping Cart", keywords: ["store", "grocery", "trolley", "buy"], category: .objects(.household)),
-        Emoji(id: "cigarette", character: "🚬", name: "Cigarette", keywords: ["smoking", "tobacco", "smoke", "bad"], category: .objects(.household)),
-        Emoji(id: "coffin", character: "⚰️", name: "Coffin", keywords: ["death", "funeral", "casket", "burial"], category: .objects(.household)),
-        Emoji(id: "headstone", character: "🪦", name: "Headstone", keywords: ["grave", "death", "tombstone", "cemetery"], category: .objects(.household)),
-        Emoji(id: "funeralUrn", character: "⚱️", name: "Funeral Urn", keywords: ["ashes", "death", "cremation", "memorial"], category: .objects(.household)),
-        Emoji(id: "nazarAmulet", character: "🧿", name: "Nazar Amulet", keywords: ["evil eye", "protection", "turkish", "blue"], category: .objects(.tool)),
-        Emoji(id: "hamsa", character: "🪬", name: "Hamsa", keywords: ["hand", "protection", "middle eastern", "lucky"], category: .objects(.tool)),
-        Emoji(id: "moai", character: "🗿", name: "Moai", keywords: ["easter island", "statue", "stone", "head"], category: .objects(.tool)),
-        Emoji(id: "placard", character: "🪧", name: "Placard", keywords: ["sign", "protest", "announcement", "board"], category: .objects(.office)),
-        Emoji(id: "identificationCard", character: "🪪", name: "Identification Card", keywords: ["id", "license", "card", "identity"], category: .objects(.office))
+        Emoji(
+            id: "glasses",
+            character: "👓",
+            name: "Glasses",
+            keywords: ["eyewear", "vision", "spectacles", "nerdy"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "sunglasses",
+            character: "🕶️",
+            name: "Sunglasses",
+            keywords: ["cool", "shades", "sunny", "fashion"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "goggles",
+            character: "🥽",
+            name: "Goggles",
+            keywords: ["swim", "safety", "ski", "protection"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "labCoat",
+            character: "🥼",
+            name: "Lab Coat",
+            keywords: ["scientist", "doctor", "medical", "white"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "safetyVest",
+            character: "🦺",
+            name: "Safety Vest",
+            keywords: ["construction", "visibility", "work", "orange"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "necktie",
+            character: "👔",
+            name: "Necktie",
+            keywords: ["formal", "business", "professional", "suit"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "tShirt",
+            character: "👕",
+            name: "T Shirt",
+            keywords: ["shirt", "casual", "clothing", "top"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "jeans",
+            character: "👖",
+            name: "Jeans",
+            keywords: ["pants", "denim", "casual", "blue"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "scarf",
+            character: "🧣",
+            name: "Scarf",
+            keywords: ["warm", "winter", "neck", "accessory"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "gloves",
+            character: "🧤",
+            name: "Gloves",
+            keywords: ["hands", "warm", "winter", "accessory"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "coat",
+            character: "🧥",
+            name: "Coat",
+            keywords: ["jacket", "warm", "winter", "outerwear"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "socks",
+            character: "🧦",
+            name: "Socks",
+            keywords: ["feet", "clothing", "warm", "pair"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "dress",
+            character: "👗",
+            name: "Dress",
+            keywords: ["clothing", "woman", "formal", "fashion"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "kimono",
+            character: "👘",
+            name: "Kimono",
+            keywords: ["japanese", "traditional", "clothing", "robe"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "sari",
+            character: "🥻",
+            name: "Sari",
+            keywords: ["indian", "traditional", "clothing", "woman"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "onePieceSwimsuit",
+            character: "🩱",
+            name: "One Piece Swimsuit",
+            keywords: ["swimming", "beach", "pool", "bathing suit"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "briefs",
+            character: "🩲",
+            name: "Briefs",
+            keywords: ["underwear", "swim", "shorts"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "shorts",
+            character: "🩳",
+            name: "Shorts",
+            keywords: ["pants", "summer", "casual", "swim"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "bikini",
+            character: "👙",
+            name: "Bikini",
+            keywords: ["swimsuit", "beach", "two piece", "summer"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "womanSClothes",
+            character: "👚",
+            name: "Woman S Clothes",
+            keywords: ["blouse", "shirt", "top", "clothing"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "foldingHandFan",
+            character: "🪭",
+            name: "Folding Hand Fan",
+            keywords: ["cool", "asian", "hot", "air"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "purse",
+            character: "👛",
+            name: "Purse",
+            keywords: ["bag", "wallet", "money", "coin"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "handbag",
+            character: "👜",
+            name: "Handbag",
+            keywords: ["bag", "purse", "accessory", "fashion"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "clutchBag",
+            character: "👝",
+            name: "Clutch Bag",
+            keywords: ["purse", "fancy", "formal", "small"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "shoppingBags",
+            character: "🛍️",
+            name: "Shopping Bags",
+            keywords: ["retail", "purchase", "store", "buy"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "backpack",
+            character: "🎒",
+            name: "Backpack",
+            keywords: ["bag", "school", "hiking", "rucksack"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "thongSandal",
+            character: "🩴",
+            name: "Thong Sandal",
+            keywords: ["flip flop", "beach", "summer", "casual"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "manSShoe",
+            character: "👞",
+            name: "Man S Shoe",
+            keywords: ["formal", "dress", "footwear", "leather"],
+            category: .objects(.clothing)
+        ),
+        Emoji(
+            id: "runningShoe",
+            character: "👟",
+            name: "Running Shoe",
+            keywords: ["sneaker", "athletic", "sport", "tennis"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "hikingBoot",
+            character: "🥾",
+            name: "Hiking Boot",
+            keywords: ["outdoor", "trail", "sturdy", "adventure"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "flatShoe",
+            character: "🥿",
+            name: "Flat Shoe",
+            keywords: ["casual", "comfortable", "loafer"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "highHeeledShoe",
+            character: "👠",
+            name: "High Heeled Shoe",
+            keywords: ["heel", "fancy", "formal", "woman"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "womanSSandal",
+            character: "👡",
+            name: "Woman S Sandal",
+            keywords: ["footwear", "summer", "open toe"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "balletShoes",
+            character: "🩰",
+            name: "Ballet Shoes",
+            keywords: ["dance", "pointe", "pink", "graceful"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "womanSBoot",
+            character: "👢",
+            name: "Woman S Boot",
+            keywords: ["footwear", "fashion", "high", "stylish"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "hairPick",
+            character: "🪮",
+            name: "Hair Pick",
+            keywords: ["comb", "afro", "grooming", "style"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "crown",
+            character: "👑",
+            name: "Crown",
+            keywords: ["king", "queen", "royal", "gold"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "womanSHat",
+            character: "👒",
+            name: "Woman S Hat",
+            keywords: ["sun", "fashion", "accessory", "derby"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "topHat",
+            character: "🎩",
+            name: "Top Hat",
+            keywords: ["formal", "fancy", "gentleman", "magician"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "graduationCap",
+            character: "🎓",
+            name: "Graduation Cap",
+            keywords: ["school", "education", "mortar board", "diploma"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "billedCap",
+            character: "🧢",
+            name: "Billed Cap",
+            keywords: ["baseball cap", "hat", "casual", "sports"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "militaryHelmet",
+            character: "🪖",
+            name: "Military Helmet",
+            keywords: ["army", "soldier", "protection", "war"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "rescueWorkerSHelmet",
+            character: "⛑️",
+            name: "Rescue Worker S Helmet",
+            keywords: ["safety", "firefighter", "emergency", "hard hat"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "prayerBeads",
+            character: "📿",
+            name: "Prayer Beads",
+            keywords: ["rosary", "meditation", "religious", "beads"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "lipstick",
+            character: "💄",
+            name: "Lipstick",
+            keywords: ["makeup", "cosmetic", "beauty", "red"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "ring",
+            character: "💍",
+            name: "Ring",
+            keywords: ["wedding", "marriage", "fiance", "proposal", "engagement"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "gemStone",
+            character: "💎",
+            name: "Gem Stone",
+            keywords: ["diamond", "jewel", "expensive", "precious"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "mutedSpeaker",
+            character: "🔇",
+            name: "Muted Speaker",
+            keywords: ["silent", "quiet", "no sound", "volume"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "speakerLowVolume",
+            character: "🔈",
+            name: "Speaker Low Volume",
+            keywords: ["quiet", "soft", "sound", "audio"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "speakerMediumVolume",
+            character: "🔉",
+            name: "Speaker Medium Volume",
+            keywords: ["moderate", "sound", "audio", "volume"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "speakerHighVolume",
+            character: "🔊",
+            name: "Speaker High Volume",
+            keywords: ["loud", "sound", "audio", "max"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "loudspeaker",
+            character: "📢",
+            name: "Loudspeaker",
+            keywords: ["announce", "amplify", "broadcast", "megaphone"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "megaphone",
+            character: "📣",
+            name: "Megaphone",
+            keywords: ["announce", "cheer", "loud", "bullhorn"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "postalHorn",
+            character: "📯",
+            name: "Postal Horn",
+            keywords: ["bugle", "announcement", "mail"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "bell",
+            character: "🔔",
+            name: "Bell",
+            keywords: ["notification", "ring", "alarm", "ding"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "bellWithSlash",
+            character: "🔕",
+            name: "Bell With Slash",
+            keywords: ["silent", "mute", "no notifications", "off"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "musicalScore",
+            character: "🎼",
+            name: "Musical Score",
+            keywords: ["sheet music", "notes", "composition", "staff"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "musicalNote",
+            character: "🎵",
+            name: "Musical Note",
+            keywords: ["music", "sing", "melody", "song"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "musicalNotes",
+            character: "🎶",
+            name: "Musical Notes",
+            keywords: ["music", "song", "melody", "singing"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "studioMicrophone",
+            character: "🎙️",
+            name: "Studio Microphone",
+            keywords: ["podcast", "recording", "broadcast", "radio"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "levelSlider",
+            character: "🎚️",
+            name: "Level Slider",
+            keywords: ["mixing", "audio", "control", "adjust"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "controlKnobs",
+            character: "🎛️",
+            name: "Control Knobs",
+            keywords: ["mixing", "audio", "adjust", "dials"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "microphone",
+            character: "🎤",
+            name: "Microphone",
+            keywords: ["singing", "karaoke", "recording", "performance"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "headphone",
+            character: "🎧",
+            name: "Headphone",
+            keywords: ["music", "listen", "audio", "earphones"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "radio",
+            character: "📻",
+            name: "Radio",
+            keywords: ["music", "broadcast", "station", "listen"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "saxophone",
+            character: "🎷",
+            name: "Saxophone",
+            keywords: ["jazz", "instrument", "music", "brass"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "accordion",
+            character: "🪗",
+            name: "Accordion",
+            keywords: ["instrument", "music", "squeezebox", "folk"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "guitar",
+            character: "🎸",
+            name: "Guitar",
+            keywords: ["music", "rock", "instrument", "strings"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "musicalKeyboard",
+            character: "🎹",
+            name: "Musical Keyboard",
+            keywords: ["piano", "music", "instrument", "keys"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "trumpet",
+            character: "🎺",
+            name: "Trumpet",
+            keywords: ["brass", "music", "instrument", "horn"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "violin",
+            character: "🎻",
+            name: "Violin",
+            keywords: ["strings", "music", "instrument", "classical"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "banjo",
+            character: "🪕",
+            name: "Banjo",
+            keywords: ["strings", "music", "country", "folk"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "drum",
+            character: "🥁",
+            name: "Drum",
+            keywords: ["music", "percussion", "beat", "sticks"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "longDrum",
+            character: "🪘",
+            name: "Long Drum",
+            keywords: ["music", "percussion", "african", "tribal"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "maracas",
+            character: "🪇",
+            name: "Maracas",
+            keywords: ["music", "percussion", "shake", "latin"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "flute",
+            character: "🪈",
+            name: "Flute",
+            keywords: ["music", "instrument", "woodwind", "blow"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "mobilePhone",
+            character: "📱",
+            name: "Mobile Phone",
+            keywords: ["smartphone", "cell", "iphone", "device"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "mobilePhoneWithArrow",
+            character: "📲",
+            name: "Mobile Phone With Arrow",
+            keywords: ["call", "incoming", "smartphone", "receive"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "telephone",
+            character: "☎️",
+            name: "Telephone",
+            keywords: ["phone", "landline", "call", "retro"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "telephoneReceiver",
+            character: "📞",
+            name: "Telephone Receiver",
+            keywords: ["phone", "call", "handset"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "pager",
+            character: "📟",
+            name: "Pager",
+            keywords: ["beeper", "retro", "device", "old"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "faxMachine",
+            character: "📠",
+            name: "Fax Machine",
+            keywords: ["document", "send", "office", "old"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "battery",
+            character: "🔋",
+            name: "Battery",
+            keywords: ["power", "charge", "energy", "full"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "lowBattery",
+            character: "🪫",
+            name: "Low Battery",
+            keywords: ["power", "empty", "dying", "charge"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "electricPlug",
+            character: "🔌",
+            name: "Electric Plug",
+            keywords: ["power", "electricity", "outlet", "charge"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "laptop",
+            character: "💻",
+            name: "Laptop",
+            keywords: ["computer", "portable", "work", "notebook"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "desktopComputer",
+            character: "🖥️",
+            name: "Desktop Computer",
+            keywords: ["pc", "monitor", "work", "screen"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "printer",
+            character: "🖨️",
+            name: "Printer",
+            keywords: ["print", "paper", "office", "document"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "keyboard",
+            character: "⌨️",
+            name: "Keyboard",
+            keywords: ["typing", "computer", "keys", "input"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "computerMouse",
+            character: "🖱️",
+            name: "Computer Mouse",
+            keywords: ["click", "pointer", "computer", "device"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "trackball",
+            character: "🖲️",
+            name: "Trackball",
+            keywords: ["mouse", "pointer", "computer", "ball"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "computerDisk",
+            character: "💽",
+            name: "Computer Disk",
+            keywords: ["minidisc", "data", "storage", "retro"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "floppyDisk",
+            character: "💾",
+            name: "Floppy Disk",
+            keywords: ["save", "storage", "retro", "data"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "opticalDisk",
+            character: "💿",
+            name: "Optical Disk",
+            keywords: ["cd", "music", "data", "disc"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "dvd",
+            character: "📀",
+            name: "Dvd",
+            keywords: ["disc", "movie", "video", "data"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "abacus",
+            character: "🧮",
+            name: "Abacus",
+            keywords: ["calculator", "counting", "math", "beads"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "movieCamera",
+            character: "🎥",
+            name: "Movie Camera",
+            keywords: ["film", "cinema", "recording", "video"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "filmFrames",
+            character: "🎞️",
+            name: "Film Frames",
+            keywords: ["movie", "cinema", "strip", "reel"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "filmProjector",
+            character: "📽️",
+            name: "Film Projector",
+            keywords: ["movie", "cinema", "old", "reel"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "clapperBoard",
+            character: "🎬",
+            name: "Clapper Board",
+            keywords: ["movie", "cinema", "action", "film"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "television",
+            character: "📺",
+            name: "Television",
+            keywords: ["tv", "screen", "watch", "show"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "camera",
+            character: "📷",
+            name: "Camera",
+            keywords: ["photo", "picture", "photography", "snap"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "cameraWithFlash",
+            character: "📸",
+            name: "Camera With Flash",
+            keywords: ["photo", "picture", "snap", "bright"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "videoCamera",
+            character: "📹",
+            name: "Video Camera",
+            keywords: ["recording", "camcorder", "film"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "videocassette",
+            character: "📼",
+            name: "Videocassette",
+            keywords: ["vhs", "tape", "retro", "movie"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "magnifyingGlassTiltedLeft",
+            character: "🔍",
+            name: "Magnifying Glass Tilted Left",
+            keywords: ["search", "find", "zoom", "look"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "magnifyingGlassTiltedRight",
+            character: "🔎",
+            name: "Magnifying Glass Tilted Right",
+            keywords: ["search", "find", "zoom", "look"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "candle",
+            character: "🕯️",
+            name: "Candle",
+            keywords: ["light", "flame", "wax", "romantic"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "lightBulb",
+            character: "💡",
+            name: "Light Bulb",
+            keywords: ["idea", "bright", "electricity", "think"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "flashlight",
+            character: "🔦",
+            name: "Flashlight",
+            keywords: ["torch", "light", "beam", "dark"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "redPaperLantern",
+            character: "🏮",
+            name: "Red Paper Lantern",
+            keywords: ["japanese", "izakaya", "light", "traditional"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "diyaLamp",
+            character: "🪔",
+            name: "Diya Lamp",
+            keywords: ["oil", "indian", "diwali", "light"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "notebookWithDecorativeCover",
+            character: "📔",
+            name: "Notebook With Decorative Cover",
+            keywords: ["book", "journal", "notes", "writing"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "closedBook",
+            character: "📕",
+            name: "Closed Book",
+            keywords: ["read", "library", "red", "literature"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "openBook",
+            character: "📖",
+            name: "Open Book",
+            keywords: ["reading", "study", "learn", "literature"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "greenBook",
+            character: "📗",
+            name: "Green Book",
+            keywords: ["read", "library", "literature", "study"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "blueBook",
+            character: "📘",
+            name: "Blue Book",
+            keywords: ["read", "library", "literature", "study"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "orangeBook",
+            character: "📙",
+            name: "Orange Book",
+            keywords: ["read", "library", "literature", "study"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "books",
+            character: "📚",
+            name: "Books",
+            keywords: ["reading", "library", "stack", "literature"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "notebook",
+            character: "📓",
+            name: "Notebook",
+            keywords: ["notes", "writing", "journal", "school"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "ledger",
+            character: "📒",
+            name: "Ledger",
+            keywords: ["notebook", "accounting", "book", "journal"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "pageWithCurl",
+            character: "📃",
+            name: "Page With Curl",
+            keywords: ["document", "paper", "sheet", "text"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "scroll",
+            character: "📜",
+            name: "Scroll",
+            keywords: ["ancient", "parchment", "document", "old"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "pageFacingUp",
+            character: "📄",
+            name: "Page Facing Up",
+            keywords: ["document", "paper", "text", "sheet"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "newspaper",
+            character: "📰",
+            name: "Newspaper",
+            keywords: ["news", "paper", "press", "article"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "rolledUpNewspaper",
+            character: "🗞️",
+            name: "Rolled Up Newspaper",
+            keywords: ["news", "paper", "delivery"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "bookmarkTabs",
+            character: "📑",
+            name: "Bookmark Tabs",
+            keywords: ["pages", "organization", "dividers"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "bookmark",
+            character: "🔖",
+            name: "Bookmark",
+            keywords: ["book", "page", "save", "marker"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "label",
+            character: "🏷️",
+            name: "Label",
+            keywords: ["tag", "price", "sticker"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "moneyBag",
+            character: "💰",
+            name: "Money Bag",
+            keywords: ["cash", "rich", "wealth", "dollar"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "coin",
+            character: "🪙",
+            name: "Coin",
+            keywords: ["money", "currency", "gold", "change"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "yenBanknote",
+            character: "💴",
+            name: "Yen Banknote",
+            keywords: ["money", "japan", "currency", "cash"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "dollarBanknote",
+            character: "💵",
+            name: "Dollar Banknote",
+            keywords: ["money", "cash", "currency", "usd"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "euroBanknote",
+            character: "💶",
+            name: "Euro Banknote",
+            keywords: ["money", "currency", "cash", "europe"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "poundBanknote",
+            character: "💷",
+            name: "Pound Banknote",
+            keywords: ["money", "currency", "uk", "british"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "moneyWithWings",
+            character: "💸",
+            name: "Money With Wings",
+            keywords: ["spending", "flying", "losing", "expense"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "creditCard",
+            character: "💳",
+            name: "Credit Card",
+            keywords: ["payment", "purchase", "plastic", "visa"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "receipt",
+            character: "🧾",
+            name: "Receipt",
+            keywords: ["bill", "payment", "invoice", "purchase"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "chartIncreasingWithYen",
+            character: "💹",
+            name: "Chart Increasing With Yen",
+            keywords: ["stocks", "market", "growth", "finance"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "envelope",
+            character: "✉️",
+            name: "Envelope",
+            keywords: ["mail", "letter", "send", "post"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "eMail",
+            character: "📧",
+            name: "E Mail",
+            keywords: ["email", "message", "internet", "send"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "incomingEnvelope",
+            character: "📨",
+            name: "Incoming Envelope",
+            keywords: ["mail", "receive", "letter", "arrival"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "envelopeWithArrow",
+            character: "📩",
+            name: "Envelope With Arrow",
+            keywords: ["mail", "send", "outgoing", "message"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "outboxTray",
+            character: "📤",
+            name: "Outbox Tray",
+            keywords: ["mail", "send", "sent", "out"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "inboxTray",
+            character: "📥",
+            name: "Inbox Tray",
+            keywords: ["mail", "receive", "incoming", "in"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "package",
+            character: "📦",
+            name: "Package",
+            keywords: ["box", "delivery", "shipping", "parcel"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "closedMailboxWithRaisedFlag",
+            character: "📫",
+            name: "Closed Mailbox With Raised Flag",
+            keywords: ["mail", "post", "you've got mail"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "closedMailboxWithLoweredFlag",
+            character: "📪",
+            name: "Closed Mailbox With Lowered Flag",
+            keywords: ["mail", "post", "empty"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "openMailboxWithRaisedFlag",
+            character: "📬",
+            name: "Open Mailbox With Raised Flag",
+            keywords: ["mail", "post", "received"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "openMailboxWithLoweredFlag",
+            character: "📭",
+            name: "Open Mailbox With Lowered Flag",
+            keywords: ["mail", "post", "empty"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "postbox",
+            character: "📮",
+            name: "Postbox",
+            keywords: ["mail", "letter", "send", "red"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "ballotBoxWithBallot",
+            character: "🗳️",
+            name: "Ballot Box With Ballot",
+            keywords: ["vote", "election", "democracy", "voting"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "pencil",
+            character: "✏️",
+            name: "Pencil",
+            keywords: ["write", "draw", "school", "eraser"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "blackNib",
+            character: "✒️",
+            name: "Black Nib",
+            keywords: ["pen", "writing", "ink", "calligraphy"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "fountainPen",
+            character: "🖋️",
+            name: "Fountain Pen",
+            keywords: ["writing", "ink", "fancy", "signature"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "pen",
+            character: "🖊️",
+            name: "Pen",
+            keywords: ["writing", "ballpoint", "ink", "office"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "paintbrush",
+            character: "🖌️",
+            name: "Paintbrush",
+            keywords: ["art", "painting", "draw", "creative"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "crayon",
+            character: "🖍️",
+            name: "Crayon",
+            keywords: ["coloring", "kids", "draw", "wax"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "memo",
+            character: "📝",
+            name: "Memo",
+            keywords: ["note", "writing", "document", "pencil"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "briefcase",
+            character: "💼",
+            name: "Briefcase",
+            keywords: ["business", "work", "office", "professional"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "fileFolder",
+            character: "📁",
+            name: "File Folder",
+            keywords: ["organize", "documents", "office", "files"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "openFileFolder",
+            character: "📂",
+            name: "Open File Folder",
+            keywords: ["documents", "organize", "files", "office"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "cardIndexDividers",
+            character: "🗂️",
+            name: "Card Index Dividers",
+            keywords: ["organize", "tabs", "filing", "office"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "calendar",
+            character: "📅",
+            name: "Calendar",
+            keywords: ["date", "schedule", "plan", "day"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "tearOffCalendar",
+            character: "📆",
+            name: "Tear Off Calendar",
+            keywords: ["date", "schedule", "daily", "day"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "spiralNotepad",
+            character: "🗒️",
+            name: "Spiral Notepad",
+            keywords: ["notes", "writing", "memo", "pad"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "spiralCalendar",
+            character: "🗓️",
+            name: "Spiral Calendar",
+            keywords: ["date", "schedule", "planner"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "cardIndex",
+            character: "📇",
+            name: "Card Index",
+            keywords: ["rolodex", "contacts", "organize", "office"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "chartIncreasing",
+            character: "📈",
+            name: "Chart Increasing",
+            keywords: ["growth", "trending up", "stocks", "success"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "chartDecreasing",
+            character: "📉",
+            name: "Chart Decreasing",
+            keywords: ["loss", "trending down", "stocks", "decline"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "barChart",
+            character: "📊",
+            name: "Bar Chart",
+            keywords: ["graph", "data", "statistics", "presentation"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "clipboard",
+            character: "📋",
+            name: "Clipboard",
+            keywords: ["notes", "paper", "list", "office"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "pushpin",
+            character: "📌",
+            name: "Pushpin",
+            keywords: ["pin", "tack", "notice", "board"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "roundPushpin",
+            character: "📍",
+            name: "Round Pushpin",
+            keywords: ["location", "pin", "map", "marker"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "paperclip",
+            character: "📎",
+            name: "Paperclip",
+            keywords: ["attach", "office", "clip", "paper"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "linkedPaperclips",
+            character: "🖇️",
+            name: "Linked Paperclips",
+            keywords: ["attach", "office", "connected"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "straightRuler",
+            character: "📏",
+            name: "Straight Ruler",
+            keywords: ["measure", "school", "draw", "line"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "triangularRuler",
+            character: "📐",
+            name: "Triangular Ruler",
+            keywords: ["measure", "geometry", "school", "angle"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "scissors",
+            character: "✂️",
+            name: "Scissors",
+            keywords: ["cut", "craft", "sharp", "snip"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "cardFileBox",
+            character: "🗃️",
+            name: "Card File Box",
+            keywords: ["organize", "filing", "storage", "office"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "fileCabinet",
+            character: "🗄️",
+            name: "File Cabinet",
+            keywords: ["storage", "office", "filing", "organize"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "wastebasket",
+            character: "🗑️",
+            name: "Wastebasket",
+            keywords: ["trash", "garbage", "bin", "delete"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "locked",
+            character: "🔒",
+            name: "Locked",
+            keywords: ["secure", "padlock", "closed", "privacy"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "unlocked",
+            character: "🔓",
+            name: "Unlocked",
+            keywords: ["open", "padlock", "unsecure", "access"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "lockedWithPen",
+            character: "🔏",
+            name: "Locked With Pen",
+            keywords: ["secure", "document", "privacy", "signature"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "lockedWithKey",
+            character: "🔐",
+            name: "Locked With Key",
+            keywords: ["secure", "locked", "padlock", "safe"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "key",
+            character: "🔑",
+            name: "Key",
+            keywords: ["unlock", "door", "access", "security"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "oldKey",
+            character: "🗝️",
+            name: "Old Key",
+            keywords: ["antique", "vintage", "unlock", "skeleton"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "hammer",
+            character: "🔨",
+            name: "Hammer",
+            keywords: ["tool", "nail", "build", "construction"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "axe",
+            character: "🪓",
+            name: "Axe",
+            keywords: ["tool", "chop", "wood", "lumber"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "pick",
+            character: "⛏️",
+            name: "Pick",
+            keywords: ["tool", "mine", "dig", "pickaxe"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "hammerAndPick",
+            character: "⚒️",
+            name: "Hammer And Pick",
+            keywords: ["tools", "mining", "construction", "work"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "hammerAndWrench",
+            character: "🛠️",
+            name: "Hammer And Wrench",
+            keywords: ["tools", "repair", "fix", "maintenance"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "dagger",
+            character: "🗡️",
+            name: "Dagger",
+            keywords: ["knife", "weapon", "blade", "sharp"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "crossedSwords",
+            character: "⚔️",
+            name: "Crossed Swords",
+            keywords: ["battle", "fight", "weapons", "medieval"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "bomb",
+            character: "💣",
+            name: "Bomb",
+            keywords: ["explosive", "danger", "blast", "explosive"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "boomerang",
+            character: "🪃",
+            name: "Boomerang",
+            keywords: ["australian", "throw", "return", "weapon"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "bowAndArrow",
+            character: "🏹",
+            name: "Bow And Arrow",
+            keywords: ["archery", "weapon", "shoot", "target"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "shield",
+            character: "🛡️",
+            name: "Shield",
+            keywords: ["protection", "defense", "armor", "medieval"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "carpentrySaw",
+            character: "🪚",
+            name: "Carpentry Saw",
+            keywords: ["tool", "cut", "wood", "construction"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "wrench",
+            character: "🔧",
+            name: "Wrench",
+            keywords: ["tool", "spanner", "fix", "mechanic"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "screwdriver",
+            character: "🪛",
+            name: "Screwdriver",
+            keywords: ["tool", "screw", "fix", "repair"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "nutAndBolt",
+            character: "🔩",
+            name: "Nut And Bolt",
+            keywords: ["tool", "hardware", "fastener", "mechanic"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "gear",
+            character: "⚙️",
+            name: "Gear",
+            keywords: ["settings", "cog", "mechanical", "machinery"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "clamp",
+            character: "🗜️",
+            name: "Clamp",
+            keywords: ["tool", "vice", "hold", "squeeze"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "balanceScale",
+            character: "⚖️",
+            name: "Balance Scale",
+            keywords: ["justice", "law", "weight", "fair"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "whiteCane",
+            character: "🦯",
+            name: "White Cane",
+            keywords: ["blind", "accessibility", "visually impaired", "walking stick"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "link",
+            character: "🔗",
+            name: "Link",
+            keywords: ["chain", "connection", "url", "hyperlink"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "chains",
+            character: "⛓️",
+            name: "Chains",
+            keywords: ["links", "metal", "locked", "bound"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "hook",
+            character: "🪝",
+            name: "Hook",
+            keywords: ["fishing", "hang", "catch", "pirate"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "toolbox",
+            character: "🧰",
+            name: "Toolbox",
+            keywords: ["tools", "kit", "repair", "handy"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "magnet",
+            character: "🧲",
+            name: "Magnet",
+            keywords: ["attract", "pull", "magnetic", "metal"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "ladder",
+            character: "🪜",
+            name: "Ladder",
+            keywords: ["climb", "steps", "height", "rungs"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "alembic",
+            character: "⚗️",
+            name: "Alembic",
+            keywords: ["chemistry", "science", "flask", "distill"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "testTube",
+            character: "🧪",
+            name: "Test Tube",
+            keywords: ["science", "chemistry", "lab", "experiment"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "petriDish",
+            character: "🧫",
+            name: "Petri Dish",
+            keywords: ["science", "lab", "bacteria", "culture"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "dna",
+            character: "🧬",
+            name: "Dna",
+            keywords: ["genetics", "science", "double helix", "genes"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "microscope",
+            character: "🔬",
+            name: "Microscope",
+            keywords: ["science", "lab", "magnify", "study"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "telescope",
+            character: "🔭",
+            name: "Telescope",
+            keywords: ["astronomy", "stars", "space", "observe"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "satelliteAntenna",
+            character: "📡",
+            name: "Satellite Antenna",
+            keywords: ["dish", "communication", "signal", "receiver"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "syringe",
+            character: "💉",
+            name: "Syringe",
+            keywords: ["needle", "injection", "shot", "vaccine"],
+            category: .objects(.accessory)
+        ),
+        Emoji(
+            id: "dropOfBlood",
+            character: "🩸",
+            name: "Drop Of Blood",
+            keywords: ["blood", "red", "donate", "injury"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "pill",
+            character: "💊",
+            name: "Pill",
+            keywords: ["medicine", "drug", "capsule", "medication"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "adhesiveBandage",
+            character: "🩹",
+            name: "Adhesive Bandage",
+            keywords: ["band aid", "injury", "first aid", "cut"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "crutch",
+            character: "🩼",
+            name: "Crutch",
+            keywords: ["injured", "walking", "support", "broken"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "stethoscope",
+            character: "🩺",
+            name: "Stethoscope",
+            keywords: ["doctor", "medical", "heartbeat", "checkup"],
+            category: .objects(.medical)
+        ),
+        Emoji(
+            id: "xRay",
+            character: "🩻",
+            name: "X Ray",
+            keywords: ["medical", "bones", "scan", "radiograph"],
+            category: .objects(.music)
+        ),
+        Emoji(
+            id: "door",
+            character: "🚪",
+            name: "Door",
+            keywords: ["entrance", "exit", "open", "close"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "elevator",
+            character: "🛗",
+            name: "Elevator",
+            keywords: ["lift", "up", "down", "building"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "mirror",
+            character: "🪞",
+            name: "Mirror",
+            keywords: ["reflection", "look", "vanity", "glass"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "window",
+            character: "🪟",
+            name: "Window",
+            keywords: ["glass", "view", "open", "light"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "bed",
+            character: "🛏️",
+            name: "Bed",
+            keywords: ["sleep", "rest", "furniture", "bedroom"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "couchAndLamp",
+            character: "🛋️",
+            name: "Couch And Lamp",
+            keywords: ["sofa", "furniture", "living room", "relax"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "chair",
+            character: "🪑",
+            name: "Chair",
+            keywords: ["sit", "furniture", "seat"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "toilet",
+            character: "🚽",
+            name: "Toilet",
+            keywords: ["bathroom", "potty", "restroom", "loo"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "plunger",
+            character: "🪠",
+            name: "Plunger",
+            keywords: ["toilet", "unclog", "bathroom", "plumber"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "shower",
+            character: "🚿",
+            name: "Shower",
+            keywords: ["bath", "clean", "water", "wash"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "bathtub",
+            character: "🛁",
+            name: "Bathtub",
+            keywords: ["bath", "soak", "relax", "clean"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "mouseTrap",
+            character: "🪤",
+            name: "Mouse Trap",
+            keywords: ["catch", "rodent", "pest", "snap"],
+            category: .objects(.tech)
+        ),
+        Emoji(
+            id: "razor",
+            character: "🪒",
+            name: "Razor",
+            keywords: ["shave", "blade", "grooming", "shaving"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "lotionBottle",
+            character: "🧴",
+            name: "Lotion Bottle",
+            keywords: ["moisturizer", "cream", "skincare", "pump"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "safetyPin",
+            character: "🧷",
+            name: "Safety Pin",
+            keywords: ["pin", "fasten", "attach", "diaper"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "broom",
+            character: "🧹",
+            name: "Broom",
+            keywords: ["sweep", "clean", "witch", "tidy"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "basket",
+            character: "🧺",
+            name: "Basket",
+            keywords: ["laundry", "wicker", "carry", "storage"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "rollOfPaper",
+            character: "🧻",
+            name: "Roll Of Paper",
+            keywords: ["toilet paper", "bathroom", "tissue"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "bucket",
+            character: "🪣",
+            name: "Bucket",
+            keywords: ["pail", "water", "carry", "clean"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "soap",
+            character: "🧼",
+            name: "Soap",
+            keywords: ["clean", "wash", "bar", "hygiene"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "bubbles",
+            character: "🫧",
+            name: "Bubbles",
+            keywords: ["soap", "foam", "clean", "floating"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "toothbrush",
+            character: "🪥",
+            name: "Toothbrush",
+            keywords: ["dental", "clean", "teeth", "brush"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "sponge",
+            character: "🧽",
+            name: "Sponge",
+            keywords: ["clean", "scrub", "wash", "absorbent"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "fireExtinguisher",
+            character: "🧯",
+            name: "Fire Extinguisher",
+            keywords: ["safety", "emergency", "red", "put out"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "shoppingCart",
+            character: "🛒",
+            name: "Shopping Cart",
+            keywords: ["store", "grocery", "trolley", "buy"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "cigarette",
+            character: "🚬",
+            name: "Cigarette",
+            keywords: ["smoking", "tobacco", "smoke", "bad"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "coffin",
+            character: "⚰️",
+            name: "Coffin",
+            keywords: ["death", "funeral", "casket", "burial"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "headstone",
+            character: "🪦",
+            name: "Headstone",
+            keywords: ["grave", "death", "tombstone", "cemetery"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "funeralUrn",
+            character: "⚱️",
+            name: "Funeral Urn",
+            keywords: ["ashes", "death", "cremation", "memorial"],
+            category: .objects(.household)
+        ),
+        Emoji(
+            id: "nazarAmulet",
+            character: "🧿",
+            name: "Nazar Amulet",
+            keywords: ["evil eye", "protection", "turkish", "blue"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "hamsa",
+            character: "🪬",
+            name: "Hamsa",
+            keywords: ["hand", "protection", "middle eastern", "lucky"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "moai",
+            character: "🗿",
+            name: "Moai",
+            keywords: ["easter island", "statue", "stone", "head"],
+            category: .objects(.tool)
+        ),
+        Emoji(
+            id: "placard",
+            character: "🪧",
+            name: "Placard",
+            keywords: ["sign", "protest", "announcement", "board"],
+            category: .objects(.office)
+        ),
+        Emoji(
+            id: "identificationCard",
+            character: "🪪",
+            name: "Identification Card",
+            keywords: ["id", "license", "card", "identity"],
+            category: .objects(.office)
+        )
     ]
 
     // MARK: - Symbols Emojis
+
     static let symbolsEmojis: [Emoji] = [
-        Emoji(id: "aTMSign", character: "🏧", name: "A T M Sign", keywords: ["atm", "cash", "money", "bank"], category: .symbols(.sign)),
-        Emoji(id: "litterInBinSign", character: "🚮", name: "Litter In Bin Sign", keywords: ["trash", "garbage", "dispose", "clean"], category: .symbols(.sign)),
-        Emoji(id: "potableWater", character: "🚰", name: "Potable Water", keywords: ["drink", "fountain", "safe", "tap"], category: .symbols(.sign)),
-        Emoji(id: "wheelchairSymbol", character: "♿", name: "Wheelchair Symbol", keywords: ["accessibility", "disabled", "handicap", "accessible"], category: .symbols(.sign)),
-        Emoji(id: "menSRoom", character: "🚹", name: "Men S Room", keywords: ["bathroom", "restroom", "toilet", "male"], category: .symbols(.religious)),
-        Emoji(id: "womenSRoom", character: "🚺", name: "Women S Room", keywords: ["bathroom", "restroom", "toilet", "female"], category: .symbols(.religious)),
-        Emoji(id: "restroom", character: "🚻", name: "Restroom", keywords: ["bathroom", "toilet", "wc", "lavatory"], category: .symbols(.religious)),
-        Emoji(id: "babySymbol", character: "🚼", name: "Baby Symbol", keywords: ["infant", "diaper", "changing", "nursery"], category: .symbols(.sign)),
-        Emoji(id: "waterCloset", character: "🚾", name: "Water Closet", keywords: ["bathroom", "wc", "toilet", "restroom"], category: .symbols(.religious)),
-        Emoji(id: "passportControl", character: "🛂", name: "Passport Control", keywords: ["airport", "customs", "travel", "immigration"], category: .symbols(.religious)),
-        Emoji(id: "customs", character: "🛃", name: "Customs", keywords: ["airport", "border", "inspection", "travel"], category: .symbols(.religious)),
-        Emoji(id: "baggageClaim", character: "🛄", name: "Baggage Claim", keywords: ["airport", "luggage", "suitcase", "carousel"], category: .symbols(.sign)),
-        Emoji(id: "leftLuggage", character: "🛅", name: "Left Luggage", keywords: ["storage", "baggage", "locker", "airport"], category: .symbols(.sign)),
-        Emoji(id: "warning", character: "⚠️", name: "Warning", keywords: ["caution", "alert", "danger", "attention"], category: .symbols(.number)),
-        Emoji(id: "childrenCrossing", character: "🚸", name: "Children Crossing", keywords: ["school", "safety", "pedestrian", "kids"], category: .symbols(.sign)),
-        Emoji(id: "noEntry", character: "⛔", name: "No Entry", keywords: ["forbidden", "restricted", "stop", "prohibited"], category: .symbols(.sign)),
-        Emoji(id: "prohibited", character: "🚫", name: "Prohibited", keywords: ["forbidden", "banned", "not allowed", "stop"], category: .symbols(.sign)),
-        Emoji(id: "noBicycles", character: "🚳", name: "No Bicycles", keywords: ["forbidden", "bike", "cycling", "prohibited"], category: .symbols(.sign)),
-        Emoji(id: "noSmoking", character: "🚭", name: "No Smoking", keywords: ["forbidden", "cigarette", "prohibited", "smoke free"], category: .symbols(.sign)),
-        Emoji(id: "noLittering", character: "🚯", name: "No Littering", keywords: ["forbidden", "trash", "clean", "prohibited"], category: .symbols(.sign)),
-        Emoji(id: "nonPotableWater", character: "🚱", name: "Non Potable Water", keywords: ["unsafe", "don't drink", "contaminated"], category: .symbols(.sign)),
-        Emoji(id: "noPedestrians", character: "🚷", name: "No Pedestrians", keywords: ["forbidden", "walking", "prohibited", "restricted"], category: .symbols(.sign)),
-        Emoji(id: "noMobilePhones", character: "📵", name: "No Mobile Phones", keywords: ["forbidden", "silent", "off", "prohibited"], category: .symbols(.religious)),
-        Emoji(id: "noOneUnderEighteen", character: "🔞", name: "No One Under Eighteen", keywords: ["adult", "18+", "mature", "nsfw"], category: .symbols(.sign)),
-        Emoji(id: "radioactive", character: "☢️", name: "Radioactive", keywords: ["danger", "nuclear", "radiation", "hazard"], category: .symbols(.sign)),
-        Emoji(id: "biohazard", character: "☣️", name: "Biohazard", keywords: ["danger", "toxic", "hazard", "contamination"], category: .symbols(.sign)),
-        Emoji(id: "upArrow", character: "⬆️", name: "Up Arrow", keywords: ["direction", "north", "increase", "navigate"], category: .symbols(.arrow)),
-        Emoji(id: "upRightArrow", character: "↗️", name: "Up Right Arrow", keywords: ["direction", "northeast", "diagonal"], category: .symbols(.arrow)),
-        Emoji(id: "rightArrow", character: "➡️", name: "Right Arrow", keywords: ["direction", "east", "next", "forward"], category: .symbols(.arrow)),
-        Emoji(id: "downRightArrow", character: "↘️", name: "Down Right Arrow", keywords: ["direction", "southeast", "diagonal"], category: .symbols(.arrow)),
-        Emoji(id: "downArrow", character: "⬇️", name: "Down Arrow", keywords: ["direction", "south", "decrease", "download"], category: .symbols(.arrow)),
-        Emoji(id: "downLeftArrow", character: "↙️", name: "Down Left Arrow", keywords: ["direction", "southwest", "diagonal"], category: .symbols(.arrow)),
-        Emoji(id: "leftArrow", character: "⬅️", name: "Left Arrow", keywords: ["direction", "west", "back", "previous"], category: .symbols(.arrow)),
-        Emoji(id: "upLeftArrow", character: "↖️", name: "Up Left Arrow", keywords: ["direction", "northwest", "diagonal"], category: .symbols(.arrow)),
-        Emoji(id: "upDownArrow", character: "↕️", name: "Up Down Arrow", keywords: ["vertical", "both ways", "resize"], category: .symbols(.arrow)),
-        Emoji(id: "leftRightArrow", character: "↔️", name: "Left Right Arrow", keywords: ["horizontal", "both ways", "resize"], category: .symbols(.arrow)),
-        Emoji(id: "rightArrowCurvingLeft", character: "↩️", name: "Right Arrow Curving Left", keywords: ["return", "reply", "undo"], category: .symbols(.arrow)),
-        Emoji(id: "leftArrowCurvingRight", character: "↪️", name: "Left Arrow Curving Right", keywords: ["forward", "redirect", "redo"], category: .symbols(.arrow)),
-        Emoji(id: "rightArrowCurvingUp", character: "⤴️", name: "Right Arrow Curving Up", keywords: ["upload", "forward", "send"], category: .symbols(.arrow)),
-        Emoji(id: "rightArrowCurvingDown", character: "⤵️", name: "Right Arrow Curving Down", keywords: ["download", "reply", "forward"], category: .symbols(.arrow)),
-        Emoji(id: "clockwiseVerticalArrows", character: "🔃", name: "Clockwise Vertical Arrows", keywords: ["reload", "refresh", "repeat", "sync"], category: .symbols(.arrow)),
-        Emoji(id: "counterclockwiseArrowsButton", character: "🔄", name: "Counterclockwise Arrows Button", keywords: ["reload", "refresh", "repeat", "sync"], category: .symbols(.arrow)),
-        Emoji(id: "bACKArrow", character: "🔙", name: "B A C K Arrow", keywords: ["return", "previous", "reverse"], category: .symbols(.arrow)),
-        Emoji(id: "eNDArrow", character: "🔚", name: "E N D Arrow", keywords: ["finish", "last", "final"], category: .symbols(.arrow)),
-        Emoji(id: "oNArrow", character: "🔛", name: "O N Arrow", keywords: ["active", "enabled", "continue"], category: .symbols(.arrow)),
-        Emoji(id: "sOONArrow", character: "🔜", name: "S O O N Arrow", keywords: ["coming", "future", "next"], category: .symbols(.arrow)),
-        Emoji(id: "tOPArrow", character: "🔝", name: "T O P Arrow", keywords: ["up", "first", "best", "summit"], category: .symbols(.arrow)),
-        Emoji(id: "placeOfWorship", character: "🛐", name: "Place Of Worship", keywords: ["religious", "pray", "church", "temple"], category: .symbols(.religious)),
-        Emoji(id: "atomSymbol", character: "⚛️", name: "Atom Symbol", keywords: ["science", "physics", "nuclear", "molecule"], category: .symbols(.religious)),
-        Emoji(id: "om", character: "🕉️", name: "Om", keywords: ["hindu", "meditation", "spiritual", "mantra"], category: .symbols(.religious)),
-        Emoji(id: "starOfDavid", character: "✡️", name: "Star Of David", keywords: ["jewish", "judaism", "israel", "religion"], category: .symbols(.religious)),
-        Emoji(id: "wheelOfDharma", character: "☸️", name: "Wheel Of Dharma", keywords: ["buddhist", "buddhism", "religion", "spiritual"], category: .symbols(.religious)),
-        Emoji(id: "yinYang", character: "☯️", name: "Yin Yang", keywords: ["balance", "taoism", "harmony", "opposite"], category: .symbols(.religious)),
-        Emoji(id: "latinCross", character: "✝️", name: "Latin Cross", keywords: ["christian", "christianity", "religion", "jesus"], category: .symbols(.religious)),
-        Emoji(id: "orthodoxCross", character: "☦️", name: "Orthodox Cross", keywords: ["christian", "eastern", "religion"], category: .symbols(.religious)),
-        Emoji(id: "starAndCrescent", character: "☪️", name: "Star And Crescent", keywords: ["islam", "muslim", "religion"], category: .symbols(.religious)),
-        Emoji(id: "peaceSymbol", character: "☮️", name: "Peace Symbol", keywords: ["peace", "hippie", "pacifism", "love"], category: .symbols(.religious)),
-        Emoji(id: "menorah", character: "🕎", name: "Menorah", keywords: ["jewish", "judaism", "hanukkah", "candles"], category: .symbols(.religious)),
-        Emoji(id: "dottedSixPointedStar", character: "🔯", name: "Dotted Six Pointed Star", keywords: ["star", "fortune", "symbol"], category: .symbols(.religious)),
-        Emoji(id: "khanda", character: "🪯", name: "Khanda", keywords: ["sikh", "sikhism", "religion", "symbol"], category: .symbols(.religious)),
-        Emoji(id: "aries", character: "♈", name: "Aries", keywords: ["zodiac", "astrology", "ram", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "taurus", character: "♉", name: "Taurus", keywords: ["zodiac", "astrology", "bull", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "gemini", character: "♊", name: "Gemini", keywords: ["zodiac", "astrology", "twins", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "cancer", character: "♋", name: "Cancer", keywords: ["zodiac", "astrology", "crab", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "leo", character: "♌", name: "Leo", keywords: ["zodiac", "astrology", "lion", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "virgo", character: "♍", name: "Virgo", keywords: ["zodiac", "astrology", "virgin", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "libra", character: "♎", name: "Libra", keywords: ["zodiac", "astrology", "scales", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "scorpio", character: "♏", name: "Scorpio", keywords: ["zodiac", "astrology", "scorpion", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "sagittarius", character: "♐", name: "Sagittarius", keywords: ["zodiac", "astrology", "archer", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "capricorn", character: "♑", name: "Capricorn", keywords: ["zodiac", "astrology", "goat", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "aquarius", character: "♒", name: "Aquarius", keywords: ["zodiac", "astrology", "water bearer", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "pisces", character: "♓", name: "Pisces", keywords: ["zodiac", "astrology", "fish", "horoscope"], category: .symbols(.zodiac)),
-        Emoji(id: "ophiuchus", character: "⛎", name: "Ophiuchus", keywords: ["zodiac", "astrology", "serpent bearer", "13th sign"], category: .symbols(.zodiac)),
-        Emoji(id: "shuffleTracksButton", character: "🔀", name: "Shuffle Tracks Button", keywords: ["random", "music", "mix", "player"], category: .symbols(.religious)),
-        Emoji(id: "repeatButton", character: "🔁", name: "Repeat Button", keywords: ["loop", "music", "again", "replay"], category: .symbols(.media)),
-        Emoji(id: "repeatSingleButton", character: "🔂", name: "Repeat Single Button", keywords: ["loop one", "music", "replay", "single"], category: .symbols(.media)),
-        Emoji(id: "playButton", character: "▶️", name: "Play Button", keywords: ["start", "music", "video", "media"], category: .symbols(.media)),
-        Emoji(id: "fastForwardButton", character: "⏩", name: "Fast Forward Button", keywords: ["skip", "speed up", "next", "media"], category: .symbols(.media)),
-        Emoji(id: "nextTrackButton", character: "⏭️", name: "Next Track Button", keywords: ["skip", "forward", "music", "song"], category: .symbols(.media)),
-        Emoji(id: "playOrPauseButton", character: "⏯️", name: "Play Or Pause Button", keywords: ["toggle", "media", "control", "music"], category: .symbols(.media)),
-        Emoji(id: "reverseButton", character: "◀️", name: "Reverse Button", keywords: ["back", "rewind", "previous", "media"], category: .symbols(.media)),
-        Emoji(id: "fastReverseButton", character: "⏪", name: "Fast Reverse Button", keywords: ["rewind", "back", "previous", "media"], category: .symbols(.media)),
-        Emoji(id: "lastTrackButton", character: "⏮️", name: "Last Track Button", keywords: ["previous", "back", "music", "song"], category: .symbols(.media)),
-        Emoji(id: "upwardsButton", character: "🔼", name: "Upwards Button", keywords: ["up", "increase", "triangle", "scroll"], category: .symbols(.media)),
-        Emoji(id: "fastUpButton", character: "⏫", name: "Fast Up Button", keywords: ["up", "scroll", "double", "increase"], category: .symbols(.number)),
-        Emoji(id: "downwardsButton", character: "🔽", name: "Downwards Button", keywords: ["down", "decrease", "triangle", "scroll"], category: .symbols(.media)),
-        Emoji(id: "fastDownButton", character: "⏬", name: "Fast Down Button", keywords: ["down", "scroll", "double", "decrease"], category: .symbols(.other)),
-        Emoji(id: "pauseButton", character: "⏸️", name: "Pause Button", keywords: ["stop", "media", "wait", "freeze"], category: .symbols(.media)),
-        Emoji(id: "stopButton", character: "⏹️", name: "Stop Button", keywords: ["halt", "end", "media", "square"], category: .symbols(.media)),
-        Emoji(id: "recordButton", character: "⏺️", name: "Record Button", keywords: ["recording", "capture", "media", "red dot"], category: .symbols(.media)),
-        Emoji(id: "ejectButton", character: "⏏️", name: "Eject Button", keywords: ["remove", "media", "disk", "cd"], category: .symbols(.media)),
-        Emoji(id: "cinema", character: "🎦", name: "Cinema", keywords: ["movie", "film", "theater", "camera"], category: .symbols(.sign)),
-        Emoji(id: "dimButton", character: "🔅", name: "Dim Button", keywords: ["brightness", "lower", "dark", "screen"], category: .symbols(.sign)),
-        Emoji(id: "brightButton", character: "🔆", name: "Bright Button", keywords: ["brightness", "increase", "light", "screen"], category: .symbols(.sign)),
-        Emoji(id: "antennaBars", character: "📶", name: "Antenna Bars", keywords: ["signal", "reception", "wifi", "cellular"], category: .symbols(.number)),
-        Emoji(id: "wireless", character: "🛜", name: "Wireless", keywords: ["wifi", "internet", "connection", "network"], category: .symbols(.sign)),
-        Emoji(id: "vibrationMode", character: "📳", name: "Vibration Mode", keywords: ["silent", "phone", "buzz", "shake"], category: .symbols(.sign)),
-        Emoji(id: "mobilePhoneOff", character: "📴", name: "Mobile Phone Off", keywords: ["disabled", "silent", "airplane", "power"], category: .symbols(.sign)),
-        Emoji(id: "femaleSign", character: "♀️", name: "Female Sign", keywords: ["woman", "gender", "venus", "girl"], category: .symbols(.religious)),
-        Emoji(id: "maleSign", character: "♂️", name: "Male Sign", keywords: ["man", "gender", "mars", "boy"], category: .symbols(.sign)),
-        Emoji(id: "transgenderSymbol", character: "⚧️", name: "Transgender Symbol", keywords: ["trans", "gender", "identity", "lgbtq"], category: .symbols(.other)),
-        Emoji(id: "multiply", character: "✖️", name: "Multiply", keywords: ["times", "math", "x", "multiplication"], category: .symbols(.other)),
-        Emoji(id: "plus", character: "➕", name: "Plus", keywords: ["add", "math", "addition", "positive"], category: .symbols(.other)),
-        Emoji(id: "minus", character: "➖", name: "Minus", keywords: ["subtract", "math", "subtraction", "negative"], category: .symbols(.other)),
-        Emoji(id: "divide", character: "➗", name: "Divide", keywords: ["division", "math", "split"], category: .symbols(.other)),
-        Emoji(id: "heavyEqualsSign", character: "🟰", name: "Heavy Equals Sign", keywords: ["math", "equal", "result"], category: .symbols(.other)),
-        Emoji(id: "infinity", character: "♾️", name: "Infinity", keywords: ["endless", "forever", "unlimited", "math"], category: .symbols(.other)),
-        Emoji(id: "doubleExclamationMark", character: "‼️", name: "Double Exclamation Mark", keywords: ["emphasis", "alert", "important", "wow"], category: .symbols(.other)),
-        Emoji(id: "exclamationQuestionMark", character: "⁉️", name: "Exclamation Question Mark", keywords: ["surprised", "confused", "what", "huh"], category: .symbols(.other)),
-        Emoji(id: "redQuestionMark", character: "❓", name: "Red Question Mark", keywords: ["confused", "ask", "what", "unknown"], category: .symbols(.other)),
-        Emoji(id: "whiteQuestionMark", character: "❔", name: "White Question Mark", keywords: ["confused", "ask", "what", "unknown"], category: .symbols(.other)),
-        Emoji(id: "whiteExclamationMark", character: "❕", name: "White Exclamation Mark", keywords: ["attention", "important", "alert"], category: .symbols(.number)),
-        Emoji(id: "redExclamationMark", character: "❗", name: "Red Exclamation Mark", keywords: ["attention", "important", "alert", "warning"], category: .symbols(.number)),
-        Emoji(id: "wavyDash", character: "〰️", name: "Wavy Dash", keywords: ["wavy", "line", "squiggly"], category: .symbols(.other)),
-        Emoji(id: "currencyExchange", character: "💱", name: "Currency Exchange", keywords: ["money", "forex", "trade", "convert"], category: .symbols(.other)),
-        Emoji(id: "heavyDollarSign", character: "💲", name: "Heavy Dollar Sign", keywords: ["money", "usd", "cash", "price"], category: .symbols(.other)),
-        Emoji(id: "medicalSymbol", character: "⚕️", name: "Medical Symbol", keywords: ["doctor", "health", "caduceus", "medicine"], category: .symbols(.other)),
-        Emoji(id: "recyclingSymbol", character: "♻️", name: "Recycling Symbol", keywords: ["recycle", "green", "environment", "eco"], category: .symbols(.other)),
-        Emoji(id: "fleurDeLis", character: "⚜️", name: "Fleur De Lis", keywords: ["french", "royal", "lily", "symbol"], category: .symbols(.other)),
-        Emoji(id: "tridentEmblem", character: "🔱", name: "Trident Emblem", keywords: ["poseidon", "neptune", "pitchfork", "weapon"], category: .symbols(.sign)),
-        Emoji(id: "nameBadge", character: "📛", name: "Name Badge", keywords: ["hello", "tag", "identification", "label"], category: .symbols(.other)),
-        Emoji(id: "japaneseSymbolForBeginner", character: "🔰", name: "Japanese Symbol For Beginner", keywords: ["shoshinsha", "newbie", "learner", "starter"], category: .symbols(.other)),
-        Emoji(id: "hollowRedCircle", character: "⭕", name: "Hollow Red Circle", keywords: ["o", "correct", "circle", "mark"], category: .symbols(.shape)),
-        Emoji(id: "checkMarkButton", character: "✅", name: "Check Mark Button", keywords: ["done", "correct", "yes", "approved"], category: .symbols(.other)),
-        Emoji(id: "checkBoxWithCheck", character: "☑️", name: "Check Box With Check", keywords: ["done", "complete", "selected", "checked"], category: .symbols(.religious)),
-        Emoji(id: "checkMark", character: "✔️", name: "Check Mark", keywords: ["done", "correct", "yes", "approved"], category: .symbols(.other)),
-        Emoji(id: "crossMark", character: "❌", name: "Cross Mark", keywords: ["no", "wrong", "x", "cancel"], category: .symbols(.other)),
-        Emoji(id: "crossMarkButton", character: "❎", name: "Cross Mark Button", keywords: ["no", "wrong", "x", "cancel"], category: .symbols(.other)),
-        Emoji(id: "curlyLoop", character: "➰", name: "Curly Loop", keywords: ["loop", "curl", "voicemail"], category: .symbols(.other)),
-        Emoji(id: "doubleCurlyLoop", character: "➿", name: "Double Curly Loop", keywords: ["loop", "curl", "phone"], category: .symbols(.other)),
-        Emoji(id: "partAlternationMark", character: "〽️", name: "Part Alternation Mark", keywords: ["japanese", "m", "music"], category: .symbols(.other)),
-        Emoji(id: "eightSpokedAsterisk", character: "✳️", name: "Eight Spoked Asterisk", keywords: ["star", "sparkle", "symbol"], category: .symbols(.number)),
-        Emoji(id: "eightPointedStar", character: "✴️", name: "Eight Pointed Star", keywords: ["star", "orange", "sparkle"], category: .symbols(.other)),
-        Emoji(id: "sparkle", character: "❇️", name: "Sparkle", keywords: ["star", "green", "shine", "twinkle"], category: .symbols(.other)),
-        Emoji(id: "copyright", character: "©️", name: "Copyright", keywords: ["legal", "c", "symbol", "rights"], category: .symbols(.other)),
-        Emoji(id: "registered", character: "®️", name: "Registered", keywords: ["legal", "r", "trademark", "symbol"], category: .symbols(.other)),
-        Emoji(id: "tradeMark", character: "™️", name: "Trade Mark", keywords: ["legal", "tm", "trademark", "brand"], category: .symbols(.other)),
-        Emoji(id: "keycapHash", character: "#️⃣", name: "Keycap Hash", keywords: ["hashtag", "pound", "number"], category: .symbols(.number)),
-        Emoji(id: "keycapStar", character: "*️⃣", name: "Keycap Star", keywords: ["asterisk", "star", "multiply"], category: .symbols(.number)),
-        Emoji(id: "keycap0", character: "0️⃣", name: "Keycap0", keywords: ["zero", "number", "digit"], category: .symbols(.number)),
-        Emoji(id: "keycap1", character: "1️⃣", name: "Keycap1", keywords: ["one", "number", "digit", "first"], category: .symbols(.number)),
-        Emoji(id: "keycap2", character: "2️⃣", name: "Keycap2", keywords: ["two", "number", "digit", "second"], category: .symbols(.number)),
-        Emoji(id: "keycap3", character: "3️⃣", name: "Keycap3", keywords: ["three", "number", "digit", "third"], category: .symbols(.number)),
-        Emoji(id: "keycap4", character: "4️⃣", name: "Keycap4", keywords: ["four", "number", "digit", "fourth"], category: .symbols(.number)),
-        Emoji(id: "keycap5", character: "5️⃣", name: "Keycap5", keywords: ["five", "number", "digit", "fifth"], category: .symbols(.number)),
-        Emoji(id: "keycap6", character: "6️⃣", name: "Keycap6", keywords: ["six", "number", "digit", "sixth"], category: .symbols(.number)),
-        Emoji(id: "keycap7", character: "7️⃣", name: "Keycap7", keywords: ["seven", "number", "digit", "seventh"], category: .symbols(.number)),
-        Emoji(id: "keycap8", character: "8️⃣", name: "Keycap8", keywords: ["eight", "number", "digit", "eighth"], category: .symbols(.number)),
-        Emoji(id: "keycap9", character: "9️⃣", name: "Keycap9", keywords: ["nine", "number", "digit", "ninth"], category: .symbols(.number)),
-        Emoji(id: "keycap10", character: "🔟", name: "Keycap10", keywords: ["ten", "number", "digit", "tenth"], category: .symbols(.number)),
-        Emoji(id: "inputLatinUppercase", character: "🔠", name: "Input Latin Uppercase", keywords: ["caps", "capital", "abc", "letters"], category: .symbols(.number)),
-        Emoji(id: "inputLatinLowercase", character: "🔡", name: "Input Latin Lowercase", keywords: ["small", "letters", "abc"], category: .symbols(.number)),
-        Emoji(id: "inputNumbers", character: "🔢", name: "Input Numbers", keywords: ["digits", "123", "numeric"], category: .symbols(.number)),
-        Emoji(id: "inputSymbols", character: "🔣", name: "Input Symbols", keywords: ["characters", "special", "punctuation"], category: .symbols(.number)),
-        Emoji(id: "inputLatinLetters", character: "🔤", name: "Input Latin Letters", keywords: ["abc", "alphabet", "text"], category: .symbols(.number)),
-        Emoji(id: "aButtonBloodType", character: "🅰️", name: "A Button Blood Type", keywords: ["blood", "type a", "letter"], category: .symbols(.number)),
-        Emoji(id: "aBButtonBloodType", character: "🆎", name: "A B Button Blood Type", keywords: ["blood", "type ab", "letters"], category: .symbols(.number)),
-        Emoji(id: "bButtonBloodType", character: "🅱️", name: "B Button Blood Type", keywords: ["blood", "type b", "letter"], category: .symbols(.number)),
-        Emoji(id: "cLButton", character: "🆑", name: "C L Button", keywords: ["clear", "cl", "cancel"], category: .symbols(.other)),
-        Emoji(id: "cOOLButton", character: "🆒", name: "C O O L Button", keywords: ["cool", "awesome", "nice"], category: .symbols(.religious)),
-        Emoji(id: "fREEButton", character: "🆓", name: "F R E E Button", keywords: ["free", "gratis", "no cost"], category: .symbols(.other)),
-        Emoji(id: "information", character: "ℹ️", name: "Information", keywords: ["info", "i", "help", "details"], category: .symbols(.number)),
-        Emoji(id: "iDButton", character: "🆔", name: "I D Button", keywords: ["id", "identification", "card"], category: .symbols(.other)),
-        Emoji(id: "circledM", character: "Ⓜ️", name: "Circled M", keywords: ["metro", "m", "subway"], category: .symbols(.shape)),
-        Emoji(id: "nEWButton", character: "🆕", name: "N E W Button", keywords: ["new", "fresh", "latest"], category: .symbols(.other)),
-        Emoji(id: "nGButton", character: "🆖", name: "N G Button", keywords: ["ng", "no good", "bad"], category: .symbols(.other)),
-        Emoji(id: "oButtonBloodType", character: "🅾️", name: "O Button Blood Type", keywords: ["blood", "type o", "letter"], category: .symbols(.number)),
-        Emoji(id: "oKButton", character: "🆗", name: "O K Button", keywords: ["ok", "okay", "good", "yes"], category: .symbols(.other)),
-        Emoji(id: "pButton", character: "🅿️", name: "P Button", keywords: ["parking", "p", "car"], category: .symbols(.number)),
-        Emoji(id: "sOSButton", character: "🆘", name: "S O S Button", keywords: ["sos", "help", "emergency", "distress"], category: .symbols(.other)),
-        Emoji(id: "uPButton", character: "🆙", name: "U P Button", keywords: ["up", "level up", "increase"], category: .symbols(.number)),
-        Emoji(id: "vSButton", character: "🆚", name: "V S Button", keywords: ["vs", "versus", "against", "battle"], category: .symbols(.other)),
-        Emoji(id: "japaneseHereButton", character: "🈁", name: "Japanese Here Button", keywords: ["japanese", "koko", "here"], category: .symbols(.other)),
-        Emoji(id: "japaneseServiceChargeButton", character: "🈂️", name: "Japanese Service Charge Button", keywords: ["japanese", "sa", "service"], category: .symbols(.other)),
-        Emoji(id: "japaneseMonthlyAmountButton", character: "🈷️", name: "Japanese Monthly Amount Button", keywords: ["japanese", "tsuki", "monthly"], category: .symbols(.other)),
-        Emoji(id: "japaneseNotFreeOfChargeButton", character: "🈶", name: "Japanese Not Free Of Charge Button", keywords: ["japanese", "ari", "available"], category: .symbols(.other)),
-        Emoji(id: "japaneseReservedButton", character: "🈯", name: "Japanese Reserved Button", keywords: ["japanese", "shitei", "reserved", "designated"], category: .symbols(.other)),
-        Emoji(id: "japaneseBargainButton", character: "🉐", name: "Japanese Bargain Button", keywords: ["japanese", "toku", "deal", "advantage"], category: .symbols(.other)),
-        Emoji(id: "japaneseDiscountButton", character: "🈹", name: "Japanese Discount Button", keywords: ["japanese", "wari", "discount", "sale"], category: .symbols(.other)),
-        Emoji(id: "japaneseFreeOfChargeButton", character: "🈚", name: "Japanese Free Of Charge Button", keywords: ["japanese", "mu", "free", "nothing"], category: .symbols(.other)),
-        Emoji(id: "japaneseProhibitedButton", character: "🈲", name: "Japanese Prohibited Button", keywords: ["japanese", "kin", "prohibited", "forbidden"], category: .symbols(.sign)),
-        Emoji(id: "japaneseAcceptableButton", character: "🉑", name: "Japanese Acceptable Button", keywords: ["japanese", "ka", "acceptable", "possible"], category: .symbols(.other)),
-        Emoji(id: "japaneseApplicationButton", character: "🈸", name: "Japanese Application Button", keywords: ["japanese", "shen", "application", "apply"], category: .symbols(.other)),
-        Emoji(id: "japanesePassingGradeButton", character: "🈴", name: "Japanese Passing Grade Button", keywords: ["japanese", "he", "passing", "agreement"], category: .symbols(.other)),
-        Emoji(id: "japaneseVacancyButton", character: "🈳", name: "Japanese Vacancy Button", keywords: ["japanese", "kong", "vacancy", "empty"], category: .symbols(.other)),
-        Emoji(id: "japaneseCongratulationsButton", character: "㊗️", name: "Japanese Congratulations Button", keywords: ["japanese", "iwau", "congrats", "celebrate"], category: .symbols(.other)),
-        Emoji(id: "japaneseSecretButton", character: "㊙️", name: "Japanese Secret Button", keywords: ["japanese", "himitsu", "secret", "private"], category: .symbols(.other)),
-        Emoji(id: "japaneseOpenForBusinessButton", character: "🈺", name: "Japanese Open For Business Button", keywords: ["japanese", "eigyo", "open", "operating"], category: .symbols(.other)),
-        Emoji(id: "japaneseNoVacancyButton", character: "🈵", name: "Japanese No Vacancy Button", keywords: ["japanese", "man", "full", "no vacancy"], category: .symbols(.other)),
-        Emoji(id: "redCircle", character: "🔴", name: "Red Circle", keywords: ["red", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "orangeCircle", character: "🟠", name: "Orange Circle", keywords: ["orange", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "yellowCircle", character: "🟡", name: "Yellow Circle", keywords: ["yellow", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "greenCircle", character: "🟢", name: "Green Circle", keywords: ["green", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "blueCircle", character: "🔵", name: "Blue Circle", keywords: ["blue", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "purpleCircle", character: "🟣", name: "Purple Circle", keywords: ["purple", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "brownCircle", character: "🟤", name: "Brown Circle", keywords: ["brown", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "blackCircle", character: "⚫", name: "Black Circle", keywords: ["black", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "whiteCircle", character: "⚪", name: "White Circle", keywords: ["white", "round", "dot", "color"], category: .symbols(.shape)),
-        Emoji(id: "redSquare", character: "🟥", name: "Red Square", keywords: ["red", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "orangeSquare", character: "🟧", name: "Orange Square", keywords: ["orange", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "yellowSquare", character: "🟨", name: "Yellow Square", keywords: ["yellow", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "greenSquare", character: "🟩", name: "Green Square", keywords: ["green", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "blueSquare", character: "🟦", name: "Blue Square", keywords: ["blue", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "purpleSquare", character: "🟪", name: "Purple Square", keywords: ["purple", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "brownSquare", character: "🟫", name: "Brown Square", keywords: ["brown", "square", "block", "color"], category: .symbols(.shape)),
-        Emoji(id: "blackLargeSquare", character: "⬛", name: "Black Large Square", keywords: ["black", "square", "big", "block"], category: .symbols(.shape)),
-        Emoji(id: "whiteLargeSquare", character: "⬜", name: "White Large Square", keywords: ["white", "square", "big", "block"], category: .symbols(.shape)),
-        Emoji(id: "blackMediumSquare", character: "◼️", name: "Black Medium Square", keywords: ["black", "square", "medium", "block"], category: .symbols(.shape)),
-        Emoji(id: "whiteMediumSquare", character: "◻️", name: "White Medium Square", keywords: ["white", "square", "medium", "block"], category: .symbols(.shape)),
-        Emoji(id: "blackMediumSmallSquare", character: "◾", name: "Black Medium Small Square", keywords: ["black", "square", "small", "block"], category: .symbols(.number)),
-        Emoji(id: "whiteMediumSmallSquare", character: "◽", name: "White Medium Small Square", keywords: ["white", "square", "small", "block"], category: .symbols(.number)),
-        Emoji(id: "blackSmallSquare", character: "▪️", name: "Black Small Square", keywords: ["black", "square", "tiny", "dot"], category: .symbols(.number)),
-        Emoji(id: "whiteSmallSquare", character: "▫️", name: "White Small Square", keywords: ["white", "square", "tiny", "dot"], category: .symbols(.number)),
-        Emoji(id: "largeOrangeDiamond", character: "🔶", name: "Large Orange Diamond", keywords: ["orange", "diamond", "big", "shape"], category: .symbols(.shape)),
-        Emoji(id: "largeBlueDiamond", character: "🔷", name: "Large Blue Diamond", keywords: ["blue", "diamond", "big", "shape"], category: .symbols(.shape)),
-        Emoji(id: "smallOrangeDiamond", character: "🔸", name: "Small Orange Diamond", keywords: ["orange", "diamond", "small", "shape"], category: .symbols(.number)),
-        Emoji(id: "smallBlueDiamond", character: "🔹", name: "Small Blue Diamond", keywords: ["blue", "diamond", "small", "shape"], category: .symbols(.number)),
-        Emoji(id: "redTrianglePointedUp", character: "🔺", name: "Red Triangle Pointed Up", keywords: ["red", "triangle", "up", "shape"], category: .symbols(.shape)),
-        Emoji(id: "redTrianglePointedDown", character: "🔻", name: "Red Triangle Pointed Down", keywords: ["red", "triangle", "down", "shape"], category: .symbols(.shape)),
-        Emoji(id: "diamondWithADot", character: "💠", name: "Diamond With A Dot", keywords: ["blue", "diamond", "flower", "kawaii"], category: .symbols(.shape)),
-        Emoji(id: "radioButton", character: "🔘", name: "Radio Button", keywords: ["button", "selected", "option", "choice"], category: .symbols(.number)),
-        Emoji(id: "whiteSquareButton", character: "🔳", name: "White Square Button", keywords: ["white", "square", "button", "outlined"], category: .symbols(.shape)),
-        Emoji(id: "blackSquareButton", character: "🔲", name: "Black Square Button", keywords: ["black", "square", "button", "outlined"], category: .symbols(.shape)),
+        Emoji(
+            id: "aTMSign",
+            character: "🏧",
+            name: "A T M Sign",
+            keywords: ["atm", "cash", "money", "bank"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "litterInBinSign",
+            character: "🚮",
+            name: "Litter In Bin Sign",
+            keywords: ["trash", "garbage", "dispose", "clean"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "potableWater",
+            character: "🚰",
+            name: "Potable Water",
+            keywords: ["drink", "fountain", "safe", "tap"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "wheelchairSymbol",
+            character: "♿",
+            name: "Wheelchair Symbol",
+            keywords: ["accessibility", "disabled", "handicap", "accessible"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "menSRoom",
+            character: "🚹",
+            name: "Men S Room",
+            keywords: ["bathroom", "restroom", "toilet", "male"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "womenSRoom",
+            character: "🚺",
+            name: "Women S Room",
+            keywords: ["bathroom", "restroom", "toilet", "female"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "restroom",
+            character: "🚻",
+            name: "Restroom",
+            keywords: ["bathroom", "toilet", "wc", "lavatory"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "babySymbol",
+            character: "🚼",
+            name: "Baby Symbol",
+            keywords: ["infant", "diaper", "changing", "nursery"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "waterCloset",
+            character: "🚾",
+            name: "Water Closet",
+            keywords: ["bathroom", "wc", "toilet", "restroom"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "passportControl",
+            character: "🛂",
+            name: "Passport Control",
+            keywords: ["airport", "customs", "travel", "immigration"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "customs",
+            character: "🛃",
+            name: "Customs",
+            keywords: ["airport", "border", "inspection", "travel"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "baggageClaim",
+            character: "🛄",
+            name: "Baggage Claim",
+            keywords: ["airport", "luggage", "suitcase", "carousel"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "leftLuggage",
+            character: "🛅",
+            name: "Left Luggage",
+            keywords: ["storage", "baggage", "locker", "airport"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "warning",
+            character: "⚠️",
+            name: "Warning",
+            keywords: ["caution", "alert", "danger", "attention"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "childrenCrossing",
+            character: "🚸",
+            name: "Children Crossing",
+            keywords: ["school", "safety", "pedestrian", "kids"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noEntry",
+            character: "⛔",
+            name: "No Entry",
+            keywords: ["forbidden", "restricted", "stop", "prohibited"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "prohibited",
+            character: "🚫",
+            name: "Prohibited",
+            keywords: ["forbidden", "banned", "not allowed", "stop"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noBicycles",
+            character: "🚳",
+            name: "No Bicycles",
+            keywords: ["forbidden", "bike", "cycling", "prohibited"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noSmoking",
+            character: "🚭",
+            name: "No Smoking",
+            keywords: ["forbidden", "cigarette", "prohibited", "smoke free"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noLittering",
+            character: "🚯",
+            name: "No Littering",
+            keywords: ["forbidden", "trash", "clean", "prohibited"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "nonPotableWater",
+            character: "🚱",
+            name: "Non Potable Water",
+            keywords: ["unsafe", "don't drink", "contaminated"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noPedestrians",
+            character: "🚷",
+            name: "No Pedestrians",
+            keywords: ["forbidden", "walking", "prohibited", "restricted"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "noMobilePhones",
+            character: "📵",
+            name: "No Mobile Phones",
+            keywords: ["forbidden", "silent", "off", "prohibited"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "noOneUnderEighteen",
+            character: "🔞",
+            name: "No One Under Eighteen",
+            keywords: ["adult", "18+", "mature", "nsfw"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "radioactive",
+            character: "☢️",
+            name: "Radioactive",
+            keywords: ["danger", "nuclear", "radiation", "hazard"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "biohazard",
+            character: "☣️",
+            name: "Biohazard",
+            keywords: ["danger", "toxic", "hazard", "contamination"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "upArrow",
+            character: "⬆️",
+            name: "Up Arrow",
+            keywords: ["direction", "north", "increase", "navigate"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "upRightArrow",
+            character: "↗️",
+            name: "Up Right Arrow",
+            keywords: ["direction", "northeast", "diagonal"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "rightArrow",
+            character: "➡️",
+            name: "Right Arrow",
+            keywords: ["direction", "east", "next", "forward"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "downRightArrow",
+            character: "↘️",
+            name: "Down Right Arrow",
+            keywords: ["direction", "southeast", "diagonal"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "downArrow",
+            character: "⬇️",
+            name: "Down Arrow",
+            keywords: ["direction", "south", "decrease", "download"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "downLeftArrow",
+            character: "↙️",
+            name: "Down Left Arrow",
+            keywords: ["direction", "southwest", "diagonal"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "leftArrow",
+            character: "⬅️",
+            name: "Left Arrow",
+            keywords: ["direction", "west", "back", "previous"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "upLeftArrow",
+            character: "↖️",
+            name: "Up Left Arrow",
+            keywords: ["direction", "northwest", "diagonal"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "upDownArrow",
+            character: "↕️",
+            name: "Up Down Arrow",
+            keywords: ["vertical", "both ways", "resize"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "leftRightArrow",
+            character: "↔️",
+            name: "Left Right Arrow",
+            keywords: ["horizontal", "both ways", "resize"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "rightArrowCurvingLeft",
+            character: "↩️",
+            name: "Right Arrow Curving Left",
+            keywords: ["return", "reply", "undo"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "leftArrowCurvingRight",
+            character: "↪️",
+            name: "Left Arrow Curving Right",
+            keywords: ["forward", "redirect", "redo"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "rightArrowCurvingUp",
+            character: "⤴️",
+            name: "Right Arrow Curving Up",
+            keywords: ["upload", "forward", "send"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "rightArrowCurvingDown",
+            character: "⤵️",
+            name: "Right Arrow Curving Down",
+            keywords: ["download", "reply", "forward"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "clockwiseVerticalArrows",
+            character: "🔃",
+            name: "Clockwise Vertical Arrows",
+            keywords: ["reload", "refresh", "repeat", "sync"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "counterclockwiseArrowsButton",
+            character: "🔄",
+            name: "Counterclockwise Arrows Button",
+            keywords: ["reload", "refresh", "repeat", "sync"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "bACKArrow",
+            character: "🔙",
+            name: "B A C K Arrow",
+            keywords: ["return", "previous", "reverse"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "eNDArrow",
+            character: "🔚",
+            name: "E N D Arrow",
+            keywords: ["finish", "last", "final"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "oNArrow",
+            character: "🔛",
+            name: "O N Arrow",
+            keywords: ["active", "enabled", "continue"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "sOONArrow",
+            character: "🔜",
+            name: "S O O N Arrow",
+            keywords: ["coming", "future", "next"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "tOPArrow",
+            character: "🔝",
+            name: "T O P Arrow",
+            keywords: ["up", "first", "best", "summit"],
+            category: .symbols(.arrow)
+        ),
+        Emoji(
+            id: "placeOfWorship",
+            character: "🛐",
+            name: "Place Of Worship",
+            keywords: ["religious", "pray", "church", "temple"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "atomSymbol",
+            character: "⚛️",
+            name: "Atom Symbol",
+            keywords: ["science", "physics", "nuclear", "molecule"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "om",
+            character: "🕉️",
+            name: "Om",
+            keywords: ["hindu", "meditation", "spiritual", "mantra"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "starOfDavid",
+            character: "✡️",
+            name: "Star Of David",
+            keywords: ["jewish", "judaism", "israel", "religion"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "wheelOfDharma",
+            character: "☸️",
+            name: "Wheel Of Dharma",
+            keywords: ["buddhist", "buddhism", "religion", "spiritual"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "yinYang",
+            character: "☯️",
+            name: "Yin Yang",
+            keywords: ["balance", "taoism", "harmony", "opposite"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "latinCross",
+            character: "✝️",
+            name: "Latin Cross",
+            keywords: ["christian", "christianity", "religion", "jesus"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "orthodoxCross",
+            character: "☦️",
+            name: "Orthodox Cross",
+            keywords: ["christian", "eastern", "religion"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "starAndCrescent",
+            character: "☪️",
+            name: "Star And Crescent",
+            keywords: ["islam", "muslim", "religion"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "peaceSymbol",
+            character: "☮️",
+            name: "Peace Symbol",
+            keywords: ["peace", "hippie", "pacifism", "love"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "menorah",
+            character: "🕎",
+            name: "Menorah",
+            keywords: ["jewish", "judaism", "hanukkah", "candles"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "dottedSixPointedStar",
+            character: "🔯",
+            name: "Dotted Six Pointed Star",
+            keywords: ["star", "fortune", "symbol"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "khanda",
+            character: "🪯",
+            name: "Khanda",
+            keywords: ["sikh", "sikhism", "religion", "symbol"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "aries",
+            character: "♈",
+            name: "Aries",
+            keywords: ["zodiac", "astrology", "ram", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "taurus",
+            character: "♉",
+            name: "Taurus",
+            keywords: ["zodiac", "astrology", "bull", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "gemini",
+            character: "♊",
+            name: "Gemini",
+            keywords: ["zodiac", "astrology", "twins", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "cancer",
+            character: "♋",
+            name: "Cancer",
+            keywords: ["zodiac", "astrology", "crab", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "leo",
+            character: "♌",
+            name: "Leo",
+            keywords: ["zodiac", "astrology", "lion", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "virgo",
+            character: "♍",
+            name: "Virgo",
+            keywords: ["zodiac", "astrology", "virgin", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "libra",
+            character: "♎",
+            name: "Libra",
+            keywords: ["zodiac", "astrology", "scales", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "scorpio",
+            character: "♏",
+            name: "Scorpio",
+            keywords: ["zodiac", "astrology", "scorpion", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "sagittarius",
+            character: "♐",
+            name: "Sagittarius",
+            keywords: ["zodiac", "astrology", "archer", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "capricorn",
+            character: "♑",
+            name: "Capricorn",
+            keywords: ["zodiac", "astrology", "goat", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "aquarius",
+            character: "♒",
+            name: "Aquarius",
+            keywords: ["zodiac", "astrology", "water bearer", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "pisces",
+            character: "♓",
+            name: "Pisces",
+            keywords: ["zodiac", "astrology", "fish", "horoscope"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "ophiuchus",
+            character: "⛎",
+            name: "Ophiuchus",
+            keywords: ["zodiac", "astrology", "serpent bearer", "13th sign"],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "shuffleTracksButton",
+            character: "🔀",
+            name: "Shuffle Tracks Button",
+            keywords: ["random", "music", "mix", "player"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "repeatButton",
+            character: "🔁",
+            name: "Repeat Button",
+            keywords: ["loop", "music", "again", "replay"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "repeatSingleButton",
+            character: "🔂",
+            name: "Repeat Single Button",
+            keywords: ["loop one", "music", "replay", "single"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "playButton",
+            character: "▶️",
+            name: "Play Button",
+            keywords: ["start", "music", "video", "media"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "fastForwardButton",
+            character: "⏩",
+            name: "Fast Forward Button",
+            keywords: ["skip", "speed up", "next", "media"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "nextTrackButton",
+            character: "⏭️",
+            name: "Next Track Button",
+            keywords: ["skip", "forward", "music", "song"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "playOrPauseButton",
+            character: "⏯️",
+            name: "Play Or Pause Button",
+            keywords: ["toggle", "media", "control", "music"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "reverseButton",
+            character: "◀️",
+            name: "Reverse Button",
+            keywords: ["back", "rewind", "previous", "media"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "fastReverseButton",
+            character: "⏪",
+            name: "Fast Reverse Button",
+            keywords: ["rewind", "back", "previous", "media"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "lastTrackButton",
+            character: "⏮️",
+            name: "Last Track Button",
+            keywords: ["previous", "back", "music", "song"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "upwardsButton",
+            character: "🔼",
+            name: "Upwards Button",
+            keywords: ["up", "increase", "triangle", "scroll"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "fastUpButton",
+            character: "⏫",
+            name: "Fast Up Button",
+            keywords: ["up", "scroll", "double", "increase"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "downwardsButton",
+            character: "🔽",
+            name: "Downwards Button",
+            keywords: ["down", "decrease", "triangle", "scroll"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "fastDownButton",
+            character: "⏬",
+            name: "Fast Down Button",
+            keywords: ["down", "scroll", "double", "decrease"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "pauseButton",
+            character: "⏸️",
+            name: "Pause Button",
+            keywords: ["stop", "media", "wait", "freeze"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "stopButton",
+            character: "⏹️",
+            name: "Stop Button",
+            keywords: ["halt", "end", "media", "square"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "recordButton",
+            character: "⏺️",
+            name: "Record Button",
+            keywords: ["recording", "capture", "media", "red dot"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "ejectButton",
+            character: "⏏️",
+            name: "Eject Button",
+            keywords: ["remove", "media", "disk", "cd"],
+            category: .symbols(.media)
+        ),
+        Emoji(
+            id: "cinema",
+            character: "🎦",
+            name: "Cinema",
+            keywords: ["movie", "film", "theater", "camera"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "dimButton",
+            character: "🔅",
+            name: "Dim Button",
+            keywords: ["brightness", "lower", "dark", "screen"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "brightButton",
+            character: "🔆",
+            name: "Bright Button",
+            keywords: ["brightness", "increase", "light", "screen"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "antennaBars",
+            character: "📶",
+            name: "Antenna Bars",
+            keywords: ["signal", "reception", "wifi", "cellular"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "wireless",
+            character: "🛜",
+            name: "Wireless",
+            keywords: ["wifi", "internet", "connection", "network"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "vibrationMode",
+            character: "📳",
+            name: "Vibration Mode",
+            keywords: ["silent", "phone", "buzz", "shake"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "mobilePhoneOff",
+            character: "📴",
+            name: "Mobile Phone Off",
+            keywords: ["disabled", "silent", "airplane", "power"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "femaleSign",
+            character: "♀️",
+            name: "Female Sign",
+            keywords: ["woman", "gender", "venus", "girl"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "maleSign",
+            character: "♂️",
+            name: "Male Sign",
+            keywords: ["man", "gender", "mars", "boy"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "transgenderSymbol",
+            character: "⚧️",
+            name: "Transgender Symbol",
+            keywords: ["trans", "gender", "identity", "lgbtq"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "multiply",
+            character: "✖️",
+            name: "Multiply",
+            keywords: ["times", "math", "x", "multiplication"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "plus",
+            character: "➕",
+            name: "Plus",
+            keywords: ["add", "math", "addition", "positive"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "minus",
+            character: "➖",
+            name: "Minus",
+            keywords: ["subtract", "math", "subtraction", "negative"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "divide",
+            character: "➗",
+            name: "Divide",
+            keywords: ["division", "math", "split"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "heavyEqualsSign",
+            character: "🟰",
+            name: "Heavy Equals Sign",
+            keywords: ["math", "equal", "result"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "infinity",
+            character: "♾️",
+            name: "Infinity",
+            keywords: ["endless", "forever", "unlimited", "math"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "doubleExclamationMark",
+            character: "‼️",
+            name: "Double Exclamation Mark",
+            keywords: ["emphasis", "alert", "important", "wow"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "exclamationQuestionMark",
+            character: "⁉️",
+            name: "Exclamation Question Mark",
+            keywords: ["surprised", "confused", "what", "huh"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "redQuestionMark",
+            character: "❓",
+            name: "Red Question Mark",
+            keywords: ["confused", "ask", "what", "unknown"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "whiteQuestionMark",
+            character: "❔",
+            name: "White Question Mark",
+            keywords: ["confused", "ask", "what", "unknown"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "whiteExclamationMark",
+            character: "❕",
+            name: "White Exclamation Mark",
+            keywords: ["attention", "important", "alert"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "redExclamationMark",
+            character: "❗",
+            name: "Red Exclamation Mark",
+            keywords: ["attention", "important", "alert", "warning"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "wavyDash",
+            character: "〰️",
+            name: "Wavy Dash",
+            keywords: ["wavy", "line", "squiggly"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "currencyExchange",
+            character: "💱",
+            name: "Currency Exchange",
+            keywords: ["money", "forex", "trade", "convert"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "heavyDollarSign",
+            character: "💲",
+            name: "Heavy Dollar Sign",
+            keywords: ["money", "usd", "cash", "price"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "medicalSymbol",
+            character: "⚕️",
+            name: "Medical Symbol",
+            keywords: ["doctor", "health", "caduceus", "medicine"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "recyclingSymbol",
+            character: "♻️",
+            name: "Recycling Symbol",
+            keywords: ["recycle", "green", "environment", "eco"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "fleurDeLis",
+            character: "⚜️",
+            name: "Fleur De Lis",
+            keywords: ["french", "royal", "lily", "symbol"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "tridentEmblem",
+            character: "🔱",
+            name: "Trident Emblem",
+            keywords: ["poseidon", "neptune", "pitchfork", "weapon"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "nameBadge",
+            character: "📛",
+            name: "Name Badge",
+            keywords: ["hello", "tag", "identification", "label"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseSymbolForBeginner",
+            character: "🔰",
+            name: "Japanese Symbol For Beginner",
+            keywords: ["shoshinsha", "newbie", "learner", "starter"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "hollowRedCircle",
+            character: "⭕",
+            name: "Hollow Red Circle",
+            keywords: ["o", "correct", "circle", "mark"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "checkMarkButton",
+            character: "✅",
+            name: "Check Mark Button",
+            keywords: ["done", "correct", "yes", "approved"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "checkBoxWithCheck",
+            character: "☑️",
+            name: "Check Box With Check",
+            keywords: ["done", "complete", "selected", "checked"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "checkMark",
+            character: "✔️",
+            name: "Check Mark",
+            keywords: ["done", "correct", "yes", "approved"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "crossMark",
+            character: "❌",
+            name: "Cross Mark",
+            keywords: ["no", "wrong", "x", "cancel"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "crossMarkButton",
+            character: "❎",
+            name: "Cross Mark Button",
+            keywords: ["no", "wrong", "x", "cancel"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "curlyLoop",
+            character: "➰",
+            name: "Curly Loop",
+            keywords: ["loop", "curl", "voicemail"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "doubleCurlyLoop",
+            character: "➿",
+            name: "Double Curly Loop",
+            keywords: ["loop", "curl", "phone"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "partAlternationMark",
+            character: "〽️",
+            name: "Part Alternation Mark",
+            keywords: ["japanese", "m", "music"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "eightSpokedAsterisk",
+            character: "✳️",
+            name: "Eight Spoked Asterisk",
+            keywords: ["star", "sparkle", "symbol"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "eightPointedStar",
+            character: "✴️",
+            name: "Eight Pointed Star",
+            keywords: ["star", "orange", "sparkle"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "sparkle",
+            character: "❇️",
+            name: "Sparkle",
+            keywords: ["star", "green", "shine", "twinkle"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "copyright",
+            character: "©️",
+            name: "Copyright",
+            keywords: ["legal", "c", "symbol", "rights"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "registered",
+            character: "®️",
+            name: "Registered",
+            keywords: ["legal", "r", "trademark", "symbol"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "tradeMark",
+            character: "™️",
+            name: "Trade Mark",
+            keywords: ["legal", "tm", "trademark", "brand"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "keycapHash",
+            character: "#️⃣",
+            name: "Keycap Hash",
+            keywords: ["hashtag", "pound", "number"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycapStar",
+            character: "*️⃣",
+            name: "Keycap Star",
+            keywords: ["asterisk", "star", "multiply"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap0",
+            character: "0️⃣",
+            name: "Keycap0",
+            keywords: ["zero", "number", "digit"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap1",
+            character: "1️⃣",
+            name: "Keycap1",
+            keywords: ["one", "number", "digit", "first"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap2",
+            character: "2️⃣",
+            name: "Keycap2",
+            keywords: ["two", "number", "digit", "second"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap3",
+            character: "3️⃣",
+            name: "Keycap3",
+            keywords: ["three", "number", "digit", "third"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap4",
+            character: "4️⃣",
+            name: "Keycap4",
+            keywords: ["four", "number", "digit", "fourth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap5",
+            character: "5️⃣",
+            name: "Keycap5",
+            keywords: ["five", "number", "digit", "fifth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap6",
+            character: "6️⃣",
+            name: "Keycap6",
+            keywords: ["six", "number", "digit", "sixth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap7",
+            character: "7️⃣",
+            name: "Keycap7",
+            keywords: ["seven", "number", "digit", "seventh"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap8",
+            character: "8️⃣",
+            name: "Keycap8",
+            keywords: ["eight", "number", "digit", "eighth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap9",
+            character: "9️⃣",
+            name: "Keycap9",
+            keywords: ["nine", "number", "digit", "ninth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "keycap10",
+            character: "🔟",
+            name: "Keycap10",
+            keywords: ["ten", "number", "digit", "tenth"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "inputLatinUppercase",
+            character: "🔠",
+            name: "Input Latin Uppercase",
+            keywords: ["caps", "capital", "abc", "letters"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "inputLatinLowercase",
+            character: "🔡",
+            name: "Input Latin Lowercase",
+            keywords: ["small", "letters", "abc"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "inputNumbers",
+            character: "🔢",
+            name: "Input Numbers",
+            keywords: ["digits", "123", "numeric"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "inputSymbols",
+            character: "🔣",
+            name: "Input Symbols",
+            keywords: ["characters", "special", "punctuation"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "inputLatinLetters",
+            character: "🔤",
+            name: "Input Latin Letters",
+            keywords: ["abc", "alphabet", "text"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "aButtonBloodType",
+            character: "🅰️",
+            name: "A Button Blood Type",
+            keywords: ["blood", "type a", "letter"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "aBButtonBloodType",
+            character: "🆎",
+            name: "A B Button Blood Type",
+            keywords: ["blood", "type ab", "letters"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "bButtonBloodType",
+            character: "🅱️",
+            name: "B Button Blood Type",
+            keywords: ["blood", "type b", "letter"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "cLButton",
+            character: "🆑",
+            name: "C L Button",
+            keywords: ["clear", "cl", "cancel"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "cOOLButton",
+            character: "🆒",
+            name: "C O O L Button",
+            keywords: ["cool", "awesome", "nice"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "fREEButton",
+            character: "🆓",
+            name: "F R E E Button",
+            keywords: ["free", "gratis", "no cost"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "information",
+            character: "ℹ️",
+            name: "Information",
+            keywords: ["info", "i", "help", "details"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "iDButton",
+            character: "🆔",
+            name: "I D Button",
+            keywords: ["id", "identification", "card"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "circledM",
+            character: "Ⓜ️",
+            name: "Circled M",
+            keywords: ["metro", "m", "subway"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "nEWButton",
+            character: "🆕",
+            name: "N E W Button",
+            keywords: ["new", "fresh", "latest"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "nGButton",
+            character: "🆖",
+            name: "N G Button",
+            keywords: ["ng", "no good", "bad"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "oButtonBloodType",
+            character: "🅾️",
+            name: "O Button Blood Type",
+            keywords: ["blood", "type o", "letter"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "oKButton",
+            character: "🆗",
+            name: "O K Button",
+            keywords: ["ok", "okay", "good", "yes"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "pButton",
+            character: "🅿️",
+            name: "P Button",
+            keywords: ["parking", "p", "car"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "sOSButton",
+            character: "🆘",
+            name: "S O S Button",
+            keywords: ["sos", "help", "emergency", "distress"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "uPButton",
+            character: "🆙",
+            name: "U P Button",
+            keywords: ["up", "level up", "increase"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "vSButton",
+            character: "🆚",
+            name: "V S Button",
+            keywords: ["vs", "versus", "against", "battle"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseHereButton",
+            character: "🈁",
+            name: "Japanese Here Button",
+            keywords: ["japanese", "koko", "here"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseServiceChargeButton",
+            character: "🈂️",
+            name: "Japanese Service Charge Button",
+            keywords: ["japanese", "sa", "service"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseMonthlyAmountButton",
+            character: "🈷️",
+            name: "Japanese Monthly Amount Button",
+            keywords: ["japanese", "tsuki", "monthly"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseNotFreeOfChargeButton",
+            character: "🈶",
+            name: "Japanese Not Free Of Charge Button",
+            keywords: ["japanese", "ari", "available"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseReservedButton",
+            character: "🈯",
+            name: "Japanese Reserved Button",
+            keywords: ["japanese", "shitei", "reserved", "designated"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseBargainButton",
+            character: "🉐",
+            name: "Japanese Bargain Button",
+            keywords: ["japanese", "toku", "deal", "advantage"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseDiscountButton",
+            character: "🈹",
+            name: "Japanese Discount Button",
+            keywords: ["japanese", "wari", "discount", "sale"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseFreeOfChargeButton",
+            character: "🈚",
+            name: "Japanese Free Of Charge Button",
+            keywords: ["japanese", "mu", "free", "nothing"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseProhibitedButton",
+            character: "🈲",
+            name: "Japanese Prohibited Button",
+            keywords: ["japanese", "kin", "prohibited", "forbidden"],
+            category: .symbols(.sign)
+        ),
+        Emoji(
+            id: "japaneseAcceptableButton",
+            character: "🉑",
+            name: "Japanese Acceptable Button",
+            keywords: ["japanese", "ka", "acceptable", "possible"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseApplicationButton",
+            character: "🈸",
+            name: "Japanese Application Button",
+            keywords: ["japanese", "shen", "application", "apply"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japanesePassingGradeButton",
+            character: "🈴",
+            name: "Japanese Passing Grade Button",
+            keywords: ["japanese", "he", "passing", "agreement"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseVacancyButton",
+            character: "🈳",
+            name: "Japanese Vacancy Button",
+            keywords: ["japanese", "kong", "vacancy", "empty"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseCongratulationsButton",
+            character: "㊗️",
+            name: "Japanese Congratulations Button",
+            keywords: ["japanese", "iwau", "congrats", "celebrate"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseSecretButton",
+            character: "㊙️",
+            name: "Japanese Secret Button",
+            keywords: ["japanese", "himitsu", "secret", "private"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseOpenForBusinessButton",
+            character: "🈺",
+            name: "Japanese Open For Business Button",
+            keywords: ["japanese", "eigyo", "open", "operating"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "japaneseNoVacancyButton",
+            character: "🈵",
+            name: "Japanese No Vacancy Button",
+            keywords: ["japanese", "man", "full", "no vacancy"],
+            category: .symbols(.other)
+        ),
+        Emoji(
+            id: "redCircle",
+            character: "🔴",
+            name: "Red Circle",
+            keywords: ["red", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "orangeCircle",
+            character: "🟠",
+            name: "Orange Circle",
+            keywords: ["orange", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "yellowCircle",
+            character: "🟡",
+            name: "Yellow Circle",
+            keywords: ["yellow", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "greenCircle",
+            character: "🟢",
+            name: "Green Circle",
+            keywords: ["green", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blueCircle",
+            character: "🔵",
+            name: "Blue Circle",
+            keywords: ["blue", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "purpleCircle",
+            character: "🟣",
+            name: "Purple Circle",
+            keywords: ["purple", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "brownCircle",
+            character: "🟤",
+            name: "Brown Circle",
+            keywords: ["brown", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blackCircle",
+            character: "⚫",
+            name: "Black Circle",
+            keywords: ["black", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "whiteCircle",
+            character: "⚪",
+            name: "White Circle",
+            keywords: ["white", "round", "dot", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "redSquare",
+            character: "🟥",
+            name: "Red Square",
+            keywords: ["red", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "orangeSquare",
+            character: "🟧",
+            name: "Orange Square",
+            keywords: ["orange", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "yellowSquare",
+            character: "🟨",
+            name: "Yellow Square",
+            keywords: ["yellow", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "greenSquare",
+            character: "🟩",
+            name: "Green Square",
+            keywords: ["green", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blueSquare",
+            character: "🟦",
+            name: "Blue Square",
+            keywords: ["blue", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "purpleSquare",
+            character: "🟪",
+            name: "Purple Square",
+            keywords: ["purple", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "brownSquare",
+            character: "🟫",
+            name: "Brown Square",
+            keywords: ["brown", "square", "block", "color"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blackLargeSquare",
+            character: "⬛",
+            name: "Black Large Square",
+            keywords: ["black", "square", "big", "block"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "whiteLargeSquare",
+            character: "⬜",
+            name: "White Large Square",
+            keywords: ["white", "square", "big", "block"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blackMediumSquare",
+            character: "◼️",
+            name: "Black Medium Square",
+            keywords: ["black", "square", "medium", "block"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "whiteMediumSquare",
+            character: "◻️",
+            name: "White Medium Square",
+            keywords: ["white", "square", "medium", "block"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blackMediumSmallSquare",
+            character: "◾",
+            name: "Black Medium Small Square",
+            keywords: ["black", "square", "small", "block"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "whiteMediumSmallSquare",
+            character: "◽",
+            name: "White Medium Small Square",
+            keywords: ["white", "square", "small", "block"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "blackSmallSquare",
+            character: "▪️",
+            name: "Black Small Square",
+            keywords: ["black", "square", "tiny", "dot"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "whiteSmallSquare",
+            character: "▫️",
+            name: "White Small Square",
+            keywords: ["white", "square", "tiny", "dot"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "largeOrangeDiamond",
+            character: "🔶",
+            name: "Large Orange Diamond",
+            keywords: ["orange", "diamond", "big", "shape"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "largeBlueDiamond",
+            character: "🔷",
+            name: "Large Blue Diamond",
+            keywords: ["blue", "diamond", "big", "shape"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "smallOrangeDiamond",
+            character: "🔸",
+            name: "Small Orange Diamond",
+            keywords: ["orange", "diamond", "small", "shape"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "smallBlueDiamond",
+            character: "🔹",
+            name: "Small Blue Diamond",
+            keywords: ["blue", "diamond", "small", "shape"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "redTrianglePointedUp",
+            character: "🔺",
+            name: "Red Triangle Pointed Up",
+            keywords: ["red", "triangle", "up", "shape"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "redTrianglePointedDown",
+            character: "🔻",
+            name: "Red Triangle Pointed Down",
+            keywords: ["red", "triangle", "down", "shape"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "diamondWithADot",
+            character: "💠",
+            name: "Diamond With A Dot",
+            keywords: ["blue", "diamond", "flower", "kawaii"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "radioButton",
+            character: "🔘",
+            name: "Radio Button",
+            keywords: ["button", "selected", "option", "choice"],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "whiteSquareButton",
+            character: "🔳",
+            name: "White Square Button",
+            keywords: ["white", "square", "button", "outlined"],
+            category: .symbols(.shape)
+        ),
+        Emoji(
+            id: "blackSquareButton",
+            character: "🔲",
+            name: "Black Square Button",
+            keywords: ["black", "square", "button", "outlined"],
+            category: .symbols(.shape)
+        ),
 
         // MARK: Flags
-        Emoji(id: "chequeredFlag", character: "🏁", name: "Chequered Flag", keywords: ["racing", "finish", "checkered", "race"], category: .symbols(.flag(.other))),
-        Emoji(id: "triangularFlag", character: "🚩", name: "Triangular Flag", keywords: ["red", "marker", "warning", "post"], category: .symbols(.flag(.other))),
-        Emoji(id: "crossedFlags", character: "🎌", name: "Crossed Flags", keywords: ["japanese", "celebration", "two"], category: .symbols(.flag(.other))),
-        Emoji(id: "blackFlag", character: "🏴", name: "Black Flag", keywords: ["waving", "plain", "dark"], category: .symbols(.flag(.other))),
-        Emoji(id: "whiteFlag", character: "🏳️", name: "White Flag", keywords: ["surrender", "peace", "waving", "truce"], category: .symbols(.flag(.other))),
-        Emoji(id: "rainbowFlag", character: "🏳️‍🌈", name: "Rainbow Flag", keywords: ["pride", "lgbtq", "gay", "diversity"], category: .symbols(.flag(.other))),
-        Emoji(id: "transgenderFlag", character: "🏳️‍⚧️", name: "Transgender Flag", keywords: ["trans", "pride", "lgbtq"], category: .symbols(.flag(.other))),
-        Emoji(id: "pirateFlag", character: "🏴‍☠️", name: "Pirate Flag", keywords: ["jolly roger", "skull", "crossbones", "pirate"], category: .symbols(.flag(.other))),
-        Emoji(id: "flagAscensionIsland", character: "🇦🇨", name: "Flag Ascension Island", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagAndorra", character: "🇦🇩", name: "Flag Andorra", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagUnitedArabEmirates", character: "🇦🇪", name: "Flag United Arab Emirates", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagAfghanistan", character: "🇦🇫", name: "Flag Afghanistan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagAntiguaBarbuda", character: "🇦🇬", name: "Flag Antigua Barbuda", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagAnguilla", character: "🇦🇮", name: "Flag Anguilla", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagAlbania", character: "🇦🇱", name: "Flag Albania", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagArmenia", character: "🇦🇲", name: "Flag Armenia", keywords: [], category: .symbols(.flag(.europe))),
+
+        Emoji(
+            id: "chequeredFlag",
+            character: "🏁",
+            name: "Chequered Flag",
+            keywords: ["racing", "finish", "checkered", "race"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "triangularFlag",
+            character: "🚩",
+            name: "Triangular Flag",
+            keywords: ["red", "marker", "warning", "post"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "crossedFlags",
+            character: "🎌",
+            name: "Crossed Flags",
+            keywords: ["japanese", "celebration", "two"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "blackFlag",
+            character: "🏴",
+            name: "Black Flag",
+            keywords: ["waving", "plain", "dark"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "whiteFlag",
+            character: "🏳️",
+            name: "White Flag",
+            keywords: ["surrender", "peace", "waving", "truce"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "rainbowFlag",
+            character: "🏳️‍🌈",
+            name: "Rainbow Flag",
+            keywords: ["pride", "lgbtq", "gay", "diversity"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "transgenderFlag",
+            character: "🏳️‍⚧️",
+            name: "Transgender Flag",
+            keywords: ["trans", "pride", "lgbtq"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "pirateFlag",
+            character: "🏴‍☠️",
+            name: "Pirate Flag",
+            keywords: ["jolly roger", "skull", "crossbones", "pirate"],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "flagAscensionIsland",
+            character: "🇦🇨",
+            name: "Flag Ascension Island",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagAndorra",
+            character: "🇦🇩",
+            name: "Flag Andorra",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagUnitedArabEmirates",
+            character: "🇦🇪",
+            name: "Flag United Arab Emirates",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagAfghanistan",
+            character: "🇦🇫",
+            name: "Flag Afghanistan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagAntiguaBarbuda",
+            character: "🇦🇬",
+            name: "Flag Antigua Barbuda",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagAnguilla",
+            character: "🇦🇮",
+            name: "Flag Anguilla",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagAlbania",
+            character: "🇦🇱",
+            name: "Flag Albania",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagArmenia",
+            character: "🇦🇲",
+            name: "Flag Armenia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagAngola", character: "🇦🇴", name: "Flag Angola", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagAntarctica", character: "🇦🇶", name: "Flag Antarctica", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagArgentina", character: "🇦🇷", name: "Flag Argentina", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagAmericanSamoa", character: "🇦🇸", name: "Flag American Samoa", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagAustria", character: "🇦🇹", name: "Flag Austria", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagAustralia", character: "🇦🇺", name: "Flag Australia", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagAruba", character: "🇦🇼", name: "Flag Aruba", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagÅlandIslands", character: "🇦🇽", name: "Flagåland Islands", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagAzerbaijan", character: "🇦🇿", name: "Flag Azerbaijan", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagBosniaHerzegovina", character: "🇧🇦", name: "Flag Bosnia Herzegovina", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagBarbados", character: "🇧🇧", name: "Flag Barbados", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagBangladesh", character: "🇧🇩", name: "Flag Bangladesh", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagBelgium", character: "🇧🇪", name: "Flag Belgium", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagBurkinaFaso", character: "🇧🇫", name: "Flag Burkina Faso", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagBulgaria", character: "🇧🇬", name: "Flag Bulgaria", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagAntarctica",
+            character: "🇦🇶",
+            name: "Flag Antarctica",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagArgentina",
+            character: "🇦🇷",
+            name: "Flag Argentina",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagAmericanSamoa",
+            character: "🇦🇸",
+            name: "Flag American Samoa",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagAustria",
+            character: "🇦🇹",
+            name: "Flag Austria",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagAustralia",
+            character: "🇦🇺",
+            name: "Flag Australia",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagAruba",
+            character: "🇦🇼",
+            name: "Flag Aruba",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagÅlandIslands",
+            character: "🇦🇽",
+            name: "Flagåland Islands",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagAzerbaijan",
+            character: "🇦🇿",
+            name: "Flag Azerbaijan",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagBosniaHerzegovina",
+            character: "🇧🇦",
+            name: "Flag Bosnia Herzegovina",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagBarbados",
+            character: "🇧🇧",
+            name: "Flag Barbados",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagBangladesh",
+            character: "🇧🇩",
+            name: "Flag Bangladesh",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagBelgium",
+            character: "🇧🇪",
+            name: "Flag Belgium",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagBurkinaFaso",
+            character: "🇧🇫",
+            name: "Flag Burkina Faso",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagBulgaria",
+            character: "🇧🇬",
+            name: "Flag Bulgaria",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagBahrain", character: "🇧🇭", name: "Flag Bahrain", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagBurundi", character: "🇧🇮", name: "Flag Burundi", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagBurundi",
+            character: "🇧🇮",
+            name: "Flag Burundi",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagBenin", character: "🇧🇯", name: "Flag Benin", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagStBarthélemy", character: "🇧🇱", name: "Flag St Barthélemy", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagBermuda", character: "🇧🇲", name: "Flag Bermuda", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagStBarthélemy",
+            character: "🇧🇱",
+            name: "Flag St Barthélemy",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagBermuda",
+            character: "🇧🇲",
+            name: "Flag Bermuda",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagBrunei", character: "🇧🇳", name: "Flag Brunei", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagBolivia", character: "🇧🇴", name: "Flag Bolivia", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagCaribbeanNetherlands", character: "🇧🇶", name: "Flag Caribbean Netherlands", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagBrazil", character: "🇧🇷", name: "Flag Brazil", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagBahamas", character: "🇧🇸", name: "Flag Bahamas", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagBolivia",
+            character: "🇧🇴",
+            name: "Flag Bolivia",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagCaribbeanNetherlands",
+            character: "🇧🇶",
+            name: "Flag Caribbean Netherlands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagBrazil",
+            character: "🇧🇷",
+            name: "Flag Brazil",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagBahamas",
+            character: "🇧🇸",
+            name: "Flag Bahamas",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagBhutan", character: "🇧🇹", name: "Flag Bhutan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagBouvetIsland", character: "🇧🇻", name: "Flag Bouvet Island", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagBotswana", character: "🇧🇼", name: "Flag Botswana", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagBelarus", character: "🇧🇾", name: "Flag Belarus", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagBelize", character: "🇧🇿", name: "Flag Belize", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagCanada", character: "🇨🇦", name: "Flag Canada", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagCocosKeelingIslands", character: "🇨🇨", name: "Flag Cocos Keeling Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagCongoKinshasa", character: "🇨🇩", name: "Flag Congo Kinshasa", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagCentralAfricanRepublic", character: "🇨🇫", name: "Flag Central African Republic", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagCongoBrazzaville", character: "🇨🇬", name: "Flag Congo Brazzaville", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagSwitzerland", character: "🇨🇭", name: "Flag Switzerland", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagCôteDIvoire", character: "🇨🇮", name: "Flag Côte D Ivoire", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagCookIslands", character: "🇨🇰", name: "Flag Cook Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagChile", character: "🇨🇱", name: "Flag Chile", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagCameroon", character: "🇨🇲", name: "Flag Cameroon", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagBouvetIsland",
+            character: "🇧🇻",
+            name: "Flag Bouvet Island",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagBotswana",
+            character: "🇧🇼",
+            name: "Flag Botswana",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagBelarus",
+            character: "🇧🇾",
+            name: "Flag Belarus",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagBelize",
+            character: "🇧🇿",
+            name: "Flag Belize",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagCanada",
+            character: "🇨🇦",
+            name: "Flag Canada",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagCocosKeelingIslands",
+            character: "🇨🇨",
+            name: "Flag Cocos Keeling Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagCongoKinshasa",
+            character: "🇨🇩",
+            name: "Flag Congo Kinshasa",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagCentralAfricanRepublic",
+            character: "🇨🇫",
+            name: "Flag Central African Republic",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagCongoBrazzaville",
+            character: "🇨🇬",
+            name: "Flag Congo Brazzaville",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagSwitzerland",
+            character: "🇨🇭",
+            name: "Flag Switzerland",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagCôteDIvoire",
+            character: "🇨🇮",
+            name: "Flag Côte D Ivoire",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagCookIslands",
+            character: "🇨🇰",
+            name: "Flag Cook Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagChile",
+            character: "🇨🇱",
+            name: "Flag Chile",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagCameroon",
+            character: "🇨🇲",
+            name: "Flag Cameroon",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagChina", character: "🇨🇳", name: "Flag China", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagColombia", character: "🇨🇴", name: "Flag Colombia", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagClippertonIsland", character: "🇨🇵", name: "Flag Clipperton Island", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagCostaRica", character: "🇨🇷", name: "Flag Costa Rica", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagCuba", character: "🇨🇺", name: "Flag Cuba", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagCapeVerde", character: "🇨🇻", name: "Flag Cape Verde", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagCuraçao", character: "🇨🇼", name: "Flag Curaçao", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagChristmasIsland", character: "🇨🇽", name: "Flag Christmas Island", keywords: [], category: .symbols(.flag(.asia))),
+        Emoji(
+            id: "flagClippertonIsland",
+            character: "🇨🇵",
+            name: "Flag Clipperton Island",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagCostaRica",
+            character: "🇨🇷",
+            name: "Flag Costa Rica",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagCuba",
+            character: "🇨🇺",
+            name: "Flag Cuba",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagCapeVerde",
+            character: "🇨🇻",
+            name: "Flag Cape Verde",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagCuraçao",
+            character: "🇨🇼",
+            name: "Flag Curaçao",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagChristmasIsland",
+            character: "🇨🇽",
+            name: "Flag Christmas Island",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
         Emoji(id: "flagCyprus", character: "🇨🇾", name: "Flag Cyprus", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagCzechia", character: "🇨🇿", name: "Flag Czechia", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagGermany", character: "🇩🇪", name: "Flag Germany", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagDiegoGarcia", character: "🇩🇬", name: "Flag Diego Garcia", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagDjibouti", character: "🇩🇯", name: "Flag Djibouti", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagDenmark", character: "🇩🇰", name: "Flag Denmark", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagCzechia",
+            character: "🇨🇿",
+            name: "Flag Czechia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagGermany",
+            character: "🇩🇪",
+            name: "Flag Germany",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagDiegoGarcia",
+            character: "🇩🇬",
+            name: "Flag Diego Garcia",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagDjibouti",
+            character: "🇩🇯",
+            name: "Flag Djibouti",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagDenmark",
+            character: "🇩🇰",
+            name: "Flag Denmark",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagDominica", character: "🇩🇲", name: "Flag Dominica", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagDominicanRepublic", character: "🇩🇴", name: "Flag Dominican Republic", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagAlgeria", character: "🇩🇿", name: "Flag Algeria", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagCeutaMelilla", character: "🇪🇦", name: "Flag Ceuta Melilla", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagEcuador", character: "🇪🇨", name: "Flag Ecuador", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagEstonia", character: "🇪🇪", name: "Flag Estonia", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagDominicanRepublic",
+            character: "🇩🇴",
+            name: "Flag Dominican Republic",
+            keywords: [],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "flagAlgeria",
+            character: "🇩🇿",
+            name: "Flag Algeria",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagCeutaMelilla",
+            character: "🇪🇦",
+            name: "Flag Ceuta Melilla",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagEcuador",
+            character: "🇪🇨",
+            name: "Flag Ecuador",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagEstonia",
+            character: "🇪🇪",
+            name: "Flag Estonia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagEgypt", character: "🇪🇬", name: "Flag Egypt", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagWesternSahara", character: "🇪🇭", name: "Flag Western Sahara", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagEritrea", character: "🇪🇷", name: "Flag Eritrea", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagWesternSahara",
+            character: "🇪🇭",
+            name: "Flag Western Sahara",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagEritrea",
+            character: "🇪🇷",
+            name: "Flag Eritrea",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagSpain", character: "🇪🇸", name: "Flag Spain", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagEthiopia", character: "🇪🇹", name: "Flag Ethiopia", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagEuropeanUnion", character: "🇪🇺", name: "Flag European Union", keywords: [], category: .symbols(.flag(.other))),
-        Emoji(id: "flagFinland", character: "🇫🇮", name: "Flag Finland", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagEthiopia",
+            character: "🇪🇹",
+            name: "Flag Ethiopia",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagEuropeanUnion",
+            character: "🇪🇺",
+            name: "Flag European Union",
+            keywords: [],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "flagFinland",
+            character: "🇫🇮",
+            name: "Flag Finland",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagFiji", character: "🇫🇯", name: "Flag Fiji", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagFalklandIslands", character: "🇫🇰", name: "Flag Falkland Islands", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagMicronesia", character: "🇫🇲", name: "Flag Micronesia", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagFaroeIslands", character: "🇫🇴", name: "Flag Faroe Islands", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagFalklandIslands",
+            character: "🇫🇰",
+            name: "Flag Falkland Islands",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagMicronesia",
+            character: "🇫🇲",
+            name: "Flag Micronesia",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagFaroeIslands",
+            character: "🇫🇴",
+            name: "Flag Faroe Islands",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagFrance", character: "🇫🇷", name: "Flag France", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagGabon", character: "🇬🇦", name: "Flag Gabon", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagUnitedKingdom", character: "🇬🇧", name: "Flag United Kingdom", keywords: ["union jack", "britain", "uk", "england"], category: .symbols(.religious)),
-        Emoji(id: "flagGrenada", character: "🇬🇩", name: "Flag Grenada", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagGeorgia", character: "🇬🇪", name: "Flag Georgia", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagFrenchGuiana", character: "🇬🇫", name: "Flag French Guiana", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagGuernsey", character: "🇬🇬", name: "Flag Guernsey", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagUnitedKingdom",
+            character: "🇬🇧",
+            name: "Flag United Kingdom",
+            keywords: ["union jack", "britain", "uk", "england"],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "flagGrenada",
+            character: "🇬🇩",
+            name: "Flag Grenada",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagGeorgia",
+            character: "🇬🇪",
+            name: "Flag Georgia",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagFrenchGuiana",
+            character: "🇬🇫",
+            name: "Flag French Guiana",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagGuernsey",
+            character: "🇬🇬",
+            name: "Flag Guernsey",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagGhana", character: "🇬🇭", name: "Flag Ghana", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagGibraltar", character: "🇬🇮", name: "Flag Gibraltar", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagGreenland", character: "🇬🇱", name: "Flag Greenland", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagGibraltar",
+            character: "🇬🇮",
+            name: "Flag Gibraltar",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagGreenland",
+            character: "🇬🇱",
+            name: "Flag Greenland",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagGambia", character: "🇬🇲", name: "Flag Gambia", keywords: [], category: .symbols(.flag(.africa))),
         Emoji(id: "flagGuinea", character: "🇬🇳", name: "Flag Guinea", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagGuadeloupe", character: "🇬🇵", name: "Flag Guadeloupe", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagEquatorialGuinea", character: "🇬🇶", name: "Flag Equatorial Guinea", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagGuadeloupe",
+            character: "🇬🇵",
+            name: "Flag Guadeloupe",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagEquatorialGuinea",
+            character: "🇬🇶",
+            name: "Flag Equatorial Guinea",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagGreece", character: "🇬🇷", name: "Flag Greece", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSouthGeorgiaSouthSandwichIslands", character: "🇬🇸", name: "Flag South Georgia South Sandwich Islands", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagGuatemala", character: "🇬🇹", name: "Flag Guatemala", keywords: [], category: .symbols(.flag(.centralAmerica))),
+        Emoji(
+            id: "flagSouthGeorgiaSouthSandwichIslands",
+            character: "🇬🇸",
+            name: "Flag South Georgia South Sandwich Islands",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagGuatemala",
+            character: "🇬🇹",
+            name: "Flag Guatemala",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
         Emoji(id: "flagGuam", character: "🇬🇺", name: "Flag Guam", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagGuineaBissau", character: "🇬🇼", name: "Flag Guinea Bissau", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagGuyana", character: "🇬🇾", name: "Flag Guyana", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagHongKongSARChina", character: "🇭🇰", name: "Flag Hong Kong S A R China", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagHeardMcDonaldIslands", character: "🇭🇲", name: "Flag Heard Mc Donald Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagHonduras", character: "🇭🇳", name: "Flag Honduras", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagCroatia", character: "🇭🇷", name: "Flag Croatia", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagHaiti", character: "🇭🇹", name: "Flag Haiti", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagHungary", character: "🇭🇺", name: "Flag Hungary", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagCanaryIslands", character: "🇮🇨", name: "Flag Canary Islands", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagIndonesia", character: "🇮🇩", name: "Flag Indonesia", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagIreland", character: "🇮🇪", name: "Flag Ireland", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagGuineaBissau",
+            character: "🇬🇼",
+            name: "Flag Guinea Bissau",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagGuyana",
+            character: "🇬🇾",
+            name: "Flag Guyana",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagHongKongSARChina",
+            character: "🇭🇰",
+            name: "Flag Hong Kong S A R China",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagHeardMcDonaldIslands",
+            character: "🇭🇲",
+            name: "Flag Heard Mc Donald Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagHonduras",
+            character: "🇭🇳",
+            name: "Flag Honduras",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagCroatia",
+            character: "🇭🇷",
+            name: "Flag Croatia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagHaiti",
+            character: "🇭🇹",
+            name: "Flag Haiti",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagHungary",
+            character: "🇭🇺",
+            name: "Flag Hungary",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagCanaryIslands",
+            character: "🇮🇨",
+            name: "Flag Canary Islands",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagIndonesia",
+            character: "🇮🇩",
+            name: "Flag Indonesia",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagIreland",
+            character: "🇮🇪",
+            name: "Flag Ireland",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagIsrael", character: "🇮🇱", name: "Flag Israel", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagIsleOfMan", character: "🇮🇲", name: "Flag Isle Of Man", keywords: [], category: .symbols(.zodiac)),
         Emoji(id: "flagIndia", character: "🇮🇳", name: "Flag India", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagBritishIndianOceanTerritory", character: "🇮🇴", name: "Flag British Indian Ocean Territory", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagBritishIndianOceanTerritory",
+            character: "🇮🇴",
+            name: "Flag British Indian Ocean Territory",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagIraq", character: "🇮🇶", name: "Flag Iraq", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagIran", character: "🇮🇷", name: "Flag Iran", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagIceland", character: "🇮🇸", name: "Flag Iceland", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagIceland",
+            character: "🇮🇸",
+            name: "Flag Iceland",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagItaly", character: "🇮🇹", name: "Flag Italy", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagJersey", character: "🇯🇪", name: "Flag Jersey", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagJamaica", character: "🇯🇲", name: "Flag Jamaica", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagJamaica",
+            character: "🇯🇲",
+            name: "Flag Jamaica",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagJordan", character: "🇯🇴", name: "Flag Jordan", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagJapan", character: "🇯🇵", name: "Flag Japan", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagKenya", character: "🇰🇪", name: "Flag Kenya", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagKyrgyzstan", character: "🇰🇬", name: "Flag Kyrgyzstan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagCambodia", character: "🇰🇭", name: "Flag Cambodia", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagKiribati", character: "🇰🇮", name: "Flag Kiribati", keywords: [], category: .symbols(.flag(.oceania))),
+        Emoji(
+            id: "flagKyrgyzstan",
+            character: "🇰🇬",
+            name: "Flag Kyrgyzstan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagCambodia",
+            character: "🇰🇭",
+            name: "Flag Cambodia",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagKiribati",
+            character: "🇰🇮",
+            name: "Flag Kiribati",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
         Emoji(id: "flagComoros", character: "🇰🇲", name: "Flag Comoros", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagStKittsNevis", character: "🇰🇳", name: "Flag St Kitts Nevis", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagNorthKorea", character: "🇰🇵", name: "Flag North Korea", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagSouthKorea", character: "🇰🇷", name: "Flag South Korea", keywords: [], category: .symbols(.flag(.asia))),
+        Emoji(
+            id: "flagStKittsNevis",
+            character: "🇰🇳",
+            name: "Flag St Kitts Nevis",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagNorthKorea",
+            character: "🇰🇵",
+            name: "Flag North Korea",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagSouthKorea",
+            character: "🇰🇷",
+            name: "Flag South Korea",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
         Emoji(id: "flagKuwait", character: "🇰🇼", name: "Flag Kuwait", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagCaymanIslands", character: "🇰🇾", name: "Flag Cayman Islands", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagKazakhstan", character: "🇰🇿", name: "Flag Kazakhstan", keywords: [], category: .symbols(.flag(.asia))),
+        Emoji(
+            id: "flagCaymanIslands",
+            character: "🇰🇾",
+            name: "Flag Cayman Islands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagKazakhstan",
+            character: "🇰🇿",
+            name: "Flag Kazakhstan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
         Emoji(id: "flagLaos", character: "🇱🇦", name: "Flag Laos", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagLebanon", character: "🇱🇧", name: "Flag Lebanon", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagStLucia", character: "🇱🇨", name: "Flag St Lucia", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagLiechtenstein", character: "🇱🇮", name: "Flag Liechtenstein", keywords: [], category: .symbols(.number)),
-        Emoji(id: "flagSriLanka", character: "🇱🇰", name: "Flag Sri Lanka", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagLiberia", character: "🇱🇷", name: "Flag Liberia", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagLesotho", character: "🇱🇸", name: "Flag Lesotho", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagLithuania", character: "🇱🇹", name: "Flag Lithuania", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagLuxembourg", character: "🇱🇺", name: "Flag Luxembourg", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagStLucia",
+            character: "🇱🇨",
+            name: "Flag St Lucia",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagLiechtenstein",
+            character: "🇱🇮",
+            name: "Flag Liechtenstein",
+            keywords: [],
+            category: .symbols(.number)
+        ),
+        Emoji(
+            id: "flagSriLanka",
+            character: "🇱🇰",
+            name: "Flag Sri Lanka",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagLiberia",
+            character: "🇱🇷",
+            name: "Flag Liberia",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagLesotho",
+            character: "🇱🇸",
+            name: "Flag Lesotho",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagLithuania",
+            character: "🇱🇹",
+            name: "Flag Lithuania",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagLuxembourg",
+            character: "🇱🇺",
+            name: "Flag Luxembourg",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagLatvia", character: "🇱🇻", name: "Flag Latvia", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagLibya", character: "🇱🇾", name: "Flag Libya", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMorocco", character: "🇲🇦", name: "Flag Morocco", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagMorocco",
+            character: "🇲🇦",
+            name: "Flag Morocco",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagMonaco", character: "🇲🇨", name: "Flag Monaco", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagMoldova", character: "🇲🇩", name: "Flag Moldova", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagMoldova",
+            character: "🇲🇩",
+            name: "Flag Moldova",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagMontenegro", character: "🇲🇪", name: "Flag Montenegro", keywords: [], category: .symbols(.number)),
-        Emoji(id: "flagStMartin", character: "🇲🇫", name: "Flag St Martin", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagMadagascar", character: "🇲🇬", name: "Flag Madagascar", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMarshallIslands", character: "🇲🇭", name: "Flag Marshall Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagNorthMacedonia", character: "🇲🇰", name: "Flag North Macedonia", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagStMartin",
+            character: "🇲🇫",
+            name: "Flag St Martin",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagMadagascar",
+            character: "🇲🇬",
+            name: "Flag Madagascar",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagMarshallIslands",
+            character: "🇲🇭",
+            name: "Flag Marshall Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagNorthMacedonia",
+            character: "🇲🇰",
+            name: "Flag North Macedonia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagMali", character: "🇲🇱", name: "Flag Mali", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMyanmarBurma", character: "🇲🇲", name: "Flag Myanmar Burma", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagMongolia", character: "🇲🇳", name: "Flag Mongolia", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagMacaoSARChina", character: "🇲🇴", name: "Flag Macao S A R China", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagNorthernMarianaIslands", character: "🇲🇵", name: "Flag Northern Mariana Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagMartinique", character: "🇲🇶", name: "Flag Martinique", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagMauritania", character: "🇲🇷", name: "Flag Mauritania", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMontserrat", character: "🇲🇸", name: "Flag Montserrat", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagMyanmarBurma",
+            character: "🇲🇲",
+            name: "Flag Myanmar Burma",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagMongolia",
+            character: "🇲🇳",
+            name: "Flag Mongolia",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagMacaoSARChina",
+            character: "🇲🇴",
+            name: "Flag Macao S A R China",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagNorthernMarianaIslands",
+            character: "🇲🇵",
+            name: "Flag Northern Mariana Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagMartinique",
+            character: "🇲🇶",
+            name: "Flag Martinique",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagMauritania",
+            character: "🇲🇷",
+            name: "Flag Mauritania",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagMontserrat",
+            character: "🇲🇸",
+            name: "Flag Montserrat",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagMalta", character: "🇲🇹", name: "Flag Malta", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagMauritius", character: "🇲🇺", name: "Flag Mauritius", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMaldives", character: "🇲🇻", name: "Flag Maldives", keywords: [], category: .symbols(.flag(.asia))),
+        Emoji(
+            id: "flagMauritius",
+            character: "🇲🇺",
+            name: "Flag Mauritius",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagMaldives",
+            character: "🇲🇻",
+            name: "Flag Maldives",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
         Emoji(id: "flagMalawi", character: "🇲🇼", name: "Flag Malawi", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagMexico", character: "🇲🇽", name: "Flag Mexico", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagMalaysia", character: "🇲🇾", name: "Flag Malaysia", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagMozambique", character: "🇲🇿", name: "Flag Mozambique", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagNamibia", character: "🇳🇦", name: "Flag Namibia", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagNewCaledonia", character: "🇳🇨", name: "Flag New Caledonia", keywords: [], category: .symbols(.flag(.oceania))),
+        Emoji(
+            id: "flagMexico",
+            character: "🇲🇽",
+            name: "Flag Mexico",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagMalaysia",
+            character: "🇲🇾",
+            name: "Flag Malaysia",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagMozambique",
+            character: "🇲🇿",
+            name: "Flag Mozambique",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagNamibia",
+            character: "🇳🇦",
+            name: "Flag Namibia",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagNewCaledonia",
+            character: "🇳🇨",
+            name: "Flag New Caledonia",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
         Emoji(id: "flagNiger", character: "🇳🇪", name: "Flag Niger", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagNorfolkIsland", character: "🇳🇫", name: "Flag Norfolk Island", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagNigeria", character: "🇳🇬", name: "Flag Nigeria", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagNicaragua", character: "🇳🇮", name: "Flag Nicaragua", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagNetherlands", character: "🇳🇱", name: "Flag Netherlands", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagNorfolkIsland",
+            character: "🇳🇫",
+            name: "Flag Norfolk Island",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagNigeria",
+            character: "🇳🇬",
+            name: "Flag Nigeria",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagNicaragua",
+            character: "🇳🇮",
+            name: "Flag Nicaragua",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagNetherlands",
+            character: "🇳🇱",
+            name: "Flag Netherlands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagNorway", character: "🇳🇴", name: "Flag Norway", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagNepal", character: "🇳🇵", name: "Flag Nepal", keywords: [], category: .symbols(.flag(.asia))),
         Emoji(id: "flagNauru", character: "🇳🇷", name: "Flag Nauru", keywords: [], category: .symbols(.flag(.oceania))),
         Emoji(id: "flagNiue", character: "🇳🇺", name: "Flag Niue", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagNewZealand", character: "🇳🇿", name: "Flag New Zealand", keywords: [], category: .symbols(.flag(.oceania))),
+        Emoji(
+            id: "flagNewZealand",
+            character: "🇳🇿",
+            name: "Flag New Zealand",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
         Emoji(id: "flagOman", character: "🇴🇲", name: "Flag Oman", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagPanama", character: "🇵🇦", name: "Flag Panama", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagPeru", character: "🇵🇪", name: "Flag Peru", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagFrenchPolynesia", character: "🇵🇫", name: "Flag French Polynesia", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagPapuaNewGuinea", character: "🇵🇬", name: "Flag Papua New Guinea", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagPhilippines", character: "🇵🇭", name: "Flag Philippines", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagPakistan", character: "🇵🇰", name: "Flag Pakistan", keywords: [], category: .symbols(.flag(.asia))),
+        Emoji(
+            id: "flagPanama",
+            character: "🇵🇦",
+            name: "Flag Panama",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagPeru",
+            character: "🇵🇪",
+            name: "Flag Peru",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagFrenchPolynesia",
+            character: "🇵🇫",
+            name: "Flag French Polynesia",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagPapuaNewGuinea",
+            character: "🇵🇬",
+            name: "Flag Papua New Guinea",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagPhilippines",
+            character: "🇵🇭",
+            name: "Flag Philippines",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagPakistan",
+            character: "🇵🇰",
+            name: "Flag Pakistan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
         Emoji(id: "flagPoland", character: "🇵🇱", name: "Flag Poland", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagStPierreMiquelon", character: "🇵🇲", name: "Flag St Pierre Miquelon", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagPitcairnIslands", character: "🇵🇳", name: "Flag Pitcairn Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagPuertoRico", character: "🇵🇷", name: "Flag Puerto Rico", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagPalestinianTerritories", character: "🇵🇸", name: "Flag Palestinian Territories", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagPortugal", character: "🇵🇹", name: "Flag Portugal", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagStPierreMiquelon",
+            character: "🇵🇲",
+            name: "Flag St Pierre Miquelon",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagPitcairnIslands",
+            character: "🇵🇳",
+            name: "Flag Pitcairn Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagPuertoRico",
+            character: "🇵🇷",
+            name: "Flag Puerto Rico",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagPalestinianTerritories",
+            character: "🇵🇸",
+            name: "Flag Palestinian Territories",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagPortugal",
+            character: "🇵🇹",
+            name: "Flag Portugal",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagPalau", character: "🇵🇼", name: "Flag Palau", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagParaguay", character: "🇵🇾", name: "Flag Paraguay", keywords: [], category: .symbols(.flag(.southAmerica))),
+        Emoji(
+            id: "flagParaguay",
+            character: "🇵🇾",
+            name: "Flag Paraguay",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
         Emoji(id: "flagQatar", character: "🇶🇦", name: "Flag Qatar", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagRéunion", character: "🇷🇪", name: "Flag Réunion", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagRéunion",
+            character: "🇷🇪",
+            name: "Flag Réunion",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagRomania", character: "🇷🇴", name: "Flag Romania", keywords: [], category: .symbols(.religious)),
         Emoji(id: "flagSerbia", character: "🇷🇸", name: "Flag Serbia", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagRussia", character: "🇷🇺", name: "Flag Russia", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagRwanda", character: "🇷🇼", name: "Flag Rwanda", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagSaudiArabia", character: "🇸🇦", name: "Flag Saudi Arabia", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagSolomonIslands", character: "🇸🇧", name: "Flag Solomon Islands", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagSeychelles", character: "🇸🇨", name: "Flag Seychelles", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagSaudiArabia",
+            character: "🇸🇦",
+            name: "Flag Saudi Arabia",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagSolomonIslands",
+            character: "🇸🇧",
+            name: "Flag Solomon Islands",
+            keywords: [],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "flagSeychelles",
+            character: "🇸🇨",
+            name: "Flag Seychelles",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagSudan", character: "🇸🇩", name: "Flag Sudan", keywords: [], category: .symbols(.flag(.africa))),
         Emoji(id: "flagSweden", character: "🇸🇪", name: "Flag Sweden", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSingapore", character: "🇸🇬", name: "Flag Singapore", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagStHelena", character: "🇸🇭", name: "Flag St Helena", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagSlovenia", character: "🇸🇮", name: "Flag Slovenia", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSvalbardJanMayen", character: "🇸🇯", name: "Flag Svalbard Jan Mayen", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSlovakia", character: "🇸🇰", name: "Flag Slovakia", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSierraLeone", character: "🇸🇱", name: "Flag Sierra Leone", keywords: [], category: .symbols(.zodiac)),
-        Emoji(id: "flagSanMarino", character: "🇸🇲", name: "Flag San Marino", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagSenegal", character: "🇸🇳", name: "Flag Senegal", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagSingapore",
+            character: "🇸🇬",
+            name: "Flag Singapore",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagStHelena",
+            character: "🇸🇭",
+            name: "Flag St Helena",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagSlovenia",
+            character: "🇸🇮",
+            name: "Flag Slovenia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagSvalbardJanMayen",
+            character: "🇸🇯",
+            name: "Flag Svalbard Jan Mayen",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagSlovakia",
+            character: "🇸🇰",
+            name: "Flag Slovakia",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagSierraLeone",
+            character: "🇸🇱",
+            name: "Flag Sierra Leone",
+            keywords: [],
+            category: .symbols(.zodiac)
+        ),
+        Emoji(
+            id: "flagSanMarino",
+            character: "🇸🇲",
+            name: "Flag San Marino",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagSenegal",
+            character: "🇸🇳",
+            name: "Flag Senegal",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagSomalia", character: "🇸🇴", name: "Flag Somalia", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagSuriname", character: "🇸🇷", name: "Flag Suriname", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagSouthSudan", character: "🇸🇸", name: "Flag South Sudan", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagSãoToméPríncipe", character: "🇸🇹", name: "Flag São Tomé Príncipe", keywords: [], category: .symbols(.religious)),
-        Emoji(id: "flagElSalvador", character: "🇸🇻", name: "Flag El Salvador", keywords: [], category: .symbols(.flag(.centralAmerica))),
-        Emoji(id: "flagSintMaarten", character: "🇸🇽", name: "Flag Sint Maarten", keywords: [], category: .symbols(.number)),
+        Emoji(
+            id: "flagSuriname",
+            character: "🇸🇷",
+            name: "Flag Suriname",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagSouthSudan",
+            character: "🇸🇸",
+            name: "Flag South Sudan",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagSãoToméPríncipe",
+            character: "🇸🇹",
+            name: "Flag São Tomé Príncipe",
+            keywords: [],
+            category: .symbols(.religious)
+        ),
+        Emoji(
+            id: "flagElSalvador",
+            character: "🇸🇻",
+            name: "Flag El Salvador",
+            keywords: [],
+            category: .symbols(.flag(.centralAmerica))
+        ),
+        Emoji(
+            id: "flagSintMaarten",
+            character: "🇸🇽",
+            name: "Flag Sint Maarten",
+            keywords: [],
+            category: .symbols(.number)
+        ),
         Emoji(id: "flagSyria", character: "🇸🇾", name: "Flag Syria", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagEswatini", character: "🇸🇿", name: "Flag Eswatini", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagTristanDaCunha", character: "🇹🇦", name: "Flag Tristan Da Cunha", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagTurksCaicosIslands", character: "🇹🇨", name: "Flag Turks Caicos Islands", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagEswatini",
+            character: "🇸🇿",
+            name: "Flag Eswatini",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagTristanDaCunha",
+            character: "🇹🇦",
+            name: "Flag Tristan Da Cunha",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagTurksCaicosIslands",
+            character: "🇹🇨",
+            name: "Flag Turks Caicos Islands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagChad", character: "🇹🇩", name: "Flag Chad", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagFrenchSouthernTerritories", character: "🇹🇫", name: "Flag French Southern Territories", keywords: [], category: .symbols(.flag(.other))),
+        Emoji(
+            id: "flagFrenchSouthernTerritories",
+            character: "🇹🇫",
+            name: "Flag French Southern Territories",
+            keywords: [],
+            category: .symbols(.flag(.other))
+        ),
         Emoji(id: "flagTogo", character: "🇹🇬", name: "Flag Togo", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagThailand", character: "🇹🇭", name: "Flag Thailand", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagTajikistan", character: "🇹🇯", name: "Flag Tajikistan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagTokelau", character: "🇹🇰", name: "Flag Tokelau", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagTimorLeste", character: "🇹🇱", name: "Flag Timor Leste", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagTurkmenistan", character: "🇹🇲", name: "Flag Turkmenistan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagTunisia", character: "🇹🇳", name: "Flag Tunisia", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagThailand",
+            character: "🇹🇭",
+            name: "Flag Thailand",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagTajikistan",
+            character: "🇹🇯",
+            name: "Flag Tajikistan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagTokelau",
+            character: "🇹🇰",
+            name: "Flag Tokelau",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagTimorLeste",
+            character: "🇹🇱",
+            name: "Flag Timor Leste",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagTurkmenistan",
+            character: "🇹🇲",
+            name: "Flag Turkmenistan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagTunisia",
+            character: "🇹🇳",
+            name: "Flag Tunisia",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagTonga", character: "🇹🇴", name: "Flag Tonga", keywords: [], category: .symbols(.flag(.oceania))),
         Emoji(id: "flagTurkey", character: "🇹🇷", name: "Flag Turkey", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagTrinidadTobago", character: "🇹🇹", name: "Flag Trinidad Tobago", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagTrinidadTobago",
+            character: "🇹🇹",
+            name: "Flag Trinidad Tobago",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagTuvalu", character: "🇹🇻", name: "Flag Tuvalu", keywords: [], category: .symbols(.flag(.oceania))),
         Emoji(id: "flagTaiwan", character: "🇹🇼", name: "Flag Taiwan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagTanzania", character: "🇹🇿", name: "Flag Tanzania", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagUkraine", character: "🇺🇦", name: "Flag Ukraine", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagTanzania",
+            character: "🇹🇿",
+            name: "Flag Tanzania",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagUkraine",
+            character: "🇺🇦",
+            name: "Flag Ukraine",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagUganda", character: "🇺🇬", name: "Flag Uganda", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagUSOutlyingIslands", character: "🇺🇲", name: "Flag U S Outlying Islands", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagUnitedNations", character: "🇺🇳", name: "Flag United Nations", keywords: [], category: .symbols(.flag(.other))),
-        Emoji(id: "flagUnitedStates", character: "🇺🇸", name: "Flag United States", keywords: ["star spangled banner", "america", "usa", "stars and stripes"], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagUruguay", character: "🇺🇾", name: "Flag Uruguay", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagUzbekistan", character: "🇺🇿", name: "Flag Uzbekistan", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagVaticanCity", character: "🇻🇦", name: "Flag Vatican City", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagStVincentGrenadines", character: "🇻🇨", name: "Flag St Vincent Grenadines", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagVenezuela", character: "🇻🇪", name: "Flag Venezuela", keywords: [], category: .symbols(.flag(.southAmerica))),
-        Emoji(id: "flagBritishVirginIslands", character: "🇻🇬", name: "Flag British Virgin Islands", keywords: [], category: .symbols(.flag(.northAmerica))),
-        Emoji(id: "flagUSVirginIslands", character: "🇻🇮", name: "Flag U S Virgin Islands", keywords: [], category: .symbols(.flag(.northAmerica))),
+        Emoji(
+            id: "flagUSOutlyingIslands",
+            character: "🇺🇲",
+            name: "Flag U S Outlying Islands",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagUnitedNations",
+            character: "🇺🇳",
+            name: "Flag United Nations",
+            keywords: [],
+            category: .symbols(.flag(.other))
+        ),
+        Emoji(
+            id: "flagUnitedStates",
+            character: "🇺🇸",
+            name: "Flag United States",
+            keywords: ["star spangled banner", "america", "usa", "stars and stripes"],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagUruguay",
+            character: "🇺🇾",
+            name: "Flag Uruguay",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagUzbekistan",
+            character: "🇺🇿",
+            name: "Flag Uzbekistan",
+            keywords: [],
+            category: .symbols(.flag(.asia))
+        ),
+        Emoji(
+            id: "flagVaticanCity",
+            character: "🇻🇦",
+            name: "Flag Vatican City",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagStVincentGrenadines",
+            character: "🇻🇨",
+            name: "Flag St Vincent Grenadines",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagVenezuela",
+            character: "🇻🇪",
+            name: "Flag Venezuela",
+            keywords: [],
+            category: .symbols(.flag(.southAmerica))
+        ),
+        Emoji(
+            id: "flagBritishVirginIslands",
+            character: "🇻🇬",
+            name: "Flag British Virgin Islands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
+        Emoji(
+            id: "flagUSVirginIslands",
+            character: "🇻🇮",
+            name: "Flag U S Virgin Islands",
+            keywords: [],
+            category: .symbols(.flag(.northAmerica))
+        ),
         Emoji(id: "flagVietnam", character: "🇻🇳", name: "Flag Vietnam", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagVanuatu", character: "🇻🇺", name: "Flag Vanuatu", keywords: [], category: .symbols(.flag(.oceania))),
-        Emoji(id: "flagWallisFutuna", character: "🇼🇫", name: "Flag Wallis Futuna", keywords: [], category: .symbols(.flag(.oceania))),
+        Emoji(
+            id: "flagVanuatu",
+            character: "🇻🇺",
+            name: "Flag Vanuatu",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
+        Emoji(
+            id: "flagWallisFutuna",
+            character: "🇼🇫",
+            name: "Flag Wallis Futuna",
+            keywords: [],
+            category: .symbols(.flag(.oceania))
+        ),
         Emoji(id: "flagSamoa", character: "🇼🇸", name: "Flag Samoa", keywords: [], category: .symbols(.flag(.oceania))),
         Emoji(id: "flagKosovo", character: "🇽🇰", name: "Flag Kosovo", keywords: [], category: .symbols(.flag(.europe))),
         Emoji(id: "flagYemen", character: "🇾🇪", name: "Flag Yemen", keywords: [], category: .symbols(.flag(.asia))),
-        Emoji(id: "flagMayotte", character: "🇾🇹", name: "Flag Mayotte", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagSouthAfrica", character: "🇿🇦", name: "Flag South Africa", keywords: [], category: .symbols(.flag(.africa))),
+        Emoji(
+            id: "flagMayotte",
+            character: "🇾🇹",
+            name: "Flag Mayotte",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagSouthAfrica",
+            character: "🇿🇦",
+            name: "Flag South Africa",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
         Emoji(id: "flagZambia", character: "🇿🇲", name: "Flag Zambia", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagZimbabwe", character: "🇿🇼", name: "Flag Zimbabwe", keywords: [], category: .symbols(.flag(.africa))),
-        Emoji(id: "flagEngland", character: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", name: "Flag England", keywords: [], category: .symbols(.flag(.europe))),
-        Emoji(id: "flagScotland", character: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", name: "Flag Scotland", keywords: [], category: .symbols(.flag(.europe))),
+        Emoji(
+            id: "flagZimbabwe",
+            character: "🇿🇼",
+            name: "Flag Zimbabwe",
+            keywords: [],
+            category: .symbols(.flag(.africa))
+        ),
+        Emoji(
+            id: "flagEngland",
+            character: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+            name: "Flag England",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
+        Emoji(
+            id: "flagScotland",
+            character: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+            name: "Flag Scotland",
+            keywords: [],
+            category: .symbols(.flag(.europe))
+        ),
         Emoji(id: "flagWales", character: "🏴󠁧󠁢󠁷󠁬󠁳󠁿", name: "Flag Wales", keywords: [], category: .symbols(.flag(.europe)))
     ]
-
 }

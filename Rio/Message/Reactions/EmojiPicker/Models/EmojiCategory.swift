@@ -18,50 +18,50 @@ nonisolated enum EmojiCategory: Identifiable, Hashable, Sendable {
     case objects(ObjectsSubcategories)
     case symbols(SymbolsSubcategories)
 
-    var id: String { 
+    var id: String {
         switch self {
-        case .frequentlyUsed: return "frequentlyUsed"
-        case .people(let sub): return "people_\(sub.rawValue)"
-        case .expressive(let sub): return "expressive_\(sub.rawValue)"
-        case .nature(let sub): return "nature_\(sub.rawValue)"
-        case .food(let sub): return "food_\(sub.rawValue)"
-        case .activities(let sub): return "activities_\(sub.rawValue)"
-        case .travel(let sub): return "travel_\(sub.rawValue)"
-        case .objects(let sub): return "objects_\(sub.rawValue)"
-        case .symbols(let sub): return "symbols_\(sub.rawValue)"
+        case .frequentlyUsed: "frequentlyUsed"
+        case let .people(sub): "people_\(sub.rawValue)"
+        case let .expressive(sub): "expressive_\(sub.rawValue)"
+        case let .nature(sub): "nature_\(sub.rawValue)"
+        case let .food(sub): "food_\(sub.rawValue)"
+        case let .activities(sub): "activities_\(sub.rawValue)"
+        case let .travel(sub): "travel_\(sub.rawValue)"
+        case let .objects(sub): "objects_\(sub.rawValue)"
+        case let .symbols(sub): "symbols_\(sub.rawValue)"
         }
     }
-    
+
     var rawValue: String { id }
-    
+
     var displayName: String {
         switch self {
-        case .frequentlyUsed: return "Frequently Used"
-        case .people: return "Smileys & People"
-        case .expressive: return "Expressions"
-        case .nature: return "Animals & Nature"
-        case .food: return "Food & Drink"
-        case .activities: return "Activities"
-        case .travel: return "Travel & Places"
-        case .objects: return "Objects"
-        case .symbols: return "Symbols & Flags"
+        case .frequentlyUsed: "Frequently Used"
+        case .people: "Smileys & People"
+        case .expressive: "Expressions"
+        case .nature: "Animals & Nature"
+        case .food: "Food & Drink"
+        case .activities: "Activities"
+        case .travel: "Travel & Places"
+        case .objects: "Objects"
+        case .symbols: "Symbols & Flags"
         }
     }
-    
+
     var iconName: String {
         switch self {
-        case .frequentlyUsed: return "clock.fill"
-        case .people: return "face.smiling.fill"
-        case .expressive: return "heart.fill"
-        case .nature: return "dog.fill"
-        case .food: return "fork.knife"
-        case .activities: return "soccerball"
-        case .travel: return "airplane"
-        case .objects: return "lightbulb.fill"
-        case .symbols: return "flag.fill"
+        case .frequentlyUsed: "clock.fill"
+        case .people: "face.smiling.fill"
+        case .expressive: "heart.fill"
+        case .nature: "dog.fill"
+        case .food: "fork.knife"
+        case .activities: "soccerball"
+        case .travel: "airplane"
+        case .objects: "lightbulb.fill"
+        case .symbols: "flag.fill"
         }
     }
-    
+
     // Manual implementation since we can't use CaseIterable with associated values
     static var allCases: [EmojiCategory] {
         [
@@ -85,43 +85,43 @@ enum PeopleSubcategories: String, CaseIterable, Identifiable, Hashable {
     var description: String {
         switch self {
         case .happy:
-            return "Joyful, smiling, grinning faces"
+            "Joyful, smiling, grinning faces"
         case .love:
-            return "Heart eyes, kissing, affectionate faces"
+            "Heart eyes, kissing, affectionate faces"
         case .playful:
-            return "Silly, tongue out, winking, playful faces"
+            "Silly, tongue out, winking, playful faces"
         case .sad:
-            return "Crying, disappointed, pensive faces"
+            "Crying, disappointed, pensive faces"
         case .angry:
-            return "Mad, enraged, frustrated faces"
+            "Mad, enraged, frustrated faces"
         case .surprised:
-            return "Shocked, astonished, amazed faces"
+            "Shocked, astonished, amazed faces"
         case .tired:
-            return "Sleepy, yawning, exhausted faces"
+            "Sleepy, yawning, exhausted faces"
         case .sick:
-            return "Medical mask, ill, nauseated faces"
+            "Medical mask, ill, nauseated faces"
         case .worried:
-            return "Anxious, confused, concerned faces"
+            "Anxious, confused, concerned faces"
         case .neutral:
-            return "Meh, expressionless, unamused, skeptical faces"
+            "Meh, expressionless, unamused, skeptical faces"
         case .jobs:
-            return "Professions and occupations"
+            "Professions and occupations"
         case .fantasy:
-            return "Fantasy and supernatural characters"
+            "Fantasy and supernatural characters"
         case .matrimony:
-            return "Wedding-related people"
+            "Wedding-related people"
         case .sports:
-            return "People doing sports activities"
+            "People doing sports activities"
         case .reactions:
-            return "Gesture-based reactions and poses"
+            "Gesture-based reactions and poses"
         case .ageBased:
-            return "Basic people figures by age and appearance"
+            "Basic people figures by age and appearance"
         case .family:
-            return "Family combinations and parent–child groupings"
+            "Family combinations and parent–child groupings"
         case .royalty:
-            return "Royal figures and nobility"
+            "Royal figures and nobility"
         case .other:
-            return "Other people emojis"
+            "Other people emojis"
         }
     }
 
@@ -134,13 +134,13 @@ enum ExpressiveSubcategories: String, CaseIterable, Identifiable, Hashable {
     var description: String {
         switch self {
         case .heart:
-            return "Heart symbols and love expressions"
+            "Heart symbols and love expressions"
         case .gesture:
-            return "Hand gestures and body language"
+            "Hand gestures and body language"
         case .creature:
-            return "Expressive creatures and characters, like cats and monkeys"
+            "Expressive creatures and characters, like cats and monkeys"
         case .bodyPart:
-            return "Body parts and anatomical features"
+            "Body parts and anatomical features"
         }
     }
 
@@ -149,128 +149,128 @@ enum ExpressiveSubcategories: String, CaseIterable, Identifiable, Hashable {
 
 enum NatureSubCatchories: String, CaseIterable, Identifiable, Hashable {
     case mammal, bird, aquatic, reptile, insect, flower, plant
-    
+
     var description: String {
         switch self {
         case .mammal:
-            return "Mammals and furry animals"
+            "Mammals and furry animals"
         case .bird:
-            return "Birds and feathered creatures"
+            "Birds and feathered creatures"
         case .aquatic:
-            return "Water-dwelling creatures"
+            "Water-dwelling creatures"
         case .reptile:
-            return "Reptiles, amphibians, and dinosaurs"
+            "Reptiles, amphibians, and dinosaurs"
         case .insect:
-            return "Insects and small crawling creatures"
+            "Insects and small crawling creatures"
         case .flower:
-            return "Flowers and blossoms"
+            "Flowers and blossoms"
         case .plant:
-            return "Plants, trees, and greenery"
+            "Plants, trees, and greenery"
         }
     }
-    
+
     var id: String { rawValue }
 }
 
 enum FoodSubcategories: String, CaseIterable, Identifiable, Hashable {
     case fruit, vegetable, preparedFood, asian, dessert, drink
-    
+
     var description: String {
         switch self {
         case .fruit:
-            return "Fruits and berries"
+            "Fruits and berries"
         case .vegetable:
-            return "Vegetables and legumes"
+            "Vegetables and legumes"
         case .preparedFood:
-            return "Prepared meals and dishes"
+            "Prepared meals and dishes"
         case .asian:
-            return "Asian cuisine and dishes"
+            "Asian cuisine and dishes"
         case .dessert:
-            return "Sweets, desserts, and baked goods"
+            "Sweets, desserts, and baked goods"
         case .drink:
-            return "Beverages and drinks"
+            "Beverages and drinks"
         }
     }
-    
+
     var id: String { rawValue }
 }
 
 enum ActivitiesSubcategories: String, CaseIterable, Identifiable, Hashable {
     case celebration, sport, game, hobby, art
-    
+
     var description: String {
         switch self {
         case .celebration:
-            return "Celebrations, parties, and events"
+            "Celebrations, parties, and events"
         case .sport:
-            return "Sports and athletic activities"
+            "Sports and athletic activities"
         case .game:
-            return "Games and gaming"
+            "Games and gaming"
         case .hobby:
-            return "Hobbies and leisure activities"
+            "Hobbies and leisure activities"
         case .art:
-            return "Arts and creative activities"
+            "Arts and creative activities"
         }
     }
-    
+
     var id: String { rawValue }
 }
 
 enum TravelSubcategories: String, CaseIterable, Identifiable, Hashable {
     case nature, building, religious, scene, landVehicle, airVehicle, waterVehicle, sign, sky
-    
+
     var description: String {
         switch self {
         case .nature:
-            return "Natural landmarks and environments"
+            "Natural landmarks and environments"
         case .building:
-            return "Buildings and structures"
+            "Buildings and structures"
         case .religious:
-            return "Religious buildings and places of worship"
+            "Religious buildings and places of worship"
         case .scene:
-            return "Scenic views and locations"
+            "Scenic views and locations"
         case .landVehicle:
-            return "Cars, trains, and land vehicles"
+            "Cars, trains, and land vehicles"
         case .airVehicle:
-            return "Airplanes, helicopters, and aircraft"
+            "Airplanes, helicopters, and aircraft"
         case .waterVehicle:
-            return "Boats, ships, and water vessels"
+            "Boats, ships, and water vessels"
         case .sign:
-            return "Traffic signs and road markers"
+            "Traffic signs and road markers"
         case .sky:
-            return "Sky, weather, and celestial phenomena"
+            "Sky, weather, and celestial phenomena"
         }
     }
-    
+
     var id: String { rawValue }
 }
 
 enum ObjectsSubcategories: String, CaseIterable, Identifiable, Hashable {
     case clothing, accessory, music, tech, tool, office, household, medical, book
-    
+
     var description: String {
         switch self {
         case .clothing:
-            return "Clothes and garments"
+            "Clothes and garments"
         case .accessory:
-            return "Accessories and wearable items"
+            "Accessories and wearable items"
         case .music:
-            return "Musical instruments and audio"
+            "Musical instruments and audio"
         case .tech:
-            return "Technology and electronics"
+            "Technology and electronics"
         case .tool:
-            return "Tools and equipment"
+            "Tools and equipment"
         case .office:
-            return "Office supplies and stationery"
+            "Office supplies and stationery"
         case .household:
-            return "Household items and furniture"
+            "Household items and furniture"
         case .medical:
-            return "Medical and health-related items"
+            "Medical and health-related items"
         case .book:
-            return "Books and reading materials"
+            "Books and reading materials"
         }
     }
-    
+
     var id: String { rawValue }
 }
 
@@ -294,7 +294,7 @@ nonisolated enum SymbolsSubcategories: Identifiable, Hashable, CaseIterable, Sen
             case .other: "Flags not from countries"
             }
         }
-        
+
         var id: String { rawValue }
     }
 
@@ -311,7 +311,7 @@ nonisolated enum SymbolsSubcategories: Identifiable, Hashable, CaseIterable, Sen
         case .other: "Other symbols and miscellaneous"
         }
     }
-    
+
     var id: String {
         switch self {
         case .sign: "sign"
@@ -320,12 +320,12 @@ nonisolated enum SymbolsSubcategories: Identifiable, Hashable, CaseIterable, Sen
         case .zodiac: "zodiac"
         case .media: "media"
         case .number: "number"
-        case .flag(let subcat): "flag_\(subcat.rawValue)"
+        case let .flag(subcat): "flag_\(subcat.rawValue)"
         case .shape: "shape"
         case .other: "other"
         }
     }
-    
+
     // Manual implementation since we can't use CaseIterable with associated values
     static var allCases: [SymbolsSubcategories] {
         var cases: [SymbolsSubcategories] = [.sign, .arrow, .religious, .zodiac, .media, .number]

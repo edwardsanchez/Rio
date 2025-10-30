@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct EmojiAIService {
+enum EmojiAIService {
     // MARK: - Category Index Builder
-    
+
     /// Builds a comprehensive category index for the AI model
     /// Excludes frequentlyUsed category
     static func buildCategoryIndex() -> [[String: Any]] {
         var index: [[String: Any]] = []
-        
+
         // People subcategories
         for subcat in PeopleSubcategories.allCases {
             let category = EmojiCategory.people(subcat)
@@ -24,7 +24,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Expressive subcategories
         for subcat in ExpressiveSubcategories.allCases {
             let category = EmojiCategory.expressive(subcat)
@@ -34,7 +34,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Nature subcategories
         for subcat in NatureSubCatchories.allCases {
             let category = EmojiCategory.nature(subcat)
@@ -44,7 +44,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Food subcategories
         for subcat in FoodSubcategories.allCases {
             let category = EmojiCategory.food(subcat)
@@ -54,7 +54,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Activities subcategories
         for subcat in ActivitiesSubcategories.allCases {
             let category = EmojiCategory.activities(subcat)
@@ -64,7 +64,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Travel subcategories
         for subcat in TravelSubcategories.allCases {
             let category = EmojiCategory.travel(subcat)
@@ -74,7 +74,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Objects subcategories
         for subcat in ObjectsSubcategories.allCases {
             let category = EmojiCategory.objects(subcat)
@@ -84,7 +84,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Symbols subcategories (including nested flags)
         let symbolsBasicCases: [(SymbolsSubcategories, String)] = [
             (.sign, "sign"),
@@ -96,7 +96,7 @@ struct EmojiAIService {
             (.shape, "shape"),
             (.other, "other")
         ]
-        
+
         for (subcat, rawValue) in symbolsBasicCases {
             index.append([
                 "category_id": subcat.id,
@@ -104,7 +104,7 @@ struct EmojiAIService {
                 "description": subcat.description
             ])
         }
-        
+
         // Flag subcategories
         for flagSubcat in SymbolsSubcategories.FlagSubcategories.allCases {
             let subcat = SymbolsSubcategories.flag(flagSubcat)
@@ -114,33 +114,33 @@ struct EmojiAIService {
                 "description": flagSubcat.description
             ])
         }
-        
+
         return index
     }
-    
+
     // MARK: - Emoji Filtering
-    
+
     /// Gets all emojis from EmojiData
     static func getAllEmojis() -> [Emoji] {
-        return EmojiData.peopleEmojis +
-               EmojiData.expressiveEmojis +
-               EmojiData.natureEmojis +
-               EmojiData.foodEmojis +
-               EmojiData.activitiesEmojis +
-               EmojiData.travelEmojis +
-               EmojiData.objectsEmojis +
-               EmojiData.symbolsEmojis
+        EmojiData.peopleEmojis +
+            EmojiData.expressiveEmojis +
+            EmojiData.natureEmojis +
+            EmojiData.foodEmojis +
+            EmojiData.activitiesEmojis +
+            EmojiData.travelEmojis +
+            EmojiData.objectsEmojis +
+            EmojiData.symbolsEmojis
     }
-    
+
     /// Filters emojis by category ID
     static func getEmojisForCategory(categoryId: String) -> [Emoji] {
         let allEmojis = getAllEmojis()
         return allEmojis.filter { $0.category.id == categoryId }
     }
-    
+
     /// Converts emoji to dictionary format for model input
     static func emojiToDict(_ emoji: Emoji) -> [String: Any] {
-        return [
+        [
             "id": emoji.id,
             "character": emoji.character,
             "name": emoji.name,
@@ -148,14 +148,14 @@ struct EmojiAIService {
             "category_id": emoji.category.id
         ]
     }
-    
+
     /// Converts array of emojis to dictionary format
     static func emojisToDict(_ emojis: [Emoji]) -> [[String: Any]] {
-        return emojis.map { emojiToDict($0) }
+        emojis.map { emojiToDict($0) }
     }
-    
+
     /// Finds an emoji by ID
     static func findEmoji(byId id: String) -> Emoji? {
-        return getAllEmojis().first { $0.id == id }
+        getAllEmojis().first { $0.id == id }
     }
 }

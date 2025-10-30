@@ -79,7 +79,7 @@ struct ChatInputView: View {
 
                 HStack(alignment: .bottom) {
                     TextField("Message", text: $message, axis: .vertical)
-                        .lineLimit(1...5) // Allow 1 to 5 lines
+                        .lineLimit(1 ... 5) // Allow 1 to 5 lines
                         .padding([.vertical, .leading], 15)
                         .focused($isMessageFieldFocused)
                         .onSubmit {
@@ -114,7 +114,8 @@ struct ChatInputView: View {
         .safeAreaPadding(.bottom, keyboardIsUp ? nil : 0)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(.smooth(duration: 0.2), value: inputFieldFrame.height)
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+        .onReceive(NotificationCenter.default
+            .publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
             if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 withAnimation {
                     keyboardIsUp = keyboardFrame.height > 0
@@ -155,7 +156,7 @@ struct ChatInputView: View {
         .buttonStyle(.borderedProminent)
         .tint(chat.theme.outboundBackgroundColor)
         .opacity(isEmpty ? 0 : 1)
-        .scaleEffect(isEmpty ? 0.9  : 1)
+        .scaleEffect(isEmpty ? 0.9 : 1)
         .animation(.smooth(duration: 0.2), value: isEmpty)
     }
 
@@ -195,25 +196,24 @@ struct ChatInputView: View {
         var createdMessages: [Message] = []
 
         for segment in segments {
-            let content: ContentType
-            if segment.isURL {
+            let content: ContentType = if segment.isURL {
                 // Create URL content type
                 if let url = URL(string: segment.content) {
-                    content = .url(url)
+                    .url(url)
                 } else {
                     // Fallback to text if URL creation fails
-                    content = .text(segment.content)
+                    .text(segment.content)
                 }
             } else {
                 // Use content type detector to check for emoji-only (1-3 emoji)
-                content = ContentTypeDetector.contentType(for: segment.content)
+                ContentTypeDetector.contentType(for: segment.content)
             }
 
             let newMessage = Message(
                 content: content,
                 from: chatData.edwardUser
             )
-            
+
             createdMessages.append(newMessage)
         }
 
@@ -340,7 +340,7 @@ struct ChatInputView: View {
                             chatData.updateMessage(updatedIndicator, in: chat.id)
                         }
                     }
-                    
+
                     readToThinkingTimer = nil
                 }
             }
@@ -379,7 +379,7 @@ struct ChatInputView: View {
                         replacesTypingIndicator: indicatorWasVisible,
                         bubbleType: .talking
                     )
-                    
+
                     newMessageId = fallbackMessage.id
                     chatData.addMessage(fallbackMessage, to: chat.id)
                 }

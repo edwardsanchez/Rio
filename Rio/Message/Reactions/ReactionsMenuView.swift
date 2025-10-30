@@ -56,7 +56,7 @@ struct ReactionsMenuView: View {
                     isOverlay: isOverlay,
                     isSelected: isSelected
                 )
-                
+
                 ReactionButton(
                     reaction: reaction,
                     isVisible: visibility.isVisible,
@@ -71,7 +71,10 @@ struct ReactionsMenuView: View {
                     reactionsMenuModel.handleReactionTap(reaction)
                 }
                 .animation(
-                    .interpolatingSpring(reactionsMenuModel.isShowingReactionMenu ? .bouncy : .smooth, initialVelocity: reactionsMenuModel.isShowingReactionMenu ? 0 : -5)
+                    .interpolatingSpring(
+                        reactionsMenuModel.isShowingReactionMenu ? .bouncy : .smooth,
+                        initialVelocity: reactionsMenuModel.isShowingReactionMenu ? 0 : -5
+                    )
                     .delay(Double(index) * ReactionsAnimationTiming.reactionStaggerStep),
                     value: reactionsMenuModel.isShowingReactionMenu
                 )
@@ -85,7 +88,7 @@ struct ReactionsMenuView: View {
         guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
-        
+
         return isOverlay ? !reactionsMenuModel.isShowingReactionMenu : reactionsMenuModel.isShowingReactionMenu
     }
 }

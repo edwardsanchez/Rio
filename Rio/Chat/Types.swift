@@ -41,11 +41,10 @@ struct Chat: Identifiable {
 
 extension Chat {
     static func fallbackTitle(for participants: [User], currentUser: User?) -> String {
-        let otherParticipants: [User]
-        if let currentUser {
-            otherParticipants = participants.filter { $0.id != currentUser.id }
+        let otherParticipants: [User] = if let currentUser {
+            participants.filter { $0.id != currentUser.id }
         } else {
-            otherParticipants = participants
+            participants
         }
 
         switch otherParticipants.count {

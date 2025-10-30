@@ -97,8 +97,8 @@ class BubbleConfiguration {
     /// Packs the given perimeter with circles that stay between `min` and `max` diameters
     func computeDiameters(length L: CGFloat, min a: CGFloat, max b: CGFloat, seed: UInt64) -> PackingResult {
         let avg = (a + b) / 2
-        let minCount = Int(ceil(L / b))          // Smallest count that keeps per-circle <= max
-        let maxCount = Int(floor(L / a))         // Largest count that keeps per-circle >= min
+        let minCount = Int(ceil(L / b)) // Smallest count that keeps per-circle <= max
+        let maxCount = Int(floor(L / a)) // Largest count that keeps per-circle >= min
 
         // 1) Try equal circles: choose a count m where L/m is within [min, max].
         if minCount <= maxCount {
@@ -106,7 +106,7 @@ class BubbleConfiguration {
             var bestM = minCount
             var bestDiff = abs(L / CGFloat(minCount) - avg)
             if maxCount > minCount {
-                for m in (minCount...maxCount) {
+                for m in minCount ... maxCount {
                     let size = L / CGFloat(m)
                     let diff = abs(size - avg)
                     if diff < bestDiff {
@@ -118,7 +118,7 @@ class BubbleConfiguration {
 
             // Introduce a tiny bit of variety near the average if multiple m tie
             var rng = SeededRandomGenerator(seed: seed)
-            let candidates = (minCount...maxCount).filter { abs(L / CGFloat($0) - avg) <= bestDiff + 0.01 }
+            let candidates = (minCount ... maxCount).filter { abs(L / CGFloat($0) - avg) <= bestDiff + 0.01 }
             if let pick = candidates.randomElement(using: &rng) { bestM = pick }
             return PackingResult(diameters: Array(repeating: L / CGFloat(bestM), count: bestM), isValid: true)
         }
@@ -131,7 +131,7 @@ class BubbleConfiguration {
         var i = 0
         var isValid = true
 
-        while leftover > 0 && i < sizes.count {
+        while leftover > 0, i < sizes.count {
             let canAdd = min(b - sizes[i], leftover)
             if canAdd > 0 {
                 sizes[i] += canAdd
@@ -139,11 +139,11 @@ class BubbleConfiguration {
             }
 
             i = (i + 1) % sizes.count
-            
+
             // If we looped a full cycle without placing anything, bump count if possible
-            if i == 0 && sizes.allSatisfy({ $0 >= b - 0.0001 }) && leftover > 0 {
+            if i == 0, sizes.allSatisfy({ $0 >= b - 0.0001 }), leftover > 0 {
                 // We cannot grow further without breaking max. Add one more circle if that would be valid.
-                if leftover >= a && leftover <= b {
+                if leftover >= a, leftover <= b {
                     sizes.append(leftover)
                     leftover = 0
                     break
@@ -168,7 +168,12 @@ class BubbleConfiguration {
     }
 
     /// Prepares the per-circle oscillation data so the total length remains stable during animation
-    func computeAnimationData(baseDiameters: [CGFloat], min: CGFloat, max: CGFloat, seed: UInt64) -> [CircleAnimationData] {
+    func computeAnimationData(
+        baseDiameters: [CGFloat],
+        min: CGFloat,
+        max: CGFloat,
+        seed: UInt64
+    ) -> [CircleAnimationData] {
         var rng = SeededRandomGenerator(seed: seed)
         var animationData: [CircleAnimationData] = []
 
@@ -186,7 +191,7 @@ class BubbleConfiguration {
 
         // Normalize amplitudes so they can be used in a zero-sum system
         // We'll pair circles and give them opposite directions
-        for i in 0..<baseDiameters.count {
+        for i in 0 ..< baseDiameters.count {
             let baseDiameter = baseDiameters[i]
             let amplitude = amplitudes[i]
 
@@ -263,7 +268,7 @@ class BubbleConfiguration {
 
             // Apply corrections
             if totalWeight > 0 {
-                for i in 0..<diameters.count {
+                for i in 0 ..< diameters.count {
                     let correction = (weights[i] / totalWeight) * error
                     diameters[i] -= correction
 
@@ -280,10 +285,10 @@ class BubbleConfiguration {
         let finalSum = diameters.reduce(0, +)
         let finalError = finalSum - totalLength
 
-        if abs(finalError) > 0.001 && !diameters.isEmpty {
+        if abs(finalError) > 0.001, !diameters.isEmpty {
             // Distribute remaining error evenly across all circles that have room
             let errorPerCircle = finalError / CGFloat(diameters.count)
-            for i in 0..<diameters.count {
+            for i in 0 ..< diameters.count {
                 diameters[i] -= errorPerCircle
                 let data = animationData[i]
                 let lowerBound = Swift.min(min, data.baseDiameter)
@@ -328,7 +333,7 @@ class BubbleConfiguration {
                 cornerRadius: cornerRadius,
                 perimeter: perimeter
             )
-            
+
             positions.append(position)
         }
 
@@ -427,9 +432,9 @@ class BubbleConfiguration {
 /// Precomputed animation info for each metaball
 struct CircleAnimationData {
     let baseDiameter: CGFloat
-    let amplitude: CGFloat  // Oscillation range around the base diameter
+    let amplitude: CGFloat // Oscillation range around the base diameter
     let phase: CGFloat
-    let direction: CGFloat  // +1 or -1, determines if it grows or shrinks first
+    let direction: CGFloat // +1 or -1, determines if it grows or shrinks first
 }
 
 /// Output of the packing algorithm that tries to fill the perimeter with circles that respect min/max bounds
@@ -441,12 +446,12 @@ struct PackingResult {
 /// Deterministic RNG so the bubble animation remains stable for a given seed
 private struct SeededRandomGenerator: RandomNumberGenerator {
     private var state: UInt64
-    init(seed: UInt64) { self.state = seed &* 0x9E3779B97F4A7C15 }
+    init(seed: UInt64) { state = seed &* 0x9E37_79B9_7F4A_7C15 }
     mutating func next() -> UInt64 {
-        state &+= 0x9E3779B97F4A7C15
+        state &+= 0x9E37_79B9_7F4A_7C15
         var z = state
-        z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
-        z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
         return z ^ (z >> 31)
     }
 }

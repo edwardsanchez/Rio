@@ -90,6 +90,7 @@
 				6D3EE7EC2E7E6D9B00F81D31 /* Sources */,
 				6D3EE7ED2E7E6D9B00F81D31 /* Frameworks */,
 				6D3EE7EE2E7E6D9B00F81D31 /* Resources */,
+				6DFE81342EC5ABB900F81D33 /* SwiftFormat */,
 				6D315D212EA6A6380007EAF4 /* ShellScript */,
 			);
 			buildRules = (
@@ -190,6 +191,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		6DFE81342EC5ABB900F81D33 /* SwiftFormat */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.swiftformat",
+			);
+			name = SwiftFormat;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+		shellScript = "# SwiftFormat\nif [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftformat > /dev/null; then\n    cd \"$SRCROOT\"\n    swiftformat --config \"$SRCROOT/.swiftformat\" \"Rio\" \"Shader Test\" \"Cursive Font Writing\"\nelse\n    echo \"warning: SwiftFormat not installed, install via Homebrew: brew install swiftformat\"\nfi\n";
+		};
 		6D315D212EA6A6380007EAF4 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
