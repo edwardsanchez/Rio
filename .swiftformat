@@ -8,3 +8,4 @@
 --trailing-commas never
 --exclude build,Packages,Packages/*,Rio.xcodeproj,*.xcworkspace,"Shader Test","Cursive Font Writing"
 --disable spaceInsideComments
+--disable wrapMultilineStatementBraces
