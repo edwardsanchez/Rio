@@ -21,7 +21,7 @@ class ChatData {
 
     // Define users
     let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    let mayaUser = User(id: UUID(), name: "Maya", avatar: .amy)
+    let mayaUser = User(id: UUID(), name: "Maya Maria Antonia", avatar: .amy)
     let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
     let liamUser = User(id: UUID(), name: "Liam", avatar: .joaquin)
     let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)

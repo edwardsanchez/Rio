@@ -112,7 +112,7 @@ struct AvatarView: View {
     AvatarView(
         user: User(
             id: UUID(),
-            name: "Maya",
+            name: "Maya Maria Antonia",
             avatar: .amy
         )
     )

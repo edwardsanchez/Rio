@@ -616,7 +616,7 @@ private struct MessageBubblePreviewContainer: View {
 
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
-    private let sampleUser = User(id: UUID(), name: "Maya", avatar: .scarlet)
+    private let sampleUser = User(id: UUID(), name: "Maya Maria Antonia", avatar: .scarlet)
 
     private var currentMessage: Message {
         switch bubbleType {
@@ -740,7 +740,7 @@ private struct MessageBubblePreviewContainer: View {
     @Previewable @State var selectedImageData: ImageData?
 
     let currentUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    let maya = User(id: UUID(), name: "Maya", avatar: .scarlet)
+    let maya = User(id: UUID(), name: "Maya Maria Antonia", avatar: .scarlet)
 
     ZStack {
         VStack(spacing: 20) {
