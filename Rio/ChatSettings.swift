@@ -151,7 +151,7 @@ struct ChatSettings: View {
                     )
                     .textInputAutocapitalization(.words)
                 } label: {
-                    Label("Chat Name", systemImage: "character.bubble")
+                    Label("Chat Name", systemImage: "character.bubble") //TODO: Make it so tapping this field selects the whole text.
                 }
             }
 

@@ -81,10 +81,10 @@ extension ThemeColorOption {
         ThemeColorOption(id: "orange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
         ThemeColorOption(id: "pink", color: Color(.systemPink), accessibilityLabel: "Pink"),
         ThemeColorOption(id: "brown", color: Color(.systemBrown), accessibilityLabel: "Brown"),
-        ThemeColorOption(id: "yellow", color: Color(.systemYellow).mix(with: .red, by: 0.2), accessibilityLabel: "Yellow"),
+        ThemeColorOption(id: "yellow", color: Color(.systemYellow).mix(with: .red, by: 0.3), accessibilityLabel: "Yellow"),
         ThemeColorOption(id: "green", color: Color(.systemGreen), accessibilityLabel: "Green"),
-        ThemeColorOption(id: "teal", color: Color(.systemTeal), accessibilityLabel: "Teal"),
-        ThemeColorOption(id: "cyan", color: Color(.systemCyan), accessibilityLabel: "Cyan"),
+        ThemeColorOption(id: "teal", color: Color(.systemTeal).mix(with: .primary, by: 0.05), accessibilityLabel: "Teal"),
+        ThemeColorOption(id: "cyan", color: Color(.systemCyan).mix(with: .primary, by: 0.05), accessibilityLabel: "Cyan"),
         ThemeColorOption(id: "blue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
         ThemeColorOption(id: "indigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
         ThemeColorOption(id: "purple", color: Color(.systemPurple), accessibilityLabel: "Purple"),
@@ -95,7 +95,7 @@ extension ThemeColorOption {
 }
 
 private extension Color {
-    func isApproximatelyEqual(to other: Color, tolerance: CGFloat = 0.01) -> Bool {
+    func isApproximatelyEqual(to other: Color, tolerance: CGFloat = 0.11) -> Bool {
         let lhs = UIColor(self).resolvedForComparison
         let rhs = UIColor(other).resolvedForComparison
 
@@ -110,10 +110,7 @@ private extension Color {
 
 private extension UIColor {
     var resolvedForComparison: UIColor {
-        if #available(iOS 13.0, *) {
-            return resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
-        }
-        return self
+        return resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
     }
 
     var rgbComponents: [CGFloat]? {
@@ -138,4 +135,98 @@ private extension UIColor {
     .padding()
     .frame(height: 320)
     .background(Color(.systemBackground))
+}
+
+struct ChatTheme {
+    let inboundTextColor: Color
+    let inboundBackgroundColor: Color
+    let outboundTextColor: Color
+    let outboundBackgroundColor: Color
+
+    init(
+        outboundBackgroundColor: Color,
+        inboundBackgroundColor: Color? = nil,
+        inboundTextColor: Color = .primary,
+        outboundTextColor: Color = .white
+    ) {
+        self.outboundBackgroundColor = outboundBackgroundColor
+        self.outboundTextColor = outboundTextColor
+        self.inboundTextColor = inboundTextColor
+        self.inboundBackgroundColor = inboundBackgroundColor
+        ?? ChatTheme.resolveInboundBackgroundColor(for: outboundBackgroundColor)
+    }
+
+    private static func resolveInboundBackgroundColor(for outboundColor: Color) -> Color {
+        Color.gray.mix(with: .base, by: 0.9).mix(with: outboundColor, by: 0.03)
+    }
+
+    // Predefined themes matching asset catalog
+    static let defaultTheme = ChatTheme(
+        outboundBackgroundColor: .defaultBubble
+    )
+
+    static let theme1 = ChatTheme(
+        outboundBackgroundColor: .green
+    )
+
+    static let theme2 = ChatTheme(
+        outboundBackgroundColor: .purple
+    )
+}
+
+private struct ChatThemeColorPairRow: View {
+    let option: ThemeColorOption
+
+    private var theme: ChatTheme {
+        ChatTheme(outboundBackgroundColor: option.color)
+    }
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Text(option.accessibilityLabel)
+                .font(.subheadline)
+                .frame(width: 80, alignment: .leading)
+
+            colorChip(theme.outboundBackgroundColor, label: "Outbound")
+            colorChip(theme.inboundBackgroundColor, label: "Inbound")
+        }
+    }
+
+    @ViewBuilder
+    private func colorChip(_ color: Color, label: String) -> some View {
+        VStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(color)
+                .frame(width: 44, height: 36)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                }
+        }
+
+    }
+}
+
+private struct ChatThemeColorsPreview: View {
+    private let options = ThemeColorOption.spectrum
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("ChatTheme Color Pairs")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(options) { option in
+                    ChatThemeColorPairRow(option: option)
+                }
+            }
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.base))
+    }
+}
+
+#Preview("ChatTheme Colors") {
+    ChatThemeColorsPreview()
 }
