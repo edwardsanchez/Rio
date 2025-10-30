@@ -4,12 +4,37 @@
 //
 //  Created by Edward Sanchez on 10/8/25.
 //
+import Defaults
 import SwiftUI
 
-struct User: Identifiable {
+struct User: Identifiable, Codable, Defaults.Serializable {
     let id: UUID
     let name: String
-    let avatar: ImageResource?
+    let avatar: Data?
+}
+
+extension User {
+    init(id: UUID = UUID(), name: String, resource avatar: ImageResource?) {
+        self.init(id: id, name: name, avatar: User.avatarData(from: avatar))
+    }
+
+    init(id: UUID = UUID(), name: String, avatar: String) {
+        self.init(id: id, name: name, avatar: User.avatarData(from: avatar))
+    }
+
+    private static func avatarData(from resource: ImageResource?) -> Data? {
+        if let resource {
+            let image = UIImage(resource: resource)
+            return image.pngData()
+        } else {
+            return nil
+        }
+    }
+
+    private static func avatarData(from string: String) -> Data? {
+        let image = UIImage(named: string)
+        return image?.pngData()
+    }
 }
 
 struct Chat: Identifiable {

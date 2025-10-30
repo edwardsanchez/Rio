@@ -150,32 +150,9 @@ private extension Chat {
         Chat(
             title: title,
             participants: participantNames.map { name in
-                User(id: UUID(), name: name, avatar: ChatPreviewAvatars.resource(for: name))
+                User(id: UUID(), name: name, avatar: name)
             },
             theme: .defaultTheme
         )
-    }
-}
-
-private enum ChatPreviewAvatars {
-    static func resource(for name: String) -> ImageResource? {
-        let key = name
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-
-        switch key {
-        case "amy", "maya", "maya park":
-            return .amy
-        case "joaquin", "joaquin wilde":
-            return .joaquin
-        case "scarlet", "scarlet chen":
-            return .scarlet
-        case "edward", "eddie", "eddie carter":
-            return .edward
-        case "carta", "carta bloom":
-            return .scarlet
-        default:
-            return nil
-        }
     }
 }

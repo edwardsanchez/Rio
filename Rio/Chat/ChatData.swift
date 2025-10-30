@@ -10,7 +10,7 @@ import SwiftUI
 
 @Observable
 class ChatData {
-    var chats: [Chat] = []
+    var chats: [Chat]
     // Track visible thinking bubbles per chat (chatId -> participant IDs)
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
     // Tracks which chat detail sheet is currently presented
@@ -18,142 +18,23 @@ class ChatData {
 
     // Current signed-in user (for adding reactions)
     let currentUser: User
+    private let sampleProvider: ChatSampleProviding
 
-    // Define users
-    let edwardUser = User(id: UUID(), name: "Edward", avatar: .edward)
-    let mayaUser = User(id: UUID(), name: "Maya Maria Antonia", avatar: .amy)
-    let sophiaUser = User(id: UUID(), name: "Sophia", avatar: .scarlet)
-    let liamUser = User(id: UUID(), name: "Liam", avatar: .joaquin)
-    let amyUser = User(id: UUID(), name: "Zoe", avatar: .amy)
-
-    init() {
-        currentUser = edwardUser //TODO: Make this not set explicitly
-        generateSampleChats()
+    init(sampleProvider: ChatSampleProviding = ChatSampleData()) {
+        self.sampleProvider = sampleProvider
+        currentUser = sampleProvider.currentUser // TODO: Replace with actual authenticated user
+        chats = sampleProvider.chats
     }
 
-    private func generateSampleChats() {
-        // Chat 1: Edward and Maya (2 participants)
-        let chat1Messages = [
-            Message(
-                content: .text("Hi Rio!\nHow are you doing today?"),
-                from: mayaUser,
-                date: Date().addingTimeInterval(-3600),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("Are you good?"),
-                from: mayaUser,
-                date: Date().addingTimeInterval(-3500),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("Hey!\nI'm doing well, thanks for asking!"),
-                from: edwardUser,
-                date: Date().addingTimeInterval(-3400)
-            ),
-            Message(content: .emoji("👋"), from: edwardUser, date: Date().addingTimeInterval(-3350)),
-            Message(
-                content: .text(
-                    "This is a very long message that should demonstrate text wrapping behavior in the chat bubble. It contains enough text to exceed the normal width of a single line and should wrap nicely within the bubble constraints without stretching horizontally across the entire screen."
-                ),
-                from: mayaUser,
-                date: Date().addingTimeInterval(-3300),
-                bubbleType: .talking
-            )
-        ]
+    var edwardUser: User { sampleProvider.sampleUsers.edward }
+    var mayaUser: User { sampleProvider.sampleUsers.maya }
+    var sophiaUser: User { sampleProvider.sampleUsers.sophia }
+    var liamUser: User { sampleProvider.sampleUsers.liam }
+    var zoeUser: User { sampleProvider.sampleUsers.zoe }
 
-        let chat1 = Chat(
-            title: nil,
-            participants: [edwardUser, mayaUser],
-            messages: chat1Messages,
-            theme: .defaultTheme,
-            currentUser: edwardUser
-        )
-
-        // Chat 2: Edward, Sophia, and Liam (3 participants)
-        let chat2Messages = [
-            Message(
-                content: .text("Hey everyone! Ready for the project meeting?"),
-                from: sophiaUser,
-                date: Date().addingTimeInterval(-7200),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("Yes, I've prepared the slides"),
-                from: edwardUser,
-                date: Date().addingTimeInterval(-7100)
-            ),
-            Message(
-                content: .text("Great! I'll bring the coffee ☕️"),
-                from: liamUser,
-                date: Date().addingTimeInterval(-7000),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("Perfect team! See you at 3 PM"),
-                from: sophiaUser,
-                date: Date().addingTimeInterval(-6900),
-                bubbleType: .talking
-            ),
-            Message(content: .text("Looking forward to it!"), from: edwardUser, date: Date().addingTimeInterval(-6800))
-        ]
-
-        let chat2 = Chat(
-            title: "Design Squad",
-            participants: [edwardUser, sophiaUser, liamUser],
-            messages: chat2Messages,
-            theme: .theme1,
-            currentUser: edwardUser
-        )
-
-        // Chat 3: Edward, Sophia, Liam, and Zoe (4 participants)
-        let chat3Messages = [
-            Message(
-                content: .text("Welcome to the group chat!"),
-                from: amyUser,
-                date: Date().addingTimeInterval(-10800),
-                bubbleType: .talking
-            ),
-            Message(content: .text("Thanks for adding me!"), from: edwardUser, date: Date().addingTimeInterval(-10700)),
-            Message(
-                content: .text("Great to have you here Edward"),
-                from: sophiaUser,
-                date: Date().addingTimeInterval(-10600),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("We were just discussing weekend plans"),
-                from: liamUser,
-                date: Date().addingTimeInterval(-10500),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("I'm thinking of going hiking. Anyone interested?"),
-                from: amyUser,
-                date: Date().addingTimeInterval(-10400),
-                bubbleType: .talking
-            ),
-            Message(
-                content: .text("Count me in! I love hiking"),
-                from: edwardUser,
-                date: Date().addingTimeInterval(-10300)
-            )
-        ]
-
-        let chat3 = Chat(
-            title: "Adventure Crew",
-            participants: [edwardUser, sophiaUser, liamUser, amyUser],
-            messages: chat3Messages,
-            theme: .theme2,
-            currentUser: edwardUser
-        )
-
-        chats = [chat1, chat2, chat3]
-    }
-
-    // Get all participants except Edward for auto-reply
+    // Get all participants except the current user for auto-reply
     func getOtherParticipants(in chat: Chat) -> [User] {
-        chat.participants.filter { $0.name != "Edward" }
+        chat.participants.filter { $0.id != currentUser.id }
     }
 
     // Add a message to a specific chat

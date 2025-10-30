@@ -187,3 +187,103 @@ extension Dictionary {
 public extension NSNumber {
     var cgfloat: CGFloat { CGFloat(truncating: self) }
 }
+
+extension Image {
+    public func fitImage() -> some View {
+        return self.resizable().aspectRatio(contentMode: .fit)
+    }
+
+    public func fillImage() -> some View {
+        return self.resizable().aspectRatio(contentMode: .fill)
+    }
+
+    public init(dataFromUIImage data: Data) {
+        if let uiImage = UIImage(data: data) {
+            self.init(uiImage: uiImage)
+        } else {
+            self.init(systemName: "photo")
+        }
+    }
+
+    public init(data: Data) {
+        if let provider = CGDataProvider(data: data as CFData),
+           let cgImage = CGImage(
+            jpegDataProviderSource: provider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+           ) ?? CGImage(
+            pngDataProviderSource: provider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+           ) {
+            self.init(cgImage, scale: 1, label: Text(""))
+        } else {
+            self.init(uiImage: UIImage(data: data) ?? UIImage(color: .clear, size: CGSize(width: 1, height: 1)))
+        }
+    }
+
+    public static func asyncInit(from data: Data) async -> Image {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let image: Image
+
+                if let provider = CGDataProvider(data: data as CFData),
+                   let cgImage = CGImage(jpegDataProviderSource: provider,
+                                         decode: nil,
+                                         shouldInterpolate: true,
+                                         intent: .defaultIntent) {
+                    // Create a UIImage from CGImage for SwiftUI Image conversion
+                    let uiImage = UIImage(cgImage: cgImage)
+                    image = Image(uiImage: uiImage)
+                } else {
+                    // Fallback image if CGImage creation fails
+                    image = Image(systemName: "photo")
+                }
+
+                continuation.resume(returning: image)
+            }
+        }
+    }
+
+    public init(optionalData: Data?) {
+        var uiImage: UIImage
+        if let optionalData {
+            uiImage = UIImage(data: optionalData) ?? UIImage()
+        } else {
+            let color = UIColor.systemRed
+            let size = CGSize(width: 300, height: 400)
+            let rect = CGRect(origin: .zero, size: size)
+            UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
+            color.setFill()
+            UIRectFill(rect)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            uiImage = image ?? UIImage()
+        }
+        self.init(uiImage: uiImage)
+    }
+
+    public init(url: URL?) {
+        var uiImage: UIImage
+        if let url {
+            uiImage = UIImage(contentsOfFile: url.path) ?? UIImage()
+        } else {
+            //            print("🛑 Image(data:) - There's no data")
+            uiImage = UIImage(systemName: "questionmark.square.dashed")!
+        }
+        self.init(uiImage: uiImage)
+    }
+}
+
+extension UIImage {
+    convenience init(color: UIColor, size: CGSize) {
+        UIGraphicsBeginImageContextWithOptions(size, false, 1)
+        color.set()
+        UIRectFill(CGRect(origin: .zero, size: size))
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        self.init(cgImage: image.cgImage!) //?? UIImage(systemName: "photo")
+    }
+}

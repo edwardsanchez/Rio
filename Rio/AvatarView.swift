@@ -54,7 +54,7 @@ struct AvatarView: View {
     private var avatarBase: some View {
         Group {
             if let avatar = user.avatar {
-                Image(avatar)
+                Image(data: avatar)
                     .resizable()
                     .scaledToFill()
             } else {
@@ -113,7 +113,7 @@ struct AvatarView: View {
         user: User(
             id: UUID(),
             name: "Maya Maria Antonia",
-            avatar: .amy
+            resource: .amy
         )
     )
     .padding(12)

@@ -373,7 +373,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -476,7 +476,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     ZStack {
         NavigationStack {
@@ -563,7 +563,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -616,7 +616,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -745,7 +745,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -918,7 +918,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -1146,7 +1146,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
@@ -1295,7 +1295,7 @@ struct MessageContentView: View {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
 
-    let sampleUser = User(id: UUID(), name: "Edward", avatar: .edward)
+    let sampleUser = User(id: UUID(), name: "Edward", resource: .edward)
 
     NavigationStack {
         ScrollView {
