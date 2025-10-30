@@ -195,7 +195,7 @@ class ParticleRenderer: NSObject, MTKViewDelegate {
             -1.0, 1.0, 0.0, 1.0,
             1.0, -1.0, 1.0, 0.0,
             1.0, 1.0, 1.0, 1.0,
-            -1.0, 1.0, 0.0, 1.0,
+            -1.0, 1.0, 0.0, 1.0
         ]
 
         vertexBuffer = device.makeBuffer(
