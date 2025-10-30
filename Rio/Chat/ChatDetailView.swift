@@ -252,7 +252,6 @@ struct ChatDetailView: View {
         // Instant scroll without animation for input field height changes
         scrollPosition.scrollTo(id: lastMessage.id, anchor: .bottom)
     }
-
 }
 
 #Preview("Chat Detail") {

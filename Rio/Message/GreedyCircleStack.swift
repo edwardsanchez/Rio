@@ -181,7 +181,6 @@ struct GreedyCircleStack: Layout, Animatable {
                 )
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
             }
-            
         } else if animationProgress >= 0.999 {
             // Fully vertical layout
             let diameter = max(0, min(verticalDiameter ?? fallbackDiameter, bounds.width))
@@ -193,7 +192,6 @@ struct GreedyCircleStack: Layout, Animatable {
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
                 currentY += diameter + verticalSpacing
             }
-            
         } else {
             // Fully greedy layout
             let angle = startAngle.radians
@@ -438,7 +436,6 @@ struct GreedyCircleStack: Layout, Animatable {
         get { animationProgress }
         set { animationProgress = newValue }
     }
-
 }
 
 // MARK: - Preview helpers

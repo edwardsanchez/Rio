@@ -131,7 +131,7 @@ struct ChatSettings: View {
                         //Use the xmark icon for this
 
                         Button("Chat 1:1") {
-
+                            //TODO: Implement
                         }
                         //TODO: Use person.2.fill icon
                     }
@@ -229,7 +229,6 @@ struct ChatSettings: View {
             Toggle(isOn: hideAlertsBinding) {
                 Label("Hide alerts", systemImage: "bell.slash")
             }
-
         } header: {
             Text("Settings")
         }

@@ -68,3 +68,10 @@ custom_rules:
     regex: "\\{[ \\t]*\\n[ \\t]*\\n"
     message: "Remove empty line directly after opening brace."
     severity: warning
+  no_empty_line_between_closing_braces:
+    included:
+      - ".*\\.swift"
+    name: "No Empty Line Between Closing Braces"
+    regex: "\\}[ \\t]*\\n[ \\t]*\\n[ \\t]*\\}"
+    message: "Remove empty line between closing braces."
+    severity: warning

@@ -174,7 +174,6 @@ private struct ChatThemeColorPairRow: View {
                         .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                 }
         }
-
     }
 }
 

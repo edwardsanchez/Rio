@@ -156,7 +156,6 @@ extension CGPoint {
 extension CGSize {
     public var transposed: CGSize { CGSize(width: height, height: width) }
     public var point: CGPoint { CGPoint(x: width, y: height) }
-
 }
 
 // MARK: - CGRect Extension

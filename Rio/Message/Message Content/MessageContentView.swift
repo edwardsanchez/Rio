@@ -545,7 +545,6 @@ struct MessageContentView: View {
             .zIndex(1)
         }
     }
-
 }
 
 // MARK: - Preview 3: Audio & Video
