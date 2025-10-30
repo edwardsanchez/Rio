@@ -211,7 +211,7 @@ struct ChatInputView: View {
 
             let newMessage = Message(
                 content: content,
-                from: chatData.edwardUser
+                from: chatData.currentUser
             )
 
             createdMessages.append(newMessage)

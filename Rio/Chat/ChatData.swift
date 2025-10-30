@@ -20,17 +20,31 @@ class ChatData {
     let currentUser: User
     private let sampleProvider: ChatSampleProviding
 
-    init(sampleProvider: ChatSampleProviding = ChatSampleData()) {
+    init(
+        sampleProvider: ChatSampleProviding = ChatSampleData(),
+        currentUser: User? = nil
+    ) {
         self.sampleProvider = sampleProvider
-        currentUser = sampleProvider.currentUser // TODO: Replace with actual authenticated user
-        chats = sampleProvider.chats
+
+        let resolvedCurrentUser = currentUser ?? sampleProvider.currentUser
+        self.currentUser = resolvedCurrentUser
+
+        if resolvedCurrentUser.id == sampleProvider.currentUser.id {
+            chats = sampleProvider.chats
+        } else {
+            chats = sampleProvider.chats.map { chat in
+                ChatData.replaceCurrentUser(
+                    in: chat,
+                    oldUser: sampleProvider.currentUser,
+                    newUser: resolvedCurrentUser
+                )
+            }
+        }
     }
 
-    var edwardUser: User { sampleProvider.sampleUsers.edward }
-    var mayaUser: User { sampleProvider.sampleUsers.maya }
-    var sophiaUser: User { sampleProvider.sampleUsers.sophia }
-    var liamUser: User { sampleProvider.sampleUsers.liam }
-    var zoeUser: User { sampleProvider.sampleUsers.zoe }
+    var sampleUsers: ChatSampleUsers {
+        sampleProvider.sampleUsers
+    }
 
     // Get all participants except the current user for auto-reply
     func getOtherParticipants(in chat: Chat) -> [User] {
@@ -250,5 +264,73 @@ class ChatData {
         )
 
         chats[chatIndex] = chat
+    }
+}
+
+extension ChatData {
+    //TODO: Remove this probably
+    private static func replaceCurrentUser(
+        in chat: Chat,
+        oldUser: User,
+        newUser: User
+    ) -> Chat {
+        let updatedParticipants = chat.participants.map { participant in
+            participant.id == oldUser.id ? newUser : participant
+        }
+
+        let updatedMessages = chat.messages.map { message -> Message in
+            if message.user.id == oldUser.id {
+                var updatedMessage = Message(
+                    id: message.id,
+                    content: message.content,
+                    from: newUser,
+                    date: message.date
+                )
+
+                updatedMessage.reactions = ChatData.replaceReactions(
+                    in: message,
+                    oldUser: oldUser,
+                    newUser: newUser
+                )
+                updatedMessage.reactionOptions = message.reactionOptions
+
+                return updatedMessage
+            } else {
+                var updatedMessage = message
+                updatedMessage.reactions = ChatData.replaceReactions(
+                    in: message,
+                    oldUser: oldUser,
+                    newUser: newUser
+                )
+                return updatedMessage
+            }
+        }
+
+        return Chat(
+            id: chat.id,
+            title: chat.title,
+            participants: updatedParticipants,
+            messages: updatedMessages,
+            theme: chat.theme,
+            currentUser: newUser
+        )
+    }
+
+    private static func replaceReactions(
+        in message: Message,
+        oldUser: User,
+        newUser: User
+    ) -> [MessageReaction] {
+        message.reactions.map { reaction in
+            if reaction.user.id == oldUser.id {
+                MessageReaction(
+                    user: newUser,
+                    date: reaction.date,
+                    emoji: reaction.emoji
+                )
+            } else {
+                reaction
+            }
+        }
     }
 }

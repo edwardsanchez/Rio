@@ -258,9 +258,10 @@ struct ChatDetailView: View {
     @Previewable @State var chatData = ChatData()
 
     // Use the same users from ChatData to ensure UUID matching
-    let edwardUser = chatData.edwardUser
-    let mayaUser = chatData.mayaUser
-    let sophiaUser = chatData.sophiaUser
+    let sampleUsers = chatData.sampleUsers
+    let edwardUser = sampleUsers.edward
+    let mayaUser = sampleUsers.maya
+    let sophiaUser = sampleUsers.sophia
 
     let sampleMessages = [
         Message(
@@ -315,8 +316,9 @@ struct ChatDetailView: View {
 
 #Preview("Outbound Geometry Match Debug") {
     let chatData = ChatData()
-    let edwardUser = chatData.edwardUser
-    let mayaUser = chatData.mayaUser
+    let sampleUsers = chatData.sampleUsers
+    let edwardUser = sampleUsers.edward
+    let mayaUser = sampleUsers.maya
 
     // Create a message that was just sent with a stable ID
     let newMessageId = UUID()
