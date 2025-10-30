@@ -56,7 +56,6 @@ struct MessageBubbleView: View {
     @State private var includeTalkingTextInLayout = false
     @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem?
-
     @Binding var selectedImageData: ImageData?
 
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -356,12 +355,17 @@ struct MessageBubbleView: View {
             layoutType: displayedBubbleType,
             animationWidth: nil,
             animationHeight: nil,
-            isVisible: !message.content.isEmoji
+            isVisible: shouldShowBubbleBackground
         )
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: showTypingIndicatorContent)
                 .padding(.leading, 20)
         }
+    }
+
+    private var shouldShowBubbleBackground: Bool {
+        guard message.content.isEmoji else { return true }
+        return !displayedBubbleType.isTalking
     }
 
     private var lockedWidth: CGFloat? {
@@ -446,6 +450,20 @@ struct MessageBubbleView: View {
 
         if thinkingContentWidth > 0 {
             isWidthLocked = true
+        }
+
+        if message.content.isEmoji {
+            withAnimation(.smooth(duration: 0.2)) {
+                showTypingIndicatorContent = false
+            }
+
+            withAnimation(.smooth(duration: 0.3)) {
+                includeTalkingTextInLayout = true
+                showTalkingContent = true
+            }
+
+            scheduleWidthUnlock()
+            return
         }
 
         withAnimation(.smooth(duration: 0.2)) {
