@@ -6,5 +6,5 @@
 --wrapcollections before-first
 --stripunusedargs closure-only
 --trailing-commas never
---exclude build,Packages,Packages/*,Rio.xcodeproj,*.xcworkspace
+--exclude build,Packages,Packages/*,Rio.xcodeproj,*.xcworkspace,"Shader Test","Cursive Font Writing"
 --disable spaceInsideComments
