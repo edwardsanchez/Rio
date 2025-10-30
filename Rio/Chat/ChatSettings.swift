@@ -69,17 +69,16 @@ struct ChatSettings: View {
     var body: some View {
         if isPresented {
             NavigationStack {
-                VStack(spacing: 20) {
-                    participantsList
-                    Divider()
-                        .padding(.horizontal)
-                    Form {
+                ScrollView{
+                    Form { //Will be replaced with custom form
+                        participantsList
                         settingsSection
                         destructiveSection
                     }
-                    .padding(.top, -20)
-                    .scrollContentBackground(.hidden)
                 }
+                .padding(.top, -20)
+                .scrollContentBackground(.hidden)
+
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationTitle(chat.title)
