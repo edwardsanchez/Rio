@@ -46,7 +46,6 @@ struct MessageBubbleView: View {
     let isReactionsOverlay: Bool
 
     @State private var bubbleManager: MessageBubbleManager
-    @State private var thinkingContentWidth: CGFloat = 0
     @Binding var selectedImageData: ImageData?
 
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -205,7 +204,7 @@ struct MessageBubbleView: View {
                 }
             }
 
-            bubbleManager.configureInitialContentState(for: message.bubbleType)
+            bubbleManager.configureInitialContentState(for: message.bubbleType, hasContent: message.content.hasContent)
         }
         .onChange(of: message.bubbleType) { oldType, newType in
             bubbleManager.handleBubbleTypeChange(
@@ -341,6 +340,11 @@ struct MessageBubbleView: View {
                 )
                 .padding(.vertical, 4)
                 .opacity(bubbleManager.showTalkingContent ? 1 : 0)
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.width
+                } action: { width in
+                    bubbleManager.updateTalkingContentWidth(width)
+                }
             }
         }
         .animation(.smooth(duration: 0.2), value: bubbleManager.showTypingIndicatorContent)

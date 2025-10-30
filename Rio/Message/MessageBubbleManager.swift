@@ -70,9 +70,17 @@ class MessageBubbleManager {
         return thinkingContentWidth
     }
 
+    /// Records the width of the talking content so we can lock to it during thinking state
+    func updateTalkingContentWidth(_ width: CGFloat) {
+        guard width > 0 else { return }
+        if abs(thinkingContentWidth - width) > 0.5 {
+            thinkingContentWidth = width
+        }
+    }
+
     // MARK: - Initial Configuration
 
-    func configureInitialContentState(for bubbleType: BubbleType) {
+    func configureInitialContentState(for bubbleType: BubbleType, hasContent: Bool) {
         cancelPendingContentTransitions()
         switch bubbleType {
         case .thinking:
@@ -83,8 +91,11 @@ class MessageBubbleManager {
         case .talking:
             isWidthLocked = false
             showTypingIndicatorContent = false
-            showTalkingContent = true
-            includeTalkingTextInLayout = true
+            showTalkingContent = hasContent
+            includeTalkingTextInLayout = hasContent
+            if !hasContent {
+                thinkingContentWidth = 0
+            }
         case .read:
             isWidthLocked = false
             showTypingIndicatorContent = false
@@ -124,7 +135,7 @@ class MessageBubbleManager {
             } else if oldType == .talking, newType == .read {
                 startTalkingToReadTransition()
             } else {
-                configureInitialContentState(for: newType)
+                configureInitialContentState(for: newType, hasContent: hasContent)
             }
         }
     }
