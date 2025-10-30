@@ -69,11 +69,18 @@ struct ChatSettings: View {
     var body: some View {
         if isPresented {
             NavigationStack {
-                Form {
-                    participantsSection
-                    settingsSection
-                    destructiveSection
+                VStack(spacing: 20) {
+                    participantsList
+                    Divider()
+                        .padding(.horizontal)
+                    Form {
+                        settingsSection
+                        destructiveSection
+                    }
+                    .padding(.top, -20)
+                    .scrollContentBackground(.hidden)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationTitle(chat.title)
                 .toolbar {
@@ -107,54 +114,16 @@ struct ChatSettings: View {
         }
     }
 
-    private var participantsSection: some View {
-        Section {
-            LazyVGrid(columns: participantGridColumns) {
-                ForEach(participantsExcludingCurrentUser) { participant in
-                    if isGroupChat {
-                        participantTile(for: participant)
-                            .contextMenu { //FIXME: This is showing up in the whole form not on the actual participant
-                                Button(role: .destructive) {
-                                    participantPendingRemoval = participant
-                                    isRemoveParticipantAlertPresented = true
-                                } label: {
-                                    Label("Remove from Group", systemImage: "xmark")
-                                }
-
-                                Button {
-                                    //TODO: Implement - only have this if there is more than 2 participants including you
-                                } label: {
-                                    Label("Chat 1:1", systemImage: "person.2")
-                                }
-                            }
-                            .alert(
-                                "Remove from Group?",
-                                isPresented: $isRemoveParticipantAlertPresented,
-                                presenting: participantPendingRemoval
-                            ) { participant in
-                                Button("Remove", role: .destructive) {
-                                    removeParticipant(participant)
-                                    participantPendingRemoval = nil
-                                }
-
-                                Button("Cancel", role: .cancel) {
-                                    participantPendingRemoval = nil
-                                }
-                            } message: { participant in
-                                Text("Are you sure you want to remove \(participant.name) from this chat?")
-                            }
-                    } else {
-                        participantTile(for: participant)
-                    }
-                }
-
-                addParticipantButton
+    private var participantsList: some View {
+        LazyVGrid(columns: participantGridColumns, spacing: 16) {
+            ForEach(participantsExcludingCurrentUser) { participant in
+                participantTile(for: participant)
             }
-            .padding(.vertical, 8)
 
-        } header: {
-            Text("Participants")
+            addParticipantButton
         }
+        .padding(.top, 30)
+        .padding(.horizontal, 20)
     }
 
     private var addParticipantButton: some View {
@@ -278,6 +247,47 @@ struct ChatSettings: View {
 
     @ViewBuilder
     private func participantTile(for participant: User) -> some View {
+        if isGroupChat {
+            participantTileContent(for: participant)
+                .contentShape(Rectangle())
+                .contextMenu {
+                    Button(role: .destructive) {
+                        participantPendingRemoval = participant
+                        isRemoveParticipantAlertPresented = true
+                    } label: {
+                        Label("Remove from Group", systemImage: "xmark")
+                    }
+
+                    Button {
+                        //TODO: Implement - only have this if there is more than 2 participants including you
+                    } label: {
+                        Label("Chat 1:1", systemImage: "person.2")
+                    }
+                }
+                .alert(
+                    "Remove from Group?",
+                    isPresented: alertBinding(for: participant),
+                    presenting: participantPendingRemoval
+                ) { participant in
+                    Button("Remove", role: .destructive) {
+                        removeParticipant(participant)
+                        isRemoveParticipantAlertPresented = false
+                        participantPendingRemoval = nil
+                    }
+
+                    Button("Cancel", role: .cancel) {
+                        isRemoveParticipantAlertPresented = false
+                        participantPendingRemoval = nil
+                    }
+                } message: { participant in
+                    Text("Are you sure you want to remove \(participant.name) from this chat?")
+                }
+        } else {
+            participantTileContent(for: participant)
+        }
+    }
+
+    private func participantTileContent(for participant: User) -> some View {
         VStack(spacing: 3) {
             AvatarView(
                 user: participant,
@@ -298,4 +308,68 @@ struct ChatSettings: View {
     private func removeParticipant(_ participant: User) {
         chatData.removeParticipant(participant, from: chat.id)
     }
+
+    private func alertBinding(for participant: User) -> Binding<Bool> {
+        Binding(
+            get: {
+                isRemoveParticipantAlertPresented && participantPendingRemoval?.id == participant.id
+            },
+            set: { newValue in
+                if !newValue, participantPendingRemoval?.id == participant.id {
+                    isRemoveParticipantAlertPresented = false
+                    participantPendingRemoval = nil
+                } else {
+                    isRemoveParticipantAlertPresented = newValue
+                }
+            }
+        )
+    }
+}
+
+private struct ChatSettingsPreviewHost: View {
+    let chatData: ChatData
+    let chat: Chat
+
+    @Namespace private var avatarNamespace
+
+    var body: some View {
+        ChatSettings(
+            chat: chat,
+            fallbackChatTitle: Chat.fallbackTitle(
+                for: chat.participants,
+                currentUser: chatData.currentUser
+            ),
+            avatarNamespace: avatarNamespace,
+            avatarTransitionAnimation: .smooth(duration: 0.28),
+            onDestructiveAction: {}
+        )
+        .environment(chatData)
+    }
+}
+
+#Preview("Group Chat Settings") {
+    @Previewable @State var chatData = ChatData()
+
+    let sampleUsers = chatData.sampleUsers
+    let currentUser = sampleUsers.edward
+    let groupParticipants = [currentUser, sampleUsers.sophia, sampleUsers.liam, sampleUsers.zoe]
+
+    let previewChat = Chat(
+        title: "Weekend Plans",
+        participants: groupParticipants,
+        messages: [],
+        theme: .theme2,
+        currentUser: currentUser
+    )
+
+    chatData.chats = [previewChat]
+    chatData.presentDetail(for: previewChat.id)
+
+    let storedChat = chatData.chats.first ?? previewChat
+
+    return ChatSettingsPreviewHost(
+        chatData: chatData,
+        chat: storedChat
+    )
+    .background(Color.red)
 }
