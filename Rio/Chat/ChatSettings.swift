@@ -32,7 +32,7 @@ struct ChatSettings: View {
     }
 
     private var participantGridColumns: [GridItem] {
-        [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
+        [GridItem(.adaptive(minimum: 50, maximum: 100), spacing: 20, alignment: .leading)]
     }
 
     private var participantsExcludingCurrentUser: [User] {
