@@ -65,9 +65,7 @@ struct ChatSettings: View {
             NavigationStack {
                 Form {
                     participantsSection
-
                     settingsSection
-
                     destructiveSection
                 }
                 .navigationBarTitleDisplayMode(.inline)
@@ -98,7 +96,6 @@ struct ChatSettings: View {
                 }
             }
             .transition(
-//                .move(edge: .bottom)
                 .opacity
             )
         }
