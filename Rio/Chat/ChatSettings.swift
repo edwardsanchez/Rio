@@ -122,13 +122,13 @@ struct ChatSettings: View {
                     }
                     .contextMenu {
                         Button("Remove from Group") {
-                            //TODO: Implement
+                            //TODO: Implement - only have this if there is more than 2 participants including you
                         }
                         //TODO: Implement this, this is a role destructive.
                         //Use the xmark icon for this
 
                         Button("Chat 1:1") {
-                            //TODO: Implement
+                            //TODO: Implement - only have this if there is more than 2 participants including you
                         }
                         //TODO: Use person.2.fill icon
                     }
