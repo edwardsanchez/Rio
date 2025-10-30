@@ -75,10 +75,8 @@ public class Curve {
     }
     
     public static func bezier(_ p1x: CGFloat = 0.5, _ p1y: CGFloat = 0, _ p2x: CGFloat = 0.4, _ p2y: CGFloat = 0.9) -> Curve {
-        
         // Bezier Curve function
         func bezierPointOverTime(_ time: CGFloat) -> CGPoint {
-            
             let p0  = CGPoint(x: 0, y: 1)
             let p3  = CGPoint(x: 1, y: 0)
 

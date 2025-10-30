@@ -125,7 +125,7 @@ struct ChatSettings: View {
                     }
                     .contextMenu {
                         Button("Remove from Group") {
-
+                            //TODO: Implement
                         }
                         //TODO: Implement this, this is a role destructive.
                         //Use the xmark icon for this

@@ -44,7 +44,7 @@ struct MessageBubbleView: View {
     let activeReactingMessageID: UUID?
     let geometrySource: ReactionGeometrySource
     let isReactionsOverlay: Bool
-
+    
     @State private var showTypingIndicatorContent = false
     @State private var showTalkingContent = false
     @State private var thinkingContentWidth: CGFloat = 0
@@ -57,46 +57,46 @@ struct MessageBubbleView: View {
     @State private var displayedBubbleType: BubbleType
     @State private var modeDelayWorkItem: DispatchWorkItem?
     @Binding var selectedImageData: ImageData?
-
+    
     @Environment(BubbleConfiguration.self) private var bubbleConfig
     
     // Computed property for message type
     private var messageType: MessageType {
         message.messageType(currentUser: chatData.currentUser)
     }
-
+    
     private var isActiveReactionBubble: Bool {
         activeReactingMessageID == message.id
     }
-
+    
     private var shouldDisplayBubble: Bool {
         guard let activeID = activeReactingMessageID else { return true }
         guard activeID == message.id else { return true }
-
+        
         if isReactionsOverlay {
             return true
         } else {
             return geometrySource == .list
         }
     }
-
+    
     private var displayOpacity: Double {
         shouldDisplayBubble ? 1 : 0
     }
-
+    
     private var allowsInteraction: Bool {
         shouldDisplayBubble && (!isActiveReactionBubble || isReactionsOverlay)
     }
-
+    
     private var matchedGeometryID: String {
         "bubble-\(message.id)"
     }
-
+    
     private var isSourceForGeometry: Bool {
         guard let activeID = activeReactingMessageID, activeID == message.id else {
             return geometrySource == .list
         }
-
+        
         switch geometrySource {
         case .list:
             return !isReactionsOverlay
@@ -104,7 +104,7 @@ struct MessageBubbleView: View {
             return isReactionsOverlay
         }
     }
-
+    
     init(
         message: Message,
         showTail: Bool = true,
@@ -138,7 +138,7 @@ struct MessageBubbleView: View {
         // Initialize displayedBubbleType to match actual bubbleType
         self._displayedBubbleType = State(initialValue: message.bubbleType)
     }
-
+    
     var body: some View {
         Group {
             if let namespace = bubbleNamespace {
@@ -155,14 +155,14 @@ struct MessageBubbleView: View {
             }
         }
     }
-
+    
     private var decoratedBubbleLayout: some View {
         baseBubbleLayout
             .opacity(displayOpacity)
             .allowsHitTesting(allowsInteraction)
             .animation(.smooth(duration: 0.2), value: shouldDisplayBubble)
     }
-
+    
     private var baseBubbleLayout: some View {
         HStack(alignment: .bottom, spacing: 12) {
             if messageType.isInbound {
@@ -209,7 +209,7 @@ struct MessageBubbleView: View {
                     newMessageId = nil
                 }
             }
-                configureInitialContentState()
+            configureInitialContentState()
         }
         .onChange(of: message.bubbleType) { oldType, newType in
             handleBubbleTypeChange(from: oldType, to: newType)
@@ -218,15 +218,15 @@ struct MessageBubbleView: View {
             cancelPendingContentTransitions()
         }
     }
-
+    
     // Computed properties for positioning and animation
     private var frameAlignment: Alignment {
         messageType.isInbound ? .leading : .trailing
     }
-
+    
     private var rowYOffset: CGFloat {
         guard isNew else { return 0 }
-
+        
         if messageType.isInbound {
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
@@ -235,12 +235,12 @@ struct MessageBubbleView: View {
             return 0
         }
     }
-
+    
     private var bubbleYOffset: CGFloat {
         guard isNew else { return 0 }
         return 0
     }
-
+    
     private var bubbleOpacity: Double {
         guard messageType.isInbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
@@ -250,7 +250,7 @@ struct MessageBubbleView: View {
         }
         return isNew ? 0 : 1
     }
-
+    
     private var inboundAvatarOpacity: Double {
         guard messageType.isInbound else { return 1 }
         guard isNew else { return 1 }
@@ -258,7 +258,7 @@ struct MessageBubbleView: View {
         // For thinking/talking, use opacity fade
         return displayedBubbleType.isRead ? 1 : 0
     }
-
+    
     // Physics-based parallax offset for cascading jelly effect
     private var parallaxOffset: CGFloat {
         bubbleConfig.calculateParallaxOffset(
@@ -268,14 +268,14 @@ struct MessageBubbleView: View {
             isNewMessage: isNew
         )
     }
-
+    
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
                 let avatarSize: CGFloat = displayedBubbleType.isRead ? 20 : 40
                 let avatarFrameHeight: CGFloat = displayedBubbleType.isRead ? 0 : 40
                 let avatarOffsetX: CGFloat = displayedBubbleType.isRead ? 9 : 0
-
+                
                 Image(avatar)
                     .resizable()
                     .frame(width: avatarSize, height: avatarSize)
@@ -294,7 +294,8 @@ struct MessageBubbleView: View {
             }
         }
     }
-
+    
+    // swiftlint:disable unused_declaration
     var typingIndicatorMessages: [String] {
         return [
             "Searching for best vegan restaurants in Paris",
@@ -302,32 +303,32 @@ struct MessageBubbleView: View {
             "Checking which restaurants are open on Sundays"
         ]
     }
-
+    
     private var typingIndicatorContainerWidth: CGFloat? {
         guard message.isTypingIndicator else { return nil }
         let scrollWidth = scrollViewFrame.width
         guard scrollWidth > 0 else { return nil }
-
+        
         let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
         let avatarWidth: CGFloat = messageType.isInbound ? 40 : 0
         let bubbleSpacing: CGFloat = messageType.isInbound ? 12 : 0
         let trailingSpacer: CGFloat = messageType.isInbound ? 10 : 0
-
+        
         let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
         return width > 0 ? width : nil
     }
-
+    // swiftlint:enable unused_declaration
+    
     private func bubbleView(
         textColor: Color,
         backgroundColor: Color
     ) -> some View {
-
         let hasContent = message.content.hasContent
-
+        
         return ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
                 .opacity(0)
-
+            
             if hasContent && includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
@@ -362,28 +363,28 @@ struct MessageBubbleView: View {
                 .padding(.leading, 20)
         }
     }
-
+    
     private var shouldShowBubbleBackground: Bool {
         guard message.content.isEmoji else { return true }
         return !displayedBubbleType.isTalking
     }
-
+    
     private var lockedWidth: CGFloat? {
         guard isWidthLocked, thinkingContentWidth > 0 else { return nil }
         return thinkingContentWidth
     }
-
+    
     // DO NOT DELETE
-//    private func updateThinkingWidth(_ width: CGFloat) {
-//        guard width > 0 else { return }
-//        if abs(thinkingContentWidth - width) > 0.5 {
-//            thinkingContentWidth = width
-//        }
-//        if message.bubbleType == .thinking {
-//            isWidthLocked = true
-//        }
-//    }
-
+    //    private func updateThinkingWidth(_ width: CGFloat) {
+    //        guard width > 0 else { return }
+    //        if abs(thinkingContentWidth - width) > 0.5 {
+    //            thinkingContentWidth = width
+    //        }
+    //        if message.bubbleType == .thinking {
+    //            isWidthLocked = true
+    //        }
+    //    }
+    
     private func configureInitialContentState() {
         cancelPendingContentTransitions()
         switch message.bubbleType {
@@ -404,11 +405,11 @@ struct MessageBubbleView: View {
             includeTalkingTextInLayout = false
         }
     }
-
+    
     private func handleBubbleTypeChange(from oldType: BubbleType, to newType: BubbleType) {
         guard oldType != newType else { return }
         cancelPendingContentTransitions()
-
+        
         // Handle displayedBubbleType delay for thinking→read transition
         if oldType == .thinking && newType == .read {
             // Keep displayedBubbleType at .thinking during explosion
@@ -424,7 +425,7 @@ struct MessageBubbleView: View {
         } else {
             // For all other transitions, update displayedBubbleType immediately
             displayedBubbleType = newType
-
+            
             if oldType == .thinking && newType == .talking {
                 startTalkingTransition()
             } else if oldType == .talking && newType == .thinking {
@@ -438,7 +439,7 @@ struct MessageBubbleView: View {
             }
         }
     }
-
+    
     private func startTalkingTransition() {
         if !message.content.hasContent {
             isWidthLocked = false
@@ -447,37 +448,37 @@ struct MessageBubbleView: View {
             includeTalkingTextInLayout = false
             return
         }
-
+        
         if thinkingContentWidth > 0 {
             isWidthLocked = true
         }
-
+        
         if message.content.isEmoji {
             withAnimation(.smooth(duration: 0.2)) {
                 showTypingIndicatorContent = false
             }
-
+            
             withAnimation(.smooth(duration: 0.3)) {
                 includeTalkingTextInLayout = true
                 showTalkingContent = true
             }
-
+            
             scheduleWidthUnlock()
             return
         }
-
+        
         withAnimation(.smooth(duration: 0.2)) {
             showTypingIndicatorContent = false
         }
-
+        
         showTalkingContent = false
         includeTalkingTextInLayout = false
-
+        
         scheduleTextLayoutInclusion()
         scheduleWidthUnlock()
         scheduleTalkingReveal()
     }
-
+    
     private func startThinkingState() {
         isWidthLocked = true
         showTalkingContent = false
@@ -486,13 +487,13 @@ struct MessageBubbleView: View {
             showTypingIndicatorContent = true
         }
     }
-
+    
     private func startReadToThinkingTransition() {
         // Delay typing indicator until read→thinking animation completes
         isWidthLocked = true
         showTalkingContent = false
         includeTalkingTextInLayout = false
-
+        
         // Wait for the bubble animation to complete before showing typing indicator
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration / 3) {
             withAnimation(.smooth(duration: 0.3)) {
@@ -500,7 +501,7 @@ struct MessageBubbleView: View {
             }
         }
     }
-
+    
     private func startReadToTalkingTransition() {
         // Quick opacity fade when going from read to talking (fast response)
         if !message.content.hasContent {
@@ -510,25 +511,25 @@ struct MessageBubbleView: View {
             includeTalkingTextInLayout = false
             return
         }
-
+        
         isWidthLocked = false
         showTypingIndicatorContent = false
         includeTalkingTextInLayout = true
-
+        
         // Quick fade in without offset animation
         withAnimation(.smooth(duration: 0.3)) {
             showTalkingContent = true
         }
-
+        
         bubbleFadeWorkItem?.cancel()
         bubbleFadeOpacity = 0
-
+        
         let work = DispatchWorkItem {
             withAnimation(.smooth(duration: 0.4)) {
                 bubbleFadeOpacity = 1
             }
         }
-
+        
         bubbleFadeWorkItem = work
         // Displayed type switches after ~0.02s; start bubble fade after avatar growth (~0.3s)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.02 + 0.3) {
@@ -537,11 +538,11 @@ struct MessageBubbleView: View {
             bubbleFadeWorkItem = nil
         }
     }
-
+    
     private func startThinkingToReadTransition() {
         // Immediately hide typing indicator (no animation) when bubbleType changes to read
         showTypingIndicatorContent = false
-
+        
         // After explosion completes (managed by displayedBubbleType delay), clean up remaining state
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
             self.isWidthLocked = false
@@ -549,7 +550,7 @@ struct MessageBubbleView: View {
             self.includeTalkingTextInLayout = false
         }
     }
-
+    
     // This should only happen if the message is unsent
     private func startTalkingToReadTransition() {
         // Fade out talking content and go to read state
@@ -560,21 +561,21 @@ struct MessageBubbleView: View {
         showTypingIndicatorContent = false
         includeTalkingTextInLayout = false
     }
-
+    
     private func scheduleTextLayoutInclusion() {
         // Include text in layout after morph phase, so it affects height during resize phase
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
             includeTalkingTextInLayout = true
         }
     }
-
+    
     private func scheduleWidthUnlock() {
         let unlockItem = DispatchWorkItem {
             withAnimation(.smooth(duration: bubbleConfig.resizeCutoffDuration)) {
                 isWidthLocked = false
             }
         }
-
+        
         widthUnlockWorkItem = unlockItem
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
             guard !unlockItem.isCancelled else { return }
@@ -582,14 +583,14 @@ struct MessageBubbleView: View {
             widthUnlockWorkItem = nil
         }
     }
-
+    
     private func scheduleTalkingReveal() {
         let revealItem = DispatchWorkItem {
             withAnimation(.smooth(duration: 0.35)) {
                 showTalkingContent = true
             }
         }
-
+        
         revealWorkItem = revealItem
         DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.textRevealDelay) {
             guard !revealItem.isCancelled else { return }
@@ -597,15 +598,15 @@ struct MessageBubbleView: View {
             revealWorkItem = nil
         }
     }
-
+    
     private func scheduleDisplayedTypeUpdate(to type: BubbleType, delay: TimeInterval) {
         // Cancel any pending bubbleType updates
         modeDelayWorkItem?.cancel()
-
+        
         let delayItem = DispatchWorkItem {
             self.displayedBubbleType = type
         }
-
+        
         modeDelayWorkItem = delayItem
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             guard !delayItem.isCancelled else { return }
@@ -613,7 +614,7 @@ struct MessageBubbleView: View {
             self.modeDelayWorkItem = nil
         }
     }
-
+    
     private func cancelPendingContentTransitions() {
         widthUnlockWorkItem?.cancel()
         widthUnlockWorkItem = nil
@@ -631,11 +632,11 @@ private struct MessageBubblePreviewContainer: View {
     @State private var bubbleType: BubbleType? = .read
     @State private var newMessageId: UUID?
     @State private var selectedImageData: ImageData?
-
+    
     // Use a stable message ID that persists across state changes
     private let messageId = UUID()
     private let sampleUser = User(id: UUID(), name: "Maya Maria Antonia", avatar: .scarlet)
-
+    
     private var currentMessage: Message {
         switch bubbleType {
         case .read:
@@ -671,11 +672,11 @@ private struct MessageBubblePreviewContainer: View {
             )
         }
     }
-
+    
     private var isNew: Bool {
         messageId == newMessageId
     }
-
+    
     var body: some View {
         VStack(spacing: 24) {
             if bubbleType != nil {
@@ -697,7 +698,7 @@ private struct MessageBubblePreviewContainer: View {
                 Color.clear
                     .frame(height: 100)
             }
-
+            
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Button("None") {
@@ -706,7 +707,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == nil ? .blue : .gray)
-
+                    
                     Button("Read") {
                         let wasNone = bubbleType == nil
                         bubbleType = .read
@@ -716,7 +717,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == .read ? .blue : .gray)
-
+                    
                     Button("Thinking") {
                         let wasNone = bubbleType == nil
                         bubbleType = .thinking
@@ -726,7 +727,7 @@ private struct MessageBubblePreviewContainer: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(bubbleType == .thinking ? .blue : .gray)
-
+                    
                     Button("Talking") {
                         let wasNone = bubbleType == nil
                         bubbleType = .talking
@@ -746,7 +747,7 @@ private struct MessageBubblePreviewContainer: View {
 
 #Preview("Inbound Message Bubble Morph") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
-
+    
     MessageBubblePreviewContainer()
         .environment(bubbleConfig)
         .environment(ChatData())
@@ -756,67 +757,66 @@ private struct MessageBubblePreviewContainer: View {
 #Preview("Message States") {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     @Previewable @State var selectedImageData: ImageData?
-
+    
     let currentUser = User(id: UUID(), name: "Edward", avatar: .edward)
     let maya = User(id: UUID(), name: "Maya Maria Antonia", avatar: .scarlet)
-
+    
     ZStack {
         VStack(spacing: 20) {
-
-        MessageBubbleView(
-            message: Message(
-                content: .text(""),
-                from: maya,
-                isTypingIndicator: true,
-                bubbleType: .read
-            ),
-            showTail: true,
-            theme: .theme1,
-            selectedImageData: $selectedImageData
-        )
-
-        // 1. Inbound thinking
-        MessageBubbleView(
-            message: Message(
-                content: .text(""),
-                from: maya,
-                isTypingIndicator: true,
-                bubbleType: .thinking
-            ),
-            showTail: true,
-            theme: .theme1,
-            selectedImageData: $selectedImageData
-        )
-
-        // 2. Inbound talking
-        MessageBubbleView(
-            message: Message(
-                content: .text("Hey! How's it going?"),
-                from: maya,
-                bubbleType: .talking
-            ),
-            showTail: true,
-            theme: .theme1,
-            selectedImageData: $selectedImageData
-        )
-
-        // 3. Outbound talking
-        MessageBubbleView(
-            message: Message(
-                content: .text("Great! Just working on some code."),
-                from: currentUser
-            ),
-            showTail: true,
-            theme: .theme1,
-            selectedImageData: $selectedImageData
-        )
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 40)
-    .environment(bubbleConfig)
-    .environment(ChatData())
-    .environment(ReactionsCoordinator())
-
+            MessageBubbleView(
+                message: Message(
+                    content: .text(""),
+                    from: maya,
+                    isTypingIndicator: true,
+                    bubbleType: .read
+                ),
+                showTail: true,
+                theme: .theme1,
+                selectedImageData: $selectedImageData
+            )
+            
+            // 1. Inbound thinking
+            MessageBubbleView(
+                message: Message(
+                    content: .text(""),
+                    from: maya,
+                    isTypingIndicator: true,
+                    bubbleType: .thinking
+                ),
+                showTail: true,
+                theme: .theme1,
+                selectedImageData: $selectedImageData
+            )
+            
+            // 2. Inbound talking
+            MessageBubbleView(
+                message: Message(
+                    content: .text("Hey! How's it going?"),
+                    from: maya,
+                    bubbleType: .talking
+                ),
+                showTail: true,
+                theme: .theme1,
+                selectedImageData: $selectedImageData
+            )
+            
+            // 3. Outbound talking
+            MessageBubbleView(
+                message: Message(
+                    content: .text("Great! Just working on some code."),
+                    from: currentUser
+                ),
+                showTail: true,
+                theme: .theme1,
+                selectedImageData: $selectedImageData
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 40)
+        .environment(bubbleConfig)
+        .environment(ChatData())
+        .environment(ReactionsCoordinator())
+        
         // Image detail overlay
         if let imageData = selectedImageData {
             ImageDetailView(
@@ -835,5 +835,4 @@ private struct MessageBubblePreviewContainer: View {
             .zIndex(1)
         }
     }
-
 }

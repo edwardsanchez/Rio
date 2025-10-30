@@ -257,7 +257,6 @@ struct BubbleExplosionTestView: View {
         textColor: Color,
         backgroundColor: Color
     ) -> some View {
-
         let hasContent = !message.text.isEmpty
 
         ZStack(alignment: .leading) {

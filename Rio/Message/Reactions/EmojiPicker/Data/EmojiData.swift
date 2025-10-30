@@ -8,7 +8,6 @@
 import Foundation
 
 struct EmojiData {
-
     // MARK: - People Emojis
     static let peopleEmojisBase: [Emoji] = [
         Emoji(id: "grinningFace", character: "😀", name: "Grinning Face", keywords: ["happy", "smile", "joy", "cheerful"], category: .people(.happy)),

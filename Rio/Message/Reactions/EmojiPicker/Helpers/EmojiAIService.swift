@@ -8,7 +8,6 @@
 import Foundation
 
 struct EmojiAIService {
-    
     // MARK: - Category Index Builder
     
     /// Builds a comprehensive category index for the AI model

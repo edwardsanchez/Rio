@@ -10,7 +10,6 @@ import SwiftUI
 /// Centralized configuration and utilities for bubble animations and layout
 @Observable
 class BubbleConfiguration {
-
     // MARK: - Configuration Constants
 
     /// Corner radius for bubble shapes

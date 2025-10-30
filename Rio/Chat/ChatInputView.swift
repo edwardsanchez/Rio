@@ -68,7 +68,7 @@ struct ChatInputView: View {
         GlassEffectContainer {
             HStack(spacing: 2) {
                 Button {
-
+                    //TODO: Implement
                 } label: {
                     Image(systemName: "plus")
                         .imageScale(.large)

@@ -59,3 +59,12 @@ type_name:
     error: 80
 
 reporter: "xcode"
+
+custom_rules:
+  no_empty_line_after_brace:
+    included:
+      - ".*\\.swift"
+    name: "No Empty Line After Brace"
+    regex: "\\{[ \\t]*\\n[ \\t]*\\n"
+    message: "Remove empty line directly after opening brace."
+    severity: warning

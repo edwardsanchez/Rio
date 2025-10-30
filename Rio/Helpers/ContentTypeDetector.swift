@@ -9,7 +9,6 @@ import Foundation
 
 /// Utility for detecting content types in text messages
 struct ContentTypeDetector {
-
     /// Checks if a string contains only emoji characters (1-3 emoji)
     /// - Parameter text: The text to check
     /// - Returns: True if the text contains only 1-3 emoji characters
