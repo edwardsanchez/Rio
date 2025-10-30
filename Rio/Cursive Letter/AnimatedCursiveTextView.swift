@@ -123,6 +123,7 @@ struct AnimatedCursiveTextView: View {
         if let specified = windowWidth {
             return specified > 0 ? specified : nil
         }
+
         guard let width = effectiveContainerWidth else { return nil }
         return resolvedWindowWidth(from: width)
     }
@@ -349,6 +350,7 @@ struct AnimatedCursiveTextView: View {
         if rect.isNull || rect.isInfinite {
             return fallback
         }
+
         return rect.maxX
     }
 
@@ -364,9 +366,11 @@ struct AnimatedCursiveTextView: View {
         let fallback = pathAnalyzer?.pointAtParameter(drawProgress).x ?? fixedLeftEdgeX
         let trimmed = path.trimmedPath(from: 0, to: drawProgress)
         let rect = trimmed.boundingRect
+
         if rect.isNull || rect.isInfinite {
             return fallback
         }
+
         return rect.maxX
     }
 
@@ -396,8 +400,10 @@ struct AnimatedCursiveTextView: View {
                 DispatchQueue.main.async {
                     maxPipeX = currentX
                 }
+
                 return currentX
             }
+
             return maxPipeX
         }
 
@@ -514,6 +520,7 @@ struct AnimatedCursiveTextView: View {
                 naturalDrawProgressFrom = maxNaturalDrawProgressFrom
             }
         }
+
         naturalDrawProgressFrom = max(0, min(1, naturalDrawProgressFrom))
 
         // 2. Update smoothedDrawProgressFrom - forward-only for visual trim rendering
@@ -542,6 +549,7 @@ struct AnimatedCursiveTextView: View {
             let direction = naturalDrawProgressFrom > previousNaturalFrom ? "FORWARD" : "BACKWARD"
             Logger.animatedCursiveText.debug("📍 Natural position: \(previousNaturalFrom) → \(naturalDrawProgressFrom) (\(direction))")
         }
+
         if abs(smoothedDrawProgressFrom - previousVisualFrom) > 0.0001 {
             Logger.animatedCursiveText.debug("👁️ Visual position: \(previousVisualFrom) → \(smoothedDrawProgressFrom) (FORWARD ONLY)")
         }
@@ -927,6 +935,7 @@ struct AnimatedCursiveTextView: View {
                         endParameter: adjustedProgress,
                         xDistance: effectiveWidth
                     )
+                    
                     let clampedFrom = min(windowStart, adjustedProgress)
 
                     // CRITICAL: Ensure forward-only progression
@@ -936,6 +945,7 @@ struct AnimatedCursiveTextView: View {
                         self.targetDrawProgressFrom = clampedFrom
                         self.drawProgressFrom = clampedFrom  // Keep for compatibility
                     }
+                    
                     // If clampedFrom would move backward, keep the current position
                     // This ensures the trim window never moves backward, preventing jitter
                 } else {

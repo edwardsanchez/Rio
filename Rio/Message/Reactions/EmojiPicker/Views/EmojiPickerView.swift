@@ -57,6 +57,7 @@ struct EmojiPickerView: View {
             if current != selectedCategory {
                 selectedCategory = current
             }
+            
             if current == lastProgrammaticTarget {
                 lastProgrammaticTarget = nil
             }

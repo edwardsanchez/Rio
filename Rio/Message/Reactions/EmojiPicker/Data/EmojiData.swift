@@ -167,11 +167,13 @@ struct EmojiData {
         var result: [String] = []
         for word in keywords {
             let lower = word.lowercased()
+            
             if !seen.contains(lower) {
                 seen.insert(lower)
                 result.append(lower)
             }
         }
+        
         return result
     }
 

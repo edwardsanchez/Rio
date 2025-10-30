@@ -231,6 +231,7 @@ struct ReactionsModifier: ViewModifier {
         guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
+
         return isOverlay ? !menuIsShowing : menuIsShowing
     }
 
@@ -297,6 +298,7 @@ private extension ReactionsModifier {
         if !combined.contains(where: { $0.id == Reaction.customEmojiReactionID }) {
             combined.append(.systemImage("face.dashed", selectedEmoji: "?"))
         }
+
         return combined
     }
 }

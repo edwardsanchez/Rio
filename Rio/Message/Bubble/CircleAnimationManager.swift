@@ -34,6 +34,7 @@ class CircleAnimationManager {
                 isDisappearing: false
             )
         }
+
         nextCircleID = targetDiameters.count
     }
 
@@ -87,6 +88,7 @@ class CircleAnimationManager {
                     startTime: now,
                     isDisappearing: false
                 )
+                
                 updated.append(transition)
             }
         }
@@ -105,6 +107,7 @@ class CircleAnimationManager {
                 if transition.isDisappearing && value <= 0.01 {
                     return nil
                 }
+
                 return max(0, value)
             }
     }
@@ -124,6 +127,7 @@ class CircleAnimationManager {
         for (l, r) in zip(lhs, rhs) where abs(l - r) > tolerance {
             return false
         }
+        
         return true
     }
 

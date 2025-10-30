@@ -53,6 +53,7 @@ struct RadialLayout: Layout {
             itemSpacing: itemSpacing,
             spacerCenterPercent: spacerCenterPercent
         )
+        
         let angles = angleConfiguration.angles
         guard angles.count == count else { return }
 
@@ -110,6 +111,7 @@ struct RadialLayout: Layout {
                 collapsedX = center.x
                 collapsedY = center.y
             }
+            
             let x = isShowingReactionMenu ? defaultX : collapsedX
             let y = isShowingReactionMenu ? defaultY : collapsedY
 

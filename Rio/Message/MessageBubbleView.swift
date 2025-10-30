@@ -190,6 +190,7 @@ struct MessageBubbleView: View {
                     // beyond the available width while still allowing natural sizing
                     Spacer(minLength: 10)
                 }
+
                 bubbleView(
                     textColor: theme.outboundTextColor,
                     backgroundColor: theme.outboundBackgroundColor
@@ -209,6 +210,7 @@ struct MessageBubbleView: View {
                     newMessageId = nil
                 }
             }
+
             configureInitialContentState()
         }
         .onChange(of: message.bubbleType) { oldType, newType in
@@ -248,6 +250,7 @@ struct MessageBubbleView: View {
         if displayedBubbleType.isRead {
             return 1  // Let BubbleView handle opacity
         }
+
         return isNew ? 0 : 1
     }
     
@@ -557,6 +560,7 @@ struct MessageBubbleView: View {
         withAnimation(.smooth(duration: 0.3)) {
             showTalkingContent = false
         }
+        
         isWidthLocked = false
         showTypingIndicatorContent = false
         includeTalkingTextInLayout = false

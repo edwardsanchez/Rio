@@ -13,11 +13,7 @@ extension UserDefaults {
     }
     
     var frequentlyUsedEmojiIDs: [String: Int] {
-        get {
-            (dictionary(forKey: Keys.frequentlyUsedEmojiIDs) as? [String: Int]) ?? [:]
-        }
-        set {
-            set(newValue, forKey: Keys.frequentlyUsedEmojiIDs)
-        }
+        get {(dictionary(forKey: Keys.frequentlyUsedEmojiIDs) as? [String: Int]) ?? [:]}
+        set {set(newValue, forKey: Keys.frequentlyUsedEmojiIDs)}
     }
 }

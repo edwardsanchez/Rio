@@ -116,6 +116,7 @@ struct GreedyCircleStack: Layout, Animatable {
             GreedyCircleStack.logger.debug("CircleStack: no subviews to arrange")
             return
         }
+
         let containerDiameter = min(bounds.width, bounds.height)
         let parentRadius = max(0, containerDiameter / 2.0 - rimPadding)
 
@@ -179,6 +180,7 @@ struct GreedyCircleStack: Layout, Animatable {
                     x: origin.x + circle.center.x,
                     y: origin.y - circle.center.y
                 )
+
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
             }
         } else if animationProgress >= 0.999 {
@@ -215,6 +217,7 @@ struct GreedyCircleStack: Layout, Animatable {
                     x: origin.x + circle.center.x,
                     y: origin.y - circle.center.y
                 )
+
                 subviews[index].place(at: placement, anchor: .center, proposal: proposal)
             }
         }
@@ -239,6 +242,7 @@ struct GreedyCircleStack: Layout, Animatable {
             x: anchorDistance * CGFloat(cos(pinnedAngle)),
             y: anchorDistance * CGFloat(sin(pinnedAngle))
         )
+
         var discs: [PackedCircle] = [
             PackedCircle(center: primaryCenter, radius: primaryRadius, isPrimary: true)
         ]
@@ -524,6 +528,7 @@ struct CircleStackPreviewCard<Content: View>: View {
                 AvatarView(user: user)
             }
         }
+        
         CircleStackPreviewCard(
             title: "5 avatars"
         ) {

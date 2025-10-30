@@ -144,6 +144,7 @@ struct MessageContentView: View {
                         if case .location = first {
                             return 120
                         }
+
                         return 60
                     }()
 
@@ -314,6 +315,7 @@ struct MessageContentView: View {
                         view.frame(maxWidth: 80, maxHeight: 80)
                     }
             }
+
             Text(labeledImage.label)
                 .font(compact ? .caption2 : .callout)
                 .foregroundStyle(textColor)
@@ -1388,6 +1390,7 @@ extension Int {
             if self % i == 0 || self % (i + 2) == 0 { return false }
             i += 6
         }
+        
         return true
     }
 

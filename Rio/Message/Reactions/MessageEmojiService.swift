@@ -71,12 +71,14 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "OPENAI_API_KEY environment variable not set"]
             )
         }
+        
         let resolvedModel: String
         if let model {
             resolvedModel = model
         } else {
             resolvedModel = await MainActor.run { defaultModel }
         }
+
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let payload: [String: Any] = [
             "model": resolvedModel,
@@ -104,6 +106,7 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "Invalid response from OpenAI"]
             )
         }
+
         guard httpResponse.statusCode == 200 else {
             let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
             throw NSError(
@@ -112,6 +115,7 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "OpenAI HTTP \(httpResponse.statusCode): \(body)"]
             )
         }
+
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let choices = json["choices"] as? [[String: Any]],
               let message = choices.first?["message"] as? [String: Any],
@@ -122,6 +126,7 @@ enum OpenAIEmojiAPI {
                 userInfo: [NSLocalizedDescriptionKey: "Failed to parse OpenAI content"]
             )
         }
+
         return content
     }
 }
@@ -144,6 +149,7 @@ enum MessageEmojiService {
         if reactions.isEmpty {
             return ["😍", "👍", "👎", "😂", "😲", "🧐"]
         }
+
         return reactions
     }()
     private static let maxContextCharacters = 10_000
@@ -194,6 +200,7 @@ enum MessageEmojiService {
             guard let result = try await group.next() else {
                 throw TimeoutError()
             }
+
             group.cancelAll()
             return result
         }
@@ -206,6 +213,7 @@ enum MessageEmojiService {
             schema: EmojiReactionSchema.openAI,
             errorDomain: "MessageEmojiService"
         )
+        
         guard let data = rawContent.data(using: .utf8) else {
             throw NSError(
                 domain: "MessageEmojiService",
@@ -213,6 +221,7 @@ enum MessageEmojiService {
                 userInfo: [NSLocalizedDescriptionKey: "Invalid OpenAI content encoding"]
             )
         }
+
         let decoded = try JSONDecoder().decode(OpenAIEmojiReactionResponse.self, from: data)
         let characters = decoded.suggestions
             .map(\.character)
@@ -257,9 +266,7 @@ enum MessageEmojiService {
         let relevantMessages = messages[lowerBound...messageIndex]
 
         let lines = relevantMessages.compactMap { entry -> String? in
-            guard let text = contentDescription(for: entry) else {
-                return nil
-            }
+            guard let text = contentDescription(for: entry) else { return nil }
             let speaker = entry.user.id == currentUser.id ? "You" : entry.user.name
             return "\(speaker): \(text)"
         }
@@ -323,8 +330,9 @@ enum MessageEmojiService {
         case .color(let rgb):
             if let name = rgb.name {
                 return "Color \(name)"
+            } else {
+                return "Color"
             }
-            return "Color"
         case .image:
             return "Image option"
         case .labeledImage(let labeled):

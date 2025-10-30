@@ -65,6 +65,7 @@ enum BubbleAnimationState: Equatable {
             if elapsed <= 0 {
                 return from.isTalking ? 1.0 : 0.0
             }
+            
             if elapsed >= duration {
                 return to.isTalking ? 1.0 : 0.0
             }

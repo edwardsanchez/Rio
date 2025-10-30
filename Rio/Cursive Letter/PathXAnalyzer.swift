@@ -179,6 +179,7 @@ struct PathXAnalyzer {
             if let last = points.last, last == point {
                 return
             }
+
             points.append(point)
         }
 
@@ -202,6 +203,7 @@ struct PathXAnalyzer {
                     let t = CGFloat(step) / CGFloat(steps)
                     appendPoint(quadPoint(p0: currentPoint, p1: control, p2: end, t: t))
                 }
+
                 currentPoint = end
             case .addCurveToPoint:
                 // Tessellate cubic Bézier curve (higher resolution for complexity)
@@ -213,6 +215,7 @@ struct PathXAnalyzer {
                     let t = CGFloat(step) / CGFloat(steps)
                     appendPoint(cubicPoint(p0: currentPoint, p1: control1, p2: control2, p3: end, t: t))
                 }
+                
                 currentPoint = end
             case .closeSubpath:
                 appendPoint(subpathStart)
@@ -324,6 +327,7 @@ struct PathXAnalyzer {
             x: startPoint.x + (endPoint.x - startPoint.x) * t,
             y: startPoint.y + (endPoint.y - startPoint.y) * t
         )
+        
         let interpolatedX = startX + (endX - startX) * t
 
         return (interpolatedPoint, interpolatedX)
@@ -613,6 +617,7 @@ struct PathXAnalyzer {
         if let lower = lowerSample {
             return lower.u
         }
+        
         if let upper = upperSample {
             return upper.u
         }

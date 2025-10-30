@@ -99,6 +99,7 @@ struct BubbleView: View {
         } else {
             initialTailPosition = CGPoint(x: 15, y: -23)  // Thinking/Read position
         }
+
         _tailPositionOffset = State(initialValue: initialTailPosition)
     }
 
@@ -186,6 +187,7 @@ struct BubbleView: View {
             } else {
                 circleManager.updateTransitions(targetDiameters: targetDiameters)
             }
+
             updateSize()
         }
         .onChange(of: CGSize(width: width, height: height)) { _, _ in
@@ -272,6 +274,7 @@ struct BubbleView: View {
             minDiameter: minDiameter,
             maxDiameter: maxDiameter
         )
+
         let desiredTargets = circleState.targets
         let existingTargets = circleManager.currentTargetDiameters()
 
@@ -365,6 +368,7 @@ struct BubbleView: View {
             if alphaThresholdMin > 0.001 {
                 context.addFilter(.alphaThreshold(min: Double(alphaThresholdMin), color: isValid ? resolvedColor : Color.red.opacity(0.5)))
             }
+
             if currentBlurRadius > 0.05 {
                 context.addFilter(.blur(radius: currentBlurRadius))
             }
@@ -383,6 +387,7 @@ struct BubbleView: View {
                             x: morphedPositions[index].x + trackOrigin.x,
                             y: morphedPositions[index].y + trackOrigin.y
                         )
+
                         ctx.draw(circleSymbol, at: position)
                     }
                 }
@@ -463,6 +468,7 @@ struct BubbleView: View {
                 let workItem = DispatchWorkItem {
                     self.tailPositionOffset = talkingPosition
                 }
+
                 tailPositionWorkItem = workItem
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
             } else {
@@ -535,6 +541,7 @@ struct BubbleView: View {
         if progress < startPoint {
             return 0
         }
+        
         let normalizedProgress = (progress - startPoint) / (1 - startPoint)
         let elapsed = normalizedProgress * decorativeCirclesDuration
 
@@ -606,6 +613,7 @@ fileprivate struct BubbleMorphLayout {
             width: trackWidth + canvasPadding * 2,
             height: trackHeight + canvasPadding * 2
         )
+        
         self.alphaThreshold = max(0.001, 0.2 * outwardProgress)
     }
 

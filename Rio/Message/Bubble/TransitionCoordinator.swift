@@ -100,6 +100,7 @@ class TransitionCoordinator {
         if animationState.isAnimating && animationState.isComplete(at: date, config: config) {
             animationState = .idle(animationState.targetType)
         }
+
         return animationState
     }
 
@@ -118,6 +119,7 @@ class TransitionCoordinator {
         if case .exploding = currentState(at: date) {
             return true
         }
+
         return false
     }
 
@@ -126,6 +128,7 @@ class TransitionCoordinator {
         if case .exploding = animationState {
             return animationState.animationProgress(at: date, config: config)
         }
+
         return 0
     }
 
@@ -134,6 +137,7 @@ class TransitionCoordinator {
         if case .scaling = currentState(at: date) {
             return true
         }
+
         return false
     }
 
@@ -142,6 +146,7 @@ class TransitionCoordinator {
         if case .scaling = animationState {
             return animationState.animationProgress(at: date, config: config)
         }
+
         return 0
     }
 
@@ -150,6 +155,7 @@ class TransitionCoordinator {
         if case .quickAppearing = currentState(at: date) {
             return true
         }
+
         return false
     }
 
@@ -158,6 +164,7 @@ class TransitionCoordinator {
         if case .quickAppearing = animationState {
             return animationState.animationProgress(at: date, config: config) < 1
         }
+        
         return false
     }
 

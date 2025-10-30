@@ -57,6 +57,7 @@ final class ReactionsMenuModel {
         if selectedReactionID == Constants.customEmojiReactionID {
             return customEmojiManager.selectedReaction
         }
+
         return reactions.first { $0.id == selectedReactionID }
     }
 
@@ -163,6 +164,7 @@ final class AnimationOrchestrator {
             withAnimation(ReactionsAnimationTiming.menuOpenAnimation) {
                 model.state = .open
             }
+            
             self.scheduleBackgroundMenuHide()
         }
 
@@ -217,6 +219,7 @@ final class AnimationOrchestrator {
             additionalDelay: delay,
             includeShowDelay: includeShowDelay
         )
+        
         withAnimation(animation) {
             model.showBackgroundMenu = value
         }

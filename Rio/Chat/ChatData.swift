@@ -127,6 +127,7 @@ class ChatData {
                 messages: updatedMessages,
                 theme: updatedChat.theme
             )
+
             chats[chatIndex] = updatedChat
             let resolvedMessage = updatedMessages[messageIndex]
             scheduleReactionOptions(for: resolvedMessage, in: updatedChat)
@@ -154,6 +155,7 @@ class ChatData {
             messages: updatedMessages,
             theme: updatedChat.theme
         )
+
         chats[chatIndex] = updatedChat
     }
 
@@ -273,6 +275,7 @@ class ChatData {
                 in: messagesSnapshot,
                 currentUser: self.currentUser
             )
+
             guard !options.isEmpty else { return }
             self.applyReactionOptions(options, to: messageId, in: chatId)
         }
@@ -298,6 +301,7 @@ class ChatData {
             messages: messages,
             theme: chat.theme
         )
+        
         chats[chatIndex] = chat
     }
 }

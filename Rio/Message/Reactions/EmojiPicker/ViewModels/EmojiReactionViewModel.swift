@@ -99,12 +99,15 @@ class EmojiReactionViewModel {
             log("ℹ️ Fast model unavailable – likely running inside previews or unsupported platform.")
             return
         }
+
         log("ℹ️ Fast model use case: general")
         log("ℹ️ Fast model availability: \(fastModel.availability)")
+
         guard fastModel.isAvailable else {
             errorMessage = "Fast emoji model is not available"
             return
         }
+
         do {
             log("⚡️ Running fast emoji reaction pipeline for: '\(trimmedText)'")
             let fastEmojis = try await fastSelectFinalists(text: trimmedText, context: trimmedContext, model: fastModel)
@@ -120,6 +123,7 @@ class EmojiReactionViewModel {
                 finalists = fallback
                 errorMessage = "Showing quick emoji suggestions while Apple Intelligence catches up."
             }
+
             log("⚠️ Fast pipeline error: \(error)")
         }
     }
@@ -140,6 +144,7 @@ class EmojiReactionViewModel {
                 finalists = fallback
                 errorMessage = "Showing quick emoji suggestions while OpenAI catches up."
             }
+
             log("⚠️ OpenAI pipeline error: \(error)")
         }
     }
@@ -160,6 +165,7 @@ class EmojiReactionViewModel {
                 finalists = fallback
                 errorMessage = "Showing quick emoji suggestions while Claude catches up."
             }
+
             log("⚠️ Claude pipeline error: \(error)")
         }
     }
@@ -184,10 +190,12 @@ class EmojiReactionViewModel {
                 attempt: attempt,
                 model: model
             )
+
             let resolved = resolveFastSuggestions(
                 suggestions,
                 tone: tone
             )
+
             log("   📊 Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
             
             if !resolved.isEmpty {
@@ -230,10 +238,12 @@ class EmojiReactionViewModel {
                 tone: tone,
                 attempt: attempt
             )
+
             let resolved = resolveFastSuggestions(
                 suggestions,
                 tone: tone
             )
+
             log("   📊 (OpenAI) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
 
             if !resolved.isEmpty {
@@ -290,15 +300,18 @@ class EmojiReactionViewModel {
                 schema: EmojiReactionSchema.openAI,
                 errorDomain: "EmojiReactionViewModel"
             )
+
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ (OpenAI) Responded in %.2fs", elapsed))
             guard let data = content.data(using: String.Encoding.utf8) else {
                 throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid OpenAI content encoding"])
             }
+
             let decoded = try JSONDecoder().decode(OpenAIEmojiReactionResponse.self, from: data)
             let suggestions = decoded.suggestions.map { s in
                 FastEmojiSuggestion(character: s.character)
             }
+
             logSuggestions(suggestions, attempt: attempt)
             return suggestions
         } catch {
@@ -322,10 +335,12 @@ class EmojiReactionViewModel {
                 tone: tone,
                 attempt: attempt
             )
+
             let resolved = resolveFastSuggestions(
                 suggestions,
                 tone: tone
             )
+
             log("   📊 (Claude) Attempt \(attempt + 1) resolved \(resolved.count) emoji from \(suggestions.count) suggestions")
 
             if !resolved.isEmpty {
@@ -380,6 +395,7 @@ class EmojiReactionViewModel {
                 systemPrompt: systemPrompt,
                 userPrompt: promptText
             )
+
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ (Claude) Responded in %.2fs", elapsed))
             
@@ -389,10 +405,12 @@ class EmojiReactionViewModel {
             guard let data = cleanedContent.data(using: String.Encoding.utf8) else {
                 throw NSError(domain: "EmojiReactionViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Claude content encoding"])
             }
+
             let decoded = try JSONDecoder().decode(ClaudeEmojiReactionResponse.self, from: data)
             let suggestions = decoded.suggestions.map { s in
                 FastEmojiSuggestion(character: s.character)
             }
+
             logSuggestions(suggestions, attempt: attempt)
             return suggestions
         } catch {
@@ -409,6 +427,7 @@ class EmojiReactionViewModel {
         guard let apiKey = ProcessInfo.processInfo.environment["CLAUDE_API_KEY"], !apiKey.isEmpty else {
             throw NSError(domain: "EmojiReactionViewModel", code: -2, userInfo: [NSLocalizedDescriptionKey: "CLAUDE_API_KEY environment variable not set"])
         }
+
         let url = URL(string: "https://api.anthropic.com/v1/messages")!
         
         // Add JSON formatting instruction to the user prompt
@@ -426,6 +445,7 @@ class EmojiReactionViewModel {
             {"character": "emoji6"}
           ]
         }
+        
         Do not include markdown code blocks, backticks, or any other formatting. Just the raw JSON object.
         """
         
@@ -449,16 +469,19 @@ class EmojiReactionViewModel {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NSError(domain: "EmojiReactionViewModel", code: -3, userInfo: [NSLocalizedDescriptionKey: "Invalid response from Claude"])
         }
+
         guard httpResponse.statusCode == 200 else {
             let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
             throw NSError(domain: "EmojiReactionViewModel", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Claude HTTP \(httpResponse.statusCode): \(body)"])
         }
+
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = json["content"] as? [[String: Any]],
               let firstContent = content.first,
               let text = firstContent["text"] as? String else {
             throw NSError(domain: "EmojiReactionViewModel", code: -4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Claude content"])
         }
+
         return text
     }
 
@@ -548,6 +571,7 @@ class EmojiReactionViewModel {
                 includeSchemaInPrompt: config.includeSchemaInPrompt,
                 options: options
             )
+
             let elapsed = Date().timeIntervalSince(start)
             log(String(format: "   ⏱️ Fast model responded in %.2fs", elapsed))
             let suggestions = response.content.suggestions
@@ -560,6 +584,7 @@ class EmojiReactionViewModel {
                     log("   ⚠️ Context window limit hit with minimal prompt; aborting this attempt")
                     return []
                 }
+
                 log("   ⚠️ Received exceededContextWindowSize on attempt \(attempt + 1); retrying with compact prompt and includeSchemaInPrompt=false")
                 let minimalPrompt = fastUserPrompt(
                     message: text,
@@ -569,11 +594,13 @@ class EmojiReactionViewModel {
                     attempt: attempt,
                     variant: .minimal
                 )
+
                 logPromptMetrics("Compact prompt", text: minimalPrompt)
                 let fallbackSession = LanguageModelSession(
                     model: model,
                     instructions: Instructions(systemPrompt)
                 )
+
                 let fallbackStart = Date()
                 let response = try await fallbackSession.respond(
                     to: Prompt(minimalPrompt),
@@ -581,6 +608,7 @@ class EmojiReactionViewModel {
                     includeSchemaInPrompt: false,
                     options: options
                 )
+
                 let elapsed = Date().timeIntervalSince(fallbackStart)
                 log(String(format: "   ⏱️ Fast model retry responded in %.2fs", elapsed))
                 let suggestions = response.content.suggestions
@@ -759,6 +787,7 @@ class EmojiReactionViewModel {
                 log("     ⚠️ Skipping suggestion \(index + 1) '\(trimmedCharacter)' – duplicate of accepted emoji")
                 return nil
             }
+
             seenCharacters.insert(existing.character)
             log("     ✅ Accepted suggestion \(index + 1) '\(trimmedCharacter)' – matched catalog emoji \(existing.id)")
             return existing
@@ -767,12 +796,14 @@ class EmojiReactionViewModel {
                 log("     ⚠️ Skipping suggestion \(index + 1) '\(trimmedCharacter)' – duplicate fallback candidate")
                 return nil
             }
+
             seenCharacters.insert(trimmedCharacter)
             // Character is a valid single emoji, but not in our DB — create a fallback entry
             let fallback = makeFallbackEmoji(
                 character: trimmedCharacter,
                 name: ""
             )
+
             log("     ✅ Accepted suggestion \(index + 1) '\(trimmedCharacter)' – created fallback emoji \(fallback.id)")
             return fallback
         }
@@ -782,6 +813,7 @@ class EmojiReactionViewModel {
         if text.count <= maxInputLength {
             return text
         }
+        
         let trimmed = text.prefix(maxInputLength)
         return String(trimmed)
     }

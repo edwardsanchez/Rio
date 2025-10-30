@@ -45,6 +45,7 @@ struct BubbleExplosionTestView: View {
             isTypingIndicator: true,
             bubbleType: .thinking
         )
+        
         self._message = State(initialValue: message ?? defaultMessage)
         self._showTail = State(initialValue: showTail)
     }
@@ -223,6 +224,7 @@ struct BubbleExplosionTestView: View {
             let progress = quantizedSliderValue / circleFormationEnd
             return 0.1 + (progress * 1.9)
         }
+
         // After circle formation: stay at 2.0 (don't scale particles)
         return 2.0
     }
@@ -233,6 +235,7 @@ struct BubbleExplosionTestView: View {
         if quantizedSliderValue <= circleFormationEnd {
             return 0.0
         }
+        
         // 0.05 - 1.0: particles space out from center
         let explosionProgress = (quantizedSliderValue - circleFormationEnd) / (1.0 - circleFormationEnd)
         return CGFloat(explosionProgress) * maxExplosionSpread

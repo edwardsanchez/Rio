@@ -82,16 +82,18 @@ struct Message: Identifiable {
     var text: String {
         if case .text(let textValue) = content {
             return textValue
+        } else {
+            return ""
         }
-        return ""
     }
 
     // Check if content is text type
     var hasTextContent: Bool {
         if case .text = content {
             return true
+        } else {
+            return false
         }
-        return false
     }
 
     // Initializer for outbound messages (from current user)
@@ -151,8 +153,9 @@ enum ContentType {
     var isEmoji: Bool {
         if case .emoji = self {
             return true
+        } else {
+            return false
         }
-        return false
     }
 
     /// Returns true if the content has something to display

@@ -185,6 +185,7 @@ struct ChatInputView: View {
                     messages: updatedMessages,
                     theme: updatedChat.theme
                 )
+
                 chatData.chats[chatIndex] = updatedChat
             }
         }
@@ -212,6 +213,7 @@ struct ChatInputView: View {
                 content: content,
                 from: chatData.edwardUser
             )
+            
             createdMessages.append(newMessage)
         }
 
@@ -236,6 +238,7 @@ struct ChatInputView: View {
                 replacesTypingIndicator: typingIndicator.replacesTypingIndicator,
                 bubbleType: typingIndicator.bubbleType
             )
+
             chatData.addMessage(updatedTypingIndicator, to: chat.id)
             chatData.setTypingIndicator(true, for: typingIndicator.user.id, in: chat.id)
         }
@@ -272,6 +275,7 @@ struct ChatInputView: View {
                     messages: updatedMessages,
                     theme: updatedChat.theme
                 )
+
                 chatData.chats[chatIndex] = updatedChat
                 chatData.setTypingIndicator(false, for: typingIndicatorUserId, in: chat.id)
             }
@@ -311,6 +315,7 @@ struct ChatInputView: View {
                     isTypingIndicator: true,
                     bubbleType: .read
                 )
+
                 currentTypingIndicatorId = typingIndicatorMessage.id
                 newMessageId = typingIndicatorMessage.id
                 chatData.addMessage(typingIndicatorMessage, to: chat.id)
@@ -331,9 +336,11 @@ struct ChatInputView: View {
                                 replacesTypingIndicator: false,
                                 bubbleType: .thinking
                             )
+
                             chatData.updateMessage(updatedIndicator, in: chat.id)
                         }
                     }
+                    
                     readToThinkingTimer = nil
                 }
             }
@@ -362,6 +369,7 @@ struct ChatInputView: View {
                         replacesTypingIndicator: indicatorWasVisible,
                         bubbleType: .talking
                     )
+
                     chatData.updateMessage(updatedMessage, in: chat.id)
                     newMessageId = nil
                 } else {
@@ -371,6 +379,7 @@ struct ChatInputView: View {
                         replacesTypingIndicator: indicatorWasVisible,
                         bubbleType: .talking
                     )
+                    
                     newMessageId = fallbackMessage.id
                     chatData.addMessage(fallbackMessage, to: chat.id)
                 }

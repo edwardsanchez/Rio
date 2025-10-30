@@ -75,3 +75,10 @@ custom_rules:
     regex: "\\}[ \\t]*\\n[ \\t]*\\n[ \\t]*\\}"
     message: "Remove empty line between closing braces."
     severity: warning
+  blank_line_after_closing_scope:
+    included:
+      - ".*\\.swift"
+    name: "Blank Line After Closing Scope"
+    regex: "(?:^|\\r?\\n)[ \\t]*[\\}\\)][ \\t]*\\r?\\n[ \\t]*(?!(?:[#./]|\\}|\\)|case\\b|default\\b|catch\\b))\\S"
+    message: "Insert a blank line after closing brace or parenthesis."
+    severity: warning

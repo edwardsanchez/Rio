@@ -29,6 +29,7 @@ class RectangleSizeManager {
             startTime: now,
             initialVelocity: .zero
         )
+
         self.config = config
     }
 
@@ -56,6 +57,7 @@ class RectangleSizeManager {
                     width: currentWidth,
                     height: singleLineTextHeight > 0 ? singleLineTextHeight : size.height
                 )
+
                 applySize(morphSize, skipAnimation: skipAnimation)
 
                 // Store full size to apply after morph
@@ -158,6 +160,7 @@ struct RectangleTransition {
             delta: widthDelta,
             initialVelocity: initialVelocity.width
         )
+        
         let heightProgress = springValue(
             elapsed: elapsed,
             delta: heightDelta,

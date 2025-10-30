@@ -184,6 +184,7 @@ struct ChatDetailView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     scrollToLatestMessage()
                 }
+                
                 shouldFocusInput = true
             }
             .frame(maxWidth: .infinity)

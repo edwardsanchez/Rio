@@ -85,6 +85,7 @@ struct ReactionsMenuView: View {
         guard reactionsMenuModel.selectedReactionID == reaction.id else {
             return !isOverlay
         }
+        
         return isOverlay ? !reactionsMenuModel.isShowingReactionMenu : reactionsMenuModel.isShowingReactionMenu
     }
 }

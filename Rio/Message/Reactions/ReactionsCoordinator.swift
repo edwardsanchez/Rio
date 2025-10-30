@@ -155,6 +155,7 @@ final class ReactionsCoordinator {
             if self.reactingMessage?.message.id == messageID {
                 self.reactingMessage = nil
             }
+            
             self.overlayRemovalWorkItems.removeValue(forKey: messageID)
         }
 

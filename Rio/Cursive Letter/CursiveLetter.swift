@@ -313,6 +313,7 @@ struct CursiveLetter {
         if let exact = allLetters.first(where: { $0.character == character }) {
             return exact
         }
+        
         // Fallback to case-insensitive match for user convenience
         return allLetters.first { $0.character.caseInsensitiveCompare(character) == .orderedSame }
     }
@@ -500,6 +501,7 @@ struct CursiveWordShape: Shape {
                 totalAdvance += letter.advance
             }
         }
+        
         guard !letters.isEmpty else { return nil }
 
         // Calculate vertical metrics by taking the maximum/minimum across all letters

@@ -216,10 +216,12 @@ struct EmojiReactionPickerView: View {
             textSelection = nil
             return
         }
+
         guard !viewModel.inputText.isEmpty else {
             textSelection = nil
             return
         }
+        
         let range = viewModel.inputText.startIndex..<viewModel.inputText.endIndex
         DispatchQueue.main.async {
             self.textSelection = TextSelection(range: range)

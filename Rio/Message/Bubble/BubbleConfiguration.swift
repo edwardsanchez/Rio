@@ -115,6 +115,7 @@ class BubbleConfiguration {
                     }
                 }
             }
+
             // Introduce a tiny bit of variety near the average if multiple m tie
             var rng = SeededRandomGenerator(seed: seed)
             let candidates = (minCount...maxCount).filter { abs(L / CGFloat($0) - avg) <= bestDiff + 0.01 }
@@ -136,7 +137,9 @@ class BubbleConfiguration {
                 sizes[i] += canAdd
                 leftover -= canAdd
             }
+
             i = (i + 1) % sizes.count
+            
             // If we looped a full cycle without placing anything, bump count if possible
             if i == 0 && sizes.allSatisfy({ $0 >= b - 0.0001 }) && leftover > 0 {
                 // We cannot grow further without breaking max. Add one more circle if that would be valid.
@@ -325,6 +328,7 @@ class BubbleConfiguration {
                 cornerRadius: cornerRadius,
                 perimeter: perimeter
             )
+            
             positions.append(position)
         }
 
