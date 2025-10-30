@@ -86,7 +86,10 @@ struct ChatSettings: View {
                             ChatTheme(outboundBackgroundColor: selectedColor),
                             for: chat.id
                         )
-                        isThemePickerPresented = false
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            isThemePickerPresented = false
+                        }
                     }
                     .presentationDetents([.height(300)])
                 }
