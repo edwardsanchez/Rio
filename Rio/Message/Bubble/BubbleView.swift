@@ -133,7 +133,9 @@ struct BubbleView: View {
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
 
     var resolvedColor: Color {
-        messageType.isOutbound ? color : Color.base.mix(with: color, by: 0.3).withSaturation(0.02)
+        messageType.isOutbound
+            ? context.theme.outboundBackgroundColor
+            : context.theme.inboundBackgroundColor
     }
 
     var body: some View {
@@ -624,14 +626,15 @@ fileprivate struct BubbleMorphLayout {
     @Previewable @State var bubbleConfig = BubbleConfiguration()
     let chatData = ChatData()
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())
-    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: .defaultTheme)
+    let previewTheme = ChatTheme(outboundBackgroundColor: .blue)
+    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: previewTheme)
 
     VStack(alignment: .leading, spacing: 16) {
         BubbleView(
             width: 68,
             height: 40,
             cornerRadius: 20,
-            color: .blue,
+            color: previewTheme.outboundBackgroundColor,
             messageID: UUID(),
             context: testContext
         )
@@ -649,14 +652,15 @@ fileprivate struct BubbleMorphLayout {
     @Previewable @State var height: CGFloat = 120
     let chatData = ChatData()
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())
-    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: .defaultTheme)
+    let previewTheme = ChatTheme(outboundBackgroundColor: .gray)
+    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: previewTheme)
 
     VStack(spacing: 24) {
         BubbleView(
             width: width,
             height: height,
             cornerRadius: 26,
-            color: .gray,
+            color: previewTheme.outboundBackgroundColor,
             type: isTalking ? .talking : .thinking,
             showTail: true,
             messageType: .inbound(.talking),
