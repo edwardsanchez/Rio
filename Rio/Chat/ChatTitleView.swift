@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ChatTitleView: View {
+    @Environment(ChatData.self) private var chatData
+
     let chat: Chat
     var isVertical: Bool
     var onTap: (() -> Void)?
@@ -66,6 +68,10 @@ struct ChatTitleView: View {
             }
     }
 
+    private var displayParticipants: [User] {
+        chat.participants.filter { $0.id != chatData.currentUser.id }
+    }
+
     private var avatarBase: some View {
         GreedyCircleStack(
             spacing: 3,
@@ -74,7 +80,7 @@ struct ChatTitleView: View {
             verticalSpacing: 20,
             verticalDiameter: 44
         ) {
-            ForEach(chat.participants) { participant in
+            ForEach(displayParticipants) { participant in
                 AvatarView(
                     user: participant,
                     namespace: avatarNamespace,
@@ -97,7 +103,9 @@ struct ChatTitleView: View {
 }
 
 #Preview("ChatTitleView Samples") {
-    VStack(spacing: 24) {
+    let chatData = ChatData()
+
+    return VStack(spacing: 24) {
         ChatTitleView(chat: .sample(title: "Solo Chat", participantNames: ["Lumen Moss"]))
         ChatTitleView(chat: .sample(title: "Pair Chat", participantNames: ["Maya Park", "River Slate"]))
         ChatTitleView(chat: .sample(title: "Trio Chat", participantNames: ["Maya Park", "River Slate", "Scarlet Chen"]))
@@ -121,15 +129,17 @@ struct ChatTitleView: View {
     }
     .padding()
     .background(Color.base)
+    .environment(chatData)
 }
 
 #Preview("ChatTitleView Single") {
     @Previewable @State var isVertical = true
-
     @Previewable @State var chat = Chat.sample(
         title: "Quartet Chat",
         participantNames: ["Maya Park", "River Slate", "Scarlet Chen", "Nate Read"]
     )
+
+    let chatData = ChatData()
 
     ChatTitleView(
         chat: chat,
@@ -143,6 +153,7 @@ struct ChatTitleView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding()
     .background(Color.base)
+    .environment(chatData)
 }
 
 private extension Chat {

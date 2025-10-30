@@ -33,6 +33,10 @@ struct ChatSettings: View {
         [GridItem(.adaptive(minimum: 60, maximum: 100), spacing: 20, alignment: .leading)]
     }
 
+    private var participantsExcludingCurrentUser: [User] {
+        chat.participants.filter { $0.id != chatData.currentUser.id }
+    }
+
     private var chatNameBinding: Binding<String> {
         Binding(
             get: {
@@ -104,7 +108,7 @@ struct ChatSettings: View {
     private var participantsSection: some View {
         Section {
             LazyVGrid(columns: participantGridColumns) {
-                ForEach(chat.participants) { participant in
+                ForEach(participantsExcludingCurrentUser) { participant in
                     VStack(spacing: 3) {
                         AvatarView(
                             user: participant,
