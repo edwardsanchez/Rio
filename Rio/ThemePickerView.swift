@@ -127,3 +127,14 @@ private extension UIColor {
         return converted.components
     }
 }
+
+#Preview {
+    @Previewable @State var selectedColor: Color = ThemeColorOption.spectrum.first?.color ?? .defaultBubble
+
+    ThemePickerView(selectedColor: selectedColor) { newColor in
+        selectedColor = newColor
+    }
+    .padding()
+    .frame(height: 320)
+    .background(Color(.systemBackground))
+}
