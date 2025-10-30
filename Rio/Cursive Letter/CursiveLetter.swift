@@ -496,6 +496,7 @@ struct CursiveWordShape: Shape {
         // Convert each character to a CursiveLetter and accumulate advance widths
         for ch in text {
             let s = String(ch)
+            
             if let letter = CursiveLetter.letter(for: s) {
                 letters.append(letter)
                 totalAdvance += letter.advance

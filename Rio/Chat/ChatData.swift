@@ -284,8 +284,10 @@ class ChatData {
     @MainActor
     private func applyReactionOptions(_ options: [String], to messageId: UUID, in chatId: UUID) {
         guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+
         var chat = chats[chatIndex]
         var messages = chat.messages
+
         guard let messageIndex = messages.firstIndex(where: { $0.id == messageId }) else { return }
 
         var targetMessage = messages[messageIndex]

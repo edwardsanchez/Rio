@@ -82,3 +82,10 @@ custom_rules:
     regex: "(?:^|\\r?\\n)[ \\t]*[\\}\\)][ \\t]*\\r?\\n[ \\t]*(?!(?:[#./]|\\}|\\)|case\\b|default\\b|catch\\b))\\S"
     message: "Insert a blank line after closing brace or parenthesis."
     severity: warning
+  blank_line_before_control_flow:
+    included:
+      - ".*\\.swift"
+    name: "Blank Line Before Control Flow"
+    regex: "(?m)^(?!(?:@|//|#|/\\*|\\{[ \\t]*$))([^\\s].*)\\n(?:if|guard|do|switch|for|while|func)\\b"
+    message: "Add a blank line before control flow or function declarations."
+    severity: warning

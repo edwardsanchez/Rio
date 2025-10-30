@@ -49,7 +49,7 @@ struct ContentTypeDetector {
 
         var segments: [(content: String, isURL: Bool)] = []
         var currentIndex = text.startIndex
-
+        
         for match in matches {
             guard let range = Range(match.range, in: text) else { continue }
 
