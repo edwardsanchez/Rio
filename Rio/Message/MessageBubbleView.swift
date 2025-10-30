@@ -45,17 +45,8 @@ struct MessageBubbleView: View {
     let geometrySource: ReactionGeometrySource
     let isReactionsOverlay: Bool
 
-    @State private var showTypingIndicatorContent = false
-    @State private var showTalkingContent = false
+    @State private var bubbleManager: MessageBubbleManager
     @State private var thinkingContentWidth: CGFloat = 0
-    @State private var isWidthLocked = false
-    @State private var widthUnlockWorkItem: DispatchWorkItem?
-    @State private var revealWorkItem: DispatchWorkItem?
-    @State private var bubbleFadeOpacity: Double = 1
-    @State private var bubbleFadeWorkItem: DispatchWorkItem?
-    @State private var includeTalkingTextInLayout = false
-    @State private var displayedBubbleType: BubbleType
-    @State private var modeDelayWorkItem: DispatchWorkItem?
     @Binding var selectedImageData: ImageData?
 
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -135,8 +126,11 @@ struct MessageBubbleView: View {
         self.geometrySource = geometrySource
         self.isReactionsOverlay = isReactionsOverlay
         _selectedImageData = selectedImageData
-        // Initialize displayedBubbleType to match actual bubbleType
-        _displayedBubbleType = State(initialValue: message.bubbleType)
+        // Initialize manager with message and config
+        _bubbleManager = State(initialValue: MessageBubbleManager(
+            message: message,
+            config: BubbleConfiguration()
+        ))
     }
 
     var body: some View {
@@ -173,7 +167,7 @@ struct MessageBubbleView: View {
                         textColor: theme.inboundTextColor,
                         backgroundColor: theme.inboundBackgroundColor
                     )
-                    .opacity(bubbleFadeOpacity)
+                    .opacity(bubbleManager.bubbleFadeOpacity)
                 }
                 .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
@@ -211,13 +205,18 @@ struct MessageBubbleView: View {
                 }
             }
 
-            configureInitialContentState()
+            bubbleManager.configureInitialContentState(for: message.bubbleType)
         }
         .onChange(of: message.bubbleType) { oldType, newType in
-            handleBubbleTypeChange(from: oldType, to: newType)
+            bubbleManager.handleBubbleTypeChange(
+                from: oldType,
+                to: newType,
+                hasContent: message.content.hasContent,
+                isEmoji: message.content.isEmoji
+            )
         }
         .onDisappear {
-            cancelPendingContentTransitions()
+            bubbleManager.cancelPendingContentTransitions()
         }
     }
 
@@ -232,7 +231,7 @@ struct MessageBubbleView: View {
         if messageType.isInbound {
             // Read state should not slide up, only scale avatar
             // Thinking and Talking states slide up from 20px below
-            return displayedBubbleType.isRead ? 0 : 20
+            return bubbleManager.displayedBubbleType.isRead ? 0 : 20
         } else {
             return 0
         }
@@ -247,7 +246,7 @@ struct MessageBubbleView: View {
         guard messageType.isInbound else { return 1 }
         // For read state, bubble is always hidden (handled by BubbleView)
         // For thinking/talking, fade in when new
-        if displayedBubbleType.isRead {
+        if bubbleManager.displayedBubbleType.isRead {
             return 1 // Let BubbleView handle opacity
         }
 
@@ -259,7 +258,7 @@ struct MessageBubbleView: View {
         guard isNew else { return 1 }
         // For read state, avatar scales from 0, don't use opacity fade
         // For thinking/talking, use opacity fade
-        return displayedBubbleType.isRead ? 1 : 0
+        return bubbleManager.displayedBubbleType.isRead ? 1 : 0
     }
 
     // Physics-based parallax offset for cascading jelly effect
@@ -275,21 +274,21 @@ struct MessageBubbleView: View {
     private var inboundAvatar: some View {
         Group {
             if let avatar = message.user.avatar {
-                let avatarSize: CGFloat = displayedBubbleType.isRead ? 20 : 40
-                let avatarFrameHeight: CGFloat = displayedBubbleType.isRead ? 0 : 40
-                let avatarOffsetX: CGFloat = displayedBubbleType.isRead ? 9 : 0
+                let avatarSize: CGFloat = bubbleManager.displayedBubbleType.isRead ? 20 : 40
+                let avatarFrameHeight: CGFloat = bubbleManager.displayedBubbleType.isRead ? 0 : 40
+                let avatarOffsetX: CGFloat = bubbleManager.displayedBubbleType.isRead ? 9 : 0
 
                 Image(avatar)
                     .resizable()
                     .frame(width: avatarSize, height: avatarSize)
                     .clipShape(.circle)
                     .frame(height: avatarFrameHeight)
-                    .scaleEffect(isNew && displayedBubbleType.isRead ? 0 : 1, anchor: .center)
-                    .opacity(isNew && displayedBubbleType.isRead ? 0 : 1)
+                    .scaleEffect(isNew && bubbleManager.displayedBubbleType.isRead ? 0 : 1, anchor: .center)
+                    .opacity(isNew && bubbleManager.displayedBubbleType.isRead ? 0 : 1)
                     .offset(y: 10)
                     .offset(x: avatarOffsetX)
                     .animation(.bouncy(duration: 0.3), value: isNew)
-                    .animation(.bouncy(duration: 0.3), value: displayedBubbleType)
+                    .animation(.bouncy(duration: 0.3), value: bubbleManager.displayedBubbleType)
             } else {
                 Circle()
                     .fill(Color.clear)
@@ -333,7 +332,7 @@ struct MessageBubbleView: View {
             Text("H") // Measure Spacer
                 .opacity(0)
 
-            if hasContent, includeTalkingTextInLayout {
+            if hasContent, bubbleManager.includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
                     textColor: textColor,
@@ -341,11 +340,11 @@ struct MessageBubbleView: View {
                     selectedImageData: $selectedImageData
                 )
                 .padding(.vertical, 4)
-                .opacity(showTalkingContent ? 1 : 0)
+                .opacity(bubbleManager.showTalkingContent ? 1 : 0)
             }
         }
-        .animation(.smooth(duration: 0.2), value: showTypingIndicatorContent)
-        .frame(width: lockedWidth, alignment: .leading)
+        .animation(.smooth(duration: 0.2), value: bubbleManager.showTypingIndicatorContent)
+        .frame(width: bubbleManager.lockedWidth, alignment: .leading)
         //.matchedGeometryEffect(id: -, in: -)
         //This here is the width we want to control with matched geometry when you read the input field.
         //We can use matched geometry, this is not the source.
@@ -357,25 +356,15 @@ struct MessageBubbleView: View {
             context: ReactingMessageContext(message: message, showTail: showTail, theme: theme),
             isReactionsOverlay: isReactionsOverlay,
             bubbleType: message.bubbleType,
-            layoutType: displayedBubbleType,
+            layoutType: bubbleManager.displayedBubbleType,
             animationWidth: nil,
             animationHeight: nil,
-            isVisible: shouldShowBubbleBackground
+            isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
         )
         .overlay(alignment: .leading) {
-            TypingIndicatorView(isVisible: showTypingIndicatorContent)
+            TypingIndicatorView(isVisible: bubbleManager.showTypingIndicatorContent)
                 .padding(.leading, 20)
         }
-    }
-
-    private var shouldShowBubbleBackground: Bool {
-        guard message.content.isEmoji else { return true }
-        return !displayedBubbleType.isTalking
-    }
-
-    private var lockedWidth: CGFloat? {
-        guard isWidthLocked, thinkingContentWidth > 0 else { return nil }
-        return thinkingContentWidth
     }
 
     // DO NOT DELETE
@@ -388,249 +377,6 @@ struct MessageBubbleView: View {
     //            isWidthLocked = true
     //        }
     //    }
-
-    private func configureInitialContentState() {
-        cancelPendingContentTransitions()
-        switch message.bubbleType {
-        case .thinking:
-            isWidthLocked = true
-            showTypingIndicatorContent = true
-            showTalkingContent = false
-            includeTalkingTextInLayout = false
-        case .talking:
-            isWidthLocked = false
-            showTypingIndicatorContent = false
-            showTalkingContent = message.content.hasContent
-            includeTalkingTextInLayout = message.content.hasContent
-        case .read:
-            isWidthLocked = false
-            showTypingIndicatorContent = false
-            showTalkingContent = false
-            includeTalkingTextInLayout = false
-        }
-    }
-
-    private func handleBubbleTypeChange(from oldType: BubbleType, to newType: BubbleType) {
-        guard oldType != newType else { return }
-        cancelPendingContentTransitions()
-
-        // Handle displayedBubbleType delay for thinking→read transition
-        if oldType == .thinking, newType == .read {
-            // Keep displayedBubbleType at .thinking during explosion
-            // It will be updated to .read after explosion completes
-            startThinkingToReadTransition()
-            scheduleDisplayedTypeUpdate(to: newType, delay: bubbleConfig.explosionDuration)
-        } else if oldType == .read, newType == .talking {
-            // Handle displayedBubbleType delay for read→talking transition
-            // Use a tiny delay (0.02s) to let geometry settle before showing bubble
-            // This ensures the bubble appears with its final size and tail position already in place
-            startReadToTalkingTransition()
-            scheduleDisplayedTypeUpdate(to: newType, delay: 0.02)
-        } else {
-            // For all other transitions, update displayedBubbleType immediately
-            displayedBubbleType = newType
-
-            if oldType == .thinking, newType == .talking {
-                startTalkingTransition()
-            } else if oldType == .talking, newType == .thinking {
-                startThinkingState()
-            } else if oldType == .read, newType == .thinking {
-                startReadToThinkingTransition()
-            } else if oldType == .talking, newType == .read {
-                startTalkingToReadTransition()
-            } else {
-                configureInitialContentState()
-            }
-        }
-    }
-
-    private func startTalkingTransition() {
-        if !message.content.hasContent {
-            isWidthLocked = false
-            showTypingIndicatorContent = false
-            showTalkingContent = false
-            includeTalkingTextInLayout = false
-            return
-        }
-
-        if thinkingContentWidth > 0 {
-            isWidthLocked = true
-        }
-
-        if message.content.isEmoji {
-            withAnimation(.smooth(duration: 0.2)) {
-                showTypingIndicatorContent = false
-            }
-
-            withAnimation(.smooth(duration: 0.3)) {
-                includeTalkingTextInLayout = true
-                showTalkingContent = true
-            }
-
-            scheduleWidthUnlock()
-            return
-        }
-
-        withAnimation(.smooth(duration: 0.2)) {
-            showTypingIndicatorContent = false
-        }
-
-        showTalkingContent = false
-        includeTalkingTextInLayout = false
-
-        scheduleTextLayoutInclusion()
-        scheduleWidthUnlock()
-        scheduleTalkingReveal()
-    }
-
-    private func startThinkingState() {
-        isWidthLocked = true
-        showTalkingContent = false
-        includeTalkingTextInLayout = false
-        withAnimation(.smooth(duration: 0.2)) {
-            showTypingIndicatorContent = true
-        }
-    }
-
-    private func startReadToThinkingTransition() {
-        // Delay typing indicator until read→thinking animation completes
-        isWidthLocked = true
-        showTalkingContent = false
-        includeTalkingTextInLayout = false
-
-        // Wait for the bubble animation to complete before showing typing indicator
-        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.readToThinkingDuration / 3) {
-            withAnimation(.smooth(duration: 0.3)) {
-                showTypingIndicatorContent = true
-            }
-        }
-    }
-
-    private func startReadToTalkingTransition() {
-        // Quick opacity fade when going from read to talking (fast response)
-        if !message.content.hasContent {
-            isWidthLocked = false
-            showTypingIndicatorContent = false
-            showTalkingContent = false
-            includeTalkingTextInLayout = false
-            return
-        }
-
-        isWidthLocked = false
-        showTypingIndicatorContent = false
-        includeTalkingTextInLayout = true
-
-        // Quick fade in without offset animation
-        withAnimation(.smooth(duration: 0.3)) {
-            showTalkingContent = true
-        }
-
-        bubbleFadeWorkItem?.cancel()
-        bubbleFadeOpacity = 0
-
-        let work = DispatchWorkItem {
-            withAnimation(.smooth(duration: 0.4)) {
-                bubbleFadeOpacity = 1
-            }
-        }
-
-        bubbleFadeWorkItem = work
-        // Displayed type switches after ~0.02s; start bubble fade after avatar growth (~0.3s)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02 + 0.3) {
-            guard !work.isCancelled else { return }
-            work.perform()
-            bubbleFadeWorkItem = nil
-        }
-    }
-
-    private func startThinkingToReadTransition() {
-        // Immediately hide typing indicator (no animation) when bubbleType changes to read
-        showTypingIndicatorContent = false
-
-        // After explosion completes (managed by displayedBubbleType delay), clean up remaining state
-        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.explosionDuration) {
-            isWidthLocked = false
-            showTalkingContent = false
-            includeTalkingTextInLayout = false
-        }
-    }
-
-    // This should only happen if the message is unsent
-    private func startTalkingToReadTransition() {
-        // Fade out talking content and go to read state
-        withAnimation(.smooth(duration: 0.3)) {
-            showTalkingContent = false
-        }
-
-        isWidthLocked = false
-        showTypingIndicatorContent = false
-        includeTalkingTextInLayout = false
-    }
-
-    private func scheduleTextLayoutInclusion() {
-        // Include text in layout after morph phase, so it affects height during resize phase
-        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
-            includeTalkingTextInLayout = true
-        }
-    }
-
-    private func scheduleWidthUnlock() {
-        let unlockItem = DispatchWorkItem {
-            withAnimation(.smooth(duration: bubbleConfig.resizeCutoffDuration)) {
-                isWidthLocked = false
-            }
-        }
-
-        widthUnlockWorkItem = unlockItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.morphDuration) {
-            guard !unlockItem.isCancelled else { return }
-            unlockItem.perform()
-            widthUnlockWorkItem = nil
-        }
-    }
-
-    private func scheduleTalkingReveal() {
-        let revealItem = DispatchWorkItem {
-            withAnimation(.smooth(duration: 0.35)) {
-                showTalkingContent = true
-            }
-        }
-
-        revealWorkItem = revealItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + bubbleConfig.textRevealDelay) {
-            guard !revealItem.isCancelled else { return }
-            revealItem.perform()
-            revealWorkItem = nil
-        }
-    }
-
-    private func scheduleDisplayedTypeUpdate(to type: BubbleType, delay: TimeInterval) {
-        // Cancel any pending bubbleType updates
-        modeDelayWorkItem?.cancel()
-
-        let delayItem = DispatchWorkItem {
-            displayedBubbleType = type
-        }
-
-        modeDelayWorkItem = delayItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            guard !delayItem.isCancelled else { return }
-            delayItem.perform()
-            modeDelayWorkItem = nil
-        }
-    }
-
-    private func cancelPendingContentTransitions() {
-        widthUnlockWorkItem?.cancel()
-        widthUnlockWorkItem = nil
-        revealWorkItem?.cancel()
-        revealWorkItem = nil
-        modeDelayWorkItem?.cancel()
-        modeDelayWorkItem = nil
-        bubbleFadeWorkItem?.cancel()
-        bubbleFadeWorkItem = nil
-        bubbleFadeOpacity = 1
-    }
 }
 
 private struct MessageBubblePreviewContainer: View {
