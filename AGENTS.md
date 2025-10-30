@@ -12,6 +12,7 @@
 - `xcodebuild -scheme Rio -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build` performs a CI-friendly build; ensure it passes before PRs.
 - `xcodebuild test -scheme Rio -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` will execute XCTest suites once they exist.
 - always run /opt/homebrew/bin/swiftlint --fix after each iteration
+- run `swiftformat --config .swiftformat Rio "Shader Test" "Cursive Font Writing"` before sending changes
 
 ## Coding Style & Naming Conventions
 - Follow Swift 5.9 defaults: four-space indentation, `UpperCamelCase` for types, `lowerCamelCase` for members, and mark protocol conformances in dedicated extensions when practical.
