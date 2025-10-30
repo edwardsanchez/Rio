@@ -190,6 +190,8 @@ struct ChatSettings: View {
                         selection: $chatNameSelection,
                         prompt: Text(fallbackChatTitle)
                     )
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(.words)
                     .focused($isChatNameFieldFocused)
                     .onChange(of: isChatNameFieldFocused) { _, isFocused in
