@@ -19,6 +19,7 @@ struct ChatSettings: View {
     @FocusState private var isChatNameFieldFocused: Bool
     @State private var chatNameSelection: TextSelection?
     @State private var isThemePickerPresented = false
+    @State private var isAddParticipantPresented = false
 
     private var isPresented: Bool {
         chatData.isDetailPresented(for: chat.id)
@@ -133,12 +134,46 @@ struct ChatSettings: View {
                         //TODO: Use person.2.fill icon
                     }
                 }
+
+                addParticipantButton
             }
             .padding(.vertical, 8)
 
-            //TODO: Add an "Add" button here which will open a sheet and allow you to add a participant to this chat. It will have plus sf symbol and the label below it should say "Add"
         } header: {
             Text("Participants")
+        }
+    }
+
+    private var addParticipantButton: some View {
+        Button {
+            // swiftlint:disable:next todo
+            // TODO: Implement add participant flow
+            isAddParticipantPresented = true
+        } label: {
+            VStack(spacing: 3) {
+                Circle()
+                    .fill(Color.secondary.opacity(0.15))
+                    .overlay {
+                        Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .overlay {
+                        Circle()
+                            .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+                    }
+
+                Text("Add")
+                    .font(.caption)
+                    .fixedSize()
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Add participant")
+        .sheet(isPresented: $isAddParticipantPresented) {
+            AddParticipantSheetView {
+                isAddParticipantPresented = false
+            }
         }
     }
 
