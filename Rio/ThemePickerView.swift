@@ -12,8 +12,8 @@ struct ThemePickerView: View {
     let selectedColor: Color
     let onSelect: (Color) -> Void
 
-    private let circleSize: CGFloat = 56
-    private let gridSpacing: CGFloat = 18
+    private let circleSize: CGFloat = 60
+    private let gridSpacing: CGFloat = 20
 
     private var selectedOptionID: ThemeColorOption.ID? {
         ThemeColorOption.spectrum.first { option in
@@ -22,17 +22,12 @@ struct ThemePickerView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
-            Text("Choose Theme")
-                .font(.headline)
-                .accessibilityAddTraits(.isHeader)
-
-            LazyVGrid(columns: ThemeColorOption.gridColumns, spacing: gridSpacing) {
-                ForEach(ThemeColorOption.spectrum) { option in
-                    colorRow(for: option)
-                }
+        LazyVGrid(columns: ThemeColorOption.gridColumns, spacing: 20) {
+            ForEach(ThemeColorOption.spectrum) { option in
+                colorRow(for: option)
             }
         }
+        .frame(maxHeight: .infinity)
         .padding(.horizontal, 20)
         .ignoresSafeArea()
     }
@@ -96,7 +91,7 @@ extension ThemeColorOption {
         ThemeColorOption(id: "default", color: .defaultBubble, accessibilityLabel: "Default")
     ]
 
-    static let gridColumns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 18, alignment: .center), count: 4)
+    static let gridColumns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 20, alignment: .center), count: 4)
 }
 
 private extension Color {

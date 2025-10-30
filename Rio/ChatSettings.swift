@@ -91,7 +91,7 @@ struct ChatSettings: View {
                             isThemePickerPresented = false
                         }
                     }
-                    .presentationDetents([.height(300)])
+                    .presentationDetents([.height(240)])
                 }
             }
             .transition(
