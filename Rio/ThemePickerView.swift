@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 
 struct ThemePickerView: View {
     let selectedColor: Color
@@ -71,59 +70,27 @@ struct ThemeColorOption: Identifiable {
     let accessibilityLabel: String
 
     func matches(_ otherColor: Color) -> Bool {
-        color.isApproximatelyEqual(to: otherColor)
+        color == otherColor
     }
 }
 
 extension ThemeColorOption {
     static let spectrum: [ThemeColorOption] = [
+        ThemeColorOption(id: "default", color: .defaultBubble, accessibilityLabel: "Default"),
+        ThemeColorOption(id: "pink", color: Color.customPink, accessibilityLabel: "Pink"),
         ThemeColorOption(id: "red", color: Color(.systemRed), accessibilityLabel: "Red"),
         ThemeColorOption(id: "orange", color: Color(.systemOrange), accessibilityLabel: "Orange"),
-        ThemeColorOption(id: "pink", color: Color(.systemPink), accessibilityLabel: "Pink"),
-        ThemeColorOption(id: "brown", color: Color(.systemBrown), accessibilityLabel: "Brown"),
         ThemeColorOption(id: "yellow", color: Color(.systemYellow).mix(with: .red, by: 0.3), accessibilityLabel: "Yellow"),
-        ThemeColorOption(id: "green", color: Color(.systemGreen), accessibilityLabel: "Green"),
-        ThemeColorOption(id: "teal", color: Color(.systemTeal).mix(with: .primary, by: 0.05), accessibilityLabel: "Teal"),
-        ThemeColorOption(id: "cyan", color: Color(.systemCyan).mix(with: .primary, by: 0.05), accessibilityLabel: "Cyan"),
+        ThemeColorOption(id: "brown", color: Color.customLime, accessibilityLabel: "Brown"),
+        ThemeColorOption(id: "green", color: Color(.systemGreen).mix(with: .black, by: 0.05), accessibilityLabel: "Green"),
+        ThemeColorOption(id: "teal", color: Color(.systemTeal).mix(with: .black, by: 0.04).mix(with: .green, by: 0.02), accessibilityLabel: "Teal"),
+        ThemeColorOption(id: "cyan", color: Color(.systemCyan).mix(with: .black, by: 0.04), accessibilityLabel: "Cyan"),
         ThemeColorOption(id: "blue", color: Color(.systemBlue), accessibilityLabel: "Blue"),
         ThemeColorOption(id: "indigo", color: Color(.systemIndigo), accessibilityLabel: "Indigo"),
-        ThemeColorOption(id: "purple", color: Color(.systemPurple), accessibilityLabel: "Purple"),
-        ThemeColorOption(id: "default", color: .defaultBubble, accessibilityLabel: "Default")
+        ThemeColorOption(id: "purple", color: Color(.systemPurple), accessibilityLabel: "Purple")
     ]
 
     static let gridColumns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 20, alignment: .center), count: 4)
-}
-
-private extension Color {
-    func isApproximatelyEqual(to other: Color, tolerance: CGFloat = 0.11) -> Bool {
-        let lhs = UIColor(self).resolvedForComparison
-        let rhs = UIColor(other).resolvedForComparison
-
-        guard let lhsComponents = lhs.rgbComponents,
-              let rhsComponents = rhs.rgbComponents else {
-            return false
-        }
-
-        return zip(lhsComponents, rhsComponents).allSatisfy { abs($0 - $1) <= tolerance }
-    }
-}
-
-private extension UIColor {
-    var resolvedForComparison: UIColor {
-        return resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
-    }
-
-    var rgbComponents: [CGFloat]? {
-        guard let converted = cgColor.converted(
-            to: CGColorSpace(name: CGColorSpace.sRGB)!,
-            intent: .defaultIntent,
-            options: nil
-        ) else {
-            return nil
-        }
-
-        return converted.components
-    }
 }
 
 #Preview {
@@ -157,7 +124,11 @@ struct ChatTheme {
     }
 
     private static func resolveInboundBackgroundColor(for outboundColor: Color) -> Color {
-        Color.gray.mix(with: .base, by: 0.9).mix(with: outboundColor, by: 0.03)
+        let outboundColorMix = 0.03
+        return Color(
+            light: Color.gray.mix(with: .base, by: 0.9).mix(with: outboundColor, by: outboundColorMix),
+            dark: Color.gray.mix(with: .base, by: 0.7).mix(with: outboundColor, by: outboundColorMix)
+        )
     }
 
     // Predefined themes matching asset catalog

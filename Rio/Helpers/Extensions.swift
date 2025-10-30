@@ -26,6 +26,21 @@ extension Array {
     }
 }
 
+extension Color {
+    init(light: Color, dark: Color) {
+        self.init(UIColor(dynamicProvider: { traits in
+            switch traits.userInterfaceStyle {
+            case .light, .unspecified:
+                return UIColor(light)
+            case .dark:
+                return UIColor(dark)
+            @unknown default:
+                return UIColor(light)
+            }
+        }))
+    }
+}
+
 // MARK: - Double Extension
 
 extension Double {
