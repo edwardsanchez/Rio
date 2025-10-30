@@ -119,7 +119,9 @@ struct ChatSettings: View {
 
                         Text(participant.name)
                             .font(.caption)
-                            .fixedSize()
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2, reservesSpace: true)
+                            .truncationMode(.tail)
                     }
                     .contextMenu {
                         Button("Remove from Group") {
@@ -166,6 +168,7 @@ struct ChatSettings: View {
                 Text("Add")
                     .font(.caption)
                     .fixedSize()
+                    .lineLimit(2, reservesSpace: true)
             }
         }
         .buttonStyle(.plain)
