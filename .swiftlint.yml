@@ -86,6 +86,6 @@ custom_rules:
     included:
       - ".*\\.swift"
     name: "Blank Line Before Control Flow"
-    regex: "(?m)^(?!(?:@|//|#|/\\*|\\{[ \\t]*$))([^\\s].*)\\n(?:if|guard|do|switch|for|while|func)\\b"
+    regex: "(?m)^(?!(?:@|//|#|/\\*|\\{[ \\t]*$))(?![^\\n]*\\{\\s*$)(?![^\\n]*\\boperator\\b)\\S[^\\n]*(?=\\n[ \\t]*(?:if|guard|do|switch|for|while|func)\\b)"
     message: "Add a blank line before control flow or function declarations."
     severity: warning
