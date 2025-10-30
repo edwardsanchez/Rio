@@ -268,7 +268,7 @@ public extension Image {
     }
 
     init(url: URL?) {
-        var uiImage = if let url {
+        let uiImage = if let url {
             UIImage(contentsOfFile: url.path) ?? UIImage()
         } else {
             //            print("🛑 Image(data:) - There's no data")

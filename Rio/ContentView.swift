@@ -5,9 +5,9 @@
 //  Created by Edward Sanchez on 9/19/25.
 //
 
+import Defaults
 import SVGPath
 import SwiftUI
-import Defaults
 
 struct ContentView: View {
     @State private var chatData = ChatData()
@@ -19,7 +19,10 @@ struct ContentView: View {
         if let existingUser {
             resolvedUser = existingUser
         } else {
-            let newUser = User(name: "Edward", resource: .edward) //TODO: make it shows an undismissable flow to create the user if no user is found.
+            let newUser = User(
+                name: "Edward",
+                resource: .edward
+            ) //TODO: make it shows an undismissable flow to create the user if no user is found.
             Defaults[.currentUser] = newUser
             resolvedUser = newUser
         }
