@@ -20,6 +20,8 @@ struct ChatSettings: View {
     @State private var chatNameSelection: TextSelection?
     @State private var isThemePickerPresented = false
     @State private var isAddParticipantPresented = false
+    @State private var participantPendingRemoval: User?
+    @State private var isRemoveParticipantAlertPresented = false
 
     private var isPresented: Bool {
         chatData.isDetailPresented(for: chat.id)
@@ -109,32 +111,40 @@ struct ChatSettings: View {
         Section {
             LazyVGrid(columns: participantGridColumns) {
                 ForEach(participantsExcludingCurrentUser) { participant in
-                    VStack(spacing: 3) {
-                        AvatarView(
-                            user: participant,
-                            namespace: avatarNamespace,
-                            matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                            isGeometrySource: true,
-                            matchedGeometryAnimation: avatarTransitionAnimation
-                        )
+                    if isGroupChat {
+                        participantTile(for: participant)
+                            .contextMenu { //FIXME: This is showing up in the whole form not on the actual participant
+                                Button(role: .destructive) {
+                                    participantPendingRemoval = participant
+                                    isRemoveParticipantAlertPresented = true
+                                } label: {
+                                    Label("Remove from Group", systemImage: "xmark")
+                                }
 
-                        Text(participant.name)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2, reservesSpace: true)
-                            .truncationMode(.tail)
-                    }
-                    .contextMenu {
-                        Button("Remove from Group") {
-                            //TODO: Implement - only have this if there is more than 2 participants including you
-                        }
-                        //TODO: Implement this, this is a role destructive.
-                        //Use the xmark icon for this
+                                Button {
+                                    //TODO: Implement - only have this if there is more than 2 participants including you
+                                } label: {
+                                    Label("Chat 1:1", systemImage: "person.2")
+                                }
+                            }
+                            .alert(
+                                "Remove from Group?",
+                                isPresented: $isRemoveParticipantAlertPresented,
+                                presenting: participantPendingRemoval
+                            ) { participant in
+                                Button("Remove", role: .destructive) {
+                                    removeParticipant(participant)
+                                    participantPendingRemoval = nil
+                                }
 
-                        Button("Chat 1:1") {
-                            //TODO: Implement - only have this if there is more than 2 participants including you
-                        }
-                        //TODO: Use person.2.fill icon
+                                Button("Cancel", role: .cancel) {
+                                    participantPendingRemoval = nil
+                                }
+                            } message: { participant in
+                                Text("Are you sure you want to remove \(participant.name) from this chat?")
+                            }
+                    } else {
+                        participantTile(for: participant)
                     }
                 }
 
@@ -264,5 +274,28 @@ struct ChatSettings: View {
     private func handleDestructiveAction() {
         close()
         onDestructiveAction()
+    }
+
+    @ViewBuilder
+    private func participantTile(for participant: User) -> some View {
+        VStack(spacing: 3) {
+            AvatarView(
+                user: participant,
+                namespace: avatarNamespace,
+                matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                isGeometrySource: true,
+                matchedGeometryAnimation: avatarTransitionAnimation
+            )
+
+            Text(participant.name)
+                .font(.caption)
+                .multilineTextAlignment(.center)
+                .lineLimit(2, reservesSpace: true)
+                .truncationMode(.tail)
+        }
+    }
+
+    private func removeParticipant(_ participant: User) {
+        chatData.removeParticipant(participant, from: chat.id)
     }
 }

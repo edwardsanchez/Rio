@@ -151,6 +151,31 @@ class ChatData {
         chats[chatIndex] = updatedChat
     }
 
+    func removeParticipant(_ participant: User, from chatId: UUID) {
+        guard participant.id != currentUser.id else { return }
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+
+        let chat = chats[chatIndex]
+        let updatedParticipants = chat.participants.filter { $0.id != participant.id }
+
+        guard updatedParticipants.count != chat.participants.count else { return }
+
+        let previousFallbackTitle = Chat.fallbackTitle(for: chat.participants, currentUser: currentUser)
+        let shouldUseFallback = chat.title == previousFallbackTitle
+        let resolvedTitle: String? = shouldUseFallback ? nil : chat.title
+
+        let updatedChat = Chat(
+            id: chat.id,
+            title: resolvedTitle,
+            participants: updatedParticipants,
+            messages: chat.messages,
+            theme: chat.theme,
+            currentUser: currentUser
+        )
+
+        chats[chatIndex] = updatedChat
+    }
+
     func removeChat(withId chatId: UUID) {
         chats.removeAll { $0.id == chatId }
         activeTypingIndicators.removeValue(forKey: chatId)
