@@ -116,11 +116,11 @@ struct ChatInputView: View {
         .animation(.smooth(duration: 0.2), value: inputFieldFrame.height)
         .onReceive(NotificationCenter.default
             .publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
-            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                withAnimation {
-                    keyboardIsUp = keyboardFrame.height > 0
+                if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                    withAnimation {
+                        keyboardIsUp = keyboardFrame.height > 0
+                    }
                 }
-            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             withAnimation {

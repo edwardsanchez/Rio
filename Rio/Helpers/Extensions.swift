@@ -188,16 +188,16 @@ public extension NSNumber {
     var cgfloat: CGFloat { CGFloat(truncating: self) }
 }
 
-extension Image {
-    public func fitImage() -> some View {
-        return self.resizable().aspectRatio(contentMode: .fit)
+public extension Image {
+    func fitImage() -> some View {
+        resizable().aspectRatio(contentMode: .fit)
     }
 
-    public func fillImage() -> some View {
-        return self.resizable().aspectRatio(contentMode: .fill)
+    func fillImage() -> some View {
+        resizable().aspectRatio(contentMode: .fill)
     }
 
-    public init(dataFromUIImage data: Data) {
+    init(dataFromUIImage data: Data) {
         if let uiImage = UIImage(data: data) {
             self.init(uiImage: uiImage)
         } else {
@@ -205,18 +205,18 @@ extension Image {
         }
     }
 
-    public init(data: Data) {
+    init(data: Data) {
         if let provider = CGDataProvider(data: data as CFData),
            let cgImage = CGImage(
-            jpegDataProviderSource: provider,
-            decode: nil,
-            shouldInterpolate: false,
-            intent: .defaultIntent
+               jpegDataProviderSource: provider,
+               decode: nil,
+               shouldInterpolate: false,
+               intent: .defaultIntent
            ) ?? CGImage(
-            pngDataProviderSource: provider,
-            decode: nil,
-            shouldInterpolate: false,
-            intent: .defaultIntent
+               pngDataProviderSource: provider,
+               decode: nil,
+               shouldInterpolate: false,
+               intent: .defaultIntent
            ) {
             self.init(cgImage, scale: 1, label: Text(""))
         } else {
@@ -224,16 +224,18 @@ extension Image {
         }
     }
 
-    public static func asyncInit(from data: Data) async -> Image {
+    static func asyncInit(from data: Data) async -> Image {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let image: Image
 
                 if let provider = CGDataProvider(data: data as CFData),
-                   let cgImage = CGImage(jpegDataProviderSource: provider,
-                                         decode: nil,
-                                         shouldInterpolate: true,
-                                         intent: .defaultIntent) {
+                   let cgImage = CGImage(
+                       jpegDataProviderSource: provider,
+                       decode: nil,
+                       shouldInterpolate: true,
+                       intent: .defaultIntent
+                   ) {
                     // Create a UIImage from CGImage for SwiftUI Image conversion
                     let uiImage = UIImage(cgImage: cgImage)
                     image = Image(uiImage: uiImage)
@@ -247,7 +249,7 @@ extension Image {
         }
     }
 
-    public init(optionalData: Data?) {
+    init(optionalData: Data?) {
         var uiImage: UIImage
         if let optionalData {
             uiImage = UIImage(data: optionalData) ?? UIImage()
@@ -265,13 +267,12 @@ extension Image {
         self.init(uiImage: uiImage)
     }
 
-    public init(url: URL?) {
-        var uiImage: UIImage
-        if let url {
-            uiImage = UIImage(contentsOfFile: url.path) ?? UIImage()
+    init(url: URL?) {
+        var uiImage = if let url {
+            UIImage(contentsOfFile: url.path) ?? UIImage()
         } else {
             //            print("🛑 Image(data:) - There's no data")
-            uiImage = UIImage(systemName: "questionmark.square.dashed")!
+            UIImage(systemName: "questionmark.square.dashed")!
         }
         self.init(uiImage: uiImage)
     }

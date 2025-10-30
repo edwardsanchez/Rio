@@ -460,7 +460,7 @@ struct GreedyCircleStack: Layout, Animatable {
 
 private enum PreviewUsers {
     private static func make(_ name: String, avatar: ImageResource?) -> User {
-        User(id: UUID(), name: name, resource: avatar) //No exact matches in call to initializer 
+        User(id: UUID(), name: name, resource: avatar) //No exact matches in call to initializer
     }
 
     static let mixed: [User] = [
