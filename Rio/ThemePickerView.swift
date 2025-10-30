@@ -32,12 +32,9 @@ struct ThemePickerView: View {
                     colorRow(for: option)
                 }
             }
-
-            Spacer()
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 24)
-        .padding(.bottom, 16)
+        .padding(.horizontal, 20)
+        .ignoresSafeArea()
     }
 
     private func colorRow(for option: ThemeColorOption) -> some View {
@@ -49,9 +46,18 @@ struct ThemePickerView: View {
             .overlay {
                 Circle()
                     .strokeBorder(
-                        isSelected ? Color.primary : Color.primary.opacity(0.15),
-                        lineWidth: isSelected ? 4 : 1
+                        isSelected ? Color.primary.opacity(0.3) : Color.primary.opacity(0.15),
+                        lineWidth: isSelected ? 2 : 1
                     )
+            }
+            .scaleEffect(isSelected ? 1.2 : 1)
+            .animation(.spring(bounce: 0.6), value: isSelected)
+            .overlay {
+                Circle()
+                    .fill(.white)
+                    .padding(20)
+                    .scaleEffect(isSelected ? 1 : 0)
+                    .animation(.smooth, value: isSelected)
             }
             .contentShape(Circle())
             .accessibilityElement()
