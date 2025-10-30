@@ -16,6 +16,8 @@ struct ChatSettings: View {
 
     @Environment(ChatData.self) private var chatData
 
+    @FocusState private var isChatNameFieldFocused: Bool
+    @State private var chatNameSelection: TextSelection?
     @State private var isThemePickerPresented = false
 
     private var isPresented: Bool {
@@ -147,11 +149,22 @@ struct ChatSettings: View {
                     TextField(
                         "",
                         text: chatNameBinding,
+                        selection: $chatNameSelection,
                         prompt: Text(fallbackChatTitle)
                     )
                     .textInputAutocapitalization(.words)
+                    .focused($isChatNameFieldFocused)
+                    .onChange(of: isChatNameFieldFocused) { _, isFocused in
+                        if isFocused {
+                            DispatchQueue.main.async {
+                                selectEntireChatName()
+                            }
+                        } else {
+                            chatNameSelection = nil
+                        }
+                    }
                 } label: {
-                    Label("Chat Name", systemImage: "character.bubble") //TODO: Make it so tapping this field selects the whole text.
+                    Label("Chat Name", systemImage: "character.bubble")
                 }
             }
 
@@ -189,6 +202,17 @@ struct ChatSettings: View {
                     .frame(maxWidth: .infinity)
             }
         }
+    }
+
+    private func selectEntireChatName() {
+        let currentText = chatNameBinding.wrappedValue
+
+        guard !currentText.isEmpty else {
+            chatNameSelection = nil
+            return
+        }
+
+        chatNameSelection = TextSelection(range: currentText.startIndex..<currentText.endIndex)
     }
 
     private func close() {
