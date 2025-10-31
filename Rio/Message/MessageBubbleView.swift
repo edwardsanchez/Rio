@@ -157,14 +157,15 @@ struct MessageBubbleView: View {
     }
 
     private var baseBubbleLayout: some View {
-        HStack(alignment: .bottom, spacing: 12) {
+        HStack(alignment: .bottom) {
             if messageType.isInbound {
-                Group {
+                HStack(alignment: .bottom) {
                     inboundAvatar
                         .opacity(inboundAvatarOpacity)
                     messageView
                         .opacity(bubbleManager.bubbleFadeOpacity)
                 }
+                .padding(.vertical, message.content.isEmoji ? -10 : 0)
                 .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
                 // This creates a constraint that prevents the bubble from expanding
@@ -278,7 +279,7 @@ struct MessageBubbleView: View {
                     .frame(height: avatarFrameHeight)
                     .scaleEffect(isNew && bubbleManager.displayedBubbleType.isRead ? 0 : 1, anchor: .center)
                     .opacity(isNew && bubbleManager.displayedBubbleType.isRead ? 0 : 1)
-                    .offset(y: 10)
+                    .offset(y: message.content.isEmoji ? -28 : 10)
                     .offset(x: avatarOffsetX)
                     .animation(.bouncy(duration: 0.3), value: isNew)
                     .animation(.bouncy(duration: 0.3), value: bubbleManager.displayedBubbleType)
