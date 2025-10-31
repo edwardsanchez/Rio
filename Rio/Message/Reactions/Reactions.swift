@@ -164,6 +164,7 @@ struct ReactionsModifier: ViewModifier {
                     }
             } else {
                 content
+                    .contentShape(.rect)
                     .overlay(alignment: .topTrailing) {
                         //This is the version that shows up when it's just a badge on the corner, if there's a reaction
                         //for this message.
@@ -277,6 +278,57 @@ extension View {
                 isReactionOverlay: isReactionOverlay
             )
         )
+    }
+
+    func reactionError(isAvailable: Bool) -> some View {
+        modifier(ReactionErrorModifier(isAvailable: isAvailable))
+    }
+}
+
+private struct ReactionErrorModifier: ViewModifier {
+    let isAvailable: Bool
+
+    @State private var scale: CGFloat = 1
+    @State private var feedbackTrigger = false
+    @State private var animationTask: Task<Void, Never>?
+
+    func body(content: Content) -> some View {
+        Group {
+            if isAvailable {
+                content
+                    .scaleEffect(scale)
+                    .contentShape(Rectangle())
+                    .onLongPressGesture {
+                        animationTask?.cancel()
+                        feedbackTrigger.toggle()
+
+                        animationTask = Task { @MainActor in
+                            scale = 1
+
+                            withAnimation(.bouncy(duration: 0.12)) {
+                                scale = 1.02
+                            }
+
+                            try? await Task.sleep(nanoseconds: 180_000_000)
+                            guard !Task.isCancelled else { return }
+
+                            withAnimation(.bouncy(duration: 0.32)) {
+                                scale = 1
+                            }
+
+                            animationTask = nil
+                        }
+                    }
+                    .sensoryFeedback(.error, trigger: feedbackTrigger)
+                    .onDisappear {
+                        animationTask?.cancel()
+                        animationTask = nil
+                        scale = 1
+                    }
+            } else {
+                content
+            }
+        }
     }
 }
 

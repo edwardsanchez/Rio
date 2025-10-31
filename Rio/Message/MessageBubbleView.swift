@@ -366,6 +366,7 @@ struct MessageBubbleView: View {
             animationHeight: nil,
             isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
         )
+        .reactionError(isAvailable: message.content.isEmoji || messageType.isOutbound)
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: bubbleManager.showTypingIndicatorContent)
                 .padding(.leading, 20)

@@ -271,7 +271,7 @@ struct ChatDetailView: View {
             bubbleType: .talking
         ),
         Message(
-            content: .text("Are you good?"),
+            content: .emoji("🙃"),
             from: mayaUser,
             date: Date().addingTimeInterval(-7100),
             bubbleType: .talking
