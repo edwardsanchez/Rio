@@ -32,22 +32,18 @@ struct CursiveTestView: View {
 
     // Configuration constants
     private let windowWidth: CGFloat = 50 // Width of the visible window in pixels
-    private let size: Double = 40
+    private let fontSize: CGFloat = 40
     private let wordPadding: CGFloat = 12
     private let scannerWidth: CGFloat = 50 // Width of the scanning rectangle - narrower for more range
 
-    // Computed properties
-    private var fontSizeValue: CGFloat { CGFloat(size) }
-
     private var measuredWordSize: CGSize {
-        CursiveWordShape.preferredSize(for: displayText, fontSize: fontSizeValue)
-            ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
+        CursiveWordShape.preferredSize(for: displayText, fontSize: fontSize)
+            ?? CGSize(width: fontSize * 8, height: fontSize * 1.4)
     }
 
     private let logger = Logger(subsystem: "app.amorfati.Rio", category: "CursiveLetters")
 
     var body: some View {
-        let fontSize = fontSizeValue
         let wordSize = measuredWordSize
 
         // Create path analyzer for scanner functionality
@@ -101,7 +97,7 @@ struct CursiveTestView: View {
                 // Static mode: use the default initializer (which is always static mode)
                 AnimatedCursiveTextView(
                     text: displayText,
-                    fontSize: fontSizeValue,
+                    fontSize: fontSize,
                     animationSpeed: nil,
                     windowWidth: windowWidth,
                     forwardOnlyMode: forwardOnlyMode,
@@ -116,7 +112,7 @@ struct CursiveTestView: View {
                 // Progressive mode: use the progressiveText initializer
                 AnimatedCursiveTextView(
                     progressiveText: displayText,
-                    fontSize: fontSizeValue,
+                    fontSize: fontSize,
                     animationDuration: nil,
                     showProgressIndicator: showPipe
                 )

@@ -105,9 +105,6 @@ struct AnimatedCursiveTextView: View {
 
     // MARK: - Computed Properties
 
-    /// Font size accessor for consistency across the view
-    private var fontSizeValue: CGFloat { fontSize }
-
     /// Current text being animated (based on currentTextIndex)
     private var currentText: String {
         guard currentTextIndex < texts.count else { return texts.last ?? "" }
@@ -117,8 +114,8 @@ struct AnimatedCursiveTextView: View {
     /// Calculated size needed to render the complete text at the specified font size
     /// Falls back to estimated dimensions if CursiveWordShape calculation fails
     private var measuredWordSize: CGSize {
-        CursiveWordShape.preferredSize(for: currentText, fontSize: fontSizeValue)
-            ?? CGSize(width: fontSizeValue * 8, height: fontSizeValue * 1.4)
+        CursiveWordShape.preferredSize(for: currentText, fontSize: fontSize)
+            ?? CGSize(width: fontSize * 8, height: fontSize * 1.4)
     }
 
     /// Resolves the sliding window width, falling back to geometry-derived measurements when no explicit override is
@@ -131,8 +128,6 @@ struct AnimatedCursiveTextView: View {
         guard let width = effectiveContainerWidth else { return nil }
         return resolvedWindowWidth(from: width)
     }
-
-    private var loggingEnabled: Bool { showProgressIndicator }
 
     private var effectiveContainerWidth: CGFloat? {
         containerWidthOverride ?? containerWidth
@@ -651,7 +646,7 @@ struct AnimatedCursiveTextView: View {
                 .stroke(
                     Color.secondary,
                     style: StrokeStyle(
-                        lineWidth: fontSizeValue / 20, // Proportional line width
+                        lineWidth: fontSize / 20, // Proportional line width
                         lineCap: .round, // Smooth line endings
                         lineJoin: .round // Smooth line connections
                     )
@@ -684,7 +679,7 @@ struct AnimatedCursiveTextView: View {
     }
 
     private func emitGeometryLogIfNeeded(reason: String, force: Bool = false) {
-        guard loggingEnabled else { return }
+        guard showProgressIndicator else { return }
 
         let shouldActivate = staticActivationThresholdReached
         let isActive = staticWindowCurrentlyActive
@@ -708,7 +703,7 @@ struct AnimatedCursiveTextView: View {
     }
 
     private func logGeometrySnapshot(reason: String, shouldActivate: Bool, isActive: Bool) {
-        guard loggingEnabled else { return }
+        guard showProgressIndicator else { return }
 
         let marginText = String(format: "%.1f", autoWindowMargin)
         let intrinsicText = String(format: "%.1f", measuredWordSize.width)
@@ -855,7 +850,7 @@ struct AnimatedCursiveTextView: View {
 
         // Initialize path analyzer for mathematical calculations
         // This provides the foundation for all position and window calculations
-        let shape = CursiveWordShape(text: currentText, fontSize: fontSizeValue)
+        let shape = CursiveWordShape(text: currentText, fontSize: fontSize)
         let path = shape.path(in: CGRect(origin: .zero, size: measuredWordSize))
         let analyzer = PathXAnalyzer(path: path.cgPath)
         pathAnalyzer = analyzer

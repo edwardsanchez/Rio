@@ -34,7 +34,7 @@ final class ReactionsMenuModel {
     var state: MenuState = .closed
     var showBackgroundMenu = false
 
-    private let reactionSpacing: CGFloat = 50
+    let reactionSpacing: CGFloat = 50
     private var orchestrator: AnimationOrchestrator!
     fileprivate var customEmojiManager: CustomEmojiManager!
 
@@ -89,8 +89,6 @@ final class ReactionsMenuModel {
             height: baseOffset.height + verticalAdjustment
         )
     }
-
-    var calculatedReactionSpacing: CGFloat { reactionSpacing }
 
     // MARK: - Intents
 

@@ -11,16 +11,14 @@ struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
     @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
 
-    let context: MessageBubbleContext
+    let messageContext: MessageBubbleContext
 
-    private var menuIsShowing: Bool { reactionsMenuModel.isShowingReactionMenu }
     @State private var viewSize: CGSize = .zero
 
     @Namespace private var reactionNamespace
     @State private var reactionsMenuModel: ReactionsMenuModel
 
     private let availabilityGate: Bool
-    private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
 
     static var defaultReactions: [Reaction] {
         [
@@ -36,14 +34,14 @@ struct ReactionsModifier: ViewModifier {
 
     private let reactionSpacing: CGFloat = 50
 
-    init(context: MessageBubbleContext, reactions: [Reaction], isAvailable: Bool) {
-        self.context = context
+    init(messageContext: MessageBubbleContext, reactions: [Reaction], isAvailable: Bool) {
+        self.messageContext = messageContext
         _ = reactions
-        let resolvedReactions = ReactionsModifier.makeReactions(from: context.message)
+        let resolvedReactions = ReactionsModifier.makeReactions(from: messageContext.message)
         availabilityGate = isAvailable
         _reactionsMenuModel = State(
             initialValue: ReactionsMenuModel(
-                messageID: context.message.id,
+                messageID: messageContext.message.id,
                 reactions: resolvedReactions
             )
         )
@@ -53,11 +51,14 @@ struct ReactionsModifier: ViewModifier {
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
         @Bindable var reactionsCoordinator = reactionsCoordinator
-        if isAvailable {
-            if context.isReactionsOverlay {
+        if availabilityGate {
+            if messageContext.isReactionsOverlay {
                 content
-                    .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-                    .animation(ReactionsAnimationTiming.menuScaleAnimation, value: menuIsShowing)
+                    .scaleEffect(reactionsMenuModel.isShowingReactionMenu ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
+                    .animation(
+                        ReactionsAnimationTiming.menuScaleAnimation,
+                        value: reactionsMenuModel.isShowingReactionMenu
+                    )
                     .onGeometryChange(for: CGSize.self) { proxy in
                         proxy.size
                     } action: { newSize in
@@ -65,7 +66,7 @@ struct ReactionsModifier: ViewModifier {
                         reactionsMenuModel.viewSize = newSize
                     }
                     .overlay(alignment: .topTrailing) {
-                        if let selectedReaction {
+                        if let selectedReaction = reactionsMenuModel.selectedReaction {
                             //Here only for the purposes of geometry matching as it has the right location to appear as
                             //a badge.
                             reactionButton(
@@ -123,7 +124,7 @@ struct ReactionsModifier: ViewModifier {
                     .onTapGesture {
                         reactionsMenuModel.closeReactionsMenu()
                     }
-                    .onChange(of: context.message.reactionOptions) { _, _ in
+                    .onChange(of: messageContext.message.reactionOptions) { _, _ in
                         updateMenuModelReactionsIfNeeded()
                     }
             } else {
@@ -132,7 +133,7 @@ struct ReactionsModifier: ViewModifier {
                     .overlay(alignment: .topTrailing) {
                         //This is the version that shows up when it's just a badge on the corner, if there's a reaction
                         //for this message.
-                        if let selectedReaction {
+                        if let selectedReaction = reactionsMenuModel.selectedReaction {
                             reactionButton(
                                 for: selectedReaction,
                                 isVisible: true,
@@ -141,7 +142,7 @@ struct ReactionsModifier: ViewModifier {
                             ) {
                                 reactionsMenuModel.openReactionsMenu()
                                 reactionsCoordinator.openReactionsMenu(
-                                    with: context,
+                                    with: messageContext,
                                     menuModel: reactionsMenuModel
                                 )
                             }
@@ -150,25 +151,25 @@ struct ReactionsModifier: ViewModifier {
                     .onLongPressGesture {
                         reactionsMenuModel.openReactionsMenu()
                         reactionsCoordinator.openReactionsMenu(
-                            with: context,
+                            with: messageContext,
                             menuModel: reactionsMenuModel
                         )
                     }
-                    .sensoryFeedback(.impact, trigger: menuIsShowing)
+                    .sensoryFeedback(.impact, trigger: reactionsMenuModel.isShowingReactionMenu)
                     .onAppear {
                         adoptSharedMenuModel()
                         reactionsMenuModel.coordinator = reactionsCoordinator
                         reactionsMenuModel.chatData = chatData
                         updateMenuModelReactionsIfNeeded()
                     }
-                    .onChange(of: context.message.reactionOptions) { _, _ in
+                    .onChange(of: messageContext.message.reactionOptions) { _, _ in
                         updateMenuModelReactionsIfNeeded()
                     }
             }
         } else {
             //For outbound messages since you can't like your own messages
             content
-                .onChange(of: context.message.reactionOptions) { _, _ in
+                .onChange(of: messageContext.message.reactionOptions) { _, _ in
                     updateMenuModelReactionsIfNeeded()
                 }
         }
@@ -187,7 +188,7 @@ struct ReactionsModifier: ViewModifier {
             isVisible: isVisible,
             isOverlay: isOverlay,
             isSelected: isSelected,
-            menuIsShowing: menuIsShowing,
+            menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
             isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
             reactionNamespace: reactionNamespace,
             matchedGeometryIsSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay),
@@ -201,41 +202,39 @@ struct ReactionsModifier: ViewModifier {
             return !isOverlay
         }
 
-        return isOverlay ? !menuIsShowing : menuIsShowing
+        return isOverlay ? !reactionsMenuModel.isShowingReactionMenu : reactionsMenuModel.isShowingReactionMenu
     }
 
     private func adoptSharedMenuModel() {
-        if let sharedModel = reactionsCoordinator.menuModel(for: context.message.id) {
+        if let sharedModel = reactionsCoordinator.menuModel(for: messageContext.message.id) {
             if sharedModel !== reactionsMenuModel {
                 reactionsMenuModel = sharedModel
             }
         } else {
-            reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
+            reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: messageContext.message.id)
             return
         }
 
-        reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: context.message.id)
+        reactionsCoordinator.registerMenuModel(reactionsMenuModel, for: messageContext.message.id)
     }
 
     private func updateMenuModelReactionsIfNeeded() {
-        let latest = ReactionsModifier.makeReactions(from: context.message)
+        let latest = ReactionsModifier.makeReactions(from: messageContext.message)
         if reactionsMenuModel.reactions != latest {
             reactionsMenuModel.reactions = latest
         }
     }
-
-    private var isAvailable: Bool { availabilityGate }
 }
 
 extension View {
     func reactions(
-        context: MessageBubbleContext,
+        messageContext: MessageBubbleContext,
         reactions: [Reaction] = ReactionsModifier.defaultReactions,
         isAvailable: Bool = true
     ) -> some View {
         modifier(
             ReactionsModifier(
-                context: context,
+                messageContext: messageContext,
                 reactions: reactions,
                 isAvailable: isAvailable
             )
@@ -417,7 +416,7 @@ private struct TapBackTestView: View {
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
                 .reactions(
-                    context: MessageBubbleContext(
+                    messageContext: MessageBubbleContext(
                         message: Message(content: .text("Test"), from: chatData.currentUser, date: Date()),
                         theme: .defaultTheme,
                         showTail: true,

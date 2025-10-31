@@ -7,7 +7,7 @@
 import SwiftUI
 
 private struct ChatBubbleModifier: ViewModifier {
-    let context: MessageBubbleContext
+    let messageContext: MessageBubbleContext
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
     let isVisible: Bool
@@ -23,13 +23,12 @@ private struct ChatBubbleModifier: ViewModifier {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
 
-    private var bubbleType: BubbleType { context.bubbleType }
-    private var layoutType: BubbleType { context.resolvedLayoutType }
-
     func body(content: Content) -> some View {
         // For read→talking transition: use bubbleType for sizing (immediate) to avoid animation
         // For other transitions: use layoutType for sizing (delayed for proper morphing)
         // This works because read→talking has displayedType delayed, but we want size immediate
+        let bubbleType = messageContext.bubbleType
+        let layoutType = messageContext.resolvedLayoutType
         let isReadToTalking = layoutType == .read && bubbleType == .talking
         let sizingType = isReadToTalking ? bubbleType : layoutType
 
@@ -56,7 +55,7 @@ private struct ChatBubbleModifier: ViewModifier {
             BubbleView(
                 width: sizingType == .thinking ? 80 : measuredWidth,
                 height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
-                messageContext: context
+                messageContext: messageContext
             )
             .compositingGroup()
         } else {
@@ -67,14 +66,14 @@ private struct ChatBubbleModifier: ViewModifier {
 
 extension View {
     func chatBubble(
-        context: MessageBubbleContext,
+        messageContext: MessageBubbleContext,
         animationWidth: CGFloat? = nil,
         animationHeight: CGFloat? = nil,
         isVisible: Bool = true
     ) -> some View {
         modifier(
             ChatBubbleModifier(
-                context: context,
+                messageContext: messageContext,
                 animationWidth: animationWidth,
                 animationHeight: animationHeight,
                 isVisible: isVisible

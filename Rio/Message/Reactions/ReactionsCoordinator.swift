@@ -16,8 +16,6 @@ struct MessageBubbleContext {
     let layoutType: BubbleType?
     let isReactionsOverlay: Bool
 
-    var messageID: UUID { message.id }
-
     var backgroundColor: Color {
         messageType.isOutbound ? theme.outboundBackgroundColor : theme.inboundBackgroundColor
     }

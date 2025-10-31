@@ -37,19 +37,17 @@ struct ReactionsMenuView: View {
     var reactionsMenuModel: ReactionsMenuModel
     var reactionNamespace: Namespace.ID
 
-    private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
-
     var body: some View {
         RadialLayout(
             radius: reactionsMenuModel.calculatedRadius,
             isShowingReactionMenu: reactionsMenuModel.isShowingReactionMenu,
             itemCount: reactionsMenuModel.reactions.count,
-            itemSpacing: reactionsMenuModel.calculatedReactionSpacing,
+            itemSpacing: reactionsMenuModel.reactionSpacing,
             spacerCenterPercent: reactionsMenuModel.calculatedSpacerCenterPercent,
             parentSize: reactionsMenuModel.viewSize
         ) {
             ForEach(Array(reactionsMenuModel.reactions.enumerated()), id: \.element.id) { index, reaction in
-                let isSelected = selectedReaction == reaction
+                let isSelected = reactionsMenuModel.selectedReaction == reaction
                 let visibility = ReactionVisibility(
                     menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
                     showBackgroundMenu: reactionsMenuModel.showBackgroundMenu,

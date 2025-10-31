@@ -317,7 +317,7 @@ struct MessageBubbleView: View {
 
     private func bubbleView() -> some View {
         let hasContent = message.content.hasContent
-        let bubbleContext = makeBubbleContext()
+        let messageContext = makeMessageContext()
 
         return ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
@@ -326,7 +326,7 @@ struct MessageBubbleView: View {
             if hasContent, bubbleManager.includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
-                    textColor: bubbleContext.textColor,
+                    textColor: messageContext.textColor,
                     messageID: message.id,
                     selectedImageData: $selectedImageData
                 )
@@ -345,13 +345,13 @@ struct MessageBubbleView: View {
         //This here is the width we want to control with matched geometry when you read the input field.
         //We can use matched geometry, this is not the source.
         .chatBubble(
-            context: bubbleContext,
+            messageContext: messageContext,
             animationWidth: nil,
             animationHeight: nil,
             isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
         )
         .reactions(
-            context: bubbleContext,
+            messageContext: messageContext,
             isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji
         )
         .reactionError(isAvailable: message.content.isEmoji || messageType.isOutbound)
@@ -361,7 +361,7 @@ struct MessageBubbleView: View {
         }
     }
 
-    private func makeBubbleContext(isReactionsOverlay override: Bool? = nil) -> MessageBubbleContext {
+    private func makeMessageContext(isReactionsOverlay override: Bool? = nil) -> MessageBubbleContext {
         MessageBubbleContext(
             message: message,
             theme: theme,

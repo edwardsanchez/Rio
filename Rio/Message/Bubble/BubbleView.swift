@@ -89,10 +89,6 @@ struct BubbleView: View {
         cornerRadius ?? min(min(height, width) / 2, bubbleConfig.bubbleCornerRadius)
     }
 
-    private var minDiameter: CGFloat { bubbleConfig.bubbleMinDiameter }
-    private var maxDiameter: CGFloat { bubbleConfig.bubbleMaxDiameter }
-    private var blurRadius: CGFloat { bubbleConfig.bubbleBlurRadius }
-
     private func basePadding(config: BubbleConfiguration) -> CGFloat {
         (config.bubbleMaxDiameter / 2 + config.bubbleBlurRadius) * 1
     }
@@ -106,13 +102,15 @@ struct BubbleView: View {
                 height: height,
                 cornerRadius: actualCornerRadius
             ),
-            min: minDiameter,
-            max: maxDiameter,
+            min: bubbleConfig.bubbleMinDiameter,
+            max: bubbleConfig.bubbleMaxDiameter,
             seed: animationSeed
         )
     }
 
-    var shouldHideBubble: Bool { messageContext.resolvedLayoutType.isRead && !transitionCoordinator.isExploding(at: Date()) }
+    var shouldHideBubble: Bool {
+        messageContext.resolvedLayoutType.isRead && !transitionCoordinator.isExploding(at: Date())
+    }
 
     var body: some View {
         Group {
@@ -192,12 +190,12 @@ struct BubbleView: View {
             baseSize: CGSize(width: baseWidth, height: baseHeight),
             baseCornerRadius: actualCornerRadius,
             basePadding: basePadding,
-            blurRadius: blurRadius,
+            blurRadius: bubbleConfig.bubbleBlurRadius,
             morphProgress: morphProgress
         )
 
         // During read→thinking, force blur and alpha to full strength for metaball effect
-        let currentBlurRadius = isScaling ? blurRadius : layout.blurRadius
+        let currentBlurRadius = isScaling ? bubbleConfig.bubbleBlurRadius : layout.blurRadius
         let circleTrackWidth = layout.circleTrackWidth
         let circleTrackHeight = layout.circleTrackHeight
         let circleTrackCornerRadius = layout.circleTrackCornerRadius
@@ -241,8 +239,8 @@ struct BubbleView: View {
             perimeter: currentPerimeter,
             outwardProgress: outwardProgress,
             seed: animationSeed,
-            minDiameter: minDiameter,
-            maxDiameter: maxDiameter
+            minDiameter: bubbleConfig.bubbleMinDiameter,
+            maxDiameter: bubbleConfig.bubbleMaxDiameter
         )
 
         let desiredTargets = circleState.targets
@@ -656,7 +654,9 @@ private struct BubbleMorphLayout {
             width: width,
             height: height,
             cornerRadius: 26,
-            messageContext: previewContext //Warning: PreviewContext is ignored in a #Preview macro. Use the macro initializer that matches the context of the desired environment; e.g. Widgets, Live Activities (from macro 'Preview')
+            messageContext: previewContext //Warning: PreviewContext is ignored in a #Preview macro. Use the macro
+            //initializer that matches the context of the desired environment; e.g. Widgets, Live Activities (from macro
+            //'Preview')
         )
         .frame(width: width + 120, height: height + 120)
 
