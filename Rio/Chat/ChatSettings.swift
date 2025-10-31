@@ -69,8 +69,8 @@ struct ChatSettings: View {
     var body: some View {
         if isPresented {
             NavigationStack {
-                ScrollView{
-                    Form { //Will be replaced with custom form
+                ScrollView {
+                    SimpleForm {
                         participantsList
                         settingsSection
                         destructiveSection
@@ -78,8 +78,8 @@ struct ChatSettings: View {
                 }
                 .padding(.top, -20)
                 .scrollContentBackground(.hidden)
-
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .background(Color(.systemGroupedBackground))
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationTitle(chat.title)
                 .toolbar {
@@ -160,7 +160,7 @@ struct ChatSettings: View {
     }
 
     private var settingsSection: some View {
-        Section {
+        CustomSection {
             if isGroupChat {
                 LabeledContent {
                     TextField(
@@ -214,7 +214,7 @@ struct ChatSettings: View {
     }
 
     private var destructiveSection: some View {
-        Section {
+        CustomSection {
             Button(role: .destructive, action: handleDestructiveAction) {
                 Text(isGroupChat ? "Leave Group" : "Delete Chat")
                     .frame(maxWidth: .infinity)
@@ -248,39 +248,6 @@ struct ChatSettings: View {
     private func participantTile(for participant: User) -> some View {
         if isGroupChat {
             participantTileContent(for: participant)
-                .contentShape(Rectangle())
-                .contextMenu {
-                    Button(role: .destructive) {
-                        participantPendingRemoval = participant
-                        isRemoveParticipantAlertPresented = true
-                    } label: {
-                        Label("Remove from Group", systemImage: "xmark")
-                    }
-
-                    Button {
-                        //TODO: Implement - only have this if there is more than 2 participants including you
-                    } label: {
-                        Label("Chat 1:1", systemImage: "person.2")
-                    }
-                }
-                .alert(
-                    "Remove from Group?",
-                    isPresented: alertBinding(for: participant),
-                    presenting: participantPendingRemoval
-                ) { participant in
-                    Button("Remove", role: .destructive) {
-                        removeParticipant(participant)
-                        isRemoveParticipantAlertPresented = false
-                        participantPendingRemoval = nil
-                    }
-
-                    Button("Cancel", role: .cancel) {
-                        isRemoveParticipantAlertPresented = false
-                        participantPendingRemoval = nil
-                    }
-                } message: { participant in
-                    Text("Are you sure you want to remove \(participant.name) from this chat?")
-                }
         } else {
             participantTileContent(for: participant)
         }
@@ -295,6 +262,39 @@ struct ChatSettings: View {
                 isGeometrySource: true,
                 matchedGeometryAnimation: avatarTransitionAnimation
             )
+            .glassEffect(.regular.interactive(), in: .circle)
+            .contextMenu {
+                Button(role: .destructive) {
+                    participantPendingRemoval = participant
+                    isRemoveParticipantAlertPresented = true
+                } label: {
+                    Label("Remove from Group", systemImage: "xmark")
+                }
+
+                Button {
+                    //TODO: Implement - only have this if there is more than 2 participants including you
+                } label: {
+                    Label("Chat 1:1", systemImage: "person.2")
+                }
+            }
+            .alert(
+                "Remove from Group?",
+                isPresented: alertBinding(for: participant),
+                presenting: participantPendingRemoval
+            ) { participant in
+                Button("Remove", role: .destructive) {
+                    removeParticipant(participant)
+                    isRemoveParticipantAlertPresented = false
+                    participantPendingRemoval = nil
+                }
+
+                Button("Cancel", role: .cancel) {
+                    isRemoveParticipantAlertPresented = false
+                    participantPendingRemoval = nil
+                }
+            } message: { participant in
+                Text("Are you sure you want to remove \(participant.name) from this chat?")
+            }
 
             Text(participant.name)
                 .font(.caption)
