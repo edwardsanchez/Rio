@@ -289,7 +289,18 @@ struct ChatDetailView: View {
             date: Date().addingTimeInterval(-3600),
             bubbleType: .talking
         ),
-        Message(content: .text("That looks great!"), from: edwardUser, date: Date().addingTimeInterval(-3500)),
+        Message(
+            content: .text("That looks great!"),
+            from: edwardUser,
+            date: Date().addingTimeInterval(-3500),
+            reactions: [
+                MessageReaction(
+                    user: mayaUser,
+                    date: .now,
+                    emoji: "❤️"
+                )
+            ]
+        ),
         Message(
             content: .text("Thanks! 😊"),
             from: sophiaUser,

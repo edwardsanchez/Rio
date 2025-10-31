@@ -101,7 +101,8 @@ struct Message: Identifiable {
         id: UUID = UUID(),
         content: ContentType,
         from user: User,
-        date: Date = Date.now
+        date: Date = Date.now,
+        reactions: [MessageReaction] = []
     ) {
         self.id = id
         self.user = user
@@ -110,6 +111,7 @@ struct Message: Identifiable {
         storedBubbleType = nil
         self.content = content
         isTypingIndicator = false
+        self.reactions = reactions
     }
 
     // Initializer for inbound messages (from other users)
@@ -120,7 +122,8 @@ struct Message: Identifiable {
         date: Date = Date.now,
         isTypingIndicator: Bool = false,
         replacesTypingIndicator: Bool = false,
-        bubbleType: BubbleType
+        bubbleType: BubbleType,
+        reactions: [MessageReaction] = []
     ) {
         self.id = id
         self.user = user
@@ -128,6 +131,7 @@ struct Message: Identifiable {
         self.replacesTypingIndicator = replacesTypingIndicator
         storedBubbleType = bubbleType
         self.content = content
+        self.reactions = reactions
 
         // Update isTypingIndicator based on bubble type
         self.isTypingIndicator = isTypingIndicator || bubbleType.isThinking
