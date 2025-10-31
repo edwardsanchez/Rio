@@ -56,7 +56,7 @@ private struct ChatBubbleModifier: ViewModifier {
             BubbleView(
                 width: sizingType == .thinking ? 80 : measuredWidth,
                 height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
-                context: context
+                messageContext: context
             )
             .compositingGroup()
         } else {

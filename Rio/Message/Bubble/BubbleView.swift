@@ -21,7 +21,7 @@ struct BubbleView: View {
     /// Rounded corner radius applied to the inner rectangle (optional override, defaults to bubbleConfig).
     let cornerRadius: CGFloat?
     /// Bundled context describing the current bubble appearance
-    let context: MessageBubbleContext
+    let messageContext: MessageBubbleContext
 
     // MARK: - Animation Managers (replaces 21 @State variables)
 
@@ -49,12 +49,12 @@ struct BubbleView: View {
         width: CGFloat,
         height: CGFloat,
         cornerRadius: CGFloat? = nil,
-        context: MessageBubbleContext
+        messageContext: MessageBubbleContext
     ) {
         self.width = width
         self.height = height
         self.cornerRadius = cornerRadius
-        self.context = context
+        self.messageContext = messageContext
 
         let now = Date()
         let config = BubbleConfiguration()
@@ -65,7 +65,7 @@ struct BubbleView: View {
         // Initialize managers
         _circleManager = State(initialValue: CircleAnimationManager(config: config))
         _transitionCoordinator = State(initialValue: TransitionCoordinator(
-            initialType: context.bubbleType,
+            initialType: messageContext.bubbleType,
             config: config
         ))
         _sizeManager = State(initialValue: RectangleSizeManager(
@@ -74,7 +74,7 @@ struct BubbleView: View {
         ))
 
         // Initialize tail position based on initial bubble type
-        let initialTailPosition = if bubbleType.isTalking {
+        let initialTailPosition = if messageContext.bubbleType.isTalking {
             CGPoint(x: 3, y: -1) // Talking position
         } else {
             CGPoint(x: 15, y: -23) // Thinking/Read position
@@ -84,11 +84,6 @@ struct BubbleView: View {
     }
 
     // MARK: - Computed Properties
-
-    private var bubbleType: BubbleType { context.bubbleType }
-    private var layoutType: BubbleType? { context.layoutType }
-    private var messageType: MessageType { context.messageType }
-    private var showTail: Bool { context.showTail }
 
     private var actualCornerRadius: CGFloat {
         cornerRadius ?? min(min(height, width) / 2, bubbleConfig.bubbleCornerRadius)
@@ -104,40 +99,39 @@ struct BubbleView: View {
 
     private var basePadding: CGFloat { self.basePadding(config: bubbleConfig) }
 
-    private var targetPerimeter: CGFloat {
-        bubbleConfig.calculateRoundedRectPerimeter(width: width, height: height, cornerRadius: actualCornerRadius)
-    }
-
     private var packingResult: PackingResult {
-        bubbleConfig.computeDiameters(length: targetPerimeter, min: minDiameter, max: maxDiameter, seed: animationSeed)
+        bubbleConfig.computeDiameters(
+            length: bubbleConfig.calculateRoundedRectPerimeter(
+                width: width,
+                height: height,
+                cornerRadius: actualCornerRadius
+            ),
+            min: minDiameter,
+            max: maxDiameter,
+            seed: animationSeed
+        )
     }
 
-    private var targetDiameters: [CGFloat] { packingResult.diameters }
-    private var isValid: Bool { packingResult.isValid }
-
-    var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
-    var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
-
-    var resolvedColor: Color { context.backgroundColor }
+    var shouldHideBubble: Bool { messageContext.resolvedLayoutType.isRead && !transitionCoordinator.isExploding(at: Date()) }
 
     var body: some View {
         Group {
             if transitionCoordinator.canUseNative {
                 RoundedRectangle(cornerRadius: bubbleConfig.bubbleCornerRadius)
-                    .fill(resolvedColor)
+                    .fill(messageContext.backgroundColor)
             } else {
                 TimelineView(.animation) { timeline in
                     makeAnimatedBubble(at: timeline.date)
                 }
             }
         }
-        .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
+        .overlay(alignment: messageContext.messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             TalkingTailView(
-                color: resolvedColor,
-                showTail: showTail,
-                bubbleType: bubbleType,
-                layoutType: layoutType,
-                messageType: messageType,
+                color: messageContext.backgroundColor,
+                showTail: messageContext.showTail,
+                bubbleType: messageContext.bubbleType,
+                layoutType: messageContext.layoutType,
+                messageType: messageContext.messageType,
                 tailPositionOffset: tailPositionOffset,
                 previousBubbleType: previousBubbleType
             )
@@ -159,9 +153,9 @@ struct BubbleView: View {
         .onAppear {
             startTime = Date()
             if circleManager.currentTargetDiameters().isEmpty {
-                circleManager.configureInitial(targetDiameters: targetDiameters)
+                circleManager.configureInitial(targetDiameters: packingResult.diameters)
             } else {
-                circleManager.updateTransitions(targetDiameters: targetDiameters)
+                circleManager.updateTransitions(targetDiameters: packingResult.diameters)
             }
 
             updateSize()
@@ -169,10 +163,10 @@ struct BubbleView: View {
         .onChange(of: CGSize(width: width, height: height)) { _, _ in
             updateSize()
         }
-        .onChange(of: targetDiameters) { _, newDiameters in
+        .onChange(of: packingResult.diameters) { _, newDiameters in
             circleManager.updateTransitions(targetDiameters: newDiameters)
         }
-        .onChange(of: bubbleType) { oldType, newType in
+        .onChange(of: messageContext.bubbleType) { oldType, newType in
             handleBubbleTypeChange(oldType: oldType, newType: newType)
         }
     }
@@ -344,7 +338,7 @@ struct BubbleView: View {
             if alphaThresholdMin > 0.001 {
                 context.addFilter(.alphaThreshold(
                     min: Double(alphaThresholdMin),
-                    color: isValid ? resolvedColor : Color.red.opacity(0.5)
+                    color: packingResult.isValid ? messageContext.backgroundColor : Color.red.opacity(0.5)
                 ))
             }
 
@@ -357,7 +351,7 @@ struct BubbleView: View {
                 let trackOrigin = layout.rectangleOrigin(for: layout.circleTrackSize)
                 let rectPath = RoundedRectangle(cornerRadius: displayCornerRadius)
                     .path(in: CGRect(origin: rectOrigin, size: CGSize(width: displayWidth, height: displayHeight)))
-                ctx.fill(rectPath, with: .color(resolvedColor))
+                ctx.fill(rectPath, with: .color(messageContext.backgroundColor))
 
                 // Draw circles around the path
                 for index in morphedDiameters.indices {
@@ -380,13 +374,13 @@ struct BubbleView: View {
         }
         .frame(width: canvasWidth, height: canvasHeight)
         .explosionEffect(isActive: isExploding, progress: explosionProgress)
-        .overlay(alignment: messageType.isInbound ? .bottomLeading : .bottomTrailing) {
+        .overlay(alignment: messageContext.messageType.isInbound ? .bottomLeading : .bottomTrailing) {
             ThinkingTailView(
-                color: resolvedColor,
-                showTail: showTail,
-                bubbleType: bubbleType,
-                layoutType: layoutType,
-                messageType: messageType,
+                color: messageContext.backgroundColor,
+                showTail: messageContext.showTail,
+                bubbleType: messageContext.bubbleType,
+                layoutType: messageContext.layoutType,
+                messageType: messageContext.messageType,
                 scalingProgress: scalingProgress,
                 isExploding: isExploding,
                 explosionProgress: explosionProgress,
@@ -629,7 +623,7 @@ private struct BubbleMorphLayout {
             width: 68,
             height: 40,
             cornerRadius: 20,
-            context: testContext
+            messageContext: testContext
         )
     }
     .padding()
@@ -662,7 +656,7 @@ private struct BubbleMorphLayout {
             width: width,
             height: height,
             cornerRadius: 26,
-            context: previewContext
+            messageContext: previewContext //Warning: PreviewContext is ignored in a #Preview macro. Use the macro initializer that matches the context of the desired environment; e.g. Widgets, Live Activities (from macro 'Preview')
         )
         .frame(width: width + 120, height: height + 120)
 

@@ -49,39 +49,6 @@ struct ReactionsModifier: ViewModifier {
         )
     }
 
-    // MARK: - Layout Detection
-
-    private var layoutCase: LayoutCase {
-        LayoutCase.matching(for: viewSize)
-    }
-
-    private var currentConfig: LayoutConfig {
-        layoutCase.config
-    }
-
-    private var calculatedRadius: CGFloat {
-        currentConfig.radius
-    }
-
-    private var calculatedSpacerCenterPercent: CGFloat {
-        currentConfig.spacerCenterPercent
-    }
-
-    private var calculatedOffset: CGSize {
-        guard menuIsShowing else {
-            return .zero
-        }
-
-        let config = layoutCase.config
-        let baseOffset = config.baseOffset(for: viewSize)
-        let horizontalAdjustment = config.horizontalAnchor.xOffset(for: viewSize)
-        let verticalAdjustment = config.verticalAnchor.yOffset(for: viewSize)
-        return CGSize(
-            width: baseOffset.width + horizontalAdjustment,
-            height: baseOffset.height + verticalAdjustment
-        )
-    }
-
     @ViewBuilder
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
