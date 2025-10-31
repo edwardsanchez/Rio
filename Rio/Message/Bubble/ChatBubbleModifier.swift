@@ -7,17 +7,10 @@
 import SwiftUI
 
 private struct ChatBubbleModifier: ViewModifier {
-    let messageType: MessageType
-    let backgroundColor: Color
-    let showTail: Bool
-    let bubbleType: BubbleType
-    let layoutType: BubbleType
+    let context: MessageBubbleContext
     let animationWidth: CGFloat?
     let animationHeight: CGFloat?
     let isVisible: Bool
-    let messageID: UUID
-    let context: ReactingMessageContext
-    let isReactionsOverlay: Bool
 
     @State private var contentSize: CGSize = .zero
     @Environment(BubbleConfiguration.self) private var bubbleConfig
@@ -29,6 +22,9 @@ private struct ChatBubbleModifier: ViewModifier {
     private var measuredHeight: CGFloat {
         max(contentSize.height, animationHeight ?? 0, 12)
     }
+
+    private var bubbleType: BubbleType { context.bubbleType }
+    private var layoutType: BubbleType { context.resolvedLayoutType }
 
     func body(content: Content) -> some View {
         // For read→talking transition: use bubbleType for sizing (immediate) to avoid animation
@@ -60,14 +56,7 @@ private struct ChatBubbleModifier: ViewModifier {
             BubbleView(
                 width: sizingType == .thinking ? 80 : measuredWidth,
                 height: sizingType == .thinking ? measuredHeight + 15 : measuredHeight,
-                color: backgroundColor,
-                type: bubbleType,
-                showTail: showTail,
-                messageType: messageType,
-                layoutType: layoutType,
-                messageID: messageID,
-                context: context,
-                isReactionsOverlay: isReactionsOverlay
+                context: context
             )
             .compositingGroup()
         } else {
@@ -78,31 +67,17 @@ private struct ChatBubbleModifier: ViewModifier {
 
 extension View {
     func chatBubble(
-        messageType: MessageType,
-        backgroundColor: Color,
-        showTail: Bool,
-        messageID: UUID,
-        context: ReactingMessageContext,
-        isReactionsOverlay: Bool = false,
-        bubbleType: BubbleType = .talking,
-        layoutType: BubbleType? = nil,
+        context: MessageBubbleContext,
         animationWidth: CGFloat? = nil,
         animationHeight: CGFloat? = nil,
         isVisible: Bool = true
     ) -> some View {
         modifier(
             ChatBubbleModifier(
-                messageType: messageType,
-                backgroundColor: backgroundColor,
-                showTail: showTail,
-                bubbleType: bubbleType,
-                layoutType: layoutType ?? bubbleType,
+                context: context,
                 animationWidth: animationWidth,
                 animationHeight: animationHeight,
-                isVisible: isVisible,
-                messageID: messageID,
-                context: context,
-                isReactionsOverlay: isReactionsOverlay
+                isVisible: isVisible
             )
         )
     }

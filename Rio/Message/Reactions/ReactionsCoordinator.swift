@@ -7,10 +7,70 @@
 
 import SwiftUI
 
-struct ReactingMessageContext {
+struct MessageBubbleContext {
     let message: Message
-    let showTail: Bool
     let theme: ChatTheme
+    let showTail: Bool
+    let messageType: MessageType
+    let bubbleType: BubbleType
+    let layoutType: BubbleType?
+    let isReactionsOverlay: Bool
+
+    var messageID: UUID { message.id }
+
+    var backgroundColor: Color {
+        messageType.isOutbound ? theme.outboundBackgroundColor : theme.inboundBackgroundColor
+    }
+
+    var textColor: Color {
+        messageType.isOutbound ? theme.outboundTextColor : theme.inboundTextColor
+    }
+
+    var resolvedLayoutType: BubbleType {
+        layoutType ?? bubbleType
+    }
+
+    func updatingOverlay(_ isOverlay: Bool) -> MessageBubbleContext {
+        MessageBubbleContext(
+            message: message,
+            theme: theme,
+            showTail: showTail,
+            messageType: messageType,
+            bubbleType: bubbleType,
+            layoutType: layoutType,
+            isReactionsOverlay: isOverlay
+        )
+    }
+
+    static func shouldShowTail(
+        in messages: [Message],
+        at index: Int,
+        currentUser: User,
+        nextMessageShowsDateHeader: Bool,
+        tailContinuationThreshold: TimeInterval = 300
+    ) -> Bool {
+        guard messages.indices.contains(index) else { return false }
+
+        if index == messages.count - 1 {
+            return true
+        }
+
+        if nextMessageShowsDateHeader {
+            return true
+        }
+
+        let current = messages[index]
+        let next = messages[index + 1]
+        let isNextSameUser = current.user.id == next.user.id
+
+        if current.messageType(currentUser: currentUser).isOutbound {
+            return !isNextSameUser
+        }
+
+        let timeDifference = next.date.timeIntervalSince(current.date)
+        let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
+        return !isNextSameUser || !isWithinThreshold
+    }
 }
 
 enum ReactionGeometrySource {
@@ -21,7 +81,7 @@ enum ReactionGeometrySource {
 @Observable
 final class ReactionsCoordinator {
     // Tracks the message currently displaying a reactions menu with full context
-    var reactingMessage: ReactingMessageContext?
+    var reactingMessage: MessageBubbleContext?
     // Tracks whether the emoji picker sheet is presented (only one can be shown at a time)
     var isCustomEmojiPickerPresented = false
     // Controls which bubble instance should be treated as the geometry source during transitions
@@ -34,7 +94,7 @@ final class ReactionsCoordinator {
     private var overlayRemovalWorkItems: [UUID: DispatchWorkItem] = [:]
 
     func openReactionsMenu(
-        with context: ReactingMessageContext,
+        with context: MessageBubbleContext,
         menuModel: ReactionsMenuModel
     ) {
         cancelCloseTimer(for: context.message.id)

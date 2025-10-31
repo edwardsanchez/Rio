@@ -24,16 +24,17 @@ struct ChatReaction: View {
 
             VStack {
                 if let context = coordinator.reactingMessage {
+                    let overlayContext = context.updatingOverlay(true)
                     Spacer()
 
                     MessageBubbleView(
-                        message: context.message,
-                        showTail: context.showTail,
-                        theme: context.theme,
+                        message: overlayContext.message,
+                        showTail: overlayContext.showTail,
+                        theme: overlayContext.theme,
                         bubbleNamespace: bubbleNamespace,
                         activeReactingMessageID: coordinator.reactingMessage?.message.id,
                         geometrySource: coordinator.geometrySource,
-                        isReactionsOverlay: true,
+                        isReactionsOverlay: overlayContext.isReactionsOverlay,
                         selectedImageData: $selectedImageData
                     )
                     .padding(.horizontal, 20)

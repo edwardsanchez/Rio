@@ -20,19 +20,8 @@ struct BubbleView: View {
     let height: CGFloat
     /// Rounded corner radius applied to the inner rectangle (optional override, defaults to bubbleConfig).
     let cornerRadius: CGFloat?
-    /// Fill color for the bubble and metaballs.
-    let color: Color
-    /// Current behavioural bubbleType (thinking vs talking).
-    let bubbleType: BubbleType
-    /// Whether to render the decorative bubble tail.
-    let showTail: Bool
-    /// Message direction used to align the bubble tail.
-    let messageType: MessageType
-    /// Layout type for visual display (may be delayed relative to bubbleType)
-    let layoutType: BubbleType?
-    let messageID: UUID
-    let context: ReactingMessageContext
-    let isReactionsOverlay: Bool
+    /// Bundled context describing the current bubble appearance
+    let context: MessageBubbleContext
 
     // MARK: - Animation Managers (replaces 21 @State variables)
 
@@ -60,26 +49,12 @@ struct BubbleView: View {
         width: CGFloat,
         height: CGFloat,
         cornerRadius: CGFloat? = nil,
-        color: Color,
-        type: BubbleType = .thinking,
-        showTail: Bool = false,
-        messageType: MessageType = .inbound(.thinking),
-        layoutType: BubbleType? = nil,
-        messageID: UUID,
-        context: ReactingMessageContext,
-        isReactionsOverlay: Bool = false
+        context: MessageBubbleContext
     ) {
         self.width = width
         self.height = height
         self.cornerRadius = cornerRadius
-        self.color = color
-        bubbleType = type
-        self.showTail = showTail
-        self.messageType = messageType
-        self.layoutType = layoutType
-        self.messageID = messageID
         self.context = context
-        self.isReactionsOverlay = isReactionsOverlay
 
         let now = Date()
         let config = BubbleConfiguration()
@@ -89,14 +64,17 @@ struct BubbleView: View {
 
         // Initialize managers
         _circleManager = State(initialValue: CircleAnimationManager(config: config))
-        _transitionCoordinator = State(initialValue: TransitionCoordinator(initialType: type, config: config))
+        _transitionCoordinator = State(initialValue: TransitionCoordinator(
+            initialType: context.bubbleType,
+            config: config
+        ))
         _sizeManager = State(initialValue: RectangleSizeManager(
             initialSize: CGSize(width: width, height: height),
             config: config
         ))
 
         // Initialize tail position based on initial bubble type
-        let initialTailPosition = if type.isTalking {
+        let initialTailPosition = if bubbleType.isTalking {
             CGPoint(x: 3, y: -1) // Talking position
         } else {
             CGPoint(x: 15, y: -23) // Thinking/Read position
@@ -106,6 +84,11 @@ struct BubbleView: View {
     }
 
     // MARK: - Computed Properties
+
+    private var bubbleType: BubbleType { context.bubbleType }
+    private var layoutType: BubbleType? { context.layoutType }
+    private var messageType: MessageType { context.messageType }
+    private var showTail: Bool { context.showTail }
 
     private var actualCornerRadius: CGFloat {
         cornerRadius ?? min(min(height, width) / 2, bubbleConfig.bubbleCornerRadius)
@@ -135,11 +118,7 @@ struct BubbleView: View {
     var isReadLayout: Bool { (layoutType?.isRead ?? bubbleType.isRead) }
     var shouldHideBubble: Bool { isReadLayout && !transitionCoordinator.isExploding(at: Date()) }
 
-    var resolvedColor: Color {
-        messageType.isOutbound
-            ? context.theme.outboundBackgroundColor
-            : context.theme.inboundBackgroundColor
-    }
+    var resolvedColor: Color { context.backgroundColor }
 
     var body: some View {
         Group {
@@ -635,15 +614,21 @@ private struct BubbleMorphLayout {
     let chatData = ChatData()
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())
     let previewTheme = ChatTheme(outboundBackgroundColor: .blue)
-    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: previewTheme)
+    let testContext = MessageBubbleContext(
+        message: testMessage,
+        theme: previewTheme,
+        showTail: true,
+        messageType: .outbound,
+        bubbleType: .talking,
+        layoutType: .talking,
+        isReactionsOverlay: false
+    )
 
     VStack(alignment: .leading, spacing: 16) {
         BubbleView(
             width: 68,
             height: 40,
             cornerRadius: 20,
-            color: previewTheme.outboundBackgroundColor,
-            messageID: UUID(),
             context: testContext
         )
     }
@@ -661,19 +646,23 @@ private struct BubbleMorphLayout {
     let chatData = ChatData()
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())
     let previewTheme = ChatTheme(outboundBackgroundColor: .gray)
-    let testContext = ReactingMessageContext(message: testMessage, showTail: true, theme: previewTheme)
 
     VStack(spacing: 24) {
+        let previewContext = MessageBubbleContext(
+            message: testMessage,
+            theme: previewTheme,
+            showTail: true,
+            messageType: .inbound(.talking),
+            bubbleType: isTalking ? .talking : .thinking,
+            layoutType: isTalking ? .talking : .thinking,
+            isReactionsOverlay: false
+        )
+
         BubbleView(
             width: width,
             height: height,
             cornerRadius: 26,
-            color: previewTheme.outboundBackgroundColor,
-            type: isTalking ? .talking : .thinking,
-            showTail: true,
-            messageType: .inbound(.talking),
-            messageID: UUID(),
-            context: testContext
+            context: previewContext
         )
         .frame(width: width + 120, height: height + 120)
 

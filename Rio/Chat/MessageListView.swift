@@ -65,37 +65,15 @@ struct MessageListView: View {
     }
 
     private func shouldShowTail(at index: Int) -> Bool { // Move inside Message Bubble
-        let tailContinuationThreshold: TimeInterval = 300
-        let current = messages[index]
+        let nextIndex = index + 1
+        let nextMessageShowsDateHeader = nextIndex < messages.count ? shouldShowDateHeader(at: nextIndex) : false
 
-        // Check if this is the last message overall
-        let isLastMessage = index == messages.count - 1
-
-        if isLastMessage {
-            // Last message always shows tail
-            return true
-        }
-
-        // Show tail if there's a date header between current and next message
-        if shouldShowDateHeader(at: index + 1) {
-            return true
-        }
-
-        let next = messages[index + 1]
-        let isNextSameUser = current.user.id == next.user.id
-
-        // For outbound messages (from current user), only show tail if it's the last in a sequence
-        if current.messageType(currentUser: chatData.currentUser).isOutbound {
-            // Only show tail if the next message is from a different user (end of outbound sequence)
-            return !isNextSameUser
-        }
-
-        // For inbound messages, keep the existing logic with time threshold
-        let timeDifference = next.date.timeIntervalSince(current.date)
-        let isWithinThreshold = abs(timeDifference) <= tailContinuationThreshold
-
-        // Show tail if next message is from different user OR if time gap is too large
-        return !isNextSameUser || !isWithinThreshold
+        return MessageBubbleContext.shouldShowTail(
+            in: messages,
+            at: index,
+            currentUser: chatData.currentUser,
+            nextMessageShowsDateHeader: nextMessageShowsDateHeader
+        )
     }
 
     private func shouldShowDateHeader(at index: Int) -> Bool { // keep here

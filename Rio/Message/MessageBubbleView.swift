@@ -162,11 +162,8 @@ struct MessageBubbleView: View {
                 Group {
                     inboundAvatar
                         .opacity(inboundAvatarOpacity)
-                    bubbleView(
-                        textColor: theme.inboundTextColor,
-                        backgroundColor: theme.inboundBackgroundColor
-                    )
-                    .opacity(bubbleManager.bubbleFadeOpacity)
+                    bubbleView()
+                        .opacity(bubbleManager.bubbleFadeOpacity)
                 }
                 .offset(y: bubbleYOffset)
                 // Add spacer with minimum width to force text wrapping
@@ -184,11 +181,8 @@ struct MessageBubbleView: View {
                     Spacer(minLength: 10)
                 }
 
-                bubbleView(
-                    textColor: theme.outboundTextColor,
-                    backgroundColor: theme.outboundBackgroundColor
-                )
-                .opacity(bubbleOpacity)
+                bubbleView()
+                    .opacity(bubbleOpacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
@@ -321,12 +315,9 @@ struct MessageBubbleView: View {
 
     // swiftlint:enable unused_declaration
 
-    private func bubbleView(
-        textColor: Color,
-        backgroundColor: Color
-    ) -> some View {
+    private func bubbleView() -> some View {
         let hasContent = message.content.hasContent
-        let reactionContext = ReactingMessageContext(message: message, showTail: showTail, theme: theme)
+        let bubbleContext = makeBubbleContext()
 
         return ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
@@ -335,7 +326,7 @@ struct MessageBubbleView: View {
             if hasContent, bubbleManager.includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
-                    textColor: textColor,
+                    textColor: bubbleContext.textColor,
                     messageID: message.id,
                     selectedImageData: $selectedImageData
                 )
@@ -354,28 +345,32 @@ struct MessageBubbleView: View {
         //This here is the width we want to control with matched geometry when you read the input field.
         //We can use matched geometry, this is not the source.
         .chatBubble(
-            messageType: messageType,
-            backgroundColor: backgroundColor,
-            showTail: showTail,
-            messageID: message.id,
-            context: reactionContext,
-            isReactionsOverlay: isReactionsOverlay,
-            bubbleType: message.bubbleType,
-            layoutType: bubbleManager.displayedBubbleType,
+            context: bubbleContext,
             animationWidth: nil,
             animationHeight: nil,
             isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
         )
         .reactions(
-            context: reactionContext,
-            isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji,
-            isReactionOverlay: isReactionsOverlay
+            context: bubbleContext,
+            isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji
         )
         .reactionError(isAvailable: message.content.isEmoji || messageType.isOutbound)
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: bubbleManager.showTypingIndicatorContent)
                 .padding(.leading, 20)
         }
+    }
+
+    private func makeBubbleContext(isReactionsOverlay override: Bool? = nil) -> MessageBubbleContext {
+        MessageBubbleContext(
+            message: message,
+            theme: theme,
+            showTail: showTail,
+            messageType: messageType,
+            bubbleType: message.bubbleType,
+            layoutType: bubbleManager.displayedBubbleType,
+            isReactionsOverlay: override ?? isReactionsOverlay
+        )
     }
 
     // DO NOT DELETE

@@ -11,7 +11,7 @@ struct ReactionsModifier: ViewModifier {
     @Environment(ChatData.self) private var chatData
     @Environment(ReactionsCoordinator.self) private var reactionsCoordinator
 
-    let context: ReactingMessageContext
+    let context: MessageBubbleContext
 
     private var menuIsShowing: Bool { reactionsMenuModel.isShowingReactionMenu }
     @State private var viewSize: CGSize = .zero
@@ -20,8 +20,6 @@ struct ReactionsModifier: ViewModifier {
     @State private var reactionsMenuModel: ReactionsMenuModel
 
     private let availabilityGate: Bool
-    var isReactionOverlay: Bool
-
     private var selectedReaction: Reaction? { reactionsMenuModel.selectedReaction }
 
     static var defaultReactions: [Reaction] {
@@ -38,12 +36,11 @@ struct ReactionsModifier: ViewModifier {
 
     private let reactionSpacing: CGFloat = 50
 
-    init(context: ReactingMessageContext, reactions: [Reaction], isAvailable: Bool, isReactionOverlay: Bool) {
+    init(context: MessageBubbleContext, reactions: [Reaction], isAvailable: Bool) {
         self.context = context
         _ = reactions
         let resolvedReactions = ReactionsModifier.makeReactions(from: context.message)
         availabilityGate = isAvailable
-        self.isReactionOverlay = isReactionOverlay
         _reactionsMenuModel = State(
             initialValue: ReactionsMenuModel(
                 messageID: context.message.id,
@@ -90,7 +87,7 @@ struct ReactionsModifier: ViewModifier {
         @Bindable var reactionsMenuModel = reactionsMenuModel
         @Bindable var reactionsCoordinator = reactionsCoordinator
         if isAvailable {
-            if isReactionOverlay {
+            if context.isReactionsOverlay {
                 content
                     .scaleEffect(menuIsShowing ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
                     .animation(ReactionsAnimationTiming.menuScaleAnimation, value: menuIsShowing)
@@ -265,17 +262,15 @@ struct ReactionsModifier: ViewModifier {
 
 extension View {
     func reactions(
-        context: ReactingMessageContext,
-        reactions: [Reaction] = [],
-        isAvailable: Bool = true,
-        isReactionOverlay: Bool
+        context: MessageBubbleContext,
+        reactions: [Reaction] = ReactionsModifier.defaultReactions,
+        isAvailable: Bool = true
     ) -> some View {
         modifier(
             ReactionsModifier(
                 context: context,
                 reactions: reactions,
-                isAvailable: isAvailable,
-                isReactionOverlay: isReactionOverlay
+                isAvailable: isAvailable
             )
         )
     }
@@ -455,11 +450,15 @@ private struct TapBackTestView: View {
                 .frame(width: demoWidth, height: demoHeight)
                 .containerShape(.rect)
                 .reactions(
-                    context: ReactingMessageContext(
+                    context: MessageBubbleContext(
                         message: Message(content: .text("Test"), from: chatData.currentUser, date: Date()),
+                        theme: .defaultTheme,
                         showTail: true,
-                        theme: .defaultTheme
-                    ), isReactionOverlay: false
+                        messageType: .outbound,
+                        bubbleType: .talking,
+                        layoutType: .talking,
+                        isReactionsOverlay: false
+                    )
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .padding(.horizontal)
