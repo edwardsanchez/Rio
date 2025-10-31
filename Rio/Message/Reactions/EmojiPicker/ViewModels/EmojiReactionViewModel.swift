@@ -39,13 +39,13 @@ class EmojiReactionViewModel {
     private let fastModel: SystemLanguageModel?
 
     init(fastModel: SystemLanguageModel? = nil) {
-        self.fastModel = fastModel ?? Self.initializeFastModel()
+        self.fastModel = fastModel ?? Self.defaultFastModel
         if Self.isRunningInPreview {
             finalists = Self.previewFinalists
         }
     }
 
-    private static func initializeFastModel() -> SystemLanguageModel? {
+    private static var defaultFastModel: SystemLanguageModel? {
         guard !isRunningInPreview else { return nil }
         return SystemLanguageModel()
     }
@@ -554,7 +554,7 @@ class EmojiReactionViewModel {
             ["😊", "👍", "🤝", "🌟", "💡", "🎯"]
         }
 
-        let catalog = EmojiAIService.getAllEmojis()
+        let catalog = EmojiAIService.allEmojis
         return characters.map { character in
             if let emoji = catalog.first(where: { $0.character == character }) {
                 emoji
@@ -754,7 +754,7 @@ class EmojiReactionViewModel {
         _ suggestions: [FastEmojiSuggestion],
         tone: FastFallbackTone
     ) -> [Emoji] {
-        let allEmojis = EmojiAIService.getAllEmojis()
+        let allEmojis = EmojiAIService.allEmojis
         var seenCharacters: Set<String> = []
         var results: [Emoji] = []
         log("   🔍 Evaluating \(suggestions.count) suggestions against tone \(tone)")

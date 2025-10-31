@@ -44,7 +44,7 @@ class CircleAnimationManager {
     func updateTransitions(targetDiameters: [CGFloat]) {
         let now = Date()
         var updated: [CircleTransition] = []
-        let existing = sortedTransitions()
+        let existing = sortedTransitions
 
         let sharedCount = min(existing.count, targetDiameters.count)
 
@@ -101,7 +101,7 @@ class CircleAnimationManager {
 
     /// Returns current interpolated diameters of all visible circles
     func currentBaseDiameters(at date: Date) -> [CGFloat] {
-        sortedTransitions()
+        sortedTransitions
             .compactMap { transition in
                 let value = transition.value(at: date, duration: config.circleTransitionDuration)
                 if transition.isDisappearing, value <= 0.01 {
@@ -114,7 +114,7 @@ class CircleAnimationManager {
 
     /// Returns target diameters for comparison
     func currentTargetDiameters(tolerance: CGFloat = 0.001) -> [CGFloat] {
-        sortedTransitions()
+        sortedTransitions
             .compactMap { transition in
                 let value = transition.endValue
                 return value > tolerance ? value : nil
@@ -133,7 +133,7 @@ class CircleAnimationManager {
 
     // MARK: - Private Helpers
 
-    private func sortedTransitions() -> [CircleTransition] {
+    private var sortedTransitions: [CircleTransition] {
         circleTransitions.sorted { $0.index < $1.index }
     }
 

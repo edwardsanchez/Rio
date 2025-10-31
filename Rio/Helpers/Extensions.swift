@@ -189,11 +189,11 @@ public extension NSNumber {
 }
 
 public extension Image {
-    func fitImage() -> some View {
+    var fitImage: some View {
         resizable().aspectRatio(contentMode: .fit)
     }
 
-    func fillImage() -> some View {
+    var fillImage: some View {
         resizable().aspectRatio(contentMode: .fill)
     }
 

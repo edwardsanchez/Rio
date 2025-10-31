@@ -156,7 +156,7 @@ enum MessageEmojiService {
     private static let maxContextCharacters = 10000
     private static let timeoutNanoseconds: UInt64 = 2_000_000_000
 
-    static func fallbackReactionOptions() -> [String] {
+    static var fallbackReactionOptions: [String] {
         fallbackEmojis
     }
 

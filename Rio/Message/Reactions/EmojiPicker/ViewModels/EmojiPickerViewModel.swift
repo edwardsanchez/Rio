@@ -25,7 +25,7 @@ class EmojiPickerViewModel {
     var filteredEmojis: [Emoji] {
         guard isSearching else { return [] }
 
-        let allEmojis = EmojiAIService.getAllEmojis()
+        let allEmojis = EmojiAIService.allEmojis
         let query = normalizedSearchText.lowercased()
 
         return allEmojis.filter { emoji in
@@ -37,7 +37,7 @@ class EmojiPickerViewModel {
     private let userDefaults = UserDefaults.standard
 
     init() {
-        frequentlyUsedEmojis = loadFrequentlyUsedEmojis()
+        frequentlyUsedEmojis = frequentlyUsedEmojiSnapshot
     }
 
     // Get emojis for a specific category
@@ -66,10 +66,10 @@ class EmojiPickerViewModel {
 
     // Refresh frequently used emojis (top 20)
     func refreshFrequentlyUsedEmojis() {
-        frequentlyUsedEmojis = loadFrequentlyUsedEmojis()
+        frequentlyUsedEmojis = frequentlyUsedEmojiSnapshot
     }
 
-    private func loadFrequentlyUsedEmojis() -> [Emoji] {
+    private var frequentlyUsedEmojiSnapshot: [Emoji] {
         let usageCounts = userDefaults.frequentlyUsedEmojiIDs
         guard !usageCounts.isEmpty else { return [] }
 
