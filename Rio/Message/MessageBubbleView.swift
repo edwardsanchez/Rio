@@ -326,6 +326,7 @@ struct MessageBubbleView: View {
         backgroundColor: Color
     ) -> some View {
         let hasContent = message.content.hasContent
+        let reactionContext = ReactingMessageContext(message: message, showTail: showTail, theme: theme)
 
         return ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
@@ -338,7 +339,6 @@ struct MessageBubbleView: View {
                     messageID: message.id,
                     selectedImageData: $selectedImageData
                 )
-                .allowsHitTesting(message.content.isEmoji)
                 .padding(.vertical, 4)
                 .opacity(bubbleManager.showTalkingContent ? 1 : 0)
                 .onGeometryChange(for: CGFloat.self) { proxy in
@@ -358,13 +358,18 @@ struct MessageBubbleView: View {
             backgroundColor: backgroundColor,
             showTail: showTail,
             messageID: message.id,
-            context: ReactingMessageContext(message: message, showTail: showTail, theme: theme),
+            context: reactionContext,
             isReactionsOverlay: isReactionsOverlay,
             bubbleType: message.bubbleType,
             layoutType: bubbleManager.displayedBubbleType,
             animationWidth: nil,
             animationHeight: nil,
             isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
+        )
+        .reactions(
+            context: reactionContext,
+            isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji,
+            isReactionOverlay: isReactionsOverlay
         )
         .reactionError(isAvailable: message.content.isEmoji || messageType.isOutbound)
         .overlay(alignment: .leading) {

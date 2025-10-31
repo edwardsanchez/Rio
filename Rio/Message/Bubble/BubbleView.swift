@@ -163,11 +163,6 @@ struct BubbleView: View {
                 previousBubbleType: previousBubbleType
             )
         }
-        .reactions(
-            context: context,
-            isAvailable: messageType.isInbound && bubbleType.isTalking && !context.message.content.isEmoji,
-            isReactionOverlay: isReactionsOverlay
-        )
         .opacity(shouldHideBubble ? 0 : 1)
         .background {
             // Hidden text to measure single-line height
