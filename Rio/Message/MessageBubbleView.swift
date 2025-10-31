@@ -162,7 +162,7 @@ struct MessageBubbleView: View {
                 Group {
                     inboundAvatar
                         .opacity(inboundAvatarOpacity)
-                    bubbleView()
+                    messageView
                         .opacity(bubbleManager.bubbleFadeOpacity)
                 }
                 .offset(y: bubbleYOffset)
@@ -181,7 +181,7 @@ struct MessageBubbleView: View {
                     Spacer(minLength: 10)
                 }
 
-                bubbleView()
+                messageView
                     .opacity(bubbleOpacity)
             }
         }
@@ -290,40 +290,24 @@ struct MessageBubbleView: View {
         }
     }
 
-    // swiftlint:disable unused_declaration
-    var typingIndicatorMessages: [String] {
-        [
-            "Searching for best vegan restaurants in Paris",
-            "Looking up reviews",
-            "Checking which restaurants are open on Sundays"
-        ]
+    private var messageContext: MessageBubbleContext {
+        MessageBubbleContext(
+            message: message,
+            theme: theme,
+            showTail: showTail,
+            messageType: messageType,
+            bubbleType: message.bubbleType,
+            layoutType: bubbleManager.displayedBubbleType,
+            isReactionsOverlay: isReactionsOverlay
+        )
     }
 
-    private var typingIndicatorContainerWidth: CGFloat? {
-        guard message.isTypingIndicator else { return nil }
-        let scrollWidth = scrollViewFrame.width
-        guard scrollWidth > 0 else { return nil }
-
-        let horizontalContentInset: CGFloat = 40 // .contentMargins(.horizontal, 20)
-        let avatarWidth: CGFloat = messageType.isInbound ? 40 : 0
-        let bubbleSpacing: CGFloat = messageType.isInbound ? 12 : 0
-        let trailingSpacer: CGFloat = messageType.isInbound ? 10 : 0
-
-        let width = scrollWidth - horizontalContentInset - avatarWidth - bubbleSpacing - trailingSpacer
-        return width > 0 ? width : nil
-    }
-
-    // swiftlint:enable unused_declaration
-
-    private func bubbleView() -> some View {
-        let hasContent = message.content.hasContent
-        let messageContext = makeMessageContext()
-
-        return ZStack(alignment: .leading) {
+    private var messageView: some View {
+        ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
                 .opacity(0)
 
-            if hasContent, bubbleManager.includeTalkingTextInLayout {
+            if message.content.hasContent, bubbleManager.includeTalkingTextInLayout {
                 MessageContentView(
                     content: message.content,
                     textColor: messageContext.textColor,
@@ -360,29 +344,6 @@ struct MessageBubbleView: View {
                 .padding(.leading, 20)
         }
     }
-
-    private func makeMessageContext(isReactionsOverlay override: Bool? = nil) -> MessageBubbleContext {
-        MessageBubbleContext(
-            message: message,
-            theme: theme,
-            showTail: showTail,
-            messageType: messageType,
-            bubbleType: message.bubbleType,
-            layoutType: bubbleManager.displayedBubbleType,
-            isReactionsOverlay: override ?? isReactionsOverlay
-        )
-    }
-
-    // DO NOT DELETE
-    //    private func updateThinkingWidth(_ width: CGFloat) {
-    //        guard width > 0 else { return }
-    //        if abs(thinkingContentWidth - width) > 0.5 {
-    //            thinkingContentWidth = width
-    //        }
-    //        if message.bubbleType == .thinking {
-    //            isWidthLocked = true
-    //        }
-    //    }
 }
 
 private struct MessageBubblePreviewContainer: View {
