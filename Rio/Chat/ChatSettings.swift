@@ -20,6 +20,7 @@ struct ChatSettings: View {
     @State private var chatNameSelection: TextSelection?
     @State private var isThemePickerPresented = false
     @State private var isAddParticipantPresented = false
+    @State private var participantShowingActions: User?
     @State private var participantPendingRemoval: User?
     @State private var isRemoveParticipantAlertPresented = false
 
@@ -266,18 +267,28 @@ struct ChatSettings: View {
 
     private func participantTileContent(for participant: User) -> some View {
         VStack(spacing: 3) {
-            AvatarView(
-                user: participant,
-                namespace: avatarNamespace,
-                matchedGeometryID: chat.avatarGeometryKey(for: participant),
-                isGeometrySource: true,
-                matchedGeometryAnimation: avatarTransitionAnimation
-            )
-            .glassEffect(.regular.interactive(), in: .circle)
-            .contextMenu {
+            Button {
+                participantShowingActions = participant
+            } label: {
+                AvatarView(
+                    user: participant,
+                    namespace: avatarNamespace,
+                    matchedGeometryID: chat.avatarGeometryKey(for: participant),
+                    isGeometrySource: true,
+                    matchedGeometryAnimation: avatarTransitionAnimation
+                )
+                .glassEffect(.regular.interactive(), in: .circle)
+            }
+            .buttonStyle(.plain)
+            .confirmationDialog(
+                participant.name,
+                isPresented: actionsDialogBinding(for: participant),
+                titleVisibility: .hidden
+            ) {
                 Button(role: .destructive) {
                     participantPendingRemoval = participant
                     isRemoveParticipantAlertPresented = true
+                    participantShowingActions = nil
                 } label: {
                     Label("Remove from Group", systemImage: "xmark")
                 }
@@ -330,6 +341,21 @@ struct ChatSettings: View {
                     participantPendingRemoval = nil
                 } else {
                     isRemoveParticipantAlertPresented = newValue
+                }
+            }
+        )
+    }
+
+    private func actionsDialogBinding(for participant: User) -> Binding<Bool> {
+        Binding(
+            get: {
+                participantShowingActions?.id == participant.id
+            },
+            set: { newValue in
+                if !newValue, participantShowingActions?.id == participant.id {
+                    participantShowingActions = nil
+                } else if newValue {
+                    participantShowingActions = participant
                 }
             }
         )
