@@ -69,12 +69,9 @@ struct ChatSettings: View {
     var body: some View {
         if isPresented {
             NavigationStack {
-                ScrollView {
-                    SimpleForm {
-                        participantsList
-                        settingsSection
-                        destructiveSection
-                    }
+                Form {
+                    settingsSection
+                    destructiveSection
                 }
                 .padding(.top, -20)
                 .scrollContentBackground(.hidden)
@@ -114,12 +111,18 @@ struct ChatSettings: View {
     }
 
     private var participantsList: some View {
-        LazyVGrid(columns: participantGridColumns, spacing: 16) {
-            ForEach(participantsExcludingCurrentUser) { participant in
-                participantTile(for: participant)
-            }
+        VStack {
+            LazyVGrid(columns: participantGridColumns, spacing: 16) {
+                ForEach(participantsExcludingCurrentUser) { participant in
+                    participantTile(for: participant)
+                }
 
-            addParticipantButton
+                addParticipantButton
+            }
+            .padding(.bottom, 20)
+
+            Text("Settings")
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.top, 30)
         .padding(.horizontal, 20)
@@ -160,7 +163,7 @@ struct ChatSettings: View {
     }
 
     private var settingsSection: some View {
-        CustomSection {
+        Section {
             if isGroupChat {
                 LabeledContent {
                     TextField(
@@ -209,12 +212,20 @@ struct ChatSettings: View {
                 Label("Hide alerts", systemImage: "bell.slash")
             }
         } header: {
-            Text("Settings")
+            participantsList
+        } footer: {
+            EmptyView()
         }
+
+//        Section {
+//
+//        } header: {
+//            Text("Settings")
+//        }
     }
 
     private var destructiveSection: some View {
-        CustomSection {
+        Section {
             Button(role: .destructive, action: handleDestructiveAction) {
                 Text(isGroupChat ? "Leave Group" : "Delete Chat")
                     .frame(maxWidth: .infinity)
