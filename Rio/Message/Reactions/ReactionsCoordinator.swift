@@ -207,11 +207,15 @@ final class ReactionsCoordinator {
         closeWorkItems[messageID]?.cancel()
         closeWorkItems.removeValue(forKey: messageID)
 
+        cancelOverlayRemoval(for: messageID)
+
+        guard reactingMessage?.message.id == messageID else {
+            return
+        }
+
         withAnimation(.smooth(duration: ReactionsAnimationTiming.matchedGeometryReturnDuration)) {
             geometrySource = .list
         }
-
-        cancelOverlayRemoval(for: messageID)
 
         let removalWorkItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
