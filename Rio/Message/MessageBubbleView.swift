@@ -338,6 +338,7 @@ struct MessageBubbleView: View {
                     messageID: message.id,
                     selectedImageData: $selectedImageData
                 )
+                .allowsHitTesting(message.content.isEmoji)
                 .padding(.vertical, 4)
                 .opacity(bubbleManager.showTalkingContent ? 1 : 0)
                 .onGeometryChange(for: CGFloat.self) { proxy in
