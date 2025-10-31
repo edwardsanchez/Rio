@@ -156,6 +156,12 @@ struct MessageBubbleView: View {
             .animation(.smooth(duration: 0.2), value: shouldDisplayBubble)
     }
 
+    private var overlayShadowProgress: Double {
+        guard isActiveReactionBubble else { return 0 }
+        guard isReactionsOverlay else { return 0 }
+        return geometrySource == .overlay ? 1 : 0
+    }
+
     private var baseBubbleLayout: some View {
         HStack(alignment: .bottom) {
             if messageType.isInbound {
@@ -335,6 +341,15 @@ struct MessageBubbleView: View {
             animationHeight: nil,
             isVisible: bubbleManager.shouldShowBubbleBackground(for: message.content)
         )
+        .animation(.easeIn) { content in
+            content
+                .shadow(
+                    color: Color.black.opacity(0.28 * overlayShadowProgress),
+                    radius: 28,
+                    x: 0,
+                    y: 0
+                )
+        }
         .reactions(
             messageContext: messageContext,
             isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji
