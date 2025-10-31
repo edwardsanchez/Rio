@@ -60,6 +60,11 @@ struct MessageBubbleContext {
         let current = messages[index]
         let next = messages[index + 1]
         let isNextSameUser = current.user.id == next.user.id
+        let nextIsEmoji = next.content.isEmoji
+
+        if nextIsEmoji {
+            return true
+        }
 
         if current.messageType(currentUser: currentUser).isOutbound {
             return !isNextSameUser
