@@ -10,6 +10,7 @@ import UIKit
 
 struct ChatReaction: View {
     @Environment(ReactionsCoordinator.self) private var coordinator
+    @Environment(ChatData.self) private var chatData
     let bubbleNamespace: Namespace.ID
     @Binding var selectedImageData: ImageData?
 
@@ -24,21 +25,25 @@ struct ChatReaction: View {
 
             VStack {
                 if let context = coordinator.reactingMessage {
-                    VStack(spacing: 4) {
-                        AvatarView(user: context.message.reactions.first!.user)
-                            .frame(width: 60, height: 60)
-                        Text(context.message.reactions.first!.user.name)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2, reservesSpace: true)
-                            .truncationMode(.tail)
+                    let reactions = context.message.reactions.filter { reaction in
+                        reaction.user.id != chatData.currentUser.id
                     }
-                    .overlay(alignment: .topTrailing) {
-                        Text(context.message.reactions.first!.emoji)
-                            .font(.system(size: 34))
-                            .padding(-15)
+
+                    if !reactions.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(alignment: .top, spacing: 16) {
+                                ForEach(reactions) { reaction in
+                                    ReactionParticipantView(
+                                        user: reaction.user,
+                                        emoji: reaction.emoji
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        .scrollClipDisabled()
+                        .padding(.top, 10)
                     }
-                    .padding(.top, 10)
 
                     let overlayContext = context.updatingOverlay(true)
                     let formattedTimestamp = context.message.date.chatTimestampString()
@@ -149,6 +154,29 @@ struct ChatReaction: View {
             isReactionsOverlay: context.isReactionsOverlay,
             selectedImageData: $selectedImageData
         )
+    }
+}
+
+struct ReactionParticipantView: View {
+    let user: User
+    let emoji: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            AvatarView(user: user)
+                .frame(width: 60, height: 60)
+
+            Text(user.name)
+                .font(.caption)
+                .multilineTextAlignment(.center)
+                .lineLimit(2, reservesSpace: true)
+                .truncationMode(.tail)
+        }
+        .overlay(alignment: .topTrailing) {
+            Text(emoji)
+                .font(.system(size: 34))
+                .padding(-15)
+        }
     }
 }
 
