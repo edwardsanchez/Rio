@@ -150,15 +150,6 @@ class TransitionCoordinator {
         return 0
     }
 
-    /// Whether the bubble is in quick appearing mode (read→talking)
-    func isQuickAppearing(at date: Date) -> Bool {
-        if case .quickAppearing = currentState(at: date) {
-            return true
-        }
-
-        return false
-    }
-
     /// Whether size animations should be skipped (for read→talking)
     func shouldSkipSizeAnimation(at date: Date) -> Bool {
         if case .quickAppearing = animationState {

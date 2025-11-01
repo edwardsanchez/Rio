@@ -87,15 +87,6 @@ struct Message: Identifiable {
         }
     }
 
-    // Check if content is text type
-    var hasTextContent: Bool {
-        if case .text = content {
-            true
-        } else {
-            false
-        }
-    }
-
     // Initializer for outbound messages (from current user)
     init(
         id: UUID = UUID(),
