@@ -1,5 +1,5 @@
 //
-//  TypingIndicatorView.swift
+//  􀍠 TypingIndicatorView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/7/25.

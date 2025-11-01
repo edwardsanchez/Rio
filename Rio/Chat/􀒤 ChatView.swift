@@ -1,5 +1,5 @@
 //
-//  ChatDetailView.swift
+//  􀒤 ChatView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 9/24/25.

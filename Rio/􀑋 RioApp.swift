@@ -1,5 +1,5 @@
 //
-//  RioApp.swift
+//  􀑋 RioApp.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 9/19/25.

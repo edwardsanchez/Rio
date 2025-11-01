@@ -1,5 +1,5 @@
 //
-//  AvatarView.swift
+//  􀉭 AvatarView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/24/25.

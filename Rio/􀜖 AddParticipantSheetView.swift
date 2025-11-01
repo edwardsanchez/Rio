@@ -1,5 +1,5 @@
 //
-//  AddParticipantSheetView.swift
+//  􀜖 AddParticipantSheetView.swift
 //  Rio
 //
 //  Created by ChatGPT on 10/30/25.

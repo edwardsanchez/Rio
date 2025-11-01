@@ -1,5 +1,5 @@
 //
-//  MessageStackView.swift
+//  􀘲 MessageStackView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/8/25.

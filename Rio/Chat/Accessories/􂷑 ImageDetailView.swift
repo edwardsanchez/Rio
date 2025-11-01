@@ -1,5 +1,5 @@
 //
-//  ImageDetailView.swift
+//  􂷑 ImageDetailView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/18/25.

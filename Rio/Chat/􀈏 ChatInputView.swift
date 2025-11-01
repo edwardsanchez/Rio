@@ -1,5 +1,5 @@
 //
-//  ChatInputView.swift
+//  􀈏 ChatInputView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 9/27/25.

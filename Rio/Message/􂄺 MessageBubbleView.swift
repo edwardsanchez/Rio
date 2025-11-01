@@ -1,5 +1,5 @@
 //
-//  MessageBubbleView.swift
+//  􂄺 MessageBubbleView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 9/20/25.

@@ -1,5 +1,5 @@
 //
-//  ChatSettingsView.swift
+//  􀣌 ChatSettings.swift
 //  Rio
 //
 //  Created by ChatGPT on 10/29/25.

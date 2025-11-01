@@ -1,5 +1,5 @@
 //
-//  MessageTypes.swift
+//  􁌶 MessageTypes.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/17/25.
