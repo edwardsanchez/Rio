@@ -11,12 +11,15 @@ struct ChatListView: View {
     @Environment(ChatData.self) private var chatData
 
     var body: some View {
-        List(chatData.chats) { chat in
+        List(chatData.chats, id: \.id) { chat in
             NavigationLink(destination: ChatView(chat: chat)) {
                 ChatRowView(chat: chat)
             }
+            .listRowSeparator(.hidden, edges: .top)
         }
+        .listStyle(.plain)
         .navigationTitle("Chats")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -24,28 +27,28 @@ struct ChatRowView: View {
     let chat: Chat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(chat.title)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-
-                Spacer()
-
-                if let lastMessage = chat.messages.last {
-                    Text(lastMessage.date, style: .time)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+        HStack {
+            AvatarStackView(chat: chat, isVertical: false)
+                .frame(width: 50, height: 50)
+                .background {
+                    Circle()
+                        .fill(chat.theme.outboundBackgroundColor.opacity(0.2))
                 }
-            }
 
-            HStack {
-                // Show participant count
-                Text("\(chat.participants.count) participants")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(chat.title)
+                        .font(.headline)
+                        .foregroundColor(.primary)
 
-                Spacer()
+                    Spacer()
+
+                    if let lastMessage = chat.messages.last {
+                        Text(lastMessage.date, style: .time)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 // Show last message preview
                 if let lastMessage = chat.messages.last {

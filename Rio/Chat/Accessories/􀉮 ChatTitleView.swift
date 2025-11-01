@@ -53,6 +53,10 @@ struct ChatTitleView: View {
         }
     }
 
+    private var tintColor: Color {
+        chat.theme.outboundBackgroundColor.opacity(0.1)
+    }
+
     private var title: some View {
         Text(chat.title)
             .padding(.vertical, 3)
@@ -61,21 +65,45 @@ struct ChatTitleView: View {
                 Capsule()
                     .fill(Color.clear)
             }
-            .glassEffect(isVertical ? .identity : .regular.interactive())
+            .glassEffect(isVertical ? .identity : .regular.tint(tintColor).interactive())
             .offset(y: -10)
             .onTapGesture {
                 onTap?()
             }
     }
 
+    private var avatarContent: some View {
+        AvatarStackView(
+            chat: chat,
+            isVertical: isVertical,
+            avatarNamespace: avatarNamespace,
+            isGeometrySource: isGeometrySource,
+            matchedGeometryAnimation: matchedGeometryAnimation
+        )
+        .glassEffect(isVertical ? .identity : .regular.tint(tintColor).interactive())
+        .frame(width: isVertical ? nil : 60, height: isVertical ? nil : 60)
+        .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
+        .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
+    }
+}
+
+struct AvatarStackView: View {
+    @Environment(ChatData.self) private var chatData
+
+    let chat: Chat
+    let isVertical: Bool
+    var avatarNamespace: Namespace.ID?
+    var isGeometrySource: Bool = true
+    var matchedGeometryAnimation: Animation?
+
     private var displayParticipants: [User] {
         chat.participants.filter { $0.id != chatData.currentUser.id }
     }
 
-    private var avatarBase: some View {
+    var body: some View {
         GreedyCircleStack(
             spacing: 3,
-            rimPadding: 3,
+            rimPadding: displayParticipants.count > 2 ? 4 : 2,
             isVertical: isVertical,
             verticalSpacing: 20,
             verticalDiameter: 44
@@ -91,14 +119,6 @@ struct ChatTitleView: View {
                 .id(participant.id)
             }
         }
-        .glassEffect(isVertical ? .identity : .regular.interactive())
-        .frame(width: isVertical ? nil : 60, height: isVertical ? nil : 60)
-        .frame(maxWidth: .infinity, maxHeight: isVertical ? .infinity : nil, alignment: isVertical ? .topLeading : .top)
-    }
-
-    private var avatarContent: some View {
-        avatarBase
-            .frame(maxWidth: .infinity, alignment: isVertical ? .leading : .center)
     }
 }
 
