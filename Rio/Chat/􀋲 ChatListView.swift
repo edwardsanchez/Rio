@@ -9,16 +9,25 @@ import SwiftUI
 
 struct ChatListView: View {
     @Environment(ChatData.self) private var chatData
+    @State private var chatPendingDeletion: Chat?
+    @State private var isDeleteAlertPresented = false
 
     var body: some View {
-        List(chatData.chats, id: \.id) { chat in
-            NavigationLink(destination: ChatView(chat: chat)) {
-                ChatRowView(chat: chat)
+        List {
+            ForEach(chatData.chats, id: \.id) { chat in
+                NavigationLink(destination: ChatView(chat: chat)) {
+                    ChatRowView(chat: chat)
+                }
+                .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
+                .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
             }
-            .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
-            .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
+            .onDelete { indexSet in
+                if let index = indexSet.first {
+                    chatPendingDeletion = chatData.chats[index]
+                    isDeleteAlertPresented = true
+                }
+            }
         }
-
         .listStyle(.plain)
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
@@ -28,9 +37,17 @@ struct ChatListView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button("New", systemImage: "square.and.pencil") {
-
+                    //TODO: Implement New Chat
                 }
             }
+        }
+        .chatDeletionAlert(
+            isPresented: $isDeleteAlertPresented,
+            chat: chatPendingDeletion,
+            currentUser: chatData.currentUser
+        ) { chat in
+            chatData.removeChat(withId: chat.id)
+            chatPendingDeletion = nil
         }
     }
 

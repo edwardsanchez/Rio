@@ -23,6 +23,7 @@ struct ChatSettingsView: View {
     @State private var participantShowingActions: User?
     @State private var participantPendingRemoval: User?
     @State private var isRemoveParticipantAlertPresented = false
+    @State private var isDeleteChatAlertPresented = false
 
     private var isPresented: Bool {
         chatData.isDetailPresented(for: chat.id)
@@ -103,6 +104,14 @@ struct ChatSettingsView: View {
                         }
                     }
                     .presentationDetents([.height(240)])
+                }
+                .chatDeletionAlert(
+                    isPresented: $isDeleteChatAlertPresented,
+                    chat: chat,
+                    currentUser: chatData.currentUser
+                ) { _ in
+                    close()
+                    onDestructiveAction()
                 }
             }
             .transition(
@@ -252,8 +261,7 @@ struct ChatSettingsView: View {
     }
 
     private func handleDestructiveAction() {
-        close()
-        onDestructiveAction()
+        isDeleteChatAlertPresented = true
     }
 
     @ViewBuilder
