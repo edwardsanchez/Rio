@@ -16,16 +16,17 @@
 
 ## Coding Style & Naming Conventions
 - Follow Swift 5.9 defaults: four-space indentation, `UpperCamelCase` for types, `lowerCamelCase` for members, and mark protocol conformances in dedicated extensions when practical.
+- SwiftUI views should always be appended with the name View, like MessageView, ChatView, ReactionView, etc.
 - Prefer SwiftUI composition; keep animation logic in dedicated types (`BubbleAnimationState`, `CircleAnimationManager`) to preserve readability.
 - Document non-obvious behaviors with succinct inline comments and favor `Logger` utilities instead of print statements.
-- Prefer computed properties whenever an API exposes read-only data and doesn’t require inputs. If the body is just returning a stored value, a transformed collection, or any other pure expression, use var foo: T { ... } instead of func foo() -> T.
-  -Keep true functions when the language or protocol demands it (e.g., RandomNumberGenerator.next()), or when call-site syntax should communicate “do work” (async operations, heavy computation, throws, mutating behavior). Those cases can’t be modeled as nonmutating computed properties anyway.
+- Prefer computed properties over functions whenever an API exposes read-only data and doesn’t require inputs. If the body is just returning a stored value, a transformed collection, or any other pure expression, use var `foo: T { ... }` instead of `func foo() -> T`.
+  - Keep true functions when the language or protocol demands it (e.g., `RandomNumberGenerator.next()`), or when call-site syntax should communicate “do work” (async operations, heavy computation, throws, mutating behavior). Those cases can’t be modeled as nonmutating computed properties anyway.
   - Static helpers follow the same rule: expose cached constants or composed values with static var, not static func.
   - When the API needs a result conditioned on parameters, needs to mutate state, or performs significant work that callers should treat as an action, leave it as a function.
-  - In short: “If it’s parameterless, pure, and conceptually a value, make it a computed property; otherwise stick with a function.
+  - In short: If it’s parameterless, pure, and conceptually a value, make it a computed property; otherwise stick with a function.
 - Do not use computed properties that are simply aliases to properties that are inside another struct, unless it adds semantic value.
 - Do not use computed properties with simple logic if it's only being referenced once in the codebase.
-- Things like: .animation(.easeIn) { content in is a real API. Don't fucking mess with it!
+- Things like: `.animation(.easeIn) { content` in is a real API. Don't fucking mess with it!
 
 ## Testing Guidelines
 - No automated tests are checked in yet; introduce `RioTests/` mirroring the source tree and group files by feature (e.g., `Message/BubbleTests`).
@@ -35,5 +36,4 @@
 ## Commit & Pull Request Guidelines
 - Commits in history are short, imperative statements (e.g., “Remove matched Geometry”); continue that style and scope related changes together.
 - Reference tickets with `#123` when applicable and avoid bundling generated `build/` updates.
-- PRs should outline user-facing changes, include before/after screenshots or screen recordings for UI tweaks, and mention impacted files such as `MessageBubbleView.swift`.
-- Link to `TODO.md` items resolved or introduced, and call out follow-up work if animations or assets remain unfinished.
+> 
