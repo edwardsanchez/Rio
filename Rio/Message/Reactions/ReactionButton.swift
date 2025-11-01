@@ -18,7 +18,34 @@ struct ReactionButton: View {
     let reactionNamespace: Namespace.ID
     let matchedGeometryIsSource: Bool
     let visibilityAnimation: Animation?
+    let overlayAlignment: Alignment
     let action: () -> Void
+
+    init(
+        reaction: Reaction,
+        isVisible: Bool,
+        isOverlay: Bool,
+        isSelected: Bool,
+        menuIsShowing: Bool,
+        isCustomEmojiHighlighted: Bool,
+        reactionNamespace: Namespace.ID,
+        matchedGeometryIsSource: Bool,
+        visibilityAnimation: Animation?,
+        overlayAlignment: Alignment = .topTrailing,
+        action: @escaping () -> Void
+    ) {
+        self.reaction = reaction
+        self.isVisible = isVisible
+        self.isOverlay = isOverlay
+        self.isSelected = isSelected
+        self.menuIsShowing = menuIsShowing
+        self.isCustomEmojiHighlighted = isCustomEmojiHighlighted
+        self.reactionNamespace = reactionNamespace
+        self.matchedGeometryIsSource = matchedGeometryIsSource
+        self.visibilityAnimation = visibilityAnimation
+        self.overlayAlignment = overlayAlignment
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
@@ -44,7 +71,7 @@ struct ReactionButton: View {
             in: reactionNamespace,
             isSource: matchedGeometryIsSource
         )
-        .offset(x: isOverlay ? 25 : 0, y: isOverlay ? -20 : 0)
+        .offset(overlayOffset)
         .disabled(!isInteractable)
     }
 
@@ -71,6 +98,21 @@ struct ReactionButton: View {
 
     private var scaleFactor: CGFloat {
         reaction.id == Reaction.customEmojiReactionID && isCustomEmojiHighlighted ? 1.2 : 1
+    }
+
+    private var overlayOffset: CGSize {
+        guard isOverlay else { return .zero }
+
+        switch overlayAlignment {
+        case .topLeading:
+            return CGSize(width: -25, height: -20)
+        case .topTrailing:
+            return CGSize(width: 25, height: -20)
+        case .top:
+            return CGSize(width: 0, height: -20)
+        default:
+            return CGSize(width: 25, height: -20)
+        }
     }
 
     private var isInteractable: Bool {

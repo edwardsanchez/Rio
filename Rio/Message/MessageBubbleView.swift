@@ -309,6 +309,20 @@ struct MessageBubbleView: View {
         )
     }
 
+    private var canShowReactions: Bool {
+        guard !message.content.isEmoji else { return false }
+
+        if messageType.isInbound {
+            return message.bubbleType.isTalking
+        }
+
+        return !message.reactions.isEmpty
+    }
+
+    private var shouldShowReactionError: Bool {
+        message.content.isEmoji || messageType.isOutbound
+    }
+
     private var messageView: some View {
         ZStack(alignment: .leading) {
             Text("H") // Measure Spacer
@@ -352,9 +366,9 @@ struct MessageBubbleView: View {
         }
         .reactions(
             messageContext: messageContext,
-            isAvailable: messageType.isInbound && message.bubbleType.isTalking && !message.content.isEmoji
+            isAvailable: canShowReactions
         )
-        .reactionError(isAvailable: message.content.isEmoji || messageType.isOutbound)
+        .reactionError(isAvailable: shouldShowReactionError)
         .overlay(alignment: .leading) {
             TypingIndicatorView(isVisible: bubbleManager.showTypingIndicatorContent)
                 .padding(.leading, 20)

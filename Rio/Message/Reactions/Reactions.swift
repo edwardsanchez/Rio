@@ -47,6 +47,14 @@ struct ReactionsModifier: ViewModifier {
         )
     }
 
+    private var reactionBadgeAlignment: Alignment {
+        messageContext.messageType.isOutbound ? .topLeading : .topTrailing
+    }
+
+    private var supportsInteractiveMenu: Bool {
+        !messageContext.messageType.isOutbound
+    }
+
     @ViewBuilder
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
@@ -65,7 +73,7 @@ struct ReactionsModifier: ViewModifier {
                         viewSize = newSize
                         reactionsMenuModel.viewSize = newSize
                     }
-                    .overlay(alignment: .topTrailing) {
+                    .overlay(alignment: reactionBadgeAlignment) {
                         if let selectedReaction = reactionsMenuModel.selectedReaction {
                             //Here only for the purposes of geometry matching as it has the right location to appear as
                             //a badge.
@@ -73,7 +81,8 @@ struct ReactionsModifier: ViewModifier {
                                 for: selectedReaction,
                                 isVisible: false,
                                 isOverlay: true,
-                                isSelected: false
+                                isSelected: false,
+                                alignment: reactionBadgeAlignment
                             ) {}
                                 .allowsHitTesting(false)
                         }
@@ -130,7 +139,7 @@ struct ReactionsModifier: ViewModifier {
             } else {
                 content
                     .contentShape(.rect)
-                    .overlay(alignment: .topTrailing) {
+                    .overlay(alignment: reactionBadgeAlignment) {
                         //This is the version that shows up when it's just a badge on the corner, if there's a reaction
                         //for this message.
                         if let selectedReaction = reactionsMenuModel.selectedReaction {
@@ -138,22 +147,15 @@ struct ReactionsModifier: ViewModifier {
                                 for: selectedReaction,
                                 isVisible: true,
                                 isOverlay: true,
-                                isSelected: false
+                                isSelected: false,
+                                alignment: reactionBadgeAlignment
                             ) {
-                                reactionsMenuModel.openReactionsMenu()
-                                reactionsCoordinator.openReactionsMenu(
-                                    with: messageContext,
-                                    menuModel: reactionsMenuModel
+                                openReactionsOverlay(
+                                    reactionsMenuModel: reactionsMenuModel,
+                                    reactionsCoordinator: reactionsCoordinator
                                 )
                             }
                         }
-                    }
-                    .onLongPressGesture {
-                        reactionsMenuModel.openReactionsMenu()
-                        reactionsCoordinator.openReactionsMenu(
-                            with: messageContext,
-                            menuModel: reactionsMenuModel
-                        )
                     }
                     .sensoryFeedback(.impact, trigger: reactionsMenuModel.isShowingReactionMenu)
                     .onAppear {
@@ -165,6 +167,12 @@ struct ReactionsModifier: ViewModifier {
                     .onChange(of: messageContext.message.reactionOptions) { _, _ in
                         updateMenuModelReactionsIfNeeded()
                     }
+                    .modifier(OptionalLongPressModifier(isEnabled: supportsInteractiveMenu) {
+                        openReactionsOverlay(
+                            reactionsMenuModel: reactionsMenuModel,
+                            reactionsCoordinator: reactionsCoordinator
+                        )
+                    })
             }
         } else {
             //For outbound messages since you can't like your own messages
@@ -181,6 +189,7 @@ struct ReactionsModifier: ViewModifier {
         isVisible: Bool,
         isOverlay: Bool,
         isSelected: Bool,
+        alignment: Alignment,
         action: @escaping () -> Void
     ) -> some View {
         ReactionButton(
@@ -193,6 +202,7 @@ struct ReactionsModifier: ViewModifier {
             reactionNamespace: reactionNamespace,
             matchedGeometryIsSource: matchedGeometryIsSource(for: reaction, isOverlay: isOverlay),
             visibilityAnimation: isVisible ? .smooth : nil,
+            overlayAlignment: alignment,
             action: action
         )
     }
@@ -222,6 +232,36 @@ struct ReactionsModifier: ViewModifier {
         let latest = ReactionsModifier.makeReactions(from: messageContext.message)
         if reactionsMenuModel.reactions != latest {
             reactionsMenuModel.reactions = latest
+        }
+    }
+
+    private func openReactionsOverlay(
+        reactionsMenuModel: ReactionsMenuModel,
+        reactionsCoordinator: ReactionsCoordinator
+    ) {
+        if supportsInteractiveMenu {
+            reactionsMenuModel.openReactionsMenu()
+        }
+
+        reactionsCoordinator.openReactionsMenu(
+            with: messageContext,
+            menuModel: reactionsMenuModel
+        )
+    }
+}
+
+private struct OptionalLongPressModifier: ViewModifier {
+    let isEnabled: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        Group {
+            if isEnabled {
+                content
+                    .onLongPressGesture(perform: action)
+            } else {
+                content
+            }
         }
     }
 }

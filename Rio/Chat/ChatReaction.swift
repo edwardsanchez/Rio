@@ -27,23 +27,14 @@ struct ChatReaction: View {
                     let overlayContext = context.updatingOverlay(true)
                     Spacer()
 
-                    MessageBubbleView(
-                        message: overlayContext.message,
-                        showTail: overlayContext.showTail,
-                        theme: overlayContext.theme,
-                        bubbleNamespace: bubbleNamespace,
-                        activeReactingMessageID: coordinator.reactingMessage?.message.id,
-                        geometrySource: coordinator.geometrySource,
-                        isReactionsOverlay: overlayContext.isReactionsOverlay,
-                        selectedImageData: $selectedImageData
-                    )
-                    .padding(.horizontal, 20)
-                    .onAppear {
-                        coordinator.promoteGeometrySourceToOverlay(for: context.message.id)
-                    }
-                    .onDisappear {
-                        coordinator.resetGeometrySourceToList()
-                    }
+                    overlayAlignedBubble(for: overlayContext)
+                        .padding(.horizontal, 20)
+                        .onAppear {
+                            coordinator.promoteGeometrySourceToOverlay(for: context.message.id)
+                        }
+                        .onDisappear {
+                            coordinator.resetGeometrySourceToList()
+                        }
                 }
 
                 Spacer()
@@ -108,5 +99,33 @@ struct ChatReaction: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
         coordinator.closeActiveMenu()
+    }
+
+    @ViewBuilder
+    private func overlayAlignedBubble(for context: MessageBubbleContext) -> some View {
+        if context.messageType.isOutbound {
+            HStack {
+                Spacer()
+                bubbleView(for: context)
+            }
+        } else {
+            HStack {
+                bubbleView(for: context)
+                Spacer()
+            }
+        }
+    }
+
+    private func bubbleView(for context: MessageBubbleContext) -> some View {
+        MessageBubbleView(
+            message: context.message,
+            showTail: context.showTail,
+            theme: context.theme,
+            bubbleNamespace: bubbleNamespace,
+            activeReactingMessageID: coordinator.reactingMessage?.message.id,
+            geometrySource: coordinator.geometrySource,
+            isReactionsOverlay: context.isReactionsOverlay,
+            selectedImageData: $selectedImageData
+        )
     }
 }
