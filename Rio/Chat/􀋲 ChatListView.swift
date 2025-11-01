@@ -15,7 +15,13 @@ struct ChatListView: View {
     var body: some View {
         List {
             ForEach(chatData.chats, id: \.id) { chat in
-                NavigationLink(destination: ChatView(chat: chat)) {
+                ZStack {
+                    //Invisible Navigation to hide chevron
+                    NavigationLink(destination: ChatView(chat: chat)) {
+                        EmptyView()
+                    }
+                    .opacity(0)
+
                     ChatRowView(chat: chat)
                 }
                 .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
@@ -152,6 +158,9 @@ struct ChatRowView: View {
                                 .opacity(isAlertHidden ? 1 : 0)
 
                             Text(lastMessage.date, style: .time)
+                            Image(systemName: "chevron.right")
+                                .padding(.leading, 4)
+                                .fontWeight(.medium)
                         }
                         .font(.caption)
                         .foregroundColor(.secondary)
