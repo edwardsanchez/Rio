@@ -20,6 +20,17 @@ struct ChatListView: View {
                 }
                 .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
                 .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        toggleAlerts(for: chat)
+                    } label: {
+                        Label(
+                            isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
+                            systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
+                        )
+                    }
+                    .tint(isChatMuted(chat) ? .indigo : .purple)
+                }
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
                         chatPendingDeletion = chat
@@ -32,6 +43,15 @@ struct ChatListView: View {
                     }
                 }
                 .contextMenu {
+                    Button {
+                        toggleAlerts(for: chat)
+                    } label: {
+                        Label(
+                            isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
+                            systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
+                        )
+                    }
+
                     Button(role: .destructive) {
                         chatPendingDeletion = chat
                         isDeleteAlertPresented = true
@@ -119,7 +139,9 @@ struct ChatRowView: View {
                     if let lastMessage = chat.messages.last {
                         HStack(spacing: 3) {
                             Image(systemName: isAlertHidden ? "bell.slash.fill" : "bell.fill")
+                                .opacity(isAlertHidden ? 1 : 0)
                                 .contentTransition(.symbolEffect(.replace))
+                                .animation(.smooth, value: isAlertHidden)
 
                             Text(lastMessage.date, style: .time)
                         }
