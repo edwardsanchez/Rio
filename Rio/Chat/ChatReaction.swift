@@ -30,18 +30,21 @@ struct ChatReaction: View {
                     }
 
                     if !reactions.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(alignment: .top, spacing: 16) {
-                                ForEach(reactions) { reaction in
-                                    ReactionParticipantView(
-                                        user: reaction.user,
-                                        emoji: reaction.emoji
-                                    )
-                                }
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: 20) {
+                                reactionsRowContent(for: reactions)
                             }
                             .padding(.horizontal, 20)
+                            .frame(maxWidth: .infinity, alignment: .center)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(alignment: .top, spacing: 16) {
+                                    reactionsRowContent(for: reactions)
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                            .scrollClipDisabled()
                         }
-                        .scrollClipDisabled()
                         .padding(.top, 10)
                     }
 
@@ -154,6 +157,15 @@ struct ChatReaction: View {
             isReactionsOverlay: context.isReactionsOverlay,
             selectedImageData: $selectedImageData
         )
+    }
+
+    private func reactionsRowContent(for reactions: [MessageReaction]) -> some View {
+        ForEach(reactions) { reaction in
+            ReactionParticipantView(
+                user: reaction.user,
+                emoji: reaction.emoji
+            )
+        }
     }
 }
 
