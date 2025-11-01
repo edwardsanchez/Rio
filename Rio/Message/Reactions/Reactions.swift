@@ -55,6 +55,18 @@ struct ReactionsModifier: ViewModifier {
         !messageContext.messageType.isOutbound
     }
 
+    private var fallbackMessageReaction: Reaction? {
+        guard let messageReaction = messageContext.message.reactions.last else { return nil }
+        let emoji = messageReaction.emoji.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !emoji.isEmpty else { return nil }
+
+        return Reaction(
+            id: "message-reaction-\(messageContext.message.id.uuidString)",
+            display: .emoji(value: emoji, fontSize: 24),
+            selectedEmoji: emoji
+        )
+    }
+
     @ViewBuilder
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
@@ -74,14 +86,14 @@ struct ReactionsModifier: ViewModifier {
                         reactionsMenuModel.viewSize = newSize
                     }
                     .overlay(alignment: reactionBadgeAlignment) {
-                        if let selectedReaction = reactionsMenuModel.selectedReaction {
+                        if let badgeReaction = resolvedBadgeReaction(from: reactionsMenuModel) {
                             //Here only for the purposes of geometry matching as it has the right location to appear as
                             //a badge.
                             reactionButton(
-                                for: selectedReaction,
+                                for: badgeReaction,
                                 isVisible: false,
                                 isOverlay: true,
-                                isSelected: false,
+                                isSelected: reactionsMenuModel.selectedReaction?.id == badgeReaction.id,
                                 alignment: reactionBadgeAlignment
                             ) {}
                                 .allowsHitTesting(false)
@@ -142,12 +154,12 @@ struct ReactionsModifier: ViewModifier {
                     .overlay(alignment: reactionBadgeAlignment) {
                         //This is the version that shows up when it's just a badge on the corner, if there's a reaction
                         //for this message.
-                        if let selectedReaction = reactionsMenuModel.selectedReaction {
+                        if let badgeReaction = resolvedBadgeReaction(from: reactionsMenuModel) {
                             reactionButton(
-                                for: selectedReaction,
+                                for: badgeReaction,
                                 isVisible: true,
                                 isOverlay: true,
-                                isSelected: false,
+                                isSelected: reactionsMenuModel.selectedReaction?.id == badgeReaction.id,
                                 alignment: reactionBadgeAlignment
                             ) {
                                 openReactionsOverlay(
@@ -167,12 +179,12 @@ struct ReactionsModifier: ViewModifier {
                     .onChange(of: messageContext.message.reactionOptions) { _, _ in
                         updateMenuModelReactionsIfNeeded()
                     }
-                    .modifier(OptionalLongPressModifier(isEnabled: supportsInteractiveMenu) {
+                    .onLongPressGesture {
                         openReactionsOverlay(
                             reactionsMenuModel: reactionsMenuModel,
                             reactionsCoordinator: reactionsCoordinator
                         )
-                    })
+                    }
             }
         } else {
             //For outbound messages since you can't like your own messages
@@ -248,21 +260,13 @@ struct ReactionsModifier: ViewModifier {
             menuModel: reactionsMenuModel
         )
     }
-}
 
-private struct OptionalLongPressModifier: ViewModifier {
-    let isEnabled: Bool
-    let action: () -> Void
-
-    func body(content: Content) -> some View {
-        Group {
-            if isEnabled {
-                content
-                    .onLongPressGesture(perform: action)
-            } else {
-                content
-            }
+    private func resolvedBadgeReaction(from menuModel: ReactionsMenuModel) -> Reaction? {
+        if let selected = menuModel.selectedReaction {
+            return selected
         }
+
+        return fallbackMessageReaction
     }
 }
 

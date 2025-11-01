@@ -316,11 +316,11 @@ struct MessageBubbleView: View {
             return message.bubbleType.isTalking
         }
 
-        return !message.reactions.isEmpty
+        return true
     }
 
     private var shouldShowReactionError: Bool {
-        message.content.isEmoji || messageType.isOutbound
+        message.content.isEmoji
     }
 
     private var messageView: some View {
