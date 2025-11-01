@@ -65,7 +65,10 @@ struct ChatReaction: View {
                         .safeAreaPadding(.all)
                         .font(.footnote.bold())
                         .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: overlayContext.messageType.isInbound ? .leading : .trailing)
+                        .frame(
+                            maxWidth: .infinity,
+                            alignment: overlayContext.messageType.isInbound ? .leading : .trailing
+                        )
                         .padding(.leading, overlayContext.messageType.isInbound ? 47 : 8)
                         .padding(.trailing, 8)
                 }
@@ -83,7 +86,9 @@ struct ChatReaction: View {
             }
             .padding(.bottom, 20)
             .ignoresSafeArea(.container, edges: .bottom)
-            .animation(.smooth, value: coordinator.isBackgroundDimmerVisible)
+            .animation(.smooth) { content in
+                content.opacity(coordinator.isBackgroundDimmerVisible ? 1 : 0)
+            }
         }
     }
 
