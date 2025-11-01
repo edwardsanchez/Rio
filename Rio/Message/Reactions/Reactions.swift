@@ -289,7 +289,7 @@ struct ReactionsModifier: ViewModifier {
 
         if let lastMessageReaction,
            let topReaction = reaction(from: lastMessageReaction) {
-            let bottomReaction = secondToLastMessageReaction.flatMap(reaction(from:)) ?? fallbackMessageReaction
+            let bottomReaction = secondToLastMessageReaction.flatMap(reaction(from:))
             return BadgeReactionStack(top: topReaction, bottom: bottomReaction)
         }
 
@@ -311,13 +311,13 @@ struct ReactionsModifier: ViewModifier {
     private func badgeOffset(for alignment: Alignment) -> CGSize {
         switch alignment {
         case .topLeading:
-            CGSize(width: -25, height: -20)
+            CGSize(width: -15, height: -20)
         case .topTrailing:
-            CGSize(width: 25, height: -20)
+            CGSize(width: 15, height: -20)
         case .top:
             CGSize(width: 0, height: -20)
         default:
-            CGSize(width: 25, height: -20)
+            CGSize(width: 15, height: -20)
         }
     }
 }
@@ -335,12 +335,12 @@ private struct BadgeReactionStackView: View {
     let matchedGeometrySourceProvider: (Reaction) -> Bool
     let selectedReactionId: Reaction.ID?
 
-    private let topOffset = CGSize(width: 6, height: 0)
-    private let bottomOffset = CGSize(width: 0, height: 0)
+    private let topOffset = CGSize(width: 0, height: 0)
+    private let bottomOffset = CGSize(width: -6, height: 0)
 
     var body: some View {
-        ZStack {
-            if let bottom = stack.bottom {
+        if let bottom = stack.bottom {
+            ZStack {
                 ReactionBadgeIcon(
                     reaction: bottom,
                     isSelected: selectedReactionId == bottom.id,
@@ -350,8 +350,18 @@ private struct BadgeReactionStackView: View {
                     matchedGeometryIsSource: false
                 )
                 .offset(bottomOffset)
-            }
 
+                ReactionBadgeIcon(
+                    reaction: stack.top,
+                    isSelected: selectedReactionId == stack.top.id,
+                    menuIsShowing: menuIsShowing,
+                    isCustomEmojiHighlighted: isCustomEmojiHighlighted,
+                    reactionNamespace: reactionNamespace,
+                    matchedGeometryIsSource: matchedGeometrySourceProvider(stack.top)
+                )
+                .offset(topOffset)
+            }
+        } else {
             ReactionBadgeIcon(
                 reaction: stack.top,
                 isSelected: selectedReactionId == stack.top.id,
@@ -360,7 +370,6 @@ private struct BadgeReactionStackView: View {
                 reactionNamespace: reactionNamespace,
                 matchedGeometryIsSource: matchedGeometrySourceProvider(stack.top)
             )
-            .offset(topOffset)
         }
     }
 }
@@ -384,6 +393,7 @@ private struct ReactionBadgeIcon: View {
                     .animation(.smooth, value: isSelected)
                     .scaleEffect(scaleFactor)
                     .glassEffect(.regular, in: .circle)
+                    .glassEffectTransition(.materialize)
             }
             .matchedGeometryEffect(
                 id: reaction.id,

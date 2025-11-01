@@ -50,6 +50,7 @@ struct ChatReaction: View {
 
                     let overlayContext = context.updatingOverlay(true)
                     let formattedTimestamp = context.message.date.chatTimestampString()
+                    
                     Spacer()
 
                     overlayAlignedBubble(for: overlayContext)
