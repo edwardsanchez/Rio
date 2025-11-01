@@ -72,6 +72,16 @@ struct ChatListView: View {
         chat.participants.count > 2
     }
 
+    private func isChatMuted(_ chat: Chat) -> Bool {
+        chatData.isChatMuted(chat.id)
+    }
+
+    private func toggleAlerts(for chat: Chat) {
+        let isMuted = isChatMuted(chat)
+        chatData.setChatMuted(chat.id, isMuted: !isMuted)
+        // TODO: Connect hide alerts toggle to notification preferences
+    }
+
     private func isFirstChat(_ chat: Chat) -> Bool {
         chatData.chats.first?.id == chat.id
     }
@@ -83,6 +93,11 @@ struct ChatListView: View {
 
 struct ChatRowView: View {
     let chat: Chat
+    @Environment(ChatData.self) private var chatData
+
+    private var isAlertHidden: Bool {
+        chatData.isChatMuted(chat.id)
+    }
 
     var body: some View {
         HStack {
@@ -102,9 +117,14 @@ struct ChatRowView: View {
                     Spacer()
 
                     if let lastMessage = chat.messages.last {
-                        Text(lastMessage.date, style: .time)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 3) {
+                            Image(systemName: isAlertHidden ? "bell.slash.fill" : "bell.fill")
+                                .contentTransition(.symbolEffect(.replace))
+
+                            Text(lastMessage.date, style: .time)
+                        }
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
                 }
 
