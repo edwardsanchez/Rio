@@ -20,6 +20,17 @@ struct ChatListView: View {
                 }
                 .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
                 .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        chatPendingDeletion = chat
+                        isDeleteAlertPresented = true
+                    } label: {
+                        Label(
+                            isGroupChat(chat) ? "Leave" : "Delete",
+                            systemImage: isGroupChat(chat) ? "xmark" : "trash"
+                        )
+                    }
+                }
                 .contextMenu {
                     Button(role: .destructive) {
                         chatPendingDeletion = chat
@@ -30,12 +41,6 @@ struct ChatListView: View {
                             systemImage: "xmark"
                         )
                     }
-                }
-            }
-            .onDelete { indexSet in
-                if let index = indexSet.first {
-                    chatPendingDeletion = chatData.chats[index]
-                    isDeleteAlertPresented = true
                 }
             }
         }
