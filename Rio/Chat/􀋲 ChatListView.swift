@@ -28,6 +28,13 @@ struct ChatListView: View {
                 .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                     Button {
+                        toggleReadStatus(for: chat)
+                    } label: {
+                        Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                    }
+                    .tint(.blue)
+
+                    Button {
                         toggleAlerts(for: chat)
                     } label: {
                         Label(
@@ -35,7 +42,7 @@ struct ChatListView: View {
                             systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
                         )
                     }
-                    .tint(isChatMuted(chat) ? .indigo : .purple)
+                    .tint(.indigo)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
@@ -49,6 +56,12 @@ struct ChatListView: View {
                     }
                 }
                 .contextMenu {
+                    Button {
+                        toggleReadStatus(for: chat)
+                    } label: {
+                        Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                    }
+
                     Button {
                         toggleAlerts(for: chat)
                     } label: {
@@ -102,10 +115,22 @@ struct ChatListView: View {
         chatData.isChatMuted(chat.id)
     }
 
+    private func hasUnreadMessages(_ chat: Chat) -> Bool {
+        chat.hasUnreadMessages(for: chatData.currentUser)
+    }
+
     private func toggleAlerts(for chat: Chat) {
         let isMuted = isChatMuted(chat)
         chatData.setChatMuted(chat.id, isMuted: !isMuted)
         // TODO: Connect hide alerts toggle to notification preferences
+    }
+
+    private func toggleReadStatus(for chat: Chat) {
+        if hasUnreadMessages(chat) {
+            chatData.markChatAsRead(chat.id)
+        } else {
+            chatData.markChatAsUnread(chat.id)
+        }
     }
 
     private func isFirstChat(_ chat: Chat) -> Bool {
@@ -137,8 +162,9 @@ struct ChatRowView: View {
                     if chat.hasUnreadMessages(for: chatData.currentUser) {
                         Circle()
                             .fill(chat.theme.outboundBackgroundColor)
-                            .frame(width: 12, height: 12)
-                            .offset(x: -16)
+                            .frame(width: 10, height: 10)
+                            .offset(x: -14)
+                            .transition(.scale.animation(.smooth))
                     }
                 }
                 .padding(.leading, 10)

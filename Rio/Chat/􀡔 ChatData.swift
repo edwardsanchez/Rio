@@ -206,6 +206,18 @@ class ChatData {
         // TODO: Connect hide alerts toggle to notification preferences
     }
 
+    func markChatAsRead(_ chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        let chat = chats[chatIndex]
+        chats[chatIndex] = chat.markingAllAsRead(for: currentUser)
+    }
+
+    func markChatAsUnread(_ chatId: UUID) {
+        guard let chatIndex = chats.firstIndex(where: { $0.id == chatId }) else { return }
+        let chat = chats[chatIndex]
+        chats[chatIndex] = chat.markingAsUnread(for: currentUser)
+    }
+
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
         var indicatorSet = activeTypingIndicators[chatId] ?? []
         if visible {

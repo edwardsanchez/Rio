@@ -87,6 +87,50 @@ extension Chat {
             return "\(otherParticipants.count) people"
         }
     }
+
+    /// Returns a new Chat with all messages marked as read by the current user
+    func markingAllAsRead(for currentUser: User) -> Chat {
+        let updatedMessages = messages.map { message in
+            var updatedMessage = message
+            if !updatedMessage.isReadByUser.contains(where: { $0.id == currentUser.id }) {
+                updatedMessage.isReadByUser.append(currentUser)
+            }
+            return updatedMessage
+        }
+
+        return Chat(
+            id: id,
+            title: title,
+            participants: participants,
+            messages: updatedMessages,
+            theme: theme,
+            currentUser: currentUser
+        )
+    }
+
+    /// Returns a new Chat with the last message from another user marked as unread
+    func markingAsUnread(for currentUser: User) -> Chat {
+        guard let lastInboundMessage = messages.last(where: { $0.user.id != currentUser.id }) else {
+            return self
+        }
+
+        let updatedMessages = messages.map { message in
+            var updatedMessage = message
+            if message.id == lastInboundMessage.id {
+                updatedMessage.isReadByUser.removeAll { $0.id == currentUser.id }
+            }
+            return updatedMessage
+        }
+
+        return Chat(
+            id: id,
+            title: title,
+            participants: participants,
+            messages: updatedMessages,
+            theme: theme,
+            currentUser: currentUser
+        )
+    }
 }
 
 struct ChatAvatarGeometryKey: Hashable {
