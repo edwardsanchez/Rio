@@ -20,6 +20,17 @@ struct ChatListView: View {
                 }
                 .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
                 .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
+                .contextMenu {
+                    Button(role: .destructive) {
+                        chatPendingDeletion = chat
+                        isDeleteAlertPresented = true
+                    } label: {
+                        Label(
+                            isGroupChat(chat) ? "Leave Group" : "Delete Chat",
+                            systemImage: "xmark"
+                        )
+                    }
+                }
             }
             .onDelete { indexSet in
                 if let index = indexSet.first {
@@ -32,9 +43,10 @@ struct ChatListView: View {
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                EditButton()
-            }
+            //Leave commented out for now
+//            ToolbarItem(placement: .topBarTrailing) {
+//                EditButton()
+//            }
             ToolbarItem(placement: .topBarLeading) {
                 Button("New", systemImage: "square.and.pencil") {
                     //TODO: Implement New Chat
@@ -49,6 +61,10 @@ struct ChatListView: View {
             chatData.removeChat(withId: chat.id)
             chatPendingDeletion = nil
         }
+    }
+
+    private func isGroupChat(_ chat: Chat) -> Bool {
+        chat.participants.count > 2
     }
 
     private func isFirstChat(_ chat: Chat) -> Bool {
