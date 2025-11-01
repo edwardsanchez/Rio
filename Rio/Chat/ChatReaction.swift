@@ -160,8 +160,9 @@ struct ChatReaction: View {
     }
 
     private func reactionsRowContent(for reactions: [MessageReaction]) -> some View {
-        ForEach(reactions) { reaction in
+        ForEach(Array(reactions.enumerated()), id: \.element.id) { index, reaction in
             ReactionParticipantView(
+                index: index,
                 user: reaction.user,
                 emoji: reaction.emoji
             )
@@ -170,24 +171,42 @@ struct ChatReaction: View {
 }
 
 struct ReactionParticipantView: View {
+    let index: Int
     let user: User
     let emoji: String
+
+    @State private var isShowing = false
+
+    var delay: Double {
+        return 0.1 * Double(index)
+    }
 
     var body: some View {
         VStack(spacing: 4) {
             AvatarView(user: user)
                 .frame(width: 60, height: 60)
+                .scaleEffect(isShowing ? 1.0 : 0.5)
+                .opacity(isShowing ? 1.0 : 0)
+                .animation(.bouncy.delay(delay), value: isShowing)
+                .overlay(alignment: .topTrailing) {
+                    Text(emoji)
+                        .font(.system(size: 34))
+                        .padding(-15)
+                        .scaleEffect(isShowing ? 1.0 : 0.5)
+                        .opacity(isShowing ? 1.0 : 0)
+                        .animation(.bouncy.delay(delay + 0.1), value: isShowing)
+                }
 
             Text(user.name)
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .lineLimit(2, reservesSpace: true)
                 .truncationMode(.tail)
+                .opacity(isShowing ? 1.0 : 0)
+                .animation(.bouncy.delay(delay), value: isShowing)
         }
-        .overlay(alignment: .topTrailing) {
-            Text(emoji)
-                .font(.system(size: 34))
-                .padding(-15)
+        .onAppear {
+            isShowing = true
         }
     }
 }
@@ -281,7 +300,7 @@ private struct ChatReactionPreviewContainer: View {
                     emoji: selectedEmoji
                 ),
                 MessageReaction(
-                    user: sampleUsers.zoe,
+                    user: sampleUsers.sophia,
                     date: Date(timeIntervalSinceReferenceDate: 1200),
                     emoji: "🔥"
                 ),
