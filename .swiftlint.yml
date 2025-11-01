@@ -87,6 +87,6 @@ custom_rules:
     included:
       - ".*\\.swift"
     name: "Blank Line Before Doc Comment"
-    regex: "(?m)^[ \\t]*[^/\\s}][^\\n]*\\n[ \\t]*///"
-    message: "Insert a blank line before documentation comments unless they immediately follow a closing brace or another comment."
+    regex: "(?m)^[ \\t]*(?!.*//.*$)(?!.*\\bin\\s*$)(?!.*\\{\\s*$)[^/\\s}][^\\n]*\\n[ \\t]*///"
+    message: "Insert a blank line before documentation comments unless they immediately follow a brace, another comment, or a closure `in` line."
     severity: warning
