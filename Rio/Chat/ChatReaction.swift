@@ -50,7 +50,7 @@ struct ChatReaction: View {
 
                     let overlayContext = context.updatingOverlay(true)
                     let formattedTimestamp = context.message.date.chatTimestampString()
-                    
+
                     Spacer()
 
                     overlayAlignedBubble(for: overlayContext)
@@ -176,26 +176,45 @@ struct ReactionParticipantView: View {
     let user: User
     let emoji: String
 
-    @State private var isShowing = false
+    @Environment(ReactionsCoordinator.self) private var coordinator
 
-    var delay: Double {
+    @State private var isShowing = false
+    @State private var isDismissing = false
+    @State private var resetWorkItem: DispatchWorkItem?
+
+    private var delay: Double {
         0.1 * Double(index)
+    }
+
+    private var verticalOffset: CGFloat {
+        if isDismissing {
+            return -200
+        }
+
+        return isShowing ? 0 : 16
+    }
+
+    private var disappearAnimation: Animation {
+        .easeIn(duration: 0.2)
+            .delay(delay * 0.5)
     }
 
     var body: some View {
         VStack(spacing: 4) {
             AvatarView(user: user)
                 .frame(width: 60, height: 60)
-                .scaleEffect(isShowing ? 1.0 : 0.5)
-                .opacity(isShowing ? 1.0 : 0)
+                .scaleEffect(isDismissing ? 1.0 : (isShowing ? 1.0 : 0.5))
+                .opacity(opacityValue)
                 .animation(.bouncy.delay(delay), value: isShowing)
+                .animation(disappearAnimation, value: isDismissing)
                 .overlay(alignment: .topTrailing) {
                     Text(emoji)
                         .font(.system(size: 34))
                         .padding(-15)
-                        .scaleEffect(isShowing ? 1.0 : 0.5)
-                        .opacity(isShowing ? 1.0 : 0)
+                        .scaleEffect(isDismissing ? 0.85 : (isShowing ? 1.0 : 0.5))
+                        .opacity(opacityValue)
                         .animation(.bouncy.delay(delay + 0.1), value: isShowing)
+                        .animation(disappearAnimation, value: isDismissing)
                 }
 
             Text(user.name)
@@ -203,12 +222,74 @@ struct ReactionParticipantView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2, reservesSpace: true)
                 .truncationMode(.tail)
-                .opacity(isShowing ? 1.0 : 0)
+                .opacity(opacityValue)
                 .animation(.bouncy.delay(delay), value: isShowing)
+                .animation(disappearAnimation, value: isDismissing)
         }
+        .offset(y: verticalOffset)
+        .animation(.bouncy.delay(delay), value: isShowing)
+        .animation(disappearAnimation, value: isDismissing)
         .onAppear {
+            cancelReset()
+            isDismissing = false
             isShowing = true
         }
+        .onDisappear {
+            cancelReset()
+            resetState(animated: false)
+        }
+        .onChange(of: coordinator.isBackgroundDimmerVisible) { _, isDimmerVisible in
+            if isDimmerVisible {
+                prepareForPresentation()
+            } else {
+                animateDismissal()
+            }
+        }
+    }
+
+    private var opacityValue: Double {
+        isDismissing ? 0.5 : (isShowing ? 1.0 : 0)
+    }
+
+    private func prepareForPresentation() {
+        cancelReset()
+        guard !isShowing else { return }
+        isDismissing = false
+        isShowing = true
+    }
+
+    private func animateDismissal() {
+        guard !isDismissing else { return }
+        cancelReset()
+        withAnimation(disappearAnimation) {
+            isDismissing = true
+        }
+
+        let resetDelay = ReactionsAnimationTiming.matchedGeometryReturnDuration + delay * 0.5
+        let workItem = DispatchWorkItem {
+            resetState(animated: false)
+        }
+        resetWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + resetDelay, execute: workItem)
+    }
+
+    private func resetState(animated: Bool) {
+        var transaction = Transaction()
+        if !animated {
+            transaction.disablesAnimations = true
+        }
+
+        withTransaction(transaction) {
+            isShowing = false
+            isDismissing = false
+        }
+
+        resetWorkItem = nil
+    }
+
+    private func cancelReset() {
+        resetWorkItem?.cancel()
+        resetWorkItem = nil
     }
 }
 
