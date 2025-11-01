@@ -67,8 +67,17 @@ struct ChatInputView: View {
     var inputField: some View {
         GlassEffectContainer {
             HStack(spacing: 2) {
-                Button {
-                    //TODO: Implement
+                Menu {
+                    Button {
+                        //TODO: Implement ability to attach photo
+                    } label: {
+                        Label("Photo", systemImage: "photo.on.rectangle.angled")
+                    }
+                    Button {
+                        //TODO: Implement ability to take photo
+                    } label: {
+                        Label("Camera", systemImage: "camera")
+                    }
                 } label: {
                     Image(systemName: "plus")
                         .imageScale(.large)
