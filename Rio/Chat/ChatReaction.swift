@@ -25,6 +25,7 @@ struct ChatReaction: View {
             VStack {
                 if let context = coordinator.reactingMessage {
                     let overlayContext = context.updatingOverlay(true)
+                    let formattedTimestamp = context.message.date.chatTimestampString()
                     Spacer()
 
                     overlayAlignedBubble(for: overlayContext)
@@ -35,6 +36,11 @@ struct ChatReaction: View {
                         .onDisappear {
                             coordinator.resetGeometrySourceToList()
                         }
+
+                    Text(formattedTimestamp)
+                        .safeAreaPadding(.all)
+                        .font(.footnote.bold())
+                        .foregroundStyle(.secondary)
                 }
 
                 Spacer()
@@ -49,7 +55,7 @@ struct ChatReaction: View {
                 }
             }
             .padding(.bottom, 20)
-            .ignoresSafeArea()
+            .ignoresSafeArea(.container, edges: .bottom)
             .animation(.smooth, value: coordinator.isBackgroundDimmerVisible)
         }
     }

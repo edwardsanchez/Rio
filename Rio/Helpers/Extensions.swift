@@ -87,6 +87,51 @@ public extension Int {
     init(value: CGFloat) { self = Int(value) }
 }
 
+// MARK: - Date Extension
+
+public extension Date {
+    func chatTimestampString(
+        relativeTo referenceDate: Date = .now,
+        calendar inputCalendar: Calendar = .current,
+        locale: Locale = .current
+    ) -> String {
+        var calendar = inputCalendar
+        calendar.locale = locale
+
+        let timeFormatter = DateFormatter()
+        timeFormatter.locale = locale
+        timeFormatter.calendar = calendar
+        timeFormatter.timeZone = calendar.timeZone
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
+
+        let timeString = timeFormatter.string(from: self)
+
+        let referenceStartOfDay = calendar.startOfDay(for: referenceDate)
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: referenceStartOfDay),
+           calendar.isDate(self, inSameDayAs: referenceDate) || calendar.isDate(self, inSameDayAs: yesterday) {
+            let relativeFormatter = RelativeDateTimeFormatter()
+            relativeFormatter.locale = locale
+            relativeFormatter.calendar = calendar
+            relativeFormatter.dateTimeStyle = .named
+            relativeFormatter.unitsStyle = .full
+            let relativeString = relativeFormatter.localizedString(for: self, relativeTo: referenceDate)
+            return "\(relativeString.localizedCapitalized), \(timeString)"
+        }
+
+        let includeYear = !calendar.isDate(self, equalTo: referenceDate, toGranularity: .year)
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = locale
+        dateFormatter.calendar = calendar
+        dateFormatter.timeZone = calendar.timeZone
+        let template = includeYear ? "MMMMdyyyy" : "MMMMd"
+        dateFormatter.setLocalizedDateFormatFromTemplate(template)
+        let dateString = dateFormatter.string(from: self)
+
+        return "\(dateString), \(timeString)"
+    }
+}
+
 // MARK: - CGFloat Extension
 
 public extension CGFloat {
