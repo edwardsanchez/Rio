@@ -86,17 +86,18 @@ struct ReactionsModifier: ViewModifier {
                         reactionsMenuModel.viewSize = newSize
                     }
                     .overlay(alignment: reactionBadgeAlignment) {
-                        if let badgeReaction = resolvedBadgeReaction(from: reactionsMenuModel) {
-                            //Here only for the purposes of geometry matching as it has the right location to appear as
-                            //a badge.
-                            reactionButton(
-                                for: badgeReaction,
-                                isVisible: false,
-                                isOverlay: true,
-                                isSelected: reactionsMenuModel.selectedReaction?.id == badgeReaction.id,
-                                alignment: reactionBadgeAlignment
-                            ) {}
-                                .allowsHitTesting(false)
+                        if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
+                            BadgeReactionStackView(
+                                stack: badgeStack,
+                                reactionNamespace: reactionNamespace,
+                                menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
+                                isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
+                                matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: true) },
+                                selectedReactionId: reactionsMenuModel.selectedReaction?.id
+                            )
+                            .opacity(0)
+                            .offset(badgeOffset(for: reactionBadgeAlignment))
+                            .allowsHitTesting(false)
                         }
                     }
                     .background {
@@ -152,21 +153,25 @@ struct ReactionsModifier: ViewModifier {
                 content
                     .contentShape(.rect)
                     .overlay(alignment: reactionBadgeAlignment) {
-                        //This is the version that shows up when it's just a badge on the corner, if there's a reaction
-                        //for this message.
-                        if let badgeReaction = resolvedBadgeReaction(from: reactionsMenuModel) {
-                            reactionButton(
-                                for: badgeReaction,
-                                isVisible: true,
-                                isOverlay: true,
-                                isSelected: reactionsMenuModel.selectedReaction?.id == badgeReaction.id,
-                                alignment: reactionBadgeAlignment
-                            ) {
+                        let selectedId = reactionsMenuModel.selectedReaction?.id
+                        if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
+                            Button {
                                 openReactionsOverlay(
                                     reactionsMenuModel: reactionsMenuModel,
                                     reactionsCoordinator: reactionsCoordinator
                                 )
+                            } label: {
+                                BadgeReactionStackView(
+                                    stack: badgeStack,
+                                    reactionNamespace: reactionNamespace,
+                                    menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
+                                    isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
+                                    matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: false)
+                                    },
+                                    selectedReactionId: selectedId
+                                )
                             }
+                            .offset(badgeOffset(for: reactionBadgeAlignment))
                         }
                     }
                     .sensoryFeedback(.impact, trigger: reactionsMenuModel.isShowingReactionMenu)
@@ -261,12 +266,155 @@ struct ReactionsModifier: ViewModifier {
         )
     }
 
-    private func resolvedBadgeReaction(from menuModel: ReactionsMenuModel) -> Reaction? {
-        if let selected = menuModel.selectedReaction {
-            return selected
+    private func resolvedBadgeReactionStack(from menuModel: ReactionsMenuModel) -> BadgeReactionStack? {
+        let messageReactions = messageContext.message.reactions
+        let selectedReaction = menuModel.selectedReaction
+
+        let currentUserMessageReaction = messageReactions.last { $0.user.id == chatData.currentUser.id }
+        let currentUserReaction = selectedReaction ?? currentUserMessageReaction.flatMap(reaction(from:))
+
+        let lastMessageReaction = messageReactions.last
+        let secondToLastMessageReaction = messageReactions.dropLast().last
+
+        if let currentUserReaction {
+            let bottomMessageReaction = messageReactions.last { reaction in
+                guard let currentUserMessageReaction else { return true }
+                return reaction.id != currentUserMessageReaction.id
+            }
+
+            let bottomReaction = bottomMessageReaction.flatMap(reaction(from:))
+
+            return BadgeReactionStack(top: currentUserReaction, bottom: bottomReaction)
         }
 
-        return fallbackMessageReaction
+        if let lastMessageReaction,
+           let topReaction = reaction(from: lastMessageReaction) {
+            let bottomReaction = secondToLastMessageReaction.flatMap(reaction(from:)) ?? fallbackMessageReaction
+            return BadgeReactionStack(top: topReaction, bottom: bottomReaction)
+        }
+
+        guard let fallback = fallbackMessageReaction else { return nil }
+        return BadgeReactionStack(top: fallback, bottom: nil)
+    }
+
+    private func reaction(from messageReaction: MessageReaction) -> Reaction? {
+        let trimmed = messageReaction.emoji.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        return Reaction(
+            id: "message-reaction-\(messageContext.message.id.uuidString)-\(messageReaction.id.uuidString)",
+            display: .emoji(value: trimmed, fontSize: 24),
+            selectedEmoji: trimmed
+        )
+    }
+
+    private func badgeOffset(for alignment: Alignment) -> CGSize {
+        switch alignment {
+        case .topLeading:
+            CGSize(width: -25, height: -20)
+        case .topTrailing:
+            CGSize(width: 25, height: -20)
+        case .top:
+            CGSize(width: 0, height: -20)
+        default:
+            CGSize(width: 25, height: -20)
+        }
+    }
+}
+
+private struct BadgeReactionStack {
+    let top: Reaction
+    let bottom: Reaction?
+}
+
+private struct BadgeReactionStackView: View {
+    let stack: BadgeReactionStack
+    let reactionNamespace: Namespace.ID
+    let menuIsShowing: Bool
+    let isCustomEmojiHighlighted: Bool
+    let matchedGeometrySourceProvider: (Reaction) -> Bool
+    let selectedReactionId: Reaction.ID?
+
+    private let topOffset = CGSize(width: 6, height: 0)
+    private let bottomOffset = CGSize(width: 0, height: 0)
+
+    var body: some View {
+        ZStack {
+            if let bottom = stack.bottom {
+                ReactionBadgeIcon(
+                    reaction: bottom,
+                    isSelected: selectedReactionId == bottom.id,
+                    menuIsShowing: menuIsShowing,
+                    isCustomEmojiHighlighted: isCustomEmojiHighlighted,
+                    reactionNamespace: reactionNamespace,
+                    matchedGeometryIsSource: false
+                )
+                .offset(bottomOffset)
+            }
+
+            ReactionBadgeIcon(
+                reaction: stack.top,
+                isSelected: selectedReactionId == stack.top.id,
+                menuIsShowing: menuIsShowing,
+                isCustomEmojiHighlighted: isCustomEmojiHighlighted,
+                reactionNamespace: reactionNamespace,
+                matchedGeometryIsSource: matchedGeometrySourceProvider(stack.top)
+            )
+            .offset(topOffset)
+        }
+    }
+}
+
+private struct ReactionBadgeIcon: View {
+    let reaction: Reaction
+    let isSelected: Bool
+    let menuIsShowing: Bool
+    let isCustomEmojiHighlighted: Bool
+    let reactionNamespace: Namespace.ID
+    let matchedGeometryIsSource: Bool
+
+    var body: some View {
+        reactionContent
+            .frame(width: 28, height: 28)
+            .shadow(color: Color.base.opacity(1), radius: 3)
+            .background {
+                Circle()
+                    .fill(isSelected && menuIsShowing ? Color.accentColor.opacity(0.3) : .clear)
+                    .frame(width: 44, height: 44)
+                    .animation(.smooth, value: isSelected)
+                    .scaleEffect(scaleFactor)
+                    .glassEffect(.regular, in: .circle)
+            }
+            .matchedGeometryEffect(
+                id: reaction.id,
+                in: reactionNamespace,
+                isSource: matchedGeometryIsSource
+            )
+    }
+
+    private var scaleFactor: CGFloat {
+        reaction.id == Reaction.customEmojiReactionID && isCustomEmojiHighlighted ? 1.2 : 1
+    }
+
+    @ViewBuilder
+    private var reactionContent: some View {
+        switch reaction.display {
+        case let .emoji(value, fontSize):
+            Text(value)
+                .font(.system(size: fontSize))
+                .transition(.scale.combined(with: .opacity).animation(.smooth))
+        case let .systemImage(name, pointSize, weight):
+            Image(systemName: name)
+                .font(.system(size: pointSize, weight: weight))
+                .foregroundStyle(.secondary)
+        case .placeholder:
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(.secondary)
+                .scaleEffect(0.8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.scale.combined(with: .opacity).animation(.smooth))
+        }
     }
 }
 

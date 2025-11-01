@@ -297,7 +297,12 @@ struct ChatDetailView: View {
                 MessageReaction(
                     user: mayaUser,
                     date: .now,
-                    emoji: "❤️"
+                    emoji: "😊"
+                ),
+                MessageReaction(
+                    user: mayaUser,
+                    date: .now,
+                    emoji: "😈"
                 )
             ]
         ),
