@@ -61,11 +61,13 @@ struct ChatReaction: View {
                         .onDisappear {
                             coordinator.resetGeometrySourceToList()
                         }
-
                     Text(formattedTimestamp)
                         .safeAreaPadding(.all)
                         .font(.footnote.bold())
                         .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: overlayContext.messageType.isInbound ? .leading : .trailing)
+                        .padding(.leading, overlayContext.messageType.isInbound ? 47 : 8)
+                        .padding(.trailing, 8)
                 }
 
                 Spacer()
