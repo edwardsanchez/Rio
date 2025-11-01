@@ -24,6 +24,22 @@ struct ChatReaction: View {
 
             VStack {
                 if let context = coordinator.reactingMessage {
+                    VStack(spacing: 4) {
+                        AvatarView(user: context.message.reactions.first!.user)
+                            .frame(width: 60, height: 60)
+                        Text(context.message.reactions.first!.user.name)
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2, reservesSpace: true)
+                            .truncationMode(.tail)
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        Text(context.message.reactions.first!.emoji)
+                            .font(.system(size: 34))
+                            .padding(-15)
+                    }
+                    .padding(.top, 10)
+
                     let overlayContext = context.updatingOverlay(true)
                     let formattedTimestamp = context.message.date.chatTimestampString()
                     Spacer()
