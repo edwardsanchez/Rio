@@ -83,3 +83,10 @@ custom_rules:
     regex: "(?m)^(?!(?:@|//|#|/\\*|\\{[ \\t]*$))(?![^\\n]*\\{\\s*$)(?![^\\n]*\\boperator\\b)\\S[^\\n]*(?=\\n[ \\t]*(?:if|guard|do|switch|for|while|func)\\b)"
     message: "Add a blank line before control flow or function declarations."
     severity: warning
+  blank_line_before_doc_comment:
+    included:
+      - ".*\\.swift"
+    name: "Blank Line Before Doc Comment"
+    regex: "(?m)^[ \\t]*[^/\\s}][^\\n]*\\n[ \\t]*///"
+    message: "Insert a blank line before documentation comments unless they immediately follow a closing brace or another comment."
+    severity: warning
