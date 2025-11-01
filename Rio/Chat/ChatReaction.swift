@@ -129,3 +129,191 @@ struct ChatReaction: View {
         )
     }
 }
+
+// MARK: - Previews
+
+private struct ChatReactionPreviewContainer: View {
+    enum Direction {
+        case inbound
+        case outbound
+    }
+
+    let direction: Direction
+    private let previewSetup: PreviewSetup
+
+    @State private var bubbleConfig = BubbleConfiguration()
+    @State private var chatData: ChatData
+    @State private var coordinator: ReactionsCoordinator
+    @State private var selectedImageData: ImageData?
+    @Namespace private var bubbleNamespace
+
+    init(direction: Direction) {
+        self.direction = direction
+
+        let chatData = ChatData()
+        let coordinator = ReactionsCoordinator()
+        let bubbleType: BubbleType = .talking
+        let theme = ChatTheme.theme1
+
+        let setup = ChatReactionPreviewContainer.makePreviewSetup(
+            direction: direction,
+            chatData: chatData,
+            coordinator: coordinator,
+            bubbleType: bubbleType
+        )
+
+        let context = MessageBubbleContext(
+            message: setup.message,
+            theme: theme,
+            showTail: true,
+            messageType: setup.messageType,
+            bubbleType: bubbleType,
+            layoutType: bubbleType,
+            isReactionsOverlay: false
+        )
+
+        if let menuModel = setup.menuModel {
+            coordinator.registerMenuModel(menuModel, for: setup.message.id)
+        }
+
+        coordinator.reactingMessage = context
+        coordinator.geometrySource = .overlay
+        coordinator.isBackgroundDimmerVisible = true
+
+        _chatData = State(initialValue: chatData)
+        _coordinator = State(initialValue: coordinator)
+        _selectedImageData = State(initialValue: nil)
+        previewSetup = setup
+    }
+
+    var body: some View {
+        ChatReaction(
+            bubbleNamespace: bubbleNamespace,
+            selectedImageData: $selectedImageData
+        )
+        .id(previewSetup.message.id)
+        .environment(bubbleConfig)
+        .environment(chatData)
+        .environment(coordinator)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+    }
+
+    private static func makePreviewSetup(
+        direction: Direction,
+        chatData: ChatData,
+        coordinator: ReactionsCoordinator,
+        bubbleType: BubbleType
+    ) -> PreviewSetup {
+        let sampleUsers = chatData.sampleUsers
+        let currentUser = chatData.currentUser
+
+        switch direction {
+        case .inbound:
+            let inboundSender = sampleUsers.maya
+            let selectedEmoji = "😍"
+            let reactions = [
+                MessageReaction(
+                    user: currentUser,
+                    date: Date(timeIntervalSinceReferenceDate: 1000),
+                    emoji: selectedEmoji
+                ),
+                MessageReaction(
+                    user: sampleUsers.zoe,
+                    date: Date(timeIntervalSinceReferenceDate: 1200),
+                    emoji: "🔥"
+                ),
+                MessageReaction(
+                    user: sampleUsers.liam,
+                    date: Date(timeIntervalSinceReferenceDate: 1320),
+                    emoji: "👏"
+                )
+            ]
+
+            var message = Message(
+                content: .text("Whoa! Did you see the bubble tail snap into place?"),
+                from: inboundSender,
+                date: Date(timeIntervalSinceReferenceDate: 900),
+                bubbleType: bubbleType,
+                reactions: reactions
+            )
+
+            message.reactionOptions = ["😍", "🔥", "👏", "👍", "😂", "😲"]
+
+            let menuReactions = makeMenuReactions(for: message)
+            let menuModel = ReactionsMenuModel(
+                messageID: message.id,
+                reactions: menuReactions
+            )
+
+            menuModel.selectedReactionID = menuReactions.first { $0.selectedEmoji == selectedEmoji }?.id
+            menuModel.state = .open
+            menuModel.showBackgroundMenu = false
+            menuModel.coordinator = coordinator
+            menuModel.chatData = chatData
+
+            return PreviewSetup(
+                message: message,
+                messageType: .inbound(bubbleType),
+                menuModel: menuModel
+            )
+
+        case .outbound:
+            let reactions = [
+                MessageReaction(
+                    user: sampleUsers.maya,
+                    date: Date(timeIntervalSinceReferenceDate: 1500),
+                    emoji: "🤯"
+                ),
+                MessageReaction(
+                    user: sampleUsers.liam,
+                    date: Date(timeIntervalSinceReferenceDate: 1800),
+                    emoji: "🙌"
+                )
+            ]
+
+            let message = Message(
+                content: .text("Finally unlocked the jelly transition timing!"),
+                from: currentUser,
+                date: Date(timeIntervalSinceReferenceDate: 1400),
+                reactions: reactions
+            )
+
+            return PreviewSetup(
+                message: message,
+                messageType: .outbound,
+                menuModel: nil
+            )
+        }
+    }
+
+    private static func makeMenuReactions(for message: Message) -> [Reaction] {
+        var reactions = message.reactionOptions.enumerated().map { index, emoji in
+            Reaction(
+                id: "emoji-\(message.id.uuidString)-\(index)",
+                display: .emoji(value: emoji, fontSize: 24),
+                selectedEmoji: emoji
+            )
+        }
+
+        if !reactions.contains(where: { $0.id == Reaction.customEmojiReactionID }) {
+            reactions.append(.systemImage("face.dashed", selectedEmoji: "?"))
+        }
+
+        return reactions
+    }
+
+    private struct PreviewSetup {
+        let message: Message
+        let messageType: MessageType
+        let menuModel: ReactionsMenuModel?
+    }
+}
+
+#Preview("Inbound Reaction Overlay") {
+    ChatReactionPreviewContainer(direction: .inbound)
+}
+
+#Preview("Outbound Reaction Overlay") {
+    ChatReactionPreviewContainer(direction: .outbound)
+}
