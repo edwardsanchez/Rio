@@ -127,6 +127,15 @@ struct ChatRowView: View {
                     Circle()
                         .fill(chat.theme.outboundBackgroundColor.opacity(0.2))
                 }
+                .overlay(alignment: .leading) {
+                    if chat.hasUnreadMessages(for: chatData.currentUser) {
+                        Circle()
+                            .fill(chat.theme.outboundBackgroundColor)
+                            .frame(width: 12, height: 12)
+                            .offset(x: -16)
+                    }
+                }
+                .padding(.leading, 10)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {

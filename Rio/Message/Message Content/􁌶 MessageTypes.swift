@@ -64,6 +64,7 @@ struct Message: Identifiable {
     let storedBubbleType: BubbleType?
     var reactions: [MessageReaction] = []
     var reactionOptions: [String] = []
+    var isReadByUser: [User] = []
 
     // Computed property to determine message type based on current user
     func messageType(currentUser: User) -> MessageType {
@@ -103,6 +104,7 @@ struct Message: Identifiable {
         self.content = content
         isTypingIndicator = false
         self.reactions = reactions
+        self.isReadByUser = [user] //Automatically set the message as read by message author
     }
 
     // Initializer for inbound messages (from other users)

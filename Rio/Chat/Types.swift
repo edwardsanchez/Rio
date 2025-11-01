@@ -44,6 +44,12 @@ struct Chat: Identifiable {
     let messages: [Message]
     let theme: ChatTheme
 
+    func hasUnreadMessages(for currentUser: User) -> Bool {
+        messages.contains { message in
+            !message.isReadByUser.contains { $0.id == currentUser.id }
+        }
+    }
+
     init(
         id: UUID = UUID(),
         title: String?,
