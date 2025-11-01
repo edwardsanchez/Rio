@@ -11,21 +11,19 @@ struct ChatImageOverlayView: View {
     @Binding var selectedImageData: ImageData?
 
     var body: some View {
-        Group {
-            if let imageData = selectedImageData {
-                ImageDetailView(
-                    imageData: imageData,
-                    isPresented: Binding(
-                        get: { selectedImageData != nil },
-                        set: { newValue in
-                            if !newValue {
-                                selectedImageData = nil
-                            }
+        if let imageData = selectedImageData {
+            ImageDetailView(
+                imageData: imageData,
+                isPresented: Binding(
+                    get: { selectedImageData != nil },
+                    set: { newValue in
+                        if !newValue {
+                            selectedImageData = nil
                         }
-                    )
+                    }
                 )
-                .zIndex(1)
-            }
+            )
+            .zIndex(1)
         }
     }
 }
