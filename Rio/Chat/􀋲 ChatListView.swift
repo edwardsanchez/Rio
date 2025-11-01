@@ -139,9 +139,8 @@ struct ChatRowView: View {
                     if let lastMessage = chat.messages.last {
                         HStack(spacing: 3) {
                             Image(systemName: isAlertHidden ? "bell.slash.fill" : "bell.fill")
-                                .opacity(isAlertHidden ? 1 : 0)
                                 .contentTransition(.symbolEffect(.replace))
-                                .animation(.smooth, value: isAlertHidden)
+                                .opacity(isAlertHidden ? 1 : 0)
 
                             Text(lastMessage.date, style: .time)
                         }

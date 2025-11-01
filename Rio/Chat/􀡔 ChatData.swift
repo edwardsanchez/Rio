@@ -15,6 +15,8 @@ class ChatData {
     var activeTypingIndicators: [UUID: Set<UUID>] = [:]
     // Tracks which chat detail sheet is currently presented
     var presentedDetailChatID: UUID?
+    // Track muted chats locally for SwiftUI observation
+    var mutedChatIDs: Set<UUID> = []
 
     // Current signed-in user (for adding reactions)
     let currentUser: User
@@ -40,6 +42,9 @@ class ChatData {
                 )
             }
         }
+
+        // Load muted chat IDs from Defaults
+        mutedChatIDs = Set(Defaults[.mutedChatIDs])
     }
 
     var sampleUsers: ChatSampleUsers {
@@ -179,24 +184,26 @@ class ChatData {
     func removeChat(withId chatId: UUID) {
         chats.removeAll { $0.id == chatId }
         activeTypingIndicators.removeValue(forKey: chatId)
-        updateMutedChatIDs { $0.remove(chatId) }
+        mutedChatIDs.remove(chatId)
+        Defaults[.mutedChatIDs] = Array(mutedChatIDs)
         if presentedDetailChatID == chatId {
             presentedDetailChatID = nil
         }
     }
 
     func isChatMuted(_ chatId: UUID) -> Bool {
-        Defaults[.mutedChatIDs].contains(chatId)
+        mutedChatIDs.contains(chatId)
     }
 
     func setChatMuted(_ chatId: UUID, isMuted: Bool) {
-        updateMutedChatIDs { mutedChatIDs in
-            if isMuted {
-                mutedChatIDs.insert(chatId)
-            } else {
-                mutedChatIDs.remove(chatId)
-            }
+        if isMuted {
+            mutedChatIDs.insert(chatId)
+        } else {
+            mutedChatIDs.remove(chatId)
         }
+        // Persist to UserDefaults
+        Defaults[.mutedChatIDs] = Array(mutedChatIDs)
+        // TODO: Connect hide alerts toggle to notification preferences
     }
 
     func setTypingIndicator(_ visible: Bool, for userId: UUID, in chatId: UUID) {
@@ -222,12 +229,6 @@ class ChatData {
     func getRandomParticipantForReply(in chat: Chat) -> User? {
         let otherParticipants = getOtherParticipants(in: chat)
         return otherParticipants.randomElement()
-    }
-
-    private func updateMutedChatIDs(_ modify: (inout Set<UUID>) -> Void) {
-        var mutedChatIDs = Set(Defaults[.mutedChatIDs])
-        modify(&mutedChatIDs)
-        Defaults[.mutedChatIDs] = Array(mutedChatIDs)
     }
 
     func isDetailPresented(for chatId: UUID) -> Bool {
