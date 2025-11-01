@@ -179,6 +179,14 @@ final class AnimationOrchestrator {
         cancelAll()
         guard let model else { return }
 
+        if model.state == .closed {
+            let totalDelay = ReactionsAnimationTiming.baseDuration + delay + 0.15
+            model.customEmojiManager.scheduleRestore(after: totalDelay)
+            model.customEmojiManager.setHighlight(false)
+            model.coordinator?.closeReactionsMenu(after: totalDelay)
+            return
+        }
+
         // Immediately show background menu
         setBackgroundMenuVisible(true, includeShowDelay: false)
 
