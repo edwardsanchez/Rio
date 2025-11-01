@@ -1,5 +1,5 @@
 //
-//  ChatListView.swift
+//  􀋲 ChatListView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 9/24/25.
@@ -62,10 +62,14 @@ struct ChatRowView: View {
 }
 
 #Preview {
+    @Previewable @State var chatData = ChatData()
+    @Previewable @State var bubbleConfig = BubbleConfiguration()
+    @Previewable @State var reactionsCoordinator = ReactionsCoordinator()
+
     NavigationStack {
         ChatListView()
     }
-    .environment(ChatData())
-    .environment(BubbleConfiguration())
-    .environment(ReactionsCoordinator())
+    .environment(chatData)
+    .environment(bubbleConfig)
+    .environment(reactionsCoordinator)
 }
