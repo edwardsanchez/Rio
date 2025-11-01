@@ -32,12 +32,16 @@ struct AnimatedCursiveTextView: View {
 
     /// Current end position of the visible text (0.0 to 1.0 along the path)
     @State private var drawProgress: CGFloat = 0
+
     /// Current start position of the visible text window (legacy compatibility)
     @State private var drawProgressFrom: CGFloat = 0
+
     /// Maximum X position reached by the drawing cursor (for forward-only mode)
     @State private var maxPipeX: CGFloat = 0
+
     /// Maximum start position reached during animation (prevents backward movement)
     @State private var maxDrawProgressFrom: CGFloat = 0
+
     /// Timer driving the animation updates at 60fps
     @State private var animationTimer: Timer?
 
@@ -45,20 +49,21 @@ struct AnimatedCursiveTextView: View {
 
     // This sophisticated system prevents visual jitter by maintaining separate tracking
     // for visual trim position (what the user sees) and offset calculation position
-
     /// Forward-only position used for visual trim rendering (never moves backward)
     @State private var smoothedDrawProgressFrom: CGFloat = 0
+
     /// Target position for smooth interpolation to the trim start
     @State private var targetDrawProgressFrom: CGFloat = 0
+
     /// Forward-only position used for offset calculations (prevents left edge drift)
     @State private var naturalDrawProgressFrom: CGFloat = 0
+
     /// Maximum natural position reached (ensures naturalDrawProgressFrom only advances)
     @State private var maxNaturalDrawProgressFrom: CGFloat = 0
 
     // MARK: - Ratchet Mechanism
 
     // Ensures the left edge never moves rightward, maintaining perfect alignment
-
     /// Most negative (leftward) offset reached - acts as a ratchet preventing rightward drift
     @State private var minTextOffset: CGFloat = 0
 

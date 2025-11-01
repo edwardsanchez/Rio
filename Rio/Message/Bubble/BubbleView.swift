@@ -16,10 +16,13 @@ struct BubbleView: View {
 
     /// Width of the inner rectangle that the metaballs orbit.
     let width: CGFloat
+
     /// Height of the inner rectangle that the metaballs orbit.
     let height: CGFloat
+
     /// Rounded corner radius applied to the inner rectangle (optional override, defaults to bubbleConfig).
     let cornerRadius: CGFloat?
+
     /// Bundled context describing the current bubble appearance
     let messageContext: MessageBubbleContext
 
@@ -33,12 +36,16 @@ struct BubbleView: View {
 
     /// Seed that keeps randomised animations stable across refreshes.
     @State private var animationSeed: UInt64
+
     /// Start time driving the deterministic animation timeline.
     @State private var startTime: Date
+
     /// Tracks the previous bubbleType to determine animation behavior
     @State private var previousBubbleType: BubbleType?
+
     /// Tracks the tail position offset for explicit animation control
     @State private var tailPositionOffset: CGPoint = .init(x: 15, y: -23)
+
     /// Work item for cancelling delayed tail position updates
     @State private var tailPositionWorkItem: DispatchWorkItem?
 

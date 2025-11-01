@@ -23,16 +23,22 @@ import SwiftUI
 struct CursiveLetter {
     /// The character this letter represents (e.g., "a", "B", "3", " ")
     let character: String
+
     /// The vector path data for drawing this letter, normalized to Y-down coordinate system
     let path: CGPath
+
     /// Horizontal spacing to advance the pen position after drawing this letter
     let advance: CGFloat
+
     /// Distance from baseline to the top of the tallest part of the letter
     let ascent: CGFloat
+
     /// Distance from baseline to the bottom of the lowest part of the letter (typically negative)
     let descent: CGFloat
+
     /// Total vertical space occupied by this letter (ascent - descent)
     let verticalExtent: CGFloat
+
     /// Font units per em square, used for scaling calculations
     let unitsPerEm: CGFloat
 

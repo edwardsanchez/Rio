@@ -135,6 +135,7 @@ enum MessageEmojiService {
     private struct TimeoutError: Error {}
 
     static var isEnabled = true
+
     /// Debug helper to hold results before returning (seconds). Set to 0 to disable.
     static var artificialDelay: TimeInterval = 0
 
