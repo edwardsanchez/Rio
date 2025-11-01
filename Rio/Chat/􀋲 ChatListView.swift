@@ -13,79 +13,113 @@ struct ChatListView: View {
     @State private var isDeleteAlertPresented = false
 
     var body: some View {
-        List {
-            ForEach(chatData.chats, id: \.id) { chat in
-                ZStack {
-                    //Invisible Navigation to hide chevron
-                    NavigationLink(destination: ChatView(chat: chat)) {
-                        EmptyView()
-                    }
-                    .opacity(0)
+        Group {
+            if chatData.chats.isEmpty {
+                VStack {
+                    Spacer()
+                    Text("Looking a little sad in here!")
+                        .font(.title)
+                        .foregroundStyle(.tertiary)
 
-                    ChatRowView(chat: chat)
+//                    Button(action: {
+//
+//                    }, label: {
+//                        Label("New Chat", systemImage: "square.and.pencil")
+//                            .padding(.horizontal, 10)
+//                            .font(.title3)
+//                    })
+//                    .padding(10)
+//                    .buttonStyle(.glass)
+                    Spacer()
+                    Image(.mouth)
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .flip(.vertical)
+                        .padding(.horizontal, 60)
+                        .padding(.bottom, 40)
+                        .foregroundStyle(.tertiary)
                 }
-                .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
-                .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
-                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                    Button {
-                        toggleReadStatus(for: chat)
-                    } label: {
-                        Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
-                    }
-                    .tint(.blue)
+            } else {
+                List {
+                    ForEach(chatData.chats, id: \.id) { chat in
+                        ZStack {
+                            //Invisible Navigation to hide chevron
+                            NavigationLink(destination: ChatView(chat: chat)) {
+                                EmptyView()
+                            }
+                            .opacity(0)
 
-                    Button {
-                        toggleAlerts(for: chat)
-                    } label: {
-                        Label(
-                            isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
-                            systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
-                        )
-                    }
-                    .tint(.indigo)
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        chatPendingDeletion = chat
-                        isDeleteAlertPresented = true
-                    } label: {
-                        Label(
-                            isGroupChat(chat) ? "Leave" : "Delete",
-                            systemImage: isGroupChat(chat) ? "xmark" : "trash"
-                        )
-                    }
-                }
-                .contextMenu {
-                    Button {
-                        toggleReadStatus(for: chat)
-                    } label: {
-                        Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
-                    }
+                            ChatRowView(chat: chat)
+                        }
+                        .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
+                        .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            Button {
+                                toggleReadStatus(for: chat)
+                            } label: {
+                                Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                            }
+                            .tint(.blue)
 
-                    Button {
-                        toggleAlerts(for: chat)
-                    } label: {
-                        Label(
-                            isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
-                            systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
-                        )
-                    }
+                            Button {
+                                toggleAlerts(for: chat)
+                            } label: {
+                                Label(
+                                    isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
+                                    systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
+                                )
+                            }
+                            .tint(.indigo)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                chatPendingDeletion = chat
+                                isDeleteAlertPresented = true
+                            } label: {
+                                Label(
+                                    isGroupChat(chat) ? "Leave" : "Delete",
+                                    systemImage: isGroupChat(chat) ? "xmark" : "trash"
+                                )
+                            }
+                        }
+                        .contextMenu {
+                            Button {
+                                toggleReadStatus(for: chat)
+                            } label: {
+                                Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                            }
 
-                    Button(role: .destructive) {
-                        chatPendingDeletion = chat
-                        isDeleteAlertPresented = true
-                    } label: {
-                        Label(
-                            isGroupChat(chat) ? "Leave Group" : "Delete Chat",
-                            systemImage: "xmark"
-                        )
+                            Button {
+                                toggleAlerts(for: chat)
+                            } label: {
+                                Label(
+                                    isChatMuted(chat) ? "Show Alerts" : "Hide Alerts",
+                                    systemImage: isChatMuted(chat) ? "bell.fill" : "bell.slash.fill"
+                                )
+                            }
+
+                            Button(role: .destructive) {
+                                chatPendingDeletion = chat
+                                isDeleteAlertPresented = true
+                            } label: {
+                                Label(
+                                    isGroupChat(chat) ? "Leave Group" : "Delete Chat",
+                                    systemImage: "xmark"
+                                )
+                            }
+                        }
                     }
                 }
+                .listStyle(.plain)
+
             }
         }
-        .listStyle(.plain)
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            chatData.chats = []
+        }
         .toolbar {
             //Leave commented out for now
 //            ToolbarItem(placement: .topBarTrailing) {

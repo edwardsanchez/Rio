@@ -233,6 +233,25 @@ public extension NSNumber {
     var cgfloat: CGFloat { CGFloat(truncating: self) }
 }
 
+public enum ViewAxis {
+    case horizontal
+    case vertical
+    case both
+}
+
+extension View {
+    func flip(_ axis: ViewAxis) -> some View {
+        switch axis {
+        case .horizontal:
+            self.scaleEffect(x: -1, y: 1)
+        case .vertical:
+            self.scaleEffect(x: 1, y: -1)
+        case .both:
+            self.scaleEffect(x: -1, y: -1)
+        }
+    }
+}
+
 public extension Image {
     var fitImage: some View {
         resizable().aspectRatio(contentMode: .fit)
