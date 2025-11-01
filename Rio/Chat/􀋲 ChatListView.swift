@@ -15,11 +15,20 @@ struct ChatListView: View {
             NavigationLink(destination: ChatView(chat: chat)) {
                 ChatRowView(chat: chat)
             }
-            .listRowSeparator(.hidden, edges: .top)
+            .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
+            .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
         }
         .listStyle(.plain)
         .navigationTitle("Chats")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func isFirstChat(_ chat: Chat) -> Bool {
+        chatData.chats.first?.id == chat.id
+    }
+
+    private func isLastChat(_ chat: Chat) -> Bool {
+        chatData.chats.last?.id == chat.id
     }
 }
 
