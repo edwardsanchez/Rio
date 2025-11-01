@@ -18,9 +18,20 @@ struct ChatListView: View {
             .listRowSeparator(.hidden, edges: isFirstChat(chat) ? .top : [])
             .listRowSeparator(.hidden, edges: isLastChat(chat) ? .bottom : [])
         }
+
         .listStyle(.plain)
-        .navigationTitle("Chats")
+        .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                EditButton()
+            }
+            ToolbarItem(placement: .topBarLeading) {
+                Button("New", systemImage: "square.and.pencil") {
+
+                }
+            }
+        }
     }
 
     private func isFirstChat(_ chat: Chat) -> Bool {
