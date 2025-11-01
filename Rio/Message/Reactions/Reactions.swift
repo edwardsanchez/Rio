@@ -71,131 +71,125 @@ struct ReactionsModifier: ViewModifier {
     func body(content: Content) -> some View {
         @Bindable var reactionsMenuModel = reactionsMenuModel
         @Bindable var reactionsCoordinator = reactionsCoordinator
-        if availabilityGate {
-            if messageContext.isReactionsOverlay {
-                content
-                    .scaleEffect(reactionsMenuModel.isShowingReactionMenu ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
-                    .animation(
-                        ReactionsAnimationTiming.menuScaleAnimation,
-                        value: reactionsMenuModel.isShowingReactionMenu
-                    )
-                    .onGeometryChange(for: CGSize.self) { proxy in
-                        proxy.size
-                    } action: { newSize in
-                        viewSize = newSize
-                        reactionsMenuModel.viewSize = newSize
+        if messageContext.isReactionsOverlay {
+            content
+                .scaleEffect(reactionsMenuModel.isShowingReactionMenu ? 1.1 : 1, anchor: UnitPoint(x: 0.2, y: 0.5))
+                .animation(
+                    ReactionsAnimationTiming.menuScaleAnimation,
+                    value: reactionsMenuModel.isShowingReactionMenu
+                )
+                .onGeometryChange(for: CGSize.self) { proxy in
+                    proxy.size
+                } action: { newSize in
+                    viewSize = newSize
+                    reactionsMenuModel.viewSize = newSize
+                }
+                .overlay(alignment: reactionBadgeAlignment) {
+                    if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
+                        BadgeReactionStackView(
+                            stack: badgeStack,
+                            reactionNamespace: reactionNamespace,
+                            menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
+                            isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
+                            matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: true) },
+                            selectedReactionId: reactionsMenuModel.selectedReaction?.id
+                        )
+                        .opacity(0)
+                        .offset(badgeOffset(for: reactionBadgeAlignment))
+                        .allowsHitTesting(false)
                     }
-                    .overlay(alignment: reactionBadgeAlignment) {
-                        if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
+                }
+                .background {
+                    //Background version so it animates BEHIND the bubble on open and on close, should disappear as
+                    //open animation ends, should reappear when close animation starts
+                    ReactionsMenuView(
+                        isOverlay: false,
+                        reactionsMenuModel: reactionsMenuModel,
+                        reactionNamespace: reactionNamespace
+                    )
+                    .opacity(reactionsMenuModel.showBackgroundMenu ? 1 : 0)
+                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    //Foreground version so it animates back on top of the bubble. Should be visible especially to
+                    //show the one that was just selected so it ends up at the top
+                    ReactionsMenuView(
+                        isOverlay: true,
+                        reactionsMenuModel: reactionsMenuModel,
+                        reactionNamespace: reactionNamespace
+                    )
+                    .allowsHitTesting(!reactionsMenuModel.showBackgroundMenu)
+                }
+                .onAppear {
+                    adoptSharedMenuModel()
+                    reactionsMenuModel.coordinator = reactionsCoordinator
+                    reactionsMenuModel.chatData = chatData
+                    updateMenuModelReactionsIfNeeded()
+                }
+                .sheet(
+                    isPresented: $reactionsCoordinator.isCustomEmojiPickerPresented,
+                    onDismiss: {
+                        reactionsMenuModel.setCustomEmojiHighlight(false)
+                        if reactionsMenuModel.isShowingReactionMenu {
+                            reactionsMenuModel.prepareCustomEmojiForMenuOpen()
+                        }
+                    }
+                ) {
+                    EmojiPickerView { emoji in
+                        reactionsMenuModel.applyCustomEmojiSelection(emoji.character)
+                        reactionsMenuModel.setCustomEmojiHighlight(false)
+                        reactionsCoordinator.isCustomEmojiPickerPresented = false
+                    }
+                    .presentationDetents([.height(300)])
+                }
+                .onTapGesture {
+                    reactionsMenuModel.closeReactionsMenu()
+                }
+                .onChange(of: messageContext.message.reactionOptions) { _, _ in
+                    updateMenuModelReactionsIfNeeded()
+                }
+        } else {
+            content
+                .contentShape(.rect)
+                .overlay(alignment: reactionBadgeAlignment) {
+                    let selectedId = reactionsMenuModel.selectedReaction?.id
+                    if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
+                        Button {
+                            openReactionsOverlay(
+                                reactionsMenuModel: reactionsMenuModel,
+                                reactionsCoordinator: reactionsCoordinator
+                            )
+                        } label: {
                             BadgeReactionStackView(
                                 stack: badgeStack,
                                 reactionNamespace: reactionNamespace,
                                 menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
                                 isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
-                                matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: true) },
-                                selectedReactionId: reactionsMenuModel.selectedReaction?.id
+                                matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: false)
+                                },
+                                selectedReactionId: selectedId
                             )
-                            .opacity(0)
-                            .offset(badgeOffset(for: reactionBadgeAlignment))
-                            .allowsHitTesting(false)
                         }
+                        .offset(badgeOffset(for: reactionBadgeAlignment))
                     }
-                    .background {
-                        //Background version so it animates BEHIND the bubble on open and on close, should disappear as
-                        //open animation ends, should reappear when close animation starts
-                        ReactionsMenuView(
-                            isOverlay: false,
-                            reactionsMenuModel: reactionsMenuModel,
-                            reactionNamespace: reactionNamespace
-                        )
-                        .opacity(reactionsMenuModel.showBackgroundMenu ? 1 : 0)
-                        .allowsHitTesting(false)
-                    }
-                    .overlay {
-                        //Foreground version so it animates back on top of the bubble. Should be visible especially to
-                        //show the one that was just selected so it ends up at the top
-                        ReactionsMenuView(
-                            isOverlay: true,
-                            reactionsMenuModel: reactionsMenuModel,
-                            reactionNamespace: reactionNamespace
-                        )
-                        .allowsHitTesting(!reactionsMenuModel.showBackgroundMenu)
-                    }
-                    .onAppear {
-                        adoptSharedMenuModel()
-                        reactionsMenuModel.coordinator = reactionsCoordinator
-                        reactionsMenuModel.chatData = chatData
-                        updateMenuModelReactionsIfNeeded()
-                    }
-                    .sheet(
-                        isPresented: $reactionsCoordinator.isCustomEmojiPickerPresented,
-                        onDismiss: {
-                            reactionsMenuModel.setCustomEmojiHighlight(false)
-                            if reactionsMenuModel.isShowingReactionMenu {
-                                reactionsMenuModel.prepareCustomEmojiForMenuOpen()
-                            }
-                        }
-                    ) {
-                        EmojiPickerView { emoji in
-                            reactionsMenuModel.applyCustomEmojiSelection(emoji.character)
-                            reactionsMenuModel.setCustomEmojiHighlight(false)
-                            reactionsCoordinator.isCustomEmojiPickerPresented = false
-                        }
-                        .presentationDetents([.height(300)])
-                    }
-                    .onTapGesture {
-                        reactionsMenuModel.closeReactionsMenu()
-                    }
-                    .onChange(of: messageContext.message.reactionOptions) { _, _ in
-                        updateMenuModelReactionsIfNeeded()
-                    }
-            } else {
-                content
-                    .contentShape(.rect)
-                    .overlay(alignment: reactionBadgeAlignment) {
-                        let selectedId = reactionsMenuModel.selectedReaction?.id
-                        if let badgeStack = resolvedBadgeReactionStack(from: reactionsMenuModel) {
-                            Button {
-                                openReactionsOverlay(
-                                    reactionsMenuModel: reactionsMenuModel,
-                                    reactionsCoordinator: reactionsCoordinator
-                                )
-                            } label: {
-                                BadgeReactionStackView(
-                                    stack: badgeStack,
-                                    reactionNamespace: reactionNamespace,
-                                    menuIsShowing: reactionsMenuModel.isShowingReactionMenu,
-                                    isCustomEmojiHighlighted: reactionsMenuModel.isCustomEmojiHighlighted,
-                                    matchedGeometrySourceProvider: { matchedGeometryIsSource(for: $0, isOverlay: false)
-                                    },
-                                    selectedReactionId: selectedId
-                                )
-                            }
-                            .offset(badgeOffset(for: reactionBadgeAlignment))
-                        }
-                    }
-                    .sensoryFeedback(.impact, trigger: reactionsMenuModel.isShowingReactionMenu)
-                    .onAppear {
-                        adoptSharedMenuModel()
-                        reactionsMenuModel.coordinator = reactionsCoordinator
-                        reactionsMenuModel.chatData = chatData
-                        updateMenuModelReactionsIfNeeded()
-                    }
-                    .onChange(of: messageContext.message.reactionOptions) { _, _ in
-                        updateMenuModelReactionsIfNeeded()
-                    }
-                    .onLongPressGesture {
+                }
+                .sensoryFeedback(.impact, trigger: reactionsMenuModel.isShowingReactionMenu)
+                .onAppear {
+                    adoptSharedMenuModel()
+                    reactionsMenuModel.coordinator = reactionsCoordinator
+                    reactionsMenuModel.chatData = chatData
+                    updateMenuModelReactionsIfNeeded()
+                }
+                .onChange(of: messageContext.message.reactionOptions) { _, _ in
+                    updateMenuModelReactionsIfNeeded()
+                }
+                .onLongPressGesture {
+                    if availabilityGate {
                         openReactionsOverlay(
                             reactionsMenuModel: reactionsMenuModel,
                             reactionsCoordinator: reactionsCoordinator
                         )
                     }
-            }
-        } else {
-            //For outbound messages since you can't like your own messages
-            content
-                .onChange(of: messageContext.message.reactionOptions) { _, _ in
-                    updateMenuModelReactionsIfNeeded()
                 }
         }
     }
