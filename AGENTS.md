@@ -18,6 +18,14 @@
 - Follow Swift 5.9 defaults: four-space indentation, `UpperCamelCase` for types, `lowerCamelCase` for members, and mark protocol conformances in dedicated extensions when practical.
 - Prefer SwiftUI composition; keep animation logic in dedicated types (`BubbleAnimationState`, `CircleAnimationManager`) to preserve readability.
 - Document non-obvious behaviors with succinct inline comments and favor `Logger` utilities instead of print statements.
+- Prefer computed properties whenever an API exposes read-only data and doesn’t require inputs. If the body is just returning a stored value, a transformed collection, or any other pure expression, use var foo: T { ... } instead of func foo() -> T.
+  -Keep true functions when the language or protocol demands it (e.g., RandomNumberGenerator.next()), or when call-site syntax should communicate “do work” (async operations, heavy computation, throws, mutating behavior). Those cases can’t be modeled as nonmutating computed properties anyway.
+  - Static helpers follow the same rule: expose cached constants or composed values with static var, not static func.
+  - When the API needs a result conditioned on parameters, needs to mutate state, or performs significant work that callers should treat as an action, leave it as a function.
+  - In short: “If it’s parameterless, pure, and conceptually a value, make it a computed property; otherwise stick with a function.
+- Do not use computed properties that are simply aliases to properties that are inside another struct, unless it adds semantic value.
+- Do not use computed properties with simple logic if it's only being referenced once in the codebase.
+- Things like: .animation(.easeIn) { content in is a real API. Don't fucking mess with it!
 
 ## Testing Guidelines
 - No automated tests are checked in yet; introduce `RioTests/` mirroring the source tree and group files by feature (e.g., `Message/BubbleTests`).
