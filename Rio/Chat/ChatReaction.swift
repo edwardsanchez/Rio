@@ -178,7 +178,7 @@ struct ReactionParticipantView: View {
     @State private var isShowing = false
 
     var delay: Double {
-        return 0.1 * Double(index)
+        0.1 * Double(index)
     }
 
     var body: some View {
