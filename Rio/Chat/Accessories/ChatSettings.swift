@@ -1,5 +1,5 @@
 //
-//  ChatSettings.swift
+//  ChatSettingsView.swift
 //  Rio
 //
 //  Created by ChatGPT on 10/29/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ChatSettings: View {
+struct ChatSettingsView: View {
     let chat: Chat
     let fallbackChatTitle: String
     let avatarNamespace: Namespace.ID
@@ -369,7 +369,7 @@ private struct ChatSettingsPreviewHost: View {
     @Namespace private var avatarNamespace
 
     var body: some View {
-        ChatSettings(
+        ChatSettingsView(
             chat: chat,
             fallbackChatTitle: Chat.fallbackTitle(
                 for: chat.participants,

@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-struct ChatReaction: View {
+struct ChatReactionOverlayView: View {
     @Environment(ReactionsCoordinator.self) private var coordinator
     @Environment(ChatData.self) private var chatData
     let bubbleNamespace: Namespace.ID
@@ -357,7 +357,7 @@ private struct ChatReactionPreviewContainer: View {
     }
 
     var body: some View {
-        ChatReaction(
+        ChatReactionOverlayView(
             bubbleNamespace: bubbleNamespace,
             selectedImageData: $selectedImageData
         )

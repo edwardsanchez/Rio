@@ -1,5 +1,5 @@
 //
-//  ChatImageOverlay.swift
+//  ChatImageOverlayView.swift
 //  Rio
 //
 //  Created by ChatGPT on 10/29/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ChatImageOverlay: View {
+struct ChatImageOverlayView: View {
     @Binding var selectedImageData: ImageData?
 
     var body: some View {

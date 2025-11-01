@@ -1,5 +1,5 @@
 //
-//  MessageListView.swift
+//  MessageStackView.swift
 //  Rio
 //
 //  Created by Edward Sanchez on 10/8/25.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 // Component to handle the entire message list with date headers
-struct MessageListView: View {
+struct MessageStackView: View {
     let messages: [Message]
     @Binding var newMessageId: UUID?
     let inputFieldFrame: CGRect

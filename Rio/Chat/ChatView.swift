@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ChatDetailView: View {
+struct ChatView: View {
     let chat: Chat
     @Environment(ChatData.self) private var chatData
 
@@ -71,13 +71,13 @@ struct ChatDetailView: View {
             messagesView
                 .tint(resolvedChat.theme.outboundBackgroundColor)
             inputFieldView
-            ChatImageOverlay(selectedImageData: $selectedImageData)
-            ChatReaction(
+            ChatImageOverlayView(selectedImageData: $selectedImageData)
+            ChatReactionOverlayView(
                 bubbleNamespace: bubbleNamespace,
                 selectedImageData: $selectedImageData
             )
             .tint(resolvedChat.theme.outboundBackgroundColor)
-            ChatSettings(
+            ChatSettingsView(
                 chat: resolvedChat,
                 fallbackChatTitle: fallbackChatTitle,
                 avatarNamespace: avatarNamespace,
@@ -105,7 +105,7 @@ struct ChatDetailView: View {
         // Main scroll view for messages
         NavigationStack {
             ScrollView {
-                MessageListView(
+                MessageStackView(
                     messages: messages,
                     newMessageId: $newMessageId,
                     inputFieldFrame: inputFieldFrame,
@@ -325,7 +325,7 @@ struct ChatDetailView: View {
 
     chatData.chats = [sampleChat]
 
-    return ChatDetailView(chat: sampleChat)
+    return ChatView(chat: sampleChat)
         .environment(chatData)
         .environment(BubbleConfiguration())
 }
@@ -381,7 +381,7 @@ private struct OutboundGeometryMatchDebugView: View {
             ZStack(alignment: .bottom) {
                 // Scroll view with messages
                 ScrollView {
-                    MessageListView(
+                    MessageStackView(
                         messages: messages,
                         newMessageId: $currentNewMessageId,
                         inputFieldFrame: inputFieldFrame,

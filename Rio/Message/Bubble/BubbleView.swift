@@ -646,17 +646,16 @@ private struct BubbleMorphLayout {
     let testMessage = Message(content: .text("Test"), from: chatData.currentUser, date: Date())
     let previewTheme = ChatTheme(outboundBackgroundColor: .gray)
 
+    let previewContext = MessageBubbleContext(
+        message: testMessage,
+        theme: previewTheme,
+        showTail: true,
+        messageType: .inbound(.talking),
+        bubbleType: isTalking ? .talking : .thinking,
+        layoutType: isTalking ? .talking : .thinking,
+        isReactionsOverlay: false
+    )
     VStack(spacing: 24) {
-        let previewContext = MessageBubbleContext(
-            message: testMessage,
-            theme: previewTheme,
-            showTail: true,
-            messageType: .inbound(.talking),
-            bubbleType: isTalking ? .talking : .thinking,
-            layoutType: isTalking ? .talking : .thinking,
-            isReactionsOverlay: false
-        )
-
         BubbleView(
             width: width,
             height: height,

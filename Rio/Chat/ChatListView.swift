@@ -12,7 +12,7 @@ struct ChatListView: View {
 
     var body: some View {
         List(chatData.chats) { chat in
-            NavigationLink(destination: ChatDetailView(chat: chat)) {
+            NavigationLink(destination: ChatView(chat: chat)) {
                 ChatRowView(chat: chat)
             }
         }
