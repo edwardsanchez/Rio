@@ -104,7 +104,7 @@ struct Message: Identifiable {
         self.content = content
         isTypingIndicator = false
         self.reactions = reactions
-        self.isReadByUser = [user] //Automatically set the message as read by message author
+        isReadByUser = [user] //Automatically set the message as read by message author
     }
 
     // Initializer for inbound messages (from other users)

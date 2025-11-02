@@ -22,9 +22,9 @@ struct ChatDeletionAlert {
 
     var message: String {
         if isGroupChat {
-            return "Are you sure you want to leave \"\(chat.title)\"?"
+            "Are you sure you want to leave \"\(chat.title)\"?"
         } else {
-            return "Are you sure you want to delete this conversation with \(chat.title)?"
+            "Are you sure you want to delete this conversation with \(chat.title)?"
         }
     }
 

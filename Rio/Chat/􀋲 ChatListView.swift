@@ -58,7 +58,10 @@ struct ChatListView: View {
                             Button {
                                 toggleReadStatus(for: chat)
                             } label: {
-                                Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                                Label(
+                                    hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread",
+                                    image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill
+                                )
                             }
                             .tint(.blue)
 
@@ -87,7 +90,10 @@ struct ChatListView: View {
                             Button {
                                 toggleReadStatus(for: chat)
                             } label: {
-                                Label(hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread", image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill)
+                                Label(
+                                    hasUnreadMessages(chat) ? "Mark Read" : "Mark Unread",
+                                    image: hasUnreadMessages(chat) ? .messageFill : .messageBadgeFilledFill
+                                )
                             }
 
                             Button {
@@ -112,7 +118,6 @@ struct ChatListView: View {
                     }
                 }
                 .listStyle(.plain)
-
             }
         }
         .navigationTitle("Messages")
