@@ -118,14 +118,15 @@ struct ChatListView: View {
         .navigationTitle("Messages")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            chatData.chats = []
+//            chatData.chats = [] //Uncomment for empty view
         }
         .toolbar {
-            //Leave commented out for now
-//            ToolbarItem(placement: .topBarTrailing) {
-//                EditButton()
-//            }
             ToolbarItem(placement: .topBarLeading) {
+                Button("User", systemImage: "person.crop.circle") {
+                    //TODO: Implement User Settings
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button("New", systemImage: "square.and.pencil") {
                     //TODO: Implement New Chat
                 }
