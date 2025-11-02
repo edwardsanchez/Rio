@@ -130,6 +130,51 @@ public extension Date {
 
         return "\(dateString), \(timeString)"
     }
+
+    func chatRelativeDate(
+        relativeTo referenceDate: Date = .now,
+        calendar: Calendar = .current,
+        locale: Locale = .current
+    ) -> String {
+        var cal = calendar
+        cal.locale = locale
+
+        // Check if it's today - show time only
+        if cal.isDateInToday(self) {
+            let timeFormatter = DateFormatter()
+            timeFormatter.locale = locale
+            timeFormatter.calendar = cal
+            timeFormatter.timeZone = cal.timeZone
+            timeFormatter.dateStyle = .none
+            timeFormatter.timeStyle = .short
+            return timeFormatter.string(from: self)
+        }
+
+        // Check if it's yesterday
+        if cal.isDateInYesterday(self) {
+            return "Yesterday"
+        }
+
+        // Check if it's within the past week
+        let weekAgo = cal.date(byAdding: .day, value: -7, to: referenceDate)!
+        if self > weekAgo {
+            let dayFormatter = DateFormatter()
+            dayFormatter.locale = locale
+            dayFormatter.calendar = cal
+            dayFormatter.timeZone = cal.timeZone
+            dayFormatter.dateFormat = "EEEE" // Full day name (e.g., "Thursday")
+            return dayFormatter.string(from: self)
+        }
+
+        // Otherwise show short date format
+        // Use dateFormatFromTemplate to get locale-appropriate format
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = locale
+        dateFormatter.calendar = cal
+        dateFormatter.timeZone = cal.timeZone
+        dateFormatter.setLocalizedDateFormatFromTemplate("yyMMdd")
+        return dateFormatter.string(from: self)
+    }
 }
 
 // MARK: - CGFloat Extension
@@ -243,11 +288,11 @@ extension View {
     func flip(_ axis: ViewAxis) -> some View {
         switch axis {
         case .horizontal:
-            self.scaleEffect(x: -1, y: 1)
+            scaleEffect(x: -1, y: 1)
         case .vertical:
-            self.scaleEffect(x: 1, y: -1)
+            scaleEffect(x: 1, y: -1)
         case .both:
-            self.scaleEffect(x: -1, y: -1)
+            scaleEffect(x: -1, y: -1)
         }
     }
 }

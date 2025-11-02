@@ -223,7 +223,7 @@ struct ChatRowView: View {
                                 .contentTransition(.symbolEffect(.replace))
                                 .opacity(isAlertHidden ? 1 : 0)
 
-                            Text(lastMessage.date, style: .time)
+                            Text(lastMessage.date.chatRelativeDate())
                             Image(systemName: "chevron.right")
                                 .padding(.leading, 4)
                                 .fontWeight(.medium)
